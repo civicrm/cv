@@ -31,10 +31,17 @@ class ApiCommand extends BaseCommand {
     $this
       ->setName('api')
       ->setDescription('Call an API')
-      ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args, json)', 'args')
-      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (json, pretty, php)', 'json')
+      ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
+      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (json,none,php,pretty,shell)', 'json')
       ->addArgument('Entity.action', InputArgument::REQUIRED)
-      ->addArgument('key=value', InputArgument::IS_ARRAY);
+      ->addArgument('key=value', InputArgument::IS_ARRAY)
+      ->setHelp('Call an API
+
+Examples:
+  cv api system.get
+  cv api contact.get id=10
+  echo \'{"id":10, "api.Email.get": 1}\' | cv api contact.get --in=json
+');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
@@ -85,32 +92,6 @@ class ApiCommand extends BaseCommand {
         throw new \RuntimeException('Unknown input format');
     }
     return $params;
-  }
-
-  /**
-   * @param \Symfony\Component\Console\Input\InputInterface $input
-   * @param \Symfony\Component\Console\Output\OutputInterface $output
-   * @param $result
-   */
-  protected function sendResult(InputInterface $input, OutputInterface $output, $result) {
-    $outMode = $input->getOption('out');
-    switch ($outMode) {
-      case 'pretty':
-        $output->write(print_r($result, 1));
-        break;
-
-      case 'php':
-        $output->write(var_export($result, 1));
-        break;
-
-      case 'json':
-        $options = defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0;
-        $output->write(json_encode($result, $options));
-        break;
-
-      default:
-        throw new \RuntimeException('Unknown output format');
-    }
   }
 
 }
