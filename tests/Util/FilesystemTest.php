@@ -1,7 +1,7 @@
 <?php
 namespace Civi\Cv\Util;
 
-class FilesystemTest extends \Civi\Cv\CivilTestCase {
+class FilesystemTest extends \PHPUnit_Framework_TestCase {
   public function dataIsDescendent() {
     return array(
       array('/ex', '/ex', FALSE),

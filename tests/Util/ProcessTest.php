@@ -2,7 +2,7 @@
 namespace Civi\Cv\Util;
 use Civi\Cv\Util\Process as ProcessUtil;
 
-class ProcessTest extends \Civi\Cv\CivilTestCase {
+class ProcessTest extends \PHPUnit_Framework_TestCase {
   public function testRunOk_pass() {
     $process = ProcessUtil::runOk(new \Symfony\Component\Process\Process("echo times were good"));
     $this->assertEquals("times were good", trim($process->getOutput()));

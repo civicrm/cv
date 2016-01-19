@@ -7,69 +7,44 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 
 class CivilTestCase extends \PHPUnit_Framework_TestCase {
-  /**
-   * @var string
-   */
-  protected $fixturePath;
-
-  /**
-   * @var Filesystem
-   */
-  protected $fs;
 
   /**
    * @var string
    */
   private $originalCwd;
 
+  /**
+   * Path to the "cv" binary.
+   *
+   * @var string
+   */
+  protected $cv;
+
   public function setup() {
-    $runtimeClass = get_class($this);
     $this->originalCwd = getcwd();
-    $this->fixturePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR
-      . preg_replace('/[^A-Za-z0-9_]/', '', $runtimeClass)
-      . '_'
-      . rand(0, 1000000);
-    $this->fs = new Filesystem();
-    if ($this->fs->exists($this->fixturePath)) {
-      $this->fs->remove(new \FilesystemIterator($this->fixturePath));
-    }
-    $this->fs->mkdir($this->fixturePath);
-    chdir($this->fixturePath);
+    chdir($this->getExampleDir());
+    $this->cv = dirname(__DIR__) . '/bin/cv';
   }
 
   public function tearDown() {
     chdir($this->originalCwd);
-    if ($this->fixturePath) {
-      if (!getenv('GITSCAN_KEEP_TMP')) {
-        $this->fs->remove(new \FilesystemIterator($this->fixturePath));
-        $this->fs->remove($this->fixturePath);
-      }
+  }
+
+  public function getExampleDir() {
+    $dir = getenv('CV_TEST_BUILD');
+    if (empty($dir)) {
+      throw new \RuntimeException('Environment variable CV_TEST_BUILD must point to a civicrm-cms build');
     }
+    return $dir;
   }
 
   /**
-   * @param string $subdir absolute path, or path relative to $this->fixturePath
+   * @param string $dir absolute path, or path relative to $this->fixturePath
    * @param string $command
    */
-  protected function command($subdir, $command) {
-    $process = new \Symfony\Component\Process\Process($command);
-    $process->setWorkingDirectory($subdir);
+  protected function cv($command) {
+    $process = new \Symfony\Component\Process\Process("{$this->cv} $command");
     return $process;
-  }
-
-  public function createExampleFile($path) {
-    $dir = dirname($path);
-    if ($dir) {
-      $this->fs->mkdir($dir);
-    }
-    $this->fs->dumpFile($path, "hello from $path");
-  }
-
-  public function createExampleRepo($dir) {
-    $this->createExampleFile("$dir/example.txt");
-    ProcessUtil::runOk($this->command($dir, "git init"));
-    ProcessUtil::runOk($this->command($dir, "git add example.txt"));
-    ProcessUtil::runOk($this->command($dir, "git commit -m Import example.txt"));
   }
 
   /**
@@ -89,12 +64,4 @@ class CivilTestCase extends \PHPUnit_Framework_TestCase {
     return $commandTester;
   }
 
-  /**
-   * Assert that $commit looks like a real commit.
-   *
-   * @param string $commit
-   */
-  public function assertIsCommit($commit) {
-    $this->assertTrue(\Civi\Cv\Util\Commit::isValid($commit));
-  }
 }

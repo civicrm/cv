@@ -32,7 +32,7 @@ class Application extends \Symfony\Component\Console\Application {
    */
   public function createCommands() {
     $commands = array();
-    $commands[] = new \Civi\Cv\Command\ExportCommand();
+    $commands[] = new \Civi\Cv\Command\FindCommand();
     return $commands;
   }
 

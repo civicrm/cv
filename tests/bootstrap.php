@@ -17,4 +17,4 @@ if (!isset($loader)) {
 }
 
 #### Extra - Register classes in "tests" directory
-$loader->add('Civi\\Cv', __DIR__);
+$loader->addPsr4('Civi\\Cv\\', __DIR__);
