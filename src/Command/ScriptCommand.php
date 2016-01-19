@@ -10,7 +10,7 @@ class ScriptCommand extends BaseCommand {
 
   protected function configure() {
     $this
-      ->setName('php-script')
+      ->setName('php:script')
       ->setAliases(array('scr'))
       ->setDescription('Execute a PHP script')
       ->addArgument('script', InputArgument::REQUIRED);

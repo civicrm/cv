@@ -17,7 +17,7 @@ class ScriptCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function testPhpScript() {
     $helloPhp = escapeshellarg(__DIR__ . '/hello-world.php');
-    $p = Process::runOk($this->cv("php-script $helloPhp"));
+    $p = Process::runOk($this->cv("php:script $helloPhp"));
     $this->assertRegExp('/^version [0-9a-z\.]+$/', $p->getOutput());
   }
 

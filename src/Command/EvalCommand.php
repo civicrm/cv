@@ -12,7 +12,7 @@ class EvalCommand extends BaseCommand {
 
   protected function configure() {
     $this
-      ->setName('php-eval')
+      ->setName('php:eval')
       ->setAliases(array('ev'))
       ->setDescription('Evaluate a snippet of PHP code')
       ->addArgument('code')
