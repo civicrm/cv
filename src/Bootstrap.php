@@ -176,6 +176,41 @@ class Bootstrap {
   }
 
   /**
+   * Generate bootstrap logic.
+   *
+   * NOTE: Assumes boot() has already run.
+   *
+   * @return string
+   *   PHP code.
+   */
+  public function generate() {
+    $code = array();
+
+    $srvVars = array(
+      'SCRIPT_FILENAME',
+      'REMOTE_ADDR',
+      'SERVER_SOFTWARE',
+      'REQUEST_METHOD',
+      'SCRIPT_NAME'
+    );
+    foreach ($srvVars as $srvVar) {
+      $code []= sprintf('if (empty($_SERVER["%s"])) $_SERVER["%s"] = %s;',
+        $srvVar, $srvVar, var_export($_SERVER[$srvVar], 1));
+    }
+
+    $code []= sprintf('define("CIVICRM_SETTINGS_PATH", %s);', var_export(CIVICRM_SETTINGS_PATH, 1));
+    $code []= '$error = @include_once CIVICRM_SETTINGS_PATH;';
+    $code []='if ($error == FALSE) {';
+    $code []= '  throw new \Exception("Could not load the CiviCRM settings file: {$settings}");';
+    $code []='}';
+
+    $code []='require_once $GLOBALS["civicrm_root"] . "/CRM/Core/ClassLoader.php";';
+    $code []= '\CRM_Core_ClassLoader::singleton()->register();';
+
+    return implode("\n", $code);
+  }
+
+  /**
    * @return array
    *   See options in class doc.
    */
