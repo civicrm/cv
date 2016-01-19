@@ -17,8 +17,8 @@ Example: PHP
 
 Suppose you have a standalone script or a test runner which needs to execute
 in the context of a CiviCRM site.  You don't want to hardcode it to a
-specific path or create special-purpose config files.  Instead, call `cv
-php:boot` and `eval()` the output:
+specific path, create special-purpose config files, or require a specific
+directory structure.  Instead, call `cv php:boot` and `eval()` the output:
 
 ```php
 function _cv($cmd) {
