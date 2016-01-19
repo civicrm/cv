@@ -221,7 +221,11 @@ class Bootstrap {
         break;
 
       case 'wp':
-        $settings = 'wp-content/plugins/civicrm/civicrm.settings.php';
+        $wpDirs = array(
+          $cmsRoot . '/wp-content/uploads/civicrm',
+          $cmsRoot . '/wp-content/plugins/civicrm',
+        );
+        $settings = $this->findFirstFile($wpDirs, 'civicrm.settings.php');
         break;
     }
     return array($cmsType, $cmsRoot, $settings);
