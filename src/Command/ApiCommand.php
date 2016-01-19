@@ -1,11 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\BuildkitReader;
-use Civi\Cv\GitRepo;
-use Civi\Cv\Util\ArrayUtil;
-use Civi\Cv\Util\Filesystem;
-use Civi\Cv\Util\Process as ProcessUtil;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -45,9 +40,7 @@ Examples:
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    \Civi\Cv\Bootstrap::singleton()->boot();
-    \CRM_Core_Config::singleton();
-    \CRM_Utils_System::loadBootStrap(array(), FALSE);
+    $this->boot($input, $output);
 
     list($entity, $action) = explode('.', $input->getArgument('Entity.action'));
     $params = $this->parseParams($input);

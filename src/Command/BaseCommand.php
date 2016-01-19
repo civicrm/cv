@@ -1,11 +1,20 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Application;
-use Civi\Cv\Util\ArrayUtil;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class BaseCommand extends Command {
+
+  protected function boot(InputInterface $input, OutputInterface $output) {
+    \Civi\Cv\Bootstrap::singleton()->boot();
+    \CRM_Core_Config::singleton();
+    \CRM_Utils_System::loadBootStrap(array(), FALSE);
+  }
+
   /**
    * @param \Symfony\Component\Console\Input\InputInterface $input
    * @param \Symfony\Component\Console\Output\OutputInterface $output

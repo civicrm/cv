@@ -31,7 +31,7 @@ class ShowCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    \Civi\Cv\Bootstrap::singleton()->boot();
+    $this->boot($input, $output);
 
     $buildkitData = NULL;
     if ($input->getOption('buildkit')) {
