@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Application;
 use Civi\Cv\BuildkitReader;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -13,7 +14,8 @@ class ShowCommand extends BaseCommand {
     $this
       ->setName('show')
       ->setDescription('Show the configuration of the local CiviCRM installation')
-      ->addOption('buildkit', NULL, InputOption::VALUE_NONE, 'Find and return buildkit config');
+      ->addOption('buildkit', NULL, InputOption::VALUE_NONE, 'Find and return buildkit config')
+      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (json,none,php,pretty,shell)', Application::getDefaultOut());
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
@@ -79,8 +81,7 @@ class ShowCommand extends BaseCommand {
     if ($buildkitData) {
       $data['buildkit'] = $buildkitData;
     }
-    $opt = defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0;
-    $output->write(json_encode($data, $opt));
+    $this->sendResult($input, $output, $data);
   }
 
 }
