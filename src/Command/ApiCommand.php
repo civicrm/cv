@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Application;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -27,7 +28,7 @@ class ApiCommand extends BaseCommand {
       ->setName('api')
       ->setDescription('Call an API')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
-      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (json,none,php,pretty,shell)', 'json')
+      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (json,none,php,pretty,shell)', Application::getDefaultOut())
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
       ->setHelp('Call an API
@@ -36,6 +37,8 @@ Examples:
   cv api system.get
   cv api contact.get id=10
   echo \'{"id":10, "api.Email.get": 1}\' | cv api contact.get --in=json
+
+NOTE: To change the default output format, set CV_OUTPUT.
 ');
   }
 

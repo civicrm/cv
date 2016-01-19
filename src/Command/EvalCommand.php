@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Application;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -28,8 +29,10 @@ When reading data, you may use "return":
   cv ev \'return CRM_Utils_System::version()\' --out=shell
   cv ev \'return CRM_Utils_System::version()\' --out=json
 
-By default, the output format is set to "auto". This will be produce silent output -- unless
-you use a "return" statement. In that case, it will output JSON.
+If the output format is set to "auto". This will be produce silent output -- unless
+you use a "return" statement. In that case, it will use the default (' . Application::getDefaultOut() . ').
+
+NOTE: To change the default output format, set CV_OUTPUT.
 ');
   }
 
@@ -39,7 +42,7 @@ you use a "return" statement. In that case, it will output JSON.
     if ($input->getOption('out') === 'auto') {
       $hasReturn = preg_match('/^\s*return[ \t\r\n]/', $input->getArgument('code'))
       || preg_match('/[;\{]\s*return[ \t\r\n]/', $input->getArgument('code'));
-      $input->setOption('out', $hasReturn ? 'json' : 'none');
+      $input->setOption('out', $hasReturn ? Application::getDefaultOut() : 'none');
     }
 
     $value = eval($input->getArgument('code') . ';');
