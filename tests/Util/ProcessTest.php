@@ -1,5 +1,6 @@
 <?php
 namespace Civi\Cv\Util;
+
 use Civi\Cv\Util\Process as ProcessUtil;
 
 class ProcessTest extends \PHPUnit_Framework_TestCase {
@@ -12,8 +13,10 @@ class ProcessTest extends \PHPUnit_Framework_TestCase {
     try {
       ProcessUtil::runOk(new \Symfony\Component\Process\Process("echo tragedy befell the software > /dev/stderr; exit 1"));
       $this->fail("Failed to generate expected exception");
-    } catch (\Civi\Cv\Exception\ProcessErrorException $e) {
+    }
+    catch (\Civi\Cv\Exception\ProcessErrorException $e) {
       $this->assertEquals("tragedy befell the software", trim($e->getProcess()->getErrorOutput()));
     }
   }
+
 }

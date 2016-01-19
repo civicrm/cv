@@ -21,7 +21,6 @@ class ScriptCommand extends BaseCommand {
 
   /**
    * @param string|null $name
-   * @param array $parameters list of configuration parameters to accept ($key => $label)
    */
   public function __construct($name = NULL) {
     $this->fs = new Filesystem();

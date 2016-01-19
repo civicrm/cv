@@ -21,7 +21,6 @@ class EvalCommand extends BaseCommand {
 
   /**
    * @param string|null $name
-   * @param array $parameters list of configuration parameters to accept ($key => $label)
    */
   public function __construct($name = NULL) {
     $this->fs = new Filesystem();
@@ -33,8 +32,7 @@ class EvalCommand extends BaseCommand {
       ->setName('php-eval')
       ->setAliases(array('ev'))
       ->setDescription('Evaluate a PHP snippet')
-      ->addArgument('code')
-    ;
+      ->addArgument('code');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

@@ -39,7 +39,6 @@ class CivilTestCase extends \PHPUnit_Framework_TestCase {
   }
 
   /**
-   * @param string $dir absolute path, or path relative to $this->fixturePath
    * @param string $command
    */
   protected function cv($command) {

@@ -59,4 +59,5 @@ class FilesystemTest extends \PHPUnit_Framework_TestCase {
     $fs = new Filesystem();
     $this->assertEquals($expected, $fs->formatPrettyPath($path, $basePaths));
   }
+
 }

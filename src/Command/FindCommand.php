@@ -17,7 +17,6 @@ class FindCommand extends BaseCommand {
 
   /**
    * @param string|null $name
-   * @param array $parameters list of configuration parameters to accept ($key => $label)
    */
   public function __construct($name = NULL) {
     $this->fs = new Filesystem();
@@ -29,11 +28,6 @@ class FindCommand extends BaseCommand {
       ->setName('find')
       ->setDescription('Find the configuration of the local CiviCRM installation')
       ->addOption('buildkit', NULL, InputOption::VALUE_NONE, 'Find and return buildkit config');
-  }
-
-  protected function initialize(InputInterface $input, OutputInterface $output) {
-//    $input->setArgument('path', $this->fs->toAbsolutePaths($input->getArgument('path')));
-//    $this->fs->validateExists($input->getArgument('path'));
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
@@ -103,4 +97,5 @@ class FindCommand extends BaseCommand {
     $opt = defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0;
     $output->write(json_encode($data, $opt));
   }
+
 }
