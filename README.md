@@ -5,9 +5,8 @@ Examples
 ========
 
 ```bash
-me@localhost$ cv find --json
-me@localhost$ cv find --json --buildkit
-me@localhost$ cv find --php
+me@localhost$ cv find
+me@localhost$ cv find --buildkit
 me@localhost$ cv scr /path/to/throwaway.php
 me@localhost$ cv ev 'echo Civi::paths()->get("[civicrm.root]/.");'
 ```
