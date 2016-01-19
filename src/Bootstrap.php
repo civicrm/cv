@@ -186,6 +186,7 @@ class Bootstrap {
   public function generate() {
     $code = array();
 
+    $code[] = 'if (PHP_SAPI === "cli") {';
     $srvVars = array(
       'SCRIPT_FILENAME',
       'REMOTE_ADDR',
@@ -194,18 +195,19 @@ class Bootstrap {
       'SCRIPT_NAME'
     );
     foreach ($srvVars as $srvVar) {
-      $code []= sprintf('if (empty($_SERVER["%s"])) $_SERVER["%s"] = %s;',
-        $srvVar, $srvVar, var_export($_SERVER[$srvVar], 1));
+      $code [] = sprintf('$_SERVER["%s"] = %s;',
+        $srvVar, var_export($_SERVER[$srvVar], 1));
     }
+    $code [] = '}';
 
-    $code []= sprintf('define("CIVICRM_SETTINGS_PATH", %s);', var_export(CIVICRM_SETTINGS_PATH, 1));
-    $code []= '$error = @include_once CIVICRM_SETTINGS_PATH;';
-    $code []='if ($error == FALSE) {';
-    $code []= '  throw new \Exception("Could not load the CiviCRM settings file: {$settings}");';
-    $code []='}';
+    $code [] = sprintf('define("CIVICRM_SETTINGS_PATH", %s);', var_export(CIVICRM_SETTINGS_PATH, 1));
+    $code [] = '$error = @include_once CIVICRM_SETTINGS_PATH;';
+    $code [] = 'if ($error == FALSE) {';
+    $code [] = '  throw new \Exception("Could not load the CiviCRM settings file: {$settings}");';
+    $code [] = '}';
 
-    $code []='require_once $GLOBALS["civicrm_root"] . "/CRM/Core/ClassLoader.php";';
-    $code []= '\CRM_Core_ClassLoader::singleton()->register();';
+    $code [] = 'require_once $GLOBALS["civicrm_root"] . "/CRM/Core/ClassLoader.php";';
+    $code [] = '\CRM_Core_ClassLoader::singleton()->register();';
 
     return implode("\n", $code);
   }
