@@ -22,15 +22,17 @@ php -dphar.readonly=0 `which box` build
 Unit-Tests
 ==========
 
-If you have previously installed [phpunit](http://phpunit.de/), then you can run the test suite. Something like:
+To run the test suite, you will need an existing CiviCRM installation,
+preferrably based on buildkit. (Example: `/home/me/buildkit/build/dmaster/`)
 
 ```
-$ composer create-project totten/civil
-$ cd civil
-$ phpunit
+$ composer create-project totten/cv
+$ cd cv
+$ export CV_TEST_BUILD=/home/me/buildkit/build/dmaster/
+$ ./bin/phpunit
 PHPUnit 3.7.10 by Sebastian Bergmann.
 
-Configuration read from /home/me/src/civil/phpunit.xml.dist
+Configuration read from /home/me/src/cv/phpunit.xml.dist
 
 .................................................
 
