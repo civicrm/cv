@@ -34,6 +34,7 @@ class Application extends \Symfony\Component\Console\Application {
     $commands[] = new \Civi\Cv\Command\EvalCommand();
     $commands[] = new \Civi\Cv\Command\ShowCommand();
     $commands[] = new \Civi\Cv\Command\ScriptCommand();
+    $commands[] = new \Civi\Cv\Command\UrlCommand();
     return $commands;
   }
 
