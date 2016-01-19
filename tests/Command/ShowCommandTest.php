@@ -7,8 +7,8 @@ class ShowCommandTest extends \Civi\Cv\CivilTestCase {
     parent::setup();
   }
 
-  public function testFindJson() {
-    $p = $this->cv("find");
+  public function testShowJson() {
+    $p = $this->cv("show");
     $p->run();
     $data = json_decode($p->getOutput(), 1);
     $this->assertNotEmpty($data['CIVICRM_SETTINGS_PATH']);
@@ -19,8 +19,8 @@ class ShowCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertRegExp('/^([0-9]|alpha|beta|\.)+$/', $data['VERSION']);
   }
 
-  public function testFindJsonBuildkit() {
-    $p = $this->cv("find --buildkit");
+  public function testShowJsonBuildkit() {
+    $p = $this->cv("show --buildkit");
     $p->run();
     $data = json_decode($p->getOutput(), 1);
     $this->assertNotEmpty($data['CIVICRM_SETTINGS_PATH']);
