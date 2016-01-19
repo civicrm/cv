@@ -32,6 +32,7 @@ class Application extends \Symfony\Component\Console\Application {
    */
   public function createCommands() {
     $commands = array();
+    $commands[] = new \Civi\Cv\Command\ApiCommand();
     $commands[] = new \Civi\Cv\Command\EvalCommand();
     $commands[] = new \Civi\Cv\Command\FindCommand();
     $commands[] = new \Civi\Cv\Command\ScriptCommand();
