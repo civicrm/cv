@@ -1,14 +1,42 @@
 cv
 ==
 
-Examples
-========
+Example: CLI
+============
 
 ```bash
-me@localhost$ cv find
-me@localhost$ cv find --buildkit
+me@localhost$ cv show
+me@localhost$ cv show --buildkit
 me@localhost$ cv scr /path/to/throwaway.php
 me@localhost$ cv ev 'echo Civi::paths()->get("[civicrm.root]/.");'
+me@localhost$ cv url civicrm/dashboard --open
+```
+
+Example: PHP
+============
+
+Suppose you have a standalone script or a test runner which needs to execute
+in the context of a CiviCRM site.  You don't want to hardcode it to a
+specific path or create special-purpose config files.  Instead, call `cv
+php:boot` and `eval()` the output:
+
+```php
+function _cv($cmd) {
+  $cmd = 'cv ' . $cmd;
+  $descriptorSpec = array(0 => array("pipe", "r"), 1 => array("pipe", "w"), 2 => STDERR);
+  $process = proc_open($cmd, $descriptorSpec, $pipes, __DIR__);
+  fclose($pipes[0]);
+  $bootCode = stream_get_contents($pipes[1]);
+  fclose($pipes[1]);
+  if (proc_close($process) !== 0) {
+    throw new RuntimeException("Command failed ($cmd)");
+  }
+  return $bootCode;
+}
+
+eval(_cv('php:boot'));
+$GLOBALS['_CV'] = json_decode(_cv('show --buildkit --out=json'), 1);
+printf("We should go to [%s]\n\n", json_decode(_cv('url civicrm/dashboard')));
 ```
 
 Build
