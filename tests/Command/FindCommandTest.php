@@ -14,7 +14,7 @@ class FindCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertNotEmpty($data['CIVICRM_SETTINGS_PATH']);
     $this->assertNotEmpty($data['civicrm']['root']['path']);
     $this->assertTrue(is_dir($data['civicrm']['root']['path']));
-    $this->assertNotEmpty($data['civicrm']['root']['url']);
+    $this->assertNotEmpty($data['cms']['root']['url']);
     $this->assertTrue(!isset($data['buildkit']));
   }
 
@@ -25,7 +25,7 @@ class FindCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertNotEmpty($data['CIVICRM_SETTINGS_PATH']);
     $this->assertNotEmpty($data['civicrm']['root']['path']);
     $this->assertTrue(is_dir($data['civicrm']['root']['path']));
-    $this->assertNotEmpty($data['civicrm']['root']['url']);
+    $this->assertNotEmpty($data['cms']['root']['url']);
     $this->assertNotEmpty($data['buildkit']['ADMIN_USER']);
   }
 

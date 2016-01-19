@@ -58,25 +58,46 @@ class FindCommand extends BaseCommand {
 
     if ($input->getOption('json')) {
       \CRM_Core_Config::singleton();
-      $data = array(
-        'CIVICRM_SETTINGS_PATH' => CIVICRM_SETTINGS_PATH,
-        'civicrm' => array(
-          'root' => array(
-            'url' => \Civi::paths()->getUrl('[civicrm.root]/', 'absolute'),
-            'path' => \Civi::paths()->getPath('[civicrm.root]/.'),
+      if (is_callable(array('Civi', 'paths'))) {
+        // Civi v4.7+
+        $data = array(
+          'CIVICRM_SETTINGS_PATH' => CIVICRM_SETTINGS_PATH,
+          'civicrm' => array(
+            'root' => array(
+              'url' => \Civi::paths()->getUrl('[civicrm.root]/', 'absolute'),
+              'path' => \Civi::paths()->getPath('[civicrm.root]/.'),
+            ),
+            'files' => array(
+              'url' => \Civi::paths()->getUrl('[civicrm.files]/', 'absolute'),
+              'path' => \Civi::paths()->getPath('[civicrm.root]/.'),
+            ),
           ),
-          'files' => array(
-            'url' => \Civi::paths()->getUrl('[civicrm.files]/', 'absolute'),
-            'path' => \Civi::paths()->getPath('[civicrm.root]/.'),
+          'cms' => array(
+            'root' => array(
+              'url' => \Civi::paths()->getUrl('[cms.root]/', 'absolute'),
+              'path' => \Civi::paths()->getPath('[cms.root]/.'),
+            ),
           ),
-        ),
-        'cms' => array(
-          'root' => array(
-            'url' => \Civi::paths()->getUrl('[cms.root]/', 'absolute'),
-            'path' => \Civi::paths()->getPath('[cms.root]/.'),
+        );
+      }
+      else {
+        // Civi v4.6 and earlier
+        $data = array(
+          'CIVICRM_SETTINGS_PATH' => CIVICRM_SETTINGS_PATH,
+          'civicrm' => array(
+            'root' => array(
+              'path' => $GLOBALS['civicrm_root'],
+            ),
           ),
-        ),
-      );
+          'cms' => array(
+            'root' => array(
+              'url' => \CRM_Utils_System::languageNegotiationURL(\CRM_Utils_System::baseCMSURL(), FALSE, TRUE),
+              'path' => \CRM_Core_Config::singleton()->userSystem->cmsRootPath(),
+            ),
+          ),
+        );
+
+      }
       if ($buildkitData) {
         $data['buildkit'] = $buildkitData;
       }
