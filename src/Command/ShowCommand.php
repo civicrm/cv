@@ -2,26 +2,12 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\BuildkitReader;
-use Civi\Cv\Util\Filesystem;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 
 class ShowCommand extends BaseCommand {
-
-  /**
-   * @var Filesystem
-   */
-  var $fs;
-
-  /**
-   * @param string|null $name
-   */
-  public function __construct($name = NULL) {
-    $this->fs = new Filesystem();
-    parent::__construct($name);
-  }
 
   protected function configure() {
     $this
@@ -48,7 +34,6 @@ class ShowCommand extends BaseCommand {
       }
     }
 
-    \CRM_Core_Config::singleton();
     if (is_callable(array('Civi', 'paths'))) {
       // Civi v4.7+
       $data = array(
