@@ -8,7 +8,7 @@ class FindCommandTest extends \Civi\Cv\CivilTestCase {
   }
 
   public function testFindJson() {
-    $p = $this->cv("find --json");
+    $p = $this->cv("find");
     $p->run();
     $data = json_decode($p->getOutput(), 1);
     $this->assertNotEmpty($data['CIVICRM_SETTINGS_PATH']);
@@ -16,10 +16,11 @@ class FindCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertTrue(is_dir($data['civicrm']['root']['path']));
     $this->assertNotEmpty($data['cms']['root']['url']);
     $this->assertTrue(!isset($data['buildkit']));
+    $this->assertRegExp('/^([0-9]|alpha|beta|\.)+$/', $data['VERSION']);
   }
 
   public function testFindJsonBuildkit() {
-    $p = $this->cv("find --json --buildkit");
+    $p = $this->cv("find --buildkit");
     $p->run();
     $data = json_decode($p->getOutput(), 1);
     $this->assertNotEmpty($data['CIVICRM_SETTINGS_PATH']);
@@ -27,13 +28,7 @@ class FindCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertTrue(is_dir($data['civicrm']['root']['path']));
     $this->assertNotEmpty($data['cms']['root']['url']);
     $this->assertNotEmpty($data['buildkit']['ADMIN_USER']);
-  }
-
-
-  public function testFindPhp() {
-    $p = $this->cv("find --php");
-    $p->run();
-    $this->assertRegExp('/CIVICRM_SETTINGS_PATH.*/', $p->getOutput());
+    $this->assertRegExp('/^([0-9]|alpha|beta|\.)+$/', $data['VERSION']);
   }
 
 }
