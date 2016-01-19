@@ -10,7 +10,7 @@ class ApiCommandTest extends \Civi\Cv\CivilTestCase {
   }
 
   public function testApi() {
-    $p = Process::runOk($this->cv("api System.get --out=json"));
+    $p = Process::runOk($this->cv("api System.get"));
     $data = json_decode($p->getOutput(), 1);
     $this->assertTrue(!empty($data['values']));
     foreach ($data['values'] as $row) {
@@ -23,7 +23,7 @@ class ApiCommandTest extends \Civi\Cv\CivilTestCase {
     $input = escapeshellarg(json_encode(array(
       'options' => array('limit' => 1),
     )));
-    $p = Process::runOk(new \Symfony\Component\Process\Process("echo $input | {$this->cv} api Contact.get --json"));
+    $p = Process::runOk(new \Symfony\Component\Process\Process("echo $input | {$this->cv} api Contact.get --in=json"));
     $data = json_decode($p->getOutput(), 1);
     $this->assertTrue(!empty($data['values']));
     $this->assertEquals(1, count($data['values']));
