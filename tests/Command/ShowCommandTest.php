@@ -1,7 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
-class FindCommandTest extends \Civi\Cv\CivilTestCase {
+class ShowCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function setup() {
     parent::setup();

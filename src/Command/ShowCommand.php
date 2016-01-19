@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 
-class FindCommand extends BaseCommand {
+class ShowCommand extends BaseCommand {
 
   /**
    * @var Filesystem
@@ -25,8 +25,8 @@ class FindCommand extends BaseCommand {
 
   protected function configure() {
     $this
-      ->setName('find')
-      ->setDescription('Find the configuration of the local CiviCRM installation')
+      ->setName('show')
+      ->setDescription('Show the configuration of the local CiviCRM installation')
       ->addOption('buildkit', NULL, InputOption::VALUE_NONE, 'Find and return buildkit config');
   }
 
