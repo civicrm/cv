@@ -69,6 +69,8 @@ printf("We should go to [%s]\n\n", cv('url civicrm/dashboard'));
 Build
 =====
 
+Use [box](http://box-project.github.io/box2/):
+
 ```
 php -dphar.readonly=0 `which box` build
 ```
