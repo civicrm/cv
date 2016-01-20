@@ -72,7 +72,10 @@ Build
 Use [box](http://box-project.github.io/box2/):
 
 ```
-php -dphar.readonly=0 `which box` build
+$ git clone https://github.com/civicrm/cv
+$ cd cv
+$ composer install
+$ php -dphar.readonly=0 `which box` build
 ```
 
 Unit-Tests
@@ -82,8 +85,9 @@ To run the test suite, you will need an existing CiviCRM installation,
 preferrably based on buildkit. (Example: `/home/me/buildkit/build/dmaster/`)
 
 ```
-$ composer create-project totten/cv
+$ git clone https://github.com/civicrm/cv
 $ cd cv
+$ composer install
 $ export CV_TEST_BUILD=/home/me/buildkit/build/dmaster/
 $ ./bin/phpunit
 PHPUnit 3.7.10 by Sebastian Bergmann.
