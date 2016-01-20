@@ -10,7 +10,7 @@ Download
 ========
 
 ```bash
-sudo curl https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
+sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
 sudo chmod +x /usr/local/bin/cv
 ```
 
