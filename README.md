@@ -1,6 +1,19 @@
 cv
 ==
 
+Requirements
+============
+
+A local CiviCRM installation
+
+Download
+========
+
+```bash
+sudo curl https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
+sudo chmod +x /usr/local/bin/cv
+```
+
 Example: CLI
 ============
 
@@ -10,6 +23,7 @@ me@localhost$ cv show --buildkit
 me@localhost$ cv scr /path/to/throwaway.php
 me@localhost$ cv ev 'echo Civi::paths()->get("[civicrm.root]/.");'
 me@localhost$ cv url civicrm/dashboard --open
+me@localhost$ cv api system.flush
 ```
 
 Example: PHP
@@ -21,22 +35,35 @@ specific path, create special-purpose config files, or require a specific
 directory structure.  Instead, call `cv php:boot` and `eval()` the output:
 
 ```php
-function _cv($cmd) {
+/**
+ * Call the "cv" command.
+ *
+ * @param string $cmd
+ *   The rest of the command to send.
+ * @param bool $raw
+ *   If TRUE, return the raw output. If FALSE, parse JSON output.
+ * @return string
+ *   Response output (if the command executed normally).
+ * @throws \RuntimeException
+ *   If the command terminates abnormally.
+ */
+function cv($cmd, $raw = FALSE) {
   $cmd = 'cv ' . $cmd;
   $descriptorSpec = array(0 => array("pipe", "r"), 1 => array("pipe", "w"), 2 => STDERR);
-  $process = proc_open($cmd, $descriptorSpec, $pipes, __DIR__);
+  $env = $_ENV + array('CV_OUTPUT' => 'json');
+  $process = proc_open($cmd, $descriptorSpec, $pipes, __DIR__, $env);
   fclose($pipes[0]);
   $bootCode = stream_get_contents($pipes[1]);
   fclose($pipes[1]);
   if (proc_close($process) !== 0) {
     throw new RuntimeException("Command failed ($cmd)");
   }
-  return $bootCode;
+  return $raw ? $bootCode : json_decode($bootCode, 1);
 }
 
-eval(_cv('php:boot'));
-$GLOBALS['_CV'] = json_decode(_cv('show --buildkit --out=json'), 1);
-printf("We should go to [%s]\n\n", json_decode(_cv('url civicrm/dashboard')));
+eval(cv('php:boot', TRUE));
+$config = cv('show --buildkit');
+printf("We should go to [%s]\n\n", cv('url civicrm/dashboard'));
 ```
 
 Build
