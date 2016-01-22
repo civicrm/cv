@@ -10,9 +10,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 class BaseCommand extends Command {
 
   protected function boot(InputInterface $input, OutputInterface $output) {
-    \Civi\Cv\Bootstrap::singleton()->boot();
-    \CRM_Core_Config::singleton();
-    \CRM_Utils_System::loadBootStrap(array(), FALSE);
+    if ($input->hasOption('level') && $input->getOption('level') !== 'full') {
+      \Civi\Cv\Bootstrap::singleton()->boot(array(
+        'prefetch' => FALSE,
+      ));
+    }
+    else {
+      \Civi\Cv\Bootstrap::singleton()->boot();
+      \CRM_Core_Config::singleton();
+      \CRM_Utils_System::loadBootStrap(array(), FALSE);
+    }
   }
 
   /**

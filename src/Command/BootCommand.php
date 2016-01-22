@@ -12,7 +12,7 @@ class BootCommand extends BaseCommand {
     $this
       ->setName('php:boot')
       ->setDescription('Generate PHP bootstrap code')
-      ->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (classloader,civi,full)', 'full')
+      ->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (classloader,settings,full)', 'full')
       ->addOption('test', NULL, InputOption::VALUE_NONE, 'Initialize system in test mode');
   }
 
@@ -35,9 +35,9 @@ class BootCommand extends BaseCommand {
           . '\CRM_Core_ClassLoader::singleton()->register();';
         break;
 
-      case 'civi':
+      case 'settings':
         $code .= \Civi\Cv\Bootstrap::singleton()->generate()
-          . '\CRM_Core_Config::singleton();';
+          . '\CRM_Core_Config::singleton(FALSE);';
         break;
 
       case 'full':
@@ -51,6 +51,7 @@ class BootCommand extends BaseCommand {
     }
 
     $output->writeln($code);
+    $output->writeln('/*PHPCODE*/');
   }
 
   protected function generateDefines($defines) {
