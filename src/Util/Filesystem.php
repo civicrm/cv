@@ -80,4 +80,55 @@ class Filesystem extends \Symfony\Component\Filesystem\Filesystem {
     }
   }
 
+  /**
+   * Atomically read, filter, and write a file.
+   *
+   * @param string $file
+   * @param callable $filter
+   *   A function which accepts full file content as input,
+   *   and returns new content as output.
+   * @param int|float $maxWait
+   * @param int $maxSize
+   * @return bool
+   * @throws
+   */
+  public function update($file, $filter, $maxWait = 5.0) {
+    $mode = file_exists($file) ? 'r+' : 'w+';
+    if (!($fh = fopen($file, $mode))) {
+      throw new \RuntimeException("Failed to open");
+    }
+
+    $start = microtime(TRUE);
+    do {
+      $locked = flock($fh, LOCK_EX | LOCK_NB);
+      if (!$locked && microtime(TRUE) - $start > $maxWait) {
+        throw new \RuntimeException("Failed to lock");
+      }
+      if (!$locked) {
+        usleep(rand(20, 100) * 1000);
+      }
+    } while (!$locked);
+
+    // TODO throw an error $maxSize exceeded.
+    $buf = '';
+    while (!feof($fh)) {
+      $buf .= fread($fh, 1024*1024);
+    }
+    $rawOut = call_user_func($filter, $buf);
+
+    if (!rewind($fh)) {
+      throw \RuntimeException('Bad rewind');
+    }
+    if (!ftruncate($fh, 0)) {
+      throw \RuntimeException('Bad truncate');
+    }
+
+    if (!fwrite($fh, $rawOut)) {
+      throw \RuntimeException('Bad write');
+    };
+    flock($fh, LOCK_UN);
+
+    return fclose($fh);
+  }
+
 }
