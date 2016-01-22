@@ -39,15 +39,4 @@ class Application extends \Symfony\Component\Console\Application {
     return $commands;
   }
 
-  /**
-   * Determine the default output mode.
-   *
-   * @return string
-   *   Ex: 'json', 'shell', 'php', 'pretty', 'none'
-   */
-  public static function getDefaultOut() {
-    $e = getenv('CV_OUTPUT');
-    return $e ? $e : 'json';
-  }
-
 }

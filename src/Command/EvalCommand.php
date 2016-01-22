@@ -2,6 +2,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Application;
+use Civi\Cv\Encoder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -16,7 +17,7 @@ class EvalCommand extends BaseCommand {
       ->setAliases(array('ev'))
       ->setDescription('Evaluate a snippet of PHP code')
       ->addArgument('code')
-        ->addOption('out', NULL, InputArgument::OPTIONAL, 'Specify return format (auto,json,none,php,pretty,shell)', 'auto')
+      ->addOption('out', NULL, InputArgument::OPTIONAL, 'Specify return format (auto,' . implode(',', Encoder::getFormats()) . ')', 'auto')
       ->setHelp('
 Evaluate a snippet of PHP code
 
@@ -30,7 +31,7 @@ When reading data, you may use "return":
   cv ev \'return CRM_Utils_System::version()\' --out=json
 
 If the output format is set to "auto". This will be produce silent output -- unless
-you use a "return" statement. In that case, it will use the default (' . Application::getDefaultOut() . ').
+you use a "return" statement. In that case, it will use the default (' . \Civi\Cv\Encoder::getDefaultFormat() . ').
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ');
@@ -41,8 +42,8 @@ NOTE: To change the default output format, set CV_OUTPUT.
 
     if ($input->getOption('out') === 'auto') {
       $hasReturn = preg_match('/^\s*return[ \t\r\n]/', $input->getArgument('code'))
-      || preg_match('/[;\{]\s*return[ \t\r\n]/', $input->getArgument('code'));
-      $input->setOption('out', $hasReturn ? Application::getDefaultOut() : 'none');
+        || preg_match('/[;\{]\s*return[ \t\r\n]/', $input->getArgument('code'));
+      $input->setOption('out', $hasReturn ? \Civi\Cv\Encoder::getDefaultFormat() : 'none');
     }
 
     $value = eval($input->getArgument('code') . ';');

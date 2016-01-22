@@ -16,7 +16,7 @@ class UrlCommand extends BaseCommand {
       ->setName('url')
       ->setDescription('Compose a URL to a CiviCRM page')
       ->addArgument('path')
-      ->addOption('out', NULL, InputArgument::OPTIONAL, 'Specify return format (json,none,php,pretty,shell)', Application::getDefaultOut())
+      ->addOption('out', NULL, InputArgument::OPTIONAL, 'Specify return format (json,none,php,pretty,shell)', \Civi\Cv\Encoder::getDefaultFormat())
       ->addOption('relative', 'r', InputOption::VALUE_NONE, 'Prefer relative URL format. (Default: absolute)')
       ->addOption('frontend', 'f', InputOption::VALUE_NONE, 'Generate a frontend URL (Default: backend)')
       ->addOption('open', 'O', InputOption::VALUE_NONE, 'Open a local web browser')

@@ -2,6 +2,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Application;
+use Civi\Cv\Encoder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -28,7 +29,7 @@ class ApiCommand extends BaseCommand {
       ->setName('api')
       ->setDescription('Call an API')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
-      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (json,none,php,pretty,shell)', Application::getDefaultOut())
+      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat())
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
       ->setHelp('Call an API
