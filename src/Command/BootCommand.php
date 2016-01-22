@@ -25,7 +25,7 @@ class BootCommand extends BaseCommand {
         break;
 
       case 'settings':
-        $code .= \Civi\Cv\Bootstrap::singleton()->generate()
+        $code = \Civi\Cv\Bootstrap::singleton()->generate()
           . '\CRM_Core_Config::singleton(FALSE);';
         break;
 
@@ -39,8 +39,9 @@ class BootCommand extends BaseCommand {
         break;
     }
 
+    $output->writeln('/*BEGINPHP*/');
     $output->writeln($code);
-    $output->writeln('/*PHPCODE*/');
+    $output->writeln('/*ENDPHP*/');
   }
 
 }
