@@ -18,13 +18,24 @@ Example: CLI
 ============
 
 ```bash
-me@localhost$ cv show
-me@localhost$ cv show --buildkit
+me@localhost$ cd /var/www/my/web/site
+me@localhost$ cv config:show
 me@localhost$ cv scr /path/to/throwaway.php
 me@localhost$ cv ev 'echo Civi::paths()->get("[civicrm.root]/.");'
 me@localhost$ cv url civicrm/dashboard --open
 me@localhost$ cv api system.flush
 ```
+
+If you intended to run unit-tests, and if you do *not* use `civibuild`,
+then you may need to supply some additional site information (such as
+the name of the test users). To do this, run:
+
+```bash
+me@localhost$ cd /var/www/my/web/site
+me@localhost$ cv config:fill
+me@localhost$ vi ~/.cv.json
+```
+
 
 Example: PHP
 ============
