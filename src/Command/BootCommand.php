@@ -12,26 +12,15 @@ class BootCommand extends BaseCommand {
     $this
       ->setName('php:boot')
       ->setDescription('Generate PHP bootstrap code')
-      ->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (classloader,settings,full)', 'full')
-      ->addOption('test', NULL, InputOption::VALUE_NONE, 'Initialize system in test mode');
+      ->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (classloader,settings,full)', 'full');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->boot($input, $output);
 
-    $code = '';
-
-    if ($input->getOption('test')) {
-      $code .= $this->generateDefines(array(
-        'CIVICRM_TEST' => 1,
-        'CIVICRM_CONTAINER_CACHE' => 'auto',
-        'CIVICRM_MYSQL_STRICT' => TRUE,
-      ));
-    }
-
     switch ($input->getOption('level')) {
       case 'classloader':
-        $code .= sprintf('require_once  %s . "/CRM/Core/ClassLoader.php";', var_export(rtrim($GLOBALS["civicrm_root"], '/'), 1))
+        $code = sprintf('require_once  %s . "/CRM/Core/ClassLoader.php";', var_export(rtrim($GLOBALS["civicrm_root"], '/'), 1))
           . '\CRM_Core_ClassLoader::singleton()->register();';
         break;
 
@@ -41,7 +30,7 @@ class BootCommand extends BaseCommand {
         break;
 
       case 'full':
-        $code .= \Civi\Cv\Bootstrap::singleton()->generate()
+        $code = \Civi\Cv\Bootstrap::singleton()->generate()
           . '\CRM_Core_Config::singleton();'
           . '\CRM_Utils_System::loadBootStrap(array(), FALSE);';
         break;
@@ -54,12 +43,4 @@ class BootCommand extends BaseCommand {
     $output->writeln('/*PHPCODE*/');
   }
 
-  protected function generateDefines($defines) {
-    $lines = array();
-    foreach ($defines as $k => $v) {
-      $lines []= sprintf("if (!defined('%s')) define('%s', %s);",
-        $k, $k, var_export($v, 1));
-    }
-    return implode("\n", $lines);
-  }
 }

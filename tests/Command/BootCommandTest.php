@@ -15,11 +15,9 @@ class BootlCommandTest extends \Civi\Cv\CivilTestCase {
 
     $helloPhp = escapeshellarg($phpBoot->getOutput()
       . 'printf("count is %s\n", CRM_Core_DAO::singleValueQuery("select count(*) from civicrm_contact"));'
-      . 'printf("test is %s\n", defined("CIVICRM_TEST") ? "on" : "off");'
     );
     $phpRun = Process::runOk(new \Symfony\Component\Process\Process("php -r $helloPhp"));
-    $this->assertRegExp('/^count is [0-9]+/', $phpRun->getOutput());
-    $this->assertRegExp('/test is off$/', $phpRun->getOutput());
+    $this->assertRegExp('/^count is [0-9]+$/', $phpRun->getOutput());
   }
 
   public function testBootClassLoader() {
@@ -33,17 +31,6 @@ class BootlCommandTest extends \Civi\Cv\CivilTestCase {
     );
     $phpRun = Process::runOk(new \Symfony\Component\Process\Process("php -r $helloPhp"));
     $this->assertRegExp('/^phpr says nope$/', $phpRun->getOutput());
-  }
-
-  public function testBootTest() {
-    $phpBoot = Process::runOk($this->cv("php:boot --test"));
-    $this->assertRegExp(';CIVICRM_SETTINGS_PATH;', $phpBoot->getOutput());
-
-    $helloPhp = escapeshellarg($phpBoot->getOutput()
-      . 'printf("test is %s\n", defined("CIVICRM_TEST") ? "on" : "off");'
-    );
-    $phpRun = Process::runOk(new \Symfony\Component\Process\Process("php -r $helloPhp"));
-    $this->assertRegExp('/^test is on$/', $phpRun->getOutput());
   }
 
 }
