@@ -19,7 +19,7 @@ class FillCommand extends BaseCommand {
 
   protected function configure() {
     $this
-      ->setName('config:fill')
+      ->setName('vars:fill')
       ->setDescription('Generate a configuration file for any missing site data')
       ->addOption('file', NULL, InputOption::VALUE_REQUIRED, 'Read existing configuration from a file')
     ;
@@ -58,10 +58,10 @@ class FillCommand extends BaseCommand {
   protected function execute(InputInterface $input, OutputInterface $output) {
     if (!$input->getOption('file')) {
       $application = new Application();
-      $command = $application->find('config:show');
+      $command = $application->find('vars:show');
       $commandTester = new CommandTester($command);
       $return = $commandTester->execute(array(
-        'command' => 'config:show',
+        'command' => 'vars:show',
         '--out' => 'json-strict',
       ));
       $liveData = json_decode($commandTester->getDisplay(), 1);

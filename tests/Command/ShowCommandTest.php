@@ -8,7 +8,7 @@ class ShowCommandTest extends \Civi\Cv\CivilTestCase {
   }
 
   public function testShowJson() {
-    $p = $this->cv("config:show");
+    $p = $this->cv("vars:show");
     $p->run();
     $data = json_decode($p->getOutput(), 1);
     $this->assertRegExp('/^([0-9\.\-]|alpha|beta|master|x)+$/', $data['CIVI_VERSION']);

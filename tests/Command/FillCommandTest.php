@@ -6,7 +6,7 @@ class FillCommandTest extends \Civi\Cv\CivilTestCase {
   public function testShowJson() {
     $tmpConfigFile = tempnam(sys_get_temp_dir(), 'cv-test-');
 
-    $p = $this->cv("config:fill --file=/dev/stdin");
+    $p = $this->cv("vars:fill --file=/dev/stdin");
     $p->setInput(json_encode(array(
       'ADMIN_USER' => 'admin',
     )));

@@ -26,7 +26,7 @@ class EditCommand extends BaseCommand {
 
   protected function configure() {
     $this
-      ->setName('config:edit')
+      ->setName('vars:edit')
       ->setDescription('Edit configuration values for this build');
   }
 
