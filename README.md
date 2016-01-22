@@ -1,6 +1,3 @@
-cv
-==
-
 Requirements
 ============
 
@@ -26,7 +23,7 @@ me@localhost$ cv url civicrm/dashboard --open
 me@localhost$ cv api system.flush
 ```
 
-If you intended to run unit-tests, and if you do *not* use `civibuild`,
+If you intend to run unit-tests, and if you do *not* use `civibuild`,
 then you may need to supply some additional site information (such as
 the name of the test users). To do this, run:
 
