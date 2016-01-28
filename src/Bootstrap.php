@@ -117,32 +117,13 @@ class Bootstrap {
     if (!defined('CIVICRM_SETTINGS_PATH')) {
       $this->options = $options = array_merge($this->options, $options);
 
-      if (!empty($options['dynamicSettingsFile']) && file_exists($options['dynamicSettingsFile'])) {
-        include $options['dynamicSettingsFile'];
-      }
-
-      /**
-       * @var string
-       *   Path to the settings file.
-       */
-      $settings = NULL;
-
-      if (defined('CIVICRM_CONFDIR') && file_exists(CIVICRM_CONFDIR . '/civicrm.settings.php')) {
-        $settings = CIVICRM_CONFDIR . '/civicrm.settings.php';
-      }
-      elseif (!empty($options['env']) && getenv($options['env']) && file_exists(getenv($options['env']))) {
-        $settings = getenv($options['env']);
-      }
-      elseif (!empty($options['settingsFile']) && file_exists($options['settingsFile'])) {
-        $settings = $options['settingsFile'];
-      }
-      elseif (!empty($options['search'])) {
-        list (, , $settings) = $this->findCivicrmSettingsPhp($this->getSearchDir());
-      }
-
+      $settings = $this->getCivicrmSettingsPhp($options);
       if (empty($settings) || !file_exists($settings)) {
         throw new \Exception("Failed to locate civicrm.settings.php. Please boot with settingsFile, search, or CIVICRM_SETTINGS; or normalize your directory structure.");
       }
+
+      $reader = new SiteConfigReader($settings);
+      $GLOBALS['_CV'] = $reader->compile(array('buildkit', 'home'));
 
       define('CIVICRM_SETTINGS_PATH', $settings);
       $error = @include_once $settings;
@@ -200,6 +181,8 @@ class Bootstrap {
     }
     $code [] = '}';
 
+    $code[] = sprintf('$GLOBALS[\'_CV\'] = %s;', var_export($GLOBALS['_CV'], 1));
+
     $code [] = sprintf('define("CIVICRM_SETTINGS_PATH", %s);', var_export(CIVICRM_SETTINGS_PATH, 1));
     $code [] = '$error = @include_once CIVICRM_SETTINGS_PATH;';
     $code [] = 'if ($error == FALSE) {';
@@ -226,6 +209,38 @@ class Bootstrap {
    */
   public function setOptions($options) {
     $this->options = $options;
+  }
+
+  /**
+   * @param array $options
+   * @return string
+   * @throws \Exception
+   */
+  public function getCivicrmSettingsPhp($options) {
+    if (!empty($options['dynamicSettingsFile']) && file_exists($options['dynamicSettingsFile'])) {
+      include $options['dynamicSettingsFile'];
+    }
+
+    /**
+     * @var string
+     *   Path to the settings file.
+     */
+    $settings = NULL;
+
+    if (defined('CIVICRM_CONFDIR') && file_exists(CIVICRM_CONFDIR . '/civicrm.settings.php')) {
+      $settings = CIVICRM_CONFDIR . '/civicrm.settings.php';
+    }
+    elseif (!empty($options['env']) && getenv($options['env']) && file_exists(getenv($options['env']))) {
+      $settings = getenv($options['env']);
+    }
+    elseif (!empty($options['settingsFile']) && file_exists($options['settingsFile'])) {
+      $settings = $options['settingsFile'];
+    }
+    elseif (!empty($options['search'])) {
+      list (, , $settings) = $this->findCivicrmSettingsPhp($this->getSearchDir());
+    }
+
+    return $settings;
   }
 
   /**
@@ -373,5 +388,6 @@ class Bootstrap {
       return $this->options['search'];
     }
   }
+
 
 }

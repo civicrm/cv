@@ -22,7 +22,7 @@ class FillCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertNotEmpty($config);
     $this->assertNotEmpty($config['sites']);
     foreach ($config['sites'] as $path => $siteConfig) {
-      $this->assertEquals('', $siteConfig['ADMIN_PASS']);
+      $this->assertEquals('t0ps3cr3t', $siteConfig['ADMIN_PASS']);
       $this->assertTrue(!isset($siteConfig['ADMIN_USER']));
     }
   }
