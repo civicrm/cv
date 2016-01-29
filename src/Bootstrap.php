@@ -179,9 +179,15 @@ class Bootstrap {
       $code [] = sprintf('$_SERVER["%s"] = %s;',
         $srvVar, var_export($_SERVER[$srvVar], 1));
     }
+    foreach (array('CIVICRM_UF') as $envVar) {
+      if (getenv($envVar)) {
+        $code[] = sprintf('putenv("%s=" . %s);', $envVar, var_export(getenv($envVar), 1));
+        $code[] = sprintf('$_ENV["%s"] = %s;', $envVar, var_export(getenv($envVar), 1));
+      }
+    }
     $code [] = '}';
 
-    $code[] = sprintf('$GLOBALS[\'_CV\'] = %s;', var_export($GLOBALS['_CV'], 1));
+    $code [] = sprintf('$GLOBALS[\'_CV\'] = %s;', var_export($GLOBALS['_CV'], 1));
 
     $code [] = sprintf('define("CIVICRM_SETTINGS_PATH", %s);', var_export(CIVICRM_SETTINGS_PATH, 1));
     $code [] = '$error = @include_once CIVICRM_SETTINGS_PATH;';

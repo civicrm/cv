@@ -28,6 +28,7 @@ class EditCommand extends BaseCommand {
     $this
       ->setName('vars:edit')
       ->setDescription('Edit configuration values for this build');
+    parent::configureBootOptions();
   }
 
   public function __construct($name = NULL) {

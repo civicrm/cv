@@ -35,6 +35,7 @@ you use a "return" statement. In that case, it will use the default (' . \Civi\C
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ');
+    parent::configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

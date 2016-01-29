@@ -29,6 +29,7 @@ Examples:
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ');
+    parent::configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

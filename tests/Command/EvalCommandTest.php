@@ -28,4 +28,14 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertRegExp('/^found$/', $p1->getOutput());
   }
 
+  public function testTestMode() {
+    $checkUf = escapeshellarg('return CIVICRM_UF;');
+
+    $p1 = Process::runOk($this->cv("ev $checkUf"));
+    $this->assertRegExp('/(Drupal|Joomla|WordPress|Backdrop)/i', $p1->getOutput());
+
+    $p1 = Process::runOk($this->cv("ev -t $checkUf"));
+    $this->assertRegExp('/UnitTests/i', $p1->getOutput());
+  }
+
 }

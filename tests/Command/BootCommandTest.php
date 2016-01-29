@@ -33,4 +33,15 @@ class BootlCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertRegExp('/^phpr says nope$/', $phpRun->getOutput());
   }
 
+  public function testBootTest() {
+    $phpBoot = Process::runOk($this->cv("php:boot --test"));
+    $this->assertRegExp(';CIVICRM_SETTINGS_PATH;', $phpBoot->getOutput());
+
+    $helloPhp = escapeshellarg($phpBoot->getOutput()
+      . 'echo CIVICRM_UF;'
+    );
+    $phpRun = Process::runOk(new \Symfony\Component\Process\Process("php -ddisplay_errors=1 -r $helloPhp"));
+    $this->assertRegExp('/UnitTests/i', $phpRun->getOutput());
+  }
+
 }

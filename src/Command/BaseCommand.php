@@ -6,11 +6,22 @@ use Civi\Cv\Json;
 use Civi\Cv\SiteConfigReader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class BaseCommand extends Command {
 
+  protected function configureBootOptions() {
+    $this->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (classloader,settings,full)', 'full');
+    $this->addOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)');
+  }
+
   protected function boot(InputInterface $input, OutputInterface $output) {
+    if ($input->hasOption('test') && $input->getOption('test')) {
+      putenv('CIVICRM_UF=UnitTests');
+      $_ENV['CIVICRM_UF'] = 'UnitTests';
+    }
+
     if ($input->hasOption('level') && $input->getOption('level') !== 'full') {
       \Civi\Cv\Bootstrap::singleton()->boot(array(
         'prefetch' => FALSE,

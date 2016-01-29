@@ -11,8 +11,8 @@ class BootCommand extends BaseCommand {
   protected function configure() {
     $this
       ->setName('php:boot')
-      ->setDescription('Generate PHP bootstrap code')
-      ->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (classloader,settings,full)', 'full');
+      ->setDescription('Generate PHP bootstrap code');
+    parent::configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

@@ -14,6 +14,7 @@ class ScriptCommand extends BaseCommand {
       ->setAliases(array('scr'))
       ->setDescription('Execute a PHP script')
       ->addArgument('script', InputArgument::REQUIRED);
+    parent::configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

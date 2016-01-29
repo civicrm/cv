@@ -14,6 +14,7 @@ class ShowCommand extends BaseCommand {
       ->setName('vars:show')
       ->setDescription('Show the configuration of the local CiviCRM installation')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat());
+    parent::configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

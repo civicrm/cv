@@ -24,6 +24,7 @@ class FillCommand extends BaseCommand {
       ->setDescription('Generate a configuration file for any missing site data')
       ->addOption('file', NULL, InputOption::VALUE_REQUIRED, 'Read existing configuration from a file')
     ;
+    parent::configureBootOptions();
   }
 
   public function __construct($name = NULL) {
