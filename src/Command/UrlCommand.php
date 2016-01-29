@@ -25,6 +25,7 @@ Compose a URL to a CiviCRM page
 
 Examples:
   cv url civicrm/dashboard
+  cv url civicrm/dashboard --open
   cv url \'civicrm/a/#/mailing/123?angularDebug=1\'
 
 NOTE: To change the default output format, set CV_OUTPUT.
