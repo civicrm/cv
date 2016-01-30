@@ -18,6 +18,22 @@ class Process {
   }
 
   /**
+   * Determine full path to an external command (by searching PATH).
+   *
+   * @param string $name
+   * @return null|string
+   */
+  public static function findCommand($name) {
+    $paths = explode(PATH_SEPARATOR, getenv('PATH'));
+    foreach ($paths as $path) {
+      if (file_exists("$path/$name")) {
+        return "$path/$name";
+      }
+    }
+    return NULL;
+  }
+
+  /**
    * @param \Symfony\Component\Process\Process $process
    */
   public static function dump(\Symfony\Component\Process\Process $process) {

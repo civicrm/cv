@@ -96,13 +96,7 @@ class CliEditor {
   }
 
   protected function findCommand($name) {
-    $paths = explode(PATH_SEPARATOR, getenv('PATH'));
-    foreach ($paths as $path) {
-      if (file_exists("$path/$name")) {
-        return "$path/$name";
-      }
-    }
-    return NULL;
+    return Process::findCommand($name);
   }
 
   /**
