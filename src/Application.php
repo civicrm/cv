@@ -28,15 +28,18 @@ class Application extends \Symfony\Component\Console\Application {
    *
    * @return array of Symfony Command objects
    */
-  public function createCommands() {
+  public function createCommands($context = 'default') {
     $commands = array();
     $commands[] = new \Civi\Cv\Command\ApiCommand();
-    $commands[] = new \Civi\Cv\Command\BootCommand();
-    $commands[] = new \Civi\Cv\Command\EvalCommand();
     $commands[] = new \Civi\Cv\Command\FillCommand();
     $commands[] = new \Civi\Cv\Command\ShowCommand();
-    $commands[] = new \Civi\Cv\Command\ScriptCommand();
     $commands[] = new \Civi\Cv\Command\UrlCommand();
+    if ($context !== 'repl') {
+      $commands[] = new \Civi\Cv\Command\BootCommand();
+      //$commands[] = new \Civi\Cv\Command\CliCommand();
+      $commands[] = new \Civi\Cv\Command\EvalCommand();
+      $commands[] = new \Civi\Cv\Command\ScriptCommand();
+    }
     return $commands;
   }
 
