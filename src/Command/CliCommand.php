@@ -25,14 +25,6 @@ class CliCommand extends BaseCommand {
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->boot($input, $output);
 
-    // Hrm, this approach to wrapping seems to lead to spurious hash-bang output.
-    $psysh = Process::findCommand('psysh');
-    if (empty($psysh)) {
-      $output->writeln("Error: Please download http://psysh.org/ and put it in the PATH.");
-      return 1;
-    }
-    require $psysh;
-
     $cv = new Application();
     $sh = new \Psy\Shell();
     $sh->addCommands($cv->createCommands());

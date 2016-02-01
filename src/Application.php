@@ -36,7 +36,7 @@ class Application extends \Symfony\Component\Console\Application {
     $commands[] = new \Civi\Cv\Command\UrlCommand();
     if ($context !== 'repl') {
       $commands[] = new \Civi\Cv\Command\BootCommand();
-      //$commands[] = new \Civi\Cv\Command\CliCommand();
+      $commands[] = new \Civi\Cv\Command\CliCommand();
       $commands[] = new \Civi\Cv\Command\EvalCommand();
       $commands[] = new \Civi\Cv\Command\ScriptCommand();
     }

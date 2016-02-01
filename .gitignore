@@ -3,3 +3,5 @@
 *~
 /bin/cv.phar
 /bin/phpunit
+/bin/php-parse
+/bin/psysh
