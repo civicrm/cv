@@ -132,7 +132,9 @@ class SiteConfigReader {
   protected function cleanPaths(&$data) {
     $paths = array('CIVI_CORE', 'CIVI_FILES', 'CIVI_TEMPLATEC', 'CMS_ROOT');
     foreach ($paths as $path) {
-      $data[$path] = rtrim($data[$path], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+      if (!empty($data[$path])) {
+        $data[$path] = rtrim($data[$path], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+      }
     }
   }
 
