@@ -119,7 +119,10 @@ class Bootstrap {
 
       $settings = $this->getCivicrmSettingsPhp($options);
       if (empty($settings) || !file_exists($settings)) {
-        throw new \Exception("Failed to locate civicrm.settings.php. Please boot with settingsFile, search, or CIVICRM_SETTINGS; or normalize your directory structure.");
+        throw new \Exception("Failed to locate civicrm.settings.php."
+          . " By default, this tool searches the parent directories for a standard CMS (Drupal, WordPress, etal) and standard civicrm.settings.php."
+          . " Symlinks and multisite configurations may interfere."
+          . " To customize, set variable CIVICRM_SETTINGS to point to the preferred civicrm.settings.php.");
       }
 
       $reader = new SiteConfigReader($settings);
@@ -173,7 +176,7 @@ class Bootstrap {
       'REMOTE_ADDR',
       'SERVER_SOFTWARE',
       'REQUEST_METHOD',
-      'SCRIPT_NAME'
+      'SCRIPT_NAME',
     );
     foreach ($srvVars as $srvVar) {
       $code [] = sprintf('$_SERVER["%s"] = %s;',
@@ -403,6 +406,5 @@ class Bootstrap {
       return $this->options['search'];
     }
   }
-
 
 }
