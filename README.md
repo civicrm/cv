@@ -11,6 +11,10 @@ Support may vary depending on host environment (CMS type, file-structure, etc).
 Download
 ========
 
+`cv` is distributed in PHAR format, which is a portable executable file (for PHP). It should run on most Unix-like systems where PHP 5.3+ is installed.
+
+Simply download [`cv`](https://download.civicrm.org/cv/cv.phar) and put it somewhere in the PATH, eg
+
 ```bash
 sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
 sudo chmod +x /usr/local/bin/cv
