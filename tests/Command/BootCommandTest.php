@@ -3,7 +3,7 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\Process;
 
-class BootlCommandTest extends \Civi\Cv\CivilTestCase {
+class BootCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function setup() {
     parent::setup();
