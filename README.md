@@ -1,12 +1,18 @@
+cv
+==
+
+The `cv` command is a utility for interacting with a CiviCRM installation. It performs an automatic scan to locate and boot the CiviCRM installation. It provides command-line access to helper functions and configuration data, such as APIv3 and site URLs.
+
 Requirements
 ============
 
 A local CiviCRM installation.
 
-Support may vary depending on host environment (CMS type, file-structure, etc).
+Support may vary depending on the host environment (CMS type, file-structure, symlinks, etc).
  * *Tested heavily*: Drupal 7 single-site, WordPress single-site, UnitTests
  * *Tested lightly*: Backdrop single-site, WordPress (alternate content root)
  * *Untested*: Drupal 7 multi-site, WordPress multi-site, Joomla, Drupal 6, Drupal 8; any heavy symlinking
+   * *Tip*: If you use an untested or incompatible host environment, then you may see the error `Failed to locate civicrm.settings.php`. See [StackExchange](http://civicrm.stackexchange.com/questions/12732/civix-reports-failed-to-locate-civicrm-settings-php) to discuss work-arounds.
 
 Download
 ========
