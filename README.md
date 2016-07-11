@@ -101,15 +101,15 @@ function cv($cmd, $decode = 'json') {
   }
 }
 
-eval(cv('php:boot', 'phpcode));
+eval(cv('php:boot', 'phpcode'));
 $config = cv('show --buildkit');
-printf("We should go to [%s]\n\n", cv('url civicrm/dashboard'));
+printf("We should navigate to the dsahboard: %s\n\n", cv('url civicrm/dashboard'));
 ```
 
 Build
 =====
 
-To bild a new `phar` executable, use [box](http://box-project.github.io/box2/):
+To build a new `phar` executable, use [box](http://box-project.github.io/box2/):
 
 ```
 $ git clone https://github.com/civicrm/cv
