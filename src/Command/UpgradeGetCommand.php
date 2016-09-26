@@ -25,6 +25,7 @@ Examples:
   cv upgrade:get --stability=rc --cms=wordpress
 
 Returns a JSON object with the properties:
+  rev        a unique ID corresponding to the commits that are included
   path       the path to download a tarball/zipfile
   git        the corresponding commits of the civicrm repos
   error      only appears if there is an error
@@ -49,6 +50,9 @@ Returns a JSON object with the properties:
       );
     }
     else {
+      if (array_key_exists('rev', $lookup)) {
+        $result['rev'] = $lookup['rev'];
+      }
       if (array_key_exists('git', $lookup)) {
         $result['git'] = $lookup['git'];
       }
