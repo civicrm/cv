@@ -25,29 +25,36 @@ Examples:
   cv upgrade:get --stability=rc --cms=wordpress
 
 Returns a JSON object with the properties:
-  version    the version number
   path       the path to download a tarball/zipfile
+  git        the corresponding commits of the civicrm repos
+  error      only appears if there is an error
 ');
     parent::configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $result = array(
-      'version' => NULL,
-      'path' => NULL,
-    );
-    switch ($input->getOption('stability')) {
-      case 'beta':
-        // get the beta
-        break;
+    $result = array();
+    $stability = $input->getOption('stability');
+    $cms = $input->getOption('cms');
 
-      case 'rc':
-        // get the rc
-        break;
+    $url = "https://upgrades.civicrm.org/check?stability=$stability";
+    $ch = curl_init($url);
+    $lookup = curl_exec($ch);
+    curl_close($ch);
+    $lookup = json_decode($lookup, TRUE);
 
-      case 'stable':
-      default:
-        // get the stable version
+    if (empty($lookup)) {
+      $result = array(
+        'error' => "Version not found at $url",
+      );
+    }
+    else {
+      if (array_key_exists('git', $lookup)) {
+        $result['git'] = $lookup['git'];
+      }
+      if (!empty($lookup['tar'][$cms])) {
+        $result['path'] = $lookup['tar'][$cms];
+      }
     }
 
     $this->sendResult($input, $output, $result);
