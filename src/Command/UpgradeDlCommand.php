@@ -14,6 +14,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
  * Command for asking CiviCRM for the appropriate tarball to download.
  */
 class UpgradeDlCommand extends BaseCommand {
+
   protected function configure() {
     $this
       ->setName('upgrade:dl')
@@ -22,13 +23,16 @@ class UpgradeDlCommand extends BaseCommand {
       ->addOption('stability', 's', InputOption::VALUE_REQUIRED, 'Specify the stability of the version to get (beta, rc, stable)', 'stable')
       ->addOption('cms', 'c', InputOption::VALUE_REQUIRED, 'Specify the cms to get (Backdrop, Drupal, Drupal6, Joomla, Wordpress) instead of the current site')
       ->addOption('url', 'u', InputOption::VALUE_REQUIRED, 'Specify the URL to a tarball/zipfile for downloading (regardless of --stability and --cms)')
-      ->addOption('temploc', NULL, InputOption::VALUE_REQUIRED, 'Specify the location to put the temporary tarball', '/tmp')
+      ->addOption('temploc', NULL, InputOption::VALUE_REQUIRED, 'Specify the location to put the temporary tarball', sys_get_temp_dir())
       ->setHelp('Download CiviCRM code and put it in place for an upgrade
 
 Examples:
   cv upgrade:dl --stability=rc
 
-Returns the revision number
+Returns a JSON object with the properties:
+  downloadedFile   The path to the downloaded archive
+  extractedDir     The path to the extracted archive (not performed for Joomla)
+  installedTo      The path to the `civicrm` directory of the file upgrade
 ');
     parent::configureBootOptions();
   }
@@ -59,32 +63,17 @@ Returns the revision number
     }
 
     // Get the tarball/zipfile
-    $ch = curl_init($url);
-    $parts = explode('/', $url);
-    $filename = array_pop($parts);
-    $temp = fopen("$temploc/$filename", "w");
-    curl_setopt($ch, CURLOPT_FILE, $temp);
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_exec($ch);
-    curl_close($ch);
-    fclose($fp);
+    $temploc = $input->getOption('temploc');
+    $filename = basename($url);
+    $got = file_get_contents($url);
+    if ($got === FALSE) {
+      throw new \RuntimeException("Download of $url failed.");
+    }
+    file_put_contents("$temploc/$filename", $got);
 
-    // Extract the tarball / zipfile to the temp folder
-    $parts = explode('.', $filename);
-    $suffix = array_pop($parts);
-    $tail = empty($dl['rev']) ? time() : $dl['rev'];
-    $foldername = array_shift($parts) . $tail;
-    if ($suffix == 'zip') {
-      $command = "unzip $temploc/$filename -d $temploc/$foldername";
-    }
-    else {
-      $command = "tar -xzf $temploc/$filename -C $temploc/$foldername";
-    }
-    $p = new Process("mkdir -p $temploc/$foldername && $command");
-    $p->run();
-    if (!$p->isSuccessful()) {
-      throw new ProcessFailedException($p);
-    }
+    $result = array(
+      'downloadedFile' => "$temploc/$filename",
+    );
 
     // Rsync the files into place
     $dest = $vars['CIVI_FILES'];
@@ -101,32 +90,73 @@ Returns the revision number
           $dest .= '/';
         }
 
-        // Files that should be preserved on the site
-        $excludeFiles = array(
-          'civicrm.settings.php',
-          'settings_location.php',
-        );
+        // Extract the archive to a temporary folder then rsync
+        $tail = empty($dl['rev']) ? time() : $dl['rev'];
+        $foldername = pathinfo($filename, PATHINFO_FILENAME) . $tail;
+        $result['extractedDir'] = "$temploc/$foldername";
+        $this->extractAndRsync("$temploc/$filename", "$temploc/$foldername", $dest);
+        break;
 
-        $command = 'rsync -rl --delete-after';
-        foreach ($excludeFiles as $x) {
-          $command .= " --exclude $x";
-        }
-
-        $p = new Process("$commmand $temploc/$foldername/civicrm/ $dest");
+      case 'Joomla':
+        // NOTE: This requires Joomla console for upgrading CiviCRM.
+        // Also, install/upgrade via Joomla console will only work properly when
+        // `$live_site` is set in configuration.php.  Otherwise, Joomla console
+        // won't know the site's URL.
+        $www = dirname($dest);
+        $sitename = basename($dest);
+        $p = new Process("joomla extension:installfile --www $www $sitename $temploc/$filename");
         $p->run();
         if (!$p->isSuccessful()) {
           throw new ProcessFailedException($p);
         }
         break;
-
-      case 'Joomla':
-        // https://www.joomlatools.com/developer/tools/console/commands/extension/#extensioninstallfile
-        break;
     }
-
-    $result = 'upgraded';
+    $result['installedTo'] = $dest;
 
     $this->sendResult($input, $output, $result);
+  }
+
+  /**
+   * Extract an archive into a temporary folder, then rsync to a destination
+   *
+   * @param string $fileloc
+   *   The location of the archive file.
+   * @param string $folderloc
+   *   The path for the extraction folder.
+   * @param string $dest
+   *   The folder to rsync the files into.
+   */
+  protected function extractAndRsync($fileloc, $folderloc, $dest) {
+    // Extract the tarball / zipfile to the temp folder
+
+    if (pathinfo($fileloc, PATHINFO_EXTENSION) == 'zip') {
+      $command = "unzip $fileloc -d $folderloc";
+    }
+    else {
+      $command = "tar -xzf $fileloc -C $folderloc";
+    }
+    $p = new Process("mkdir -p $folderloc && $command");
+    $p->run();
+    if (!$p->isSuccessful()) {
+      throw new ProcessFailedException($p);
+    }
+
+    // Files that should be preserved on the site
+    $excludeFiles = array(
+      'civicrm.settings.php',
+      'settings_location.php',
+    );
+
+    $command = 'rsync -rl --delete-after';
+    foreach ($excludeFiles as $x) {
+      $command .= " --exclude $x";
+    }
+
+    $p = new Process("$command $folderloc/civicrm/ $dest");
+    $p->run();
+    if (!$p->isSuccessful()) {
+      throw new ProcessFailedException($p);
+    }
   }
 
 }
