@@ -43,7 +43,7 @@ Returns a JSON object with the properties:
       $cms = $result['vars']['CIVI_UF'];
     }
 
-    $url = "https://upgrades.civicrm.org/check?stability=$stability";
+    $url = "https://upgrade.civicrm.org/check?stability=$stability";
     $ch = curl_init($url);
     $lookup = curl_exec($ch);
     curl_close($ch);
