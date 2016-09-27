@@ -54,6 +54,9 @@ Returns the revision number
 
     // Get information for where the site should go.
     $vars = empty($dl['vars']) ? \Civi\Cv\Util\Cv::run('vars:show') : $dl['vars'];
+    if (empty($cms)) {
+      $cms = $vars['CIVI_UF'];
+    }
 
     // Get the tarball/zipfile
     $ch = curl_init($url);
@@ -83,9 +86,43 @@ Returns the revision number
       throw new ProcessFailedException($p);
     }
 
-    // Rsync the files in
-    // $vars['CIVI_FILES'] is the location
-    // make sure that any config files are not deleted
+    // Rsync the files into place
+    $dest = $vars['CIVI_FILES'];
+    switch ($cms) {
+      case 'WordPress':
+        // Drop the final "civicrm/" from the file path, otherwise the same as Drupal
+        $dest = substr($dest, 0, -8);
+
+      case 'Backdrop':
+      case 'Drupal':
+      case 'Drupal6':
+        // Ensure trailing slash
+        if (substr($dest, -1) != '/') {
+          $dest .= '/';
+        }
+
+        // Files that should be preserved on the site
+        $excludeFiles = array(
+          'civicrm.settings.php',
+          'settings_location.php',
+        );
+
+        $command = 'rsync -rl --delete-after';
+        foreach ($excludeFiles as $x) {
+          $command .= " --exclude $x";
+        }
+
+        $p = new Process("$commmand $temploc/$foldername/civicrm/ $dest");
+        $p->run();
+        if (!$p->isSuccessful()) {
+          throw new ProcessFailedException($p);
+        }
+        break;
+
+      case 'Joomla':
+        // https://www.joomlatools.com/developer/tools/console/commands/extension/#extensioninstallfile
+        break;
+    }
 
     $result = 'upgraded';
 
