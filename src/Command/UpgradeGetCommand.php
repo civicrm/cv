@@ -28,6 +28,7 @@ Returns a JSON object with the properties:
   rev        a unique ID corresponding to the commits that are included
   path       the path to download a tarball/zipfile
   git        the corresponding commits of the civicrm repos
+  vars       the site variables from cv vars:show
   error      only appears if there is an error
 ');
     parent::configureBootOptions();
@@ -38,8 +39,8 @@ Returns a JSON object with the properties:
     $stability = $input->getOption('stability');
     $cms = $input->getOption('cms');
     if (empty($cms)) {
-      $vars = \Civi\Cv\Util\Cv::run('vars:show');
-      $cms = $vars['CIVI_UF'];
+      $result['vars'] = \Civi\Cv\Util\Cv::run('vars:show');
+      $cms = $result['vars']['CIVI_UF'];
     }
 
     $url = "https://upgrades.civicrm.org/check?stability=$stability";
