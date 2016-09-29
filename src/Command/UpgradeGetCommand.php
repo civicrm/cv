@@ -45,6 +45,7 @@ Returns a JSON object with the properties:
 
     $url = "https://upgrade.civicrm.org/check?stability=$stability";
     $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $lookup = curl_exec($ch);
     curl_close($ch);
     $lookup = json_decode($lookup, TRUE);
