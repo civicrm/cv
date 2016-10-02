@@ -13,7 +13,11 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class UpgradeGetCommand extends BaseCommand {
   const DEFAULT_CHECK_URL = "https://upgrade.civicrm.org/check";
+  // const DEFAULT_CHECK_URL = "http://civicrm-upgrade-manager.l/check";
 
+  /**
+   * Define the command options.
+   */
   protected function configure() {
     $this
       ->setName('upgrade:get')
@@ -48,7 +52,7 @@ Returns a JSON object with the properties:
       }
       $result['vars'] = $GLOBALS['_CV']; // REMOVE
     }
-    if (empty($cms)){
+    if (empty($cms)) {
       throw new \RuntimeException("Cannot determine download URL without CMS");
     }
 
@@ -68,6 +72,9 @@ Returns a JSON object with the properties:
     else {
       if (array_key_exists('rev', $lookup)) {
         $result['rev'] = $lookup['rev'];
+      }
+      if (array_key_exists('version', $lookup)) {
+        $result['version'] = $lookup['version'];
       }
       if (array_key_exists('git', $lookup)) {
         $result['git'] = $lookup['git'];
