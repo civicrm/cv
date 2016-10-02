@@ -12,6 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Command for asking CiviCRM for the appropriate tarball to download.
  */
 class UpgradeReportCommand extends BaseCommand {
+  const DEFAULT_REPORT_URL = 'https://upgrade.civicrm.org/report';
+
   protected function configure() {
     $this
       ->setName('upgrade:report')
@@ -89,7 +91,7 @@ Returns a JSON object with the properties:
     if ($opts['started'] || $opts['startedtime']) {
       $report['started'] = ($opts['startedtime']) ?: time();
       $report['startReport'] = $this->systemReport();
-      $report['name'] = ($opts['name']) ?: $this->getaName($report);
+      $report['name'] = ($opts['name']) ?: $this->createName($report);
     }
 
     if ($opts['problem']) {
@@ -108,7 +110,7 @@ Returns a JSON object with the properties:
           $report['downloaded'] = ($opts['downloadedtime']) ?: time();
           break;
       }
-      $report['name'] = ($opts['name']) ?: $this->getaName($report);
+      $report['name'] = ($opts['name']) ?: $this->createName($report);
       $report['status'] = 'failed';
 
       $report['problem'] = $this->systemReport();
@@ -154,7 +156,7 @@ Returns a JSON object with the properties:
    * @return string
    *   The name to use
    */
-  protected function getaName($report) {
+  protected function createName($report) {
     return md5(json_encode($report) . uniqid() . rand() . rand() . rand());
   }
 
@@ -222,7 +224,7 @@ Returns a JSON object with the properties:
         $part = json_encode($part);
       }
     }
-    $ch = curl_init('https://upgrade.civicrm.org/report');
+    $ch = curl_init(self::DEFAULT_REPORT_URL);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $report);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $response = curl_exec($ch);

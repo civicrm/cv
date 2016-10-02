@@ -12,6 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Command for asking CiviCRM for the appropriate tarball to download.
  */
 class UpgradeGetCommand extends BaseCommand {
+  const DEFAULT_CHECK_URL = "https://upgrade.civicrm.org/check";
+
   protected function configure() {
     $this
       ->setName('upgrade:get')
@@ -36,6 +38,7 @@ Returns a JSON object with the properties:
 
   protected function execute(InputInterface $input, OutputInterface $output) {
     $result = array();
+    $exitCode = 0;
     $stability = $input->getOption('stability');
     $cms = $input->getOption('cms');
     if (empty($cms)) {
@@ -43,7 +46,7 @@ Returns a JSON object with the properties:
       $cms = $result['vars']['CIVI_UF'];
     }
 
-    $url = "https://upgrade.civicrm.org/check?stability=$stability";
+    $url = self::DEFAULT_CHECK_URL . "?stability=$stability";
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $lookup = curl_exec($ch);
@@ -54,6 +57,7 @@ Returns a JSON object with the properties:
       $result = array(
         'error' => "Version not found at $url",
       );
+      $exitCode = 1;
     }
     else {
       if (array_key_exists('rev', $lookup)) {
@@ -68,6 +72,7 @@ Returns a JSON object with the properties:
     }
 
     $this->sendResult($input, $output, $result);
+    return $exitCode;
   }
 
 }
