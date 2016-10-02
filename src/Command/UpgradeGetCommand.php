@@ -57,11 +57,7 @@ Returns a JSON object with the properties:
     }
 
     $url = self::DEFAULT_CHECK_URL . "?stability=" . urlencode($stability);
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-    $lookup = curl_exec($ch);
-    curl_close($ch);
-    $lookup = json_decode($lookup, TRUE);
+    $lookup = json_decode(file_get_contents($url), TRUE);
 
     if (empty($lookup)) {
       $result = array(
