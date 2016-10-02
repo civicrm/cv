@@ -42,8 +42,14 @@ Returns a JSON object with the properties:
     $stability = $input->getOption('stability');
     $cms = $input->getOption('cms');
     if (empty($cms)) {
-      $result['vars'] = \Civi\Cv\Util\Cv::run('vars:show');
-      $cms = $result['vars']['CIVI_UF'];
+      $this->boot($input, $output);
+      if (defined('CIVICRM_UF')) {
+        $cms = CIVICRM_UF;
+      }
+      $result['vars'] = $GLOBALS['_CV']; // REMOVE
+    }
+    if (empty($cms)){
+      throw new \RuntimeException("Cannot determine download URL without CMS");
     }
 
     $url = self::DEFAULT_CHECK_URL . "?stability=$stability";
