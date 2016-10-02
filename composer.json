@@ -14,7 +14,9 @@
         "symfony/process": "~2.3",
         "symfony/filesystem": "~2.3",
         "symfony/finder": "~2.3",
-        "psy/psysh": "@stable"
+        "psy/psysh": "@stable",
+        "symfony/yaml": "@stable",
+        "fzaninotto/faker": "@stable"
     },
     "autoload": {
         "psr-4": {
