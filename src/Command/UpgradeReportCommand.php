@@ -77,7 +77,6 @@ Returns a JSON object with the properties:
     // Set up identity of report
     $report = array(
       'siteId' => \Civi\Cv\Util\Cv::run("ev \"return md5('We need to talk about your TPS reports' . CIVICRM_SITE_KEY);\" --level=settings"),
-      'status' => 'running',
     );
 
     if ($opts['downloadurl']) {
@@ -111,7 +110,7 @@ Returns a JSON object with the properties:
           break;
       }
       $report['name'] = ($opts['name']) ?: $this->createName($report);
-      $report['status'] = 'failed';
+      $report['failed'] = time();
 
       $report['problem'] = $this->systemReport();
     }
@@ -139,7 +138,6 @@ Returns a JSON object with the properties:
 
     if ($opts['finished'] || $opts['finished-time']) {
       $report['finishReport'] = $this->systemReport();
-      $report['status'] = 'successful';
     }
 
     // Send report
