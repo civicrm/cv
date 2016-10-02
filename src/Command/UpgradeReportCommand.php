@@ -21,22 +21,22 @@ class UpgradeReportCommand extends BaseCommand {
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat())
       ->addOption('name', NULL, InputOption::VALUE_REQUIRED, 'Specify the name to link the report to past reports on the same upgrade')
       ->addOption('started', NULL, InputOption::VALUE_NONE, 'Send a "started" report')
-      ->addOption('startedtime', NULL, InputOption::VALUE_REQUIRED, 'Send a "started" report with a specified timestamp')
+      ->addOption('started-time', NULL, InputOption::VALUE_REQUIRED, 'Send a "started" report with a specified timestamp')
       ->addOption('downloadurl', NULL, InputOption::VALUE_REQUIRED, 'Indicate the URL for the download attempt')
       ->addOption('downloaded', NULL, InputOption::VALUE_NONE, 'Send a "downloaded" report')
-      ->addOption('downloadedtime', NULL, InputOption::VALUE_REQUIRED, 'Send a "downloaded" report with a specified timestamp')
+      ->addOption('downloaded-time', NULL, InputOption::VALUE_REQUIRED, 'Send a "downloaded" report with a specified timestamp')
       ->addOption('extracted', NULL, InputOption::VALUE_NONE, 'Send an "extracted" report')
-      ->addOption('extractedtime', NULL, InputOption::VALUE_REQUIRED, 'Send an "extracted" report with a specified timestamp')
+      ->addOption('extracted-time', NULL, InputOption::VALUE_REQUIRED, 'Send an "extracted" report with a specified timestamp')
       ->addOption('upgraded', NULL, InputOption::VALUE_REQUIRED, 'Send an "upgraded" report (provide array of upgrade messages and version)')
-      ->addOption('upgradedtime', NULL, InputOption::VALUE_REQUIRED, 'Send an "upgraded" report with a specified timestamp')
+      ->addOption('upgraded-time', NULL, InputOption::VALUE_REQUIRED, 'Send an "upgraded" report with a specified timestamp')
       ->addOption('finished', NULL, InputOption::VALUE_NONE, 'Send a "finished" report')
-      ->addOption('finishedtime', NULL, InputOption::VALUE_REQUIRED, 'Send a "finished" report with a specified timestamp')
+      ->addOption('finished-time', NULL, InputOption::VALUE_REQUIRED, 'Send a "finished" report with a specified timestamp')
       ->addOption('problem', NULL, InputOption::VALUE_REQUIRED, "Report a problem with the upgrade (if you haven't already reported that you started).  Value should be the stage where the problem occurred (download, extract, upgrade).")
       ->addOption('reporter', NULL, InputOption::VALUE_REQUIRED, "Your email address so you can be contacted with questions")
       ->setHelp('Notify civicrm.org of your upgrade success or failure
 
 Examples:
-  cv upgrade:report --startedtime=1475079931 --downloaded
+  cv upgrade:report --started-time=1475079931 --downloaded
 
 Returns a JSON object with the properties:
   name      The name under which the report was issued
@@ -88,8 +88,8 @@ Returns a JSON object with the properties:
       $report['reporter'] = $opts['reporter'];
     }
 
-    if ($opts['started'] || $opts['startedtime']) {
-      $report['started'] = ($opts['startedtime']) ?: time();
+    if ($opts['started'] || $opts['started-time']) {
+      $report['started'] = ($opts['started-time']) ?: time();
       $report['startReport'] = $this->systemReport();
       $report['name'] = ($opts['name']) ?: $this->createName($report);
     }
@@ -99,15 +99,15 @@ Returns a JSON object with the properties:
       switch ($opts['problem']) {
         case 'upgrade':
         case 'upgraded':
-          $report['upgraded'] = ($opts['upgradedtime']) ?: time();
+          $report['upgraded'] = ($opts['upgraded-time']) ?: time();
 
         case 'extract':
         case 'extracted':
-          $report['extracted'] = ($opts['extractedtime']) ?: time();
+          $report['extracted'] = ($opts['extracted-time']) ?: time();
 
         case 'download':
         case 'downloaded':
-          $report['downloaded'] = ($opts['downloadedtime']) ?: time();
+          $report['downloaded'] = ($opts['downloaded-time']) ?: time();
           break;
       }
       $report['name'] = ($opts['name']) ?: $this->createName($report);
@@ -137,7 +137,7 @@ Returns a JSON object with the properties:
       $report['upgradeReport'] = json_decode($opts['upgraded'], TRUE);
     }
 
-    if ($opts['finished'] || $opts['finishedtime']) {
+    if ($opts['finished'] || $opts['finished-time']) {
       $report['finishReport'] = $this->systemReport();
       $report['status'] = 'successful';
     }
@@ -188,15 +188,15 @@ Returns a JSON object with the properties:
     $probs = array();
 
     // Don't accept --start once the upgrade has gotten too far
-    if ($opts['started'] || $opts['startedtime']) {
+    if ($opts['started'] || $opts['started-time']) {
       // Steps that occur after a useful start report could be produced:
       $tooLate = array(
         'extracted',
-        'extractedtime',
+        'extracted-time',
         'upgraded',
-        'upgradedtime',
+        'upgraded-time',
         'finished',
-        'finishedtime',
+        'finished-time',
       );
       foreach ($tooLate as $too) {
         if ($opts[$too]) {
@@ -206,13 +206,13 @@ Returns a JSON object with the properties:
     }
 
     // A --downloaded report needs a download URL.
-    if (($opts['downloaded'] || $opts['downloadedtime']) && !$opts['downloadurl']) {
+    if (($opts['downloaded'] || $opts['downloaded-time']) && !$opts['downloadurl']) {
       $probs[] = 'You must specify the download URL as --downloadUrl.';
     }
 
     // Require --name if this upgrade has been reported already
-    if (!($opts['started'] || $opts['startedtime'] || $opts['problem']) && !$opts['name']) {
-      $probs[] = 'Unless you are sending a start report (with --started, --startedtime, or --problem), you must specify the report name (with --name)';
+    if (!($opts['started'] || $opts['started-time'] || $opts['problem']) && !$opts['name']) {
+      $probs[] = 'Unless you are sending a start report (with --started, --started-time, or --problem), you must specify the report name (with --name)';
     }
 
     return $probs;
