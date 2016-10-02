@@ -52,7 +52,7 @@ Returns a JSON object with the properties:
       throw new \RuntimeException("Cannot determine download URL without CMS");
     }
 
-    $url = self::DEFAULT_CHECK_URL . "?stability=$stability";
+    $url = self::DEFAULT_CHECK_URL . "?stability=" . urlencode($stability);
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $lookup = curl_exec($ch);
