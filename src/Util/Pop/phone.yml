@@ -1,6 +1,7 @@
-phone: f.phoneNumber
-location_type_id:
-  home: 50
-  work: 30
-  main: 20
-  billing: 10
+fields:
+  phone: f.phoneNumber
+  location_type_id:
+    home: 50
+    work: 30
+    main: 20
+    billing: 10

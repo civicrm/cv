@@ -1,11 +1,7 @@
-first_name: f.firstName
-last_name: f.lastName
+fields:
+  first_name: f.firstName
+  last_name: f.lastName
 children:
-  email:
-    count:
-    - 1
-    - 3
-  phone:
-    count:
-    - 0
-    - 2
+  - email: 0-3
+  - phone: 0-2
+  - address: 0-2

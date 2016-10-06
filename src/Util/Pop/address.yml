@@ -1,0 +1,8 @@
+fields:
+  location_type_id:
+    1: 5
+    2: 4
+    3: 1
+  street_address: f.streetName
+  city: f.city
+  postal_code: f.postcode
