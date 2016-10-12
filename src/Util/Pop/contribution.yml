@@ -1,4 +1,3 @@
 fields:
-  financial_type_id: r.financial_type
   total_amount: f.randomFloat,2,1,100
   receive_date: f.dateTimeBetween,-15 years,now

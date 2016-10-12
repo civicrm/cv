@@ -43,10 +43,9 @@ NOTE: See doc/pop.md for usage
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->boot($input, $output);
     $pop = new Pop($output);
-    $pop->load($input->getArgument('file'));
-    $pop->run();
+    $pop->process($input->getArgument('file'));
   }
 
-  
+
 
 }
