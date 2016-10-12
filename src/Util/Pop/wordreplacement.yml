@@ -1,0 +1,3 @@
+fields:
+  find_word: F.words,1,1
+  replace_word: F.words,1,1
