@@ -28,13 +28,12 @@ class Pop {
     $this->faker = Faker\Factory::create();
 
     // Get available entities
-    $result = \civicrm_api3('entity', 'get');
 
     // Pretend that Individuals, Organisations and Households are also entities
-    $availableEntities = array_merge($result['values'], array('Individual', 'Household', 'Organization'));
-    foreach($availableEntities as $entity){
-      $this->availableEntities[strtolower($entity)]=$entity;
-    }
+    $this->availableEntities = array_merge(
+      \civicrm_api3('entity', 'get')['values'],
+      array('Individual', 'Household', 'Organization')
+    );
 
     // Define where to find Pop yml files
     $this->defaultEntityDir = __DIR__.DIRECTORY_SEPARATOR.'Pop'.DIRECTORY_SEPARATOR;
@@ -54,8 +53,10 @@ class Pop {
 
       // create a definition from each instruction
       $definition = $this->translate($instruction);
+
       // add values from default
       $definition = $this->backfill($definition);
+
       // populate entities based on the definition
       $this->populate($definition);
     }
@@ -71,17 +72,10 @@ class Pop {
   function load($file){
 
     // load the yaml file
-    $yaml = yaml_parse_file($file);
-    if(!$yaml){
+    $this->instructions = yaml_parse_file($file);
+    if(!$this->instructions){
       echo "Error: could not open yaml file: ($file)\n";
       exit(1);
-    }
-
-    // for each instruction, lowercase the argument names
-    foreach($yaml as $n => $instruction){
-      foreach($instruction as $key => $argument){
-        $this->instructions[$n][strtolower($key)]=$argument;
-      }
     }
   }
 
@@ -118,7 +112,7 @@ class Pop {
 
     // define the entity and check that it is available
     $definition['entity'] = key($instruction);
-    if(!isset($this->availableEntities[$definition['entity']])){
+    if(!in_array($definition['entity'], $this->availableEntities)){
       echo "Error: could not find entity: {$definition['entity']}\n";
       echo yaml_emit($original);
       exit(1);
@@ -167,7 +161,7 @@ class Pop {
   function getAvailableFields($entity){
 
     if(!isset($this->availableFields[$entity])){
-      $this->availableFields[$entity] = \civicrm_api3($this->availableEntities[$entity], 'getfields', array('api_action'=> 'create'))['values'];
+      $this->availableFields[$entity] = \civicrm_api3($entity, 'getfields', array('api_action'=> 'create'))['values'];
     }
     return $this->availableFields[$entity];
   }
@@ -233,25 +227,21 @@ class Pop {
       }
 
       // if we are using a modifier, run the appropriate function
-
-      if(strpos($value,"r.")===0){
-        $value = $this->getRandomEntity(substr($value,2));
-      }elseif(stripos($value,"f.")===0){
-        $value = $this->getFake($value);
-      }
+      $this->modify($name, $value, $entity);
     }
 
     // add any required fields using sensible defaults
     foreach($this->getRequiredFields($entity) as $requiredFieldName => $requiredFieldDef){
       if(!isset($fields[$requiredFieldName])){
         if(isset($requiredFieldDef['FKApiName'])){
-          $fields[$requiredFieldName] = $this->getRandomEntity(strtolower($requiredFieldDef['FKApiName']));
+          $fields[$requiredFieldName] = $this->getRandomEntity($requiredFieldDef['FKApiName']);
         }elseif(isset($requiredFieldDef['pseudoconstant'])){
           $fields[$requiredFieldName] = $this->getRandomOption($entity, $requiredFieldDef['name']);
         }
       }
     }
-    $result = \civicrm_api3($this->availableEntities[$entity], 'create', $fields);
+
+    $result = \civicrm_api3($entity, 'create', $fields);
     if(!$result['is_error']){
       $this->logEntity($entity, $result['id']);
       return array('entity' => $entity, 'id' => $result['id']);
@@ -260,6 +250,23 @@ class Pop {
     }else{
       $this->log('error', "Could not add $entity");
       exit(1);
+    }
+  }
+
+  function modify($field, &$value, $entity){
+
+    // TODO refactor this function so that it checks for
+
+    // check for keywords
+
+    // check for modifier prefixes
+
+    if(strpos($value,"r.")===0){
+      $value = $this->getRandomEntity(substr($value,2));
+    }elseif($value == "choose"){
+      $value = $this->getRandomOption($entity, $field);
+    }elseif(stripos($value,"f.")===0){
+      $value = $this->getFake($value);
     }
   }
 
@@ -297,7 +304,7 @@ class Pop {
   function getRandomEntity($entity){
     if(!isset($this->entityStore[$entity])){
       // 10,000 entities is probably random enough for most people
-      $result = civicrm_api3($this->availableEntities[$entity], 'get', array('return' => array('id'), 'options' => array('limit' => 10000)));
+      $result = civicrm_api3($entity, 'get', array('return' => array('id'), 'options' => array('limit' => 10000)));
       $this->entityStore[$entity]=array_keys($result['values']);
     }
     return $this->entityStore[$entity][array_rand($this->entityStore[$entity])];
@@ -313,7 +320,6 @@ class Pop {
   }
 
   function logEntity($entity, $id){
-    $entity = $this->availableEntities[$entity];
     $x = 0;
     while ($x < count($this->summary)){
       echo "\033[1A";

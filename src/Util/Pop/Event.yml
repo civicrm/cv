@@ -1,3 +1,4 @@
 fields:
   start_date: f.date,Y-m-d H:i:s
   title: f.sentence,2
+  event_type_id: choose 
