@@ -54,10 +54,8 @@ class Pop {
 
       // create a definition from each instruction
       $definition = $this->translate($instruction);
-
       // add values from default
       $definition = $this->backfill($definition);
-
       // populate entities based on the definition
       $this->populate($definition);
     }
@@ -167,8 +165,9 @@ class Pop {
   }
 
   function getAvailableFields($entity){
+
     if(!isset($this->availableFields[$entity])){
-      $this->availableFields[$entity] = \civicrm_api3($entity, 'getfields', array('api_action'=> 'create'))['values'];
+      $this->availableFields[$entity] = \civicrm_api3($this->availableEntities[$entity], 'getfields', array('api_action'=> 'create'))['values'];
     }
     return $this->availableFields[$entity];
   }
@@ -177,18 +176,12 @@ class Pop {
     if(!isset($this->requiredFields[$entity])){
       foreach($this->getAvailableFields($entity) as $availableField){
         if($availableField['api.required']){
-          if(isset($availableField['FKApiName'])){
-            $this->requiredFields[$entity][$availableField['name']] = 'Entity';
-          }elseif(isset($availableField['pseudoconstant'])){
-            $this->requiredFields[$entity][$availableField['name']] = 'Option';
-          }
+          $this->requiredFields[$entity][$availableField['name']] = $availableField;
         }
       }
     }
     return $this->requiredFields[$entity];
   }
-
-
 
   // create a set of entities from a definition
   function populate($definition, $parent = null){
@@ -214,6 +207,7 @@ class Pop {
     // create each entity
     $count = 0;
     while($count < $definition['count']){
+
       $createdEntity = $this->createEntity($definition['entity'], $definition['fields']);
 
       // create children if necessary
@@ -229,6 +223,7 @@ class Pop {
   }
 
   function createEntity($entity, $fields){
+
     // go through fields, making substitutions where necessary
     foreach($fields as $name => &$value){
 
@@ -247,18 +242,15 @@ class Pop {
     }
 
     // add any required fields using sensible defaults
-    foreach($this->getRequiredFields($entity) as $requiredFieldName => $requiredFieldType){
+    foreach($this->getRequiredFields($entity) as $requiredFieldName => $requiredFieldDef){
       if(!isset($fields[$requiredFieldName])){
-        if($requiredFieldType == 'Entity'){
-          $fields[$requiredFieldName] = $this->getRandomEntity($entity);
-        }
-        if($requiredFieldType == 'Option'){
-          $fields[$requiredFieldName] = $this->getRandomOption($entity, $fields[$requiredFieldName]);
+        if(isset($requiredFieldDef['FKApiName'])){
+          $fields[$requiredFieldName] = $this->getRandomEntity(strtolower($requiredFieldDef['FKApiName']));
+        }elseif(isset($requiredFieldDef['pseudoconstant'])){
+          $fields[$requiredFieldName] = $this->getRandomOption($entity, $requiredFieldDef['name']);
         }
       }
     }
-
-
     $result = \civicrm_api3($this->availableEntities[$entity], 'create', $fields);
     if(!$result['is_error']){
       $this->logEntity($entity, $result['id']);
@@ -312,12 +304,12 @@ class Pop {
   }
   function getRandomOption($entity, $field){
     if(!isset($this->$optionStore[$entity][$field])){
-      $this->optionStore[$entity][$field] = civicrm_api3('Address', 'getoptions', array(
+      $this->optionStore[$entity][$field] = civicrm_api3($entity, 'getoptions', array(
         'sequential' => 1,
-        'field' => "location_type_id",
+        'field' => $field,
       ))['values'];
     }
-    return $this->optionStore[$entity][$field][array_rand($this->optionStore[$entity][$field])]['value'];
+    return $this->optionStore[$entity][$field][array_rand($this->optionStore[$entity][$field])]['key'];
   }
 
   function logEntity($entity, $id){
