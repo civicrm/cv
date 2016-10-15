@@ -1,6 +1,6 @@
 fields:
   organization_name: f.company
 children:
-  - address: 0-1
-  - email: 0-3
-  - phone: 0-2
+  - Address: 0-1
+  - Email: 0-3
+  - Phone: 0-2

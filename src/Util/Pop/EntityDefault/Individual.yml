@@ -2,6 +2,6 @@ fields:
   first_name: f.firstName
   last_name: f.lastName
 children:
-  - address: 0-2
-  - email: 0-3
-  - phone: 0-2
+  - Address: 0-2
+  - Email: 0-3
+  - Phone: 0-2
