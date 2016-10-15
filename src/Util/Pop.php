@@ -2,7 +2,7 @@
 namespace Civi\Cv\Util;
 
 use Faker;
-use Civi\Cv\Util\Pop\FieldPopulator;
+use Civi\Cv\Util\Pop\Populator;
 use Civi\Cv\Util\Pop\EntityStore;
 use Civi\Cv\Util\Pop\OptionStore;
 
@@ -34,7 +34,7 @@ class Pop {
 
     // Initialise entity
     //
-    $this->fieldPopulator = new FieldPopulator($this->entityStore, $this->optionStore);
+    $this->populator = new Populator($this->entityStore, $this->optionStore);
 
     // Get available entities (pretending that Individuals, Organisations and
     // Households are also entities)
@@ -62,11 +62,11 @@ class Pop {
       // create a definition from each instruction
       $definition = $this->translate($instruction);
 
-      // add values from default
+      // backfill definition with entity defaults
       $definition = $this->backfill($definition);
 
-      // populate entities based on the definition
-      $this->populate($definition);
+      // create entities based on the definition
+      $this->createEntities($definition);
     }
 
     // summarise the process
@@ -159,9 +159,14 @@ class Pop {
     }
     $definition['fields'] = array_intersect_key($definition['fields'], $availableFields);
 
-    // add any childrend defined in the default entity
+    // add any children defined in the default entity
     if(isset($entityDefault['children'])){
       $definition['children'] = array_merge($definition['children'], $entityDefault['children']);
+    }
+
+    // add any populators defined in the default entity
+    if(isset($entityDefault['populators'])){
+      $definition['populators'] = array_merge($definition['populators'], $entityDefault['populators']);
     }
 
     return $definition;
@@ -187,7 +192,7 @@ class Pop {
   }
 
   // create a set of entities from a definition
-  function populate($definition, $parent = null){
+  function createEntities($definition, $parent = null){
 
     // if count is a range, decide how many entities to create
     if(strpos($definition['count'], '-')){
@@ -197,9 +202,9 @@ class Pop {
 
     // if this is an individual, household or organisation, convert it to a
     // contact with an appropriatly defined contact_type
-    if(in_array($definition['entity'], array('individual', 'household', 'organization'))){
+    if(in_array($definition['entity'], array('Individual', 'Household', 'Organization'))){
       $definition['fields']['contact_type'] = $definition['entity'];
-      $definition['entity'] = 'contact';
+      $definition['entity'] = 'Contact';
     }
 
     // if this is a child of another entity, populate the parent id
@@ -211,33 +216,33 @@ class Pop {
     $count = 0;
     while($count < $definition['count']){
 
-      $createdEntity = $this->createEntity($definition['entity'], $definition['fields'], $definition['populators']);
+      $createdEntity = $this->populate($definition['entity'], $definition['fields'], $definition['populators']);
 
       // create children if necessary
       if(isset($definition['children'])){;
         foreach($definition['children'] as $childInstruction){
           $childDefinition = $this->translate($childInstruction);
           $childDefinition = $this->backfill($childDefinition);
-          $this->populate($childDefinition, $createdEntity);
+          $this->createEntities($childDefinition, $createdEntity);
         }
       }
       $count++;
     }
   }
 
-  function createEntity($entity, $fields, $functions){
+  function populate($entity, $fields, $populators){
 
-  if(count($functions)){
-    foreach($functions as $function){
-      if(method_exists($this->fieldPopulator, $function)){
-        $this->fieldPopulator->$function($entity, $fields);
-      }else{
-        echo "Could not find method '{$function}'\n";
-        exit;
-      };
+    if(count($populators)){
+      foreach($populators as $populator){
+        if(method_exists($this->populator, $populator)){
+          $this->populator->$populator($entity, $fields);
+        }else{
+          echo "Could not find method '{$populator}'\n";
+          exit;
+        };
+      }
     }
-  }
-  // go through fields, making substitutions where necessary
+    // go through fields, making substitutions where necessary
     foreach($fields as $name => &$value){
 
       // if value is an array, select one at (weighted) random
@@ -306,7 +311,6 @@ class Pop {
     }
   }
 
-
   function getFake($field){
     $function = explode(',', substr($field,2));
     $output = call_user_func_array(array($this->faker, array_shift($function)), $function);
@@ -319,7 +323,6 @@ class Pop {
     }
     return $output;
   }
-
 
   function logEntity($entity, $id){
     $x = 0;
@@ -334,10 +337,10 @@ class Pop {
       $this->summary[$entity]['count']=1;
       $this->summary[$entity]['first_id']=$id;
       $this->summary[$entity]['last_id']=$id;
-    }
+    } 
     ksort($this->summary);
     foreach($this->summary as $entity => $stats){
-      $this->output->writeln("\033[K<fg=green>{$entity}s: </><fg=green>{$stats['count']}</>");
+      $this->output->writeln("\033[K<fg=green>{$entity}: </><fg=green>{$stats['count']}</>");
     }
   }
 
@@ -353,7 +356,7 @@ class Pop {
       $x++;
     }
     foreach($this->summary as $entity => $stats){
-      $this->output->write("\033[K<fg=green>{$entity}s: {$stats['count']} ");
+      $this->output->write("\033[K<fg=green>{$entity}: {$stats['count']} ");
       if($stats['first_id'] && $stats['first_id']==$stats['last_id']){
         $this->output->writeln("({$stats['first_id']})</>");
       }elseif($stats['first_id'] < $stats['last_id']){
