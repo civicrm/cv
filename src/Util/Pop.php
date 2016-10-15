@@ -2,16 +2,15 @@
 namespace Civi\Cv\Util;
 
 use Faker;
+use Civi\Cv\Util\Pop\FieldPopulator;
+use Civi\Cv\Util\Pop\EntityStore;
+use Civi\Cv\Util\Pop\OptionStore;
+
+
 class Pop {
 
   // Summarise the process (number of entities imported, etc.)
   var $summary = array();
-
-  // Place to store and retreive entities
-  var $entityStore = array();
-
-  // Place to store and retreive option Groups
-  var $optionGroupStore = array();
 
   // The types of entity that we can populate
   var $availableEntities  = array();
@@ -27,16 +26,25 @@ class Pop {
     // Initialise faker
     $this->faker = Faker\Factory::create();
 
-    // Get available entities
+    // Initialise entity store
+    $this->entityStore = new entityStore();
 
-    // Pretend that Individuals, Organisations and Households are also entities
+    // Initialise option store
+    $this->optionStore = new optionStore();
+
+    // Initialise entity
+    //
+    $this->fieldPopulator = new FieldPopulator($this->entityStore, $this->optionStore);
+
+    // Get available entities (pretending that Individuals, Organisations and
+    // Households are also entities)
     $this->availableEntities = array_merge(
       \civicrm_api3('entity', 'get')['values'],
       array('Individual', 'Household', 'Organization')
     );
 
     // Define where to find Pop yml files
-    $this->defaultEntityDir = __DIR__.DIRECTORY_SEPARATOR.'Pop'.DIRECTORY_SEPARATOR;
+    $this->entityDefaultsDir = __DIR__.DIRECTORY_SEPARATOR.'Pop/EntityDefault'.DIRECTORY_SEPARATOR;
 
     $this->defaultDefinition = yaml_parse_file("{$this->defaultEntityDir}default.yml");
   }
@@ -79,31 +87,32 @@ class Pop {
     }
   }
 
+  /**
+   * Parses an instructVion, returning a definition when valid and
+   * exiting with error messages when not valid.
+   * @param  $instruction
+   * @return $definition
+   */
   function translate($instruction){
+
     // clone the $instruction for debugging purposes
     $original = $instruction;
 
-    // empty definition to be populated
-    $definition = array(
-      'fields' => array(),
-      'children' => array(),
-    );
+    // move valid parts of the instruction to the definition
+    $parts = array('fields', 'children', 'populators');
 
-    // if the instruction includes fields, add them
-    if(isset($instruction['fields'])){
-      $definition['fields']=$instruction['fields'];
-      unset($instruction['fields']);
+    foreach($parts as $part){
+      if(isset($instruction[$part])){
+        $definition[$part]=$instruction[$part];
+        unset($instruction[$part]);
+      }else{
+        $definition[$part]=array();
+      }
     }
 
-    // if the instruction includes children, add them
-    if(isset($instruction['children'])){
-      $definition['children']=$instruction['children'];
-      unset($instruction['children']);
-    }
-
-    // at this point, valid instructions should be a one
-    // element array of form array(Entity => count). Exit if
-    // this is not the case.
+    // at this point, the instruction should be a one
+    // element array of form array(Entity => count).
+    // Commplain if this is not the case.
     if(count($instruction) != 1){
       echo "Error: badly formatted instruction:\n";
       echo yaml_emit($original);
@@ -132,7 +141,7 @@ class Pop {
   function backfill($definition) {
 
     // get defaults for this entity, if they exist
-    $entityDefault = yaml_parse_file("{$this->defaultEntityDir}{$definition['entity']}.yml");
+    $entityDefault = yaml_parse_file("{$this->entityDefaultsDir}{$definition['entity']}.yml");
 
     // backfill with default fields for this entity
     if(isset($entityDefault['fields'])){
@@ -202,7 +211,7 @@ class Pop {
     $count = 0;
     while($count < $definition['count']){
 
-      $createdEntity = $this->createEntity($definition['entity'], $definition['fields']);
+      $createdEntity = $this->createEntity($definition['entity'], $definition['fields'], $definition['populators']);
 
       // create children if necessary
       if(isset($definition['children'])){;
@@ -216,9 +225,19 @@ class Pop {
     }
   }
 
-  function createEntity($entity, $fields){
+  function createEntity($entity, $fields, $functions){
 
-    // go through fields, making substitutions where necessary
+  if(count($functions)){
+    foreach($functions as $function){
+      if(method_exists($this->fieldPopulator, $function)){
+        $this->fieldPopulator->$function($entity, $fields);
+      }else{
+        echo "Could not find method '{$function}'\n";
+        exit;
+      };
+    }
+  }
+  // go through fields, making substitutions where necessary
     foreach($fields as $name => &$value){
 
       // if value is an array, select one at (weighted) random
@@ -234,9 +253,9 @@ class Pop {
     foreach($this->getRequiredFields($entity) as $requiredFieldName => $requiredFieldDef){
       if(!isset($fields[$requiredFieldName])){
         if(isset($requiredFieldDef['FKApiName'])){
-          $fields[$requiredFieldName] = $this->getRandomEntity($requiredFieldDef['FKApiName']);
+          $fields[$requiredFieldName] = $this->entityStore->getRandom($requiredFieldDef['FKApiName']);
         }elseif(isset($requiredFieldDef['pseudoconstant'])){
-          $fields[$requiredFieldName] = $this->getRandomOption($entity, $requiredFieldDef['name']);
+          $fields[$requiredFieldName] = $this->optionStore->getRandom($entity, $requiredFieldDef['name']);
         }
       }
     }
@@ -246,7 +265,7 @@ class Pop {
       $this->logEntity($entity, $result['id']);
       return array('entity' => $entity, 'id' => $result['id']);
       //add to the random entity register so they can be selected in future
-      $this->entityStore[$entity][]=$result['id'];
+      $this->entityStore->add($entity, $result['id']);
     }else{
       $this->log('error', "Could not add $entity");
       exit(1);
@@ -262,9 +281,9 @@ class Pop {
     // check for modifier prefixes
 
     if(strpos($value,"r.")===0){
-      $value = $this->getRandomEntity(substr($value,2));
+      $value = $this->entityStore->getRandom(substr($value,2));
     }elseif($value == "choose"){
-      $value = $this->getRandomOption($entity, $field);
+      $value = $this->optionStore->getRandom($field, $entity);
     }elseif(stripos($value,"f.")===0){
       $value = $this->getFake($value);
     }
@@ -301,23 +320,6 @@ class Pop {
     return $output;
   }
 
-  function getRandomEntity($entity){
-    if(!isset($this->entityStore[$entity])){
-      // 10,000 entities is probably random enough for most people
-      $result = civicrm_api3($entity, 'get', array('return' => array('id'), 'options' => array('limit' => 10000)));
-      $this->entityStore[$entity]=array_keys($result['values']);
-    }
-    return $this->entityStore[$entity][array_rand($this->entityStore[$entity])];
-  }
-  function getRandomOption($entity, $field){
-    if(!isset($this->$optionStore[$entity][$field])){
-      $this->optionStore[$entity][$field] = civicrm_api3($entity, 'getoptions', array(
-        'sequential' => 1,
-        'field' => $field,
-      ))['values'];
-    }
-    return $this->optionStore[$entity][$field][array_rand($this->optionStore[$entity][$field])]['key'];
-  }
 
   function logEntity($entity, $id){
     $x = 0;
@@ -337,6 +339,11 @@ class Pop {
     foreach($this->summary as $entity => $stats){
       $this->output->writeln("\033[K<fg=green>{$entity}s: </><fg=green>{$stats['count']}</>");
     }
+  }
+
+  function popGenerateRelationshipContacts($fields){
+    print_r($fields);
+    exit;
   }
 
   function summarize(){
