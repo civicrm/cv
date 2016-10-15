@@ -44,9 +44,9 @@ class Pop {
     );
 
     // Define where to find Pop yml files
-    $this->entityDefaultsDir = __DIR__.DIRECTORY_SEPARATOR.'Pop/EntityDefault'.DIRECTORY_SEPARATOR;
+    $this->entityDefaultDir = __DIR__.DIRECTORY_SEPARATOR.'Pop/EntityDefault'.DIRECTORY_SEPARATOR;
 
-    $this->defaultDefinition = yaml_parse_file("{$this->defaultEntityDir}default.yml");
+    $this->defaultDefinition = yaml_parse_file("{$this->entityDefaultDir}default.yml");
   }
 
   function process($file){
@@ -127,9 +127,12 @@ class Pop {
       exit(1);
     }
 
-    // check that the count is valid (i.e. an integer or a range specified by
-    // two integers seperated by a dash
+    // check that the count is valid, i.e. an integer or a range specified by
+    // two integers seperated by a dash or NULL (which we interpret as 1)
     $definition['count'] = current($instruction);
+    if($definition['count']===NULL){
+      $definition['count'] = 1;
+    }
     if(!preg_match('/^\d+(\-\d+)?$/', $definition['count'])){
       echo "Error: invalid value for count: {$definition['count']}\n";
       echo yaml_emit($original);
@@ -141,7 +144,7 @@ class Pop {
   function backfill($definition) {
 
     // get defaults for this entity, if they exist
-    $entityDefault = yaml_parse_file("{$this->entityDefaultsDir}{$definition['entity']}.yml");
+    $entityDefault = yaml_parse_file("{$this->entityDefaultDir}{$definition['entity']}.yml");
 
     // backfill with default fields for this entity
     if(isset($entityDefault['fields'])){
@@ -258,9 +261,9 @@ class Pop {
     foreach($this->getRequiredFields($entity) as $requiredFieldName => $requiredFieldDef){
       if(!isset($fields[$requiredFieldName])){
         if(isset($requiredFieldDef['FKApiName'])){
-          $fields[$requiredFieldName] = $this->entityStore->getRandom($requiredFieldDef['FKApiName']);
+          $fields[$requiredFieldName] = $this->entityStore->getRandomId($requiredFieldDef['FKApiName']);
         }elseif(isset($requiredFieldDef['pseudoconstant'])){
-          $fields[$requiredFieldName] = $this->optionStore->getRandom($entity, $requiredFieldDef['name']);
+          $fields[$requiredFieldName] = $this->optionStore->getRandomId($entity, $requiredFieldDef['name']);
         }
       }
     }
@@ -286,9 +289,9 @@ class Pop {
     // check for modifier prefixes
 
     if(strpos($value,"r.")===0){
-      $value = $this->entityStore->getRandom(substr($value,2));
+      $value = $this->entityStore->getRandomId(substr($value,2));
     }elseif($value == "choose"){
-      $value = $this->optionStore->getRandom($field, $entity);
+      $value = $this->optionStore->getRandomId($field, $entity);
     }elseif(stripos($value,"f.")===0){
       $value = $this->getFake($value);
     }
@@ -337,7 +340,7 @@ class Pop {
       $this->summary[$entity]['count']=1;
       $this->summary[$entity]['first_id']=$id;
       $this->summary[$entity]['last_id']=$id;
-    } 
+    }
     ksort($this->summary);
     foreach($this->summary as $entity => $stats){
       $this->output->writeln("\033[K<fg=green>{$entity}: </><fg=green>{$stats['count']}</>");
