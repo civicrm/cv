@@ -9,7 +9,7 @@ class OptionStore {
 
   private $store = array();
 
-  function getRandom($entity, $field){
+  function getRandomId($entity, $field){
     if(!isset($this->store[$entity][$field])){
       $this->store[$entity][$field] = civicrm_api3($entity, 'getoptions', array(
         'sequential' => 1,
@@ -18,4 +18,4 @@ class OptionStore {
     }
     return $this->store[$entity][$field][array_rand($this->store[$entity][$field])]['key'];
   }
-  }
+}
