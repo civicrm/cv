@@ -119,16 +119,12 @@ class PopCommandTest extends \Civi\Cv\CivilTestCase {
       'Phone',
       'Pledge',
       'PledgePayment',
-      'Premium',
-      'PriceField',
-      'PriceFieldValue',
-      'PriceSet',
+      'Premium', // It looks like there are some manatory fields that are not marked as such
       'PrintLabel',
       'Product',
-      'Profile',
-      'Relationship', // need to account for duplicate relationship error
+      'Relationship', // We need to account for Duplicate Relationship Exception
       'RelationshipType',
-      'ReportInstance', // bug in api?
+      // 'ReportInstance', // Didn't appear to work. Might be that we need to specify more fields but the API didn't pick that up.
       'ReportTemplate',
       'SavedSearch',
       'Setting',
