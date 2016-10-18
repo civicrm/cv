@@ -291,7 +291,7 @@ class Pop {
     if(strpos($value,"r.")===0){
       $value = $this->entityStore->getRandomId(substr($value,2));
     }elseif($value == "choose"){
-      $value = $this->optionStore->getRandomId($field, $entity);
+      $value = $this->optionStore->getRandomId($entity, $field);
     }elseif(stripos($value,"f.")===0){
       $value = $this->getFake($value);
     }
