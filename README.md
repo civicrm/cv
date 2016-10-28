@@ -108,9 +108,14 @@ function cv($cmd, $decode = 'json') {
 }
 
 eval(cv('php:boot', 'phpcode'));
-$config = cv('show --buildkit');
+$config = cv('vars:show');
 printf("We should navigate to the dsahboard: %s\n\n", cv('url civicrm/dashboard'));
 ```
+
+Example: NodeJS
+===============
+
+See https://github.com/civicrm/cv-nodejs
 
 Build
 =====
