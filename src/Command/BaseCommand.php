@@ -14,6 +14,7 @@ class BaseCommand extends Command {
   protected function configureBootOptions() {
     $this->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (classloader,settings,full)', 'full');
     $this->addOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)');
+    $this->addOption('user', 'U', InputOption::VALUE_REQUIRED, 'CMS user');
   }
 
   protected function boot(InputInterface $input, OutputInterface $output) {
@@ -31,6 +32,14 @@ class BaseCommand extends Command {
       \Civi\Cv\Bootstrap::singleton()->boot();
       \CRM_Core_Config::singleton();
       \CRM_Utils_System::loadBootStrap(array(), FALSE);
+      if ($input->getOption('user')) {
+        if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
+          \CRM_Utils_System::loadUser($input->getOption('user'));
+        }
+        else {
+          $output->writeln("<error>Failed to set user. Feature not supported by UF (" . CIVICRM_UF . ")</error>");
+        }
+      }
     }
   }
 
