@@ -1,6 +1,0 @@
-fields:
-  household_name: f.company
-children:
-  - Address: 0-1
-  - Email: 0-3
-  - Phone: 0-2

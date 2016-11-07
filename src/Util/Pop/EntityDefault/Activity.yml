@@ -1,3 +1,0 @@
-fields:
-  source_contact_id: r.contact
-  activity_type_id: r.activitytype

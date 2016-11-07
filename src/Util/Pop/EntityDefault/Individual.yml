@@ -1,7 +1,0 @@
-fields:
-  first_name: f.firstName
-  last_name: f.lastName
-children:
-  - Address: 0-2
-  - Email: 0-3
-  - Phone: 0-2

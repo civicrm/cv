@@ -1,4 +1,0 @@
-fields:
-  street_address: f.streetName
-  city: f.city
-  postal_code: f.postcode

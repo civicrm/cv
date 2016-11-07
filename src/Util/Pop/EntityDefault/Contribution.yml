@@ -1,3 +1,0 @@
-fields:
-  total_amount: f.randomFloat,2,1,100
-  receive_date: f.dateTimeBetween,-15 years,now

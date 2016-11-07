@@ -1,6 +1,0 @@
-fields:
-  title: F.words,3,1
-  name: F.words,3,1
-  label: F.words,3,1
-  description: f.paragraph,1
-  source: pop
