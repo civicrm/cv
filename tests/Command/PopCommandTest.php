@@ -191,7 +191,7 @@ class popCommandTest extends \Civi\Cv\CivilTestCase {
       'Contact',
       'ContactType',
       'Contribution',
-      'ContributionPage',
+      // 'ContributionPage',
       // 'ContributionProduct',
       // 'ContributionRecur',
       'ContributionSoft',
