@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Civi\Cv\Util\Pop;
+use Civi\Pop\Pop;
 use Faker;
 
 class PopCommand extends BaseCommand {
@@ -29,6 +29,7 @@ class PopCommand extends BaseCommand {
     $this
       ->setName('pop')
       ->addArgument('file', InputArgument::REQUIRED, 'yaml file with entities to populate?')
+      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat())
       ->setDescription('Populate a site with entities from a yaml file')
       ->setHelp('Populate a site with entities from a yaml file
 
@@ -43,9 +44,13 @@ NOTE: See doc/pop.md for usage
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->boot($input, $output);
     $pop = new Pop($output);
+    $pop->setInteractive($input->isInteractive());
+    if($input->getOption('out') != 'json-pretty'){
+      $pop->setInteractive(0);
+    }
     $pop->process($input->getArgument('file'));
+    if($input->getOption('out') != 'json-pretty'){
+      $this->sendResult($input, $output, $pop->getSummary());
+    }
   }
-
-
-
 }

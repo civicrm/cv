@@ -8,6 +8,12 @@
             "email": "totten@civicrm.org"
         }
     ],
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/home/michael/src/pop"
+        }
+    ],
     "require": {
         "php": ">=5.3.3",
         "symfony/console": "~2.3",
@@ -15,8 +21,7 @@
         "symfony/filesystem": "~2.3",
         "symfony/finder": "~2.3",
         "psy/psysh": "@stable",
-        "symfony/yaml": "@stable",
-        "fzaninotto/faker": "@stable"
+        "michaelmcandrew/pop": "dev-master"
     },
     "autoload": {
         "psr-4": {
