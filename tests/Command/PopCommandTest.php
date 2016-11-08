@@ -1,10 +1,9 @@
 <?php
-
 namespace Civi\Cv\Command;
 use Civi\Cv\Util\Process;
 
 
-class popCommandTest extends \Civi\Cv\CivilTestCase {
+class PopCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function setup() {
     parent::setup();
