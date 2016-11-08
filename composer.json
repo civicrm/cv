@@ -21,7 +21,7 @@
         "symfony/filesystem": "~2.3",
         "symfony/finder": "~2.3",
         "psy/psysh": "@stable",
-        "michaelmcandrew/pop": "dev-master"
+        "michaelmcandrew/pop": "@stable"
     },
     "autoload": {
         "psr-4": {
