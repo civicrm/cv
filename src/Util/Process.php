@@ -18,6 +18,22 @@ class Process {
   }
 
   /**
+   * Helper which synchronously runs a command and verifies that it generates an error.
+   *
+   * @param \Symfony\Component\Process\Process $process
+   * @return \Symfony\Component\Process\Process
+   * @throws \RuntimeException
+   */
+  public static function runFail(\Symfony\Component\Process\Process $process) {
+    $process->run();
+    if ($process->isSuccessful()) {
+      Process::dump($process);
+      throw new \Civi\Cv\Exception\ProcessErrorException($process, "Process succeeded unexpectedly");
+    }
+    return $process;
+  }
+
+  /**
    * Determine full path to an external command (by searching PATH).
    *
    * @param string $name
