@@ -31,6 +31,9 @@ class Application extends \Symfony\Component\Console\Application {
   public function createCommands($context = 'default') {
     $commands = array();
     $commands[] = new \Civi\Cv\Command\ApiCommand();
+    $commands[] = new \Civi\Cv\Command\ExtensionEnableCommand();
+    $commands[] = new \Civi\Cv\Command\ExtensionDisableCommand();
+    $commands[] = new \Civi\Cv\Command\ExtensionUninstallCommand();
     $commands[] = new \Civi\Cv\Command\FillCommand();
     $commands[] = new \Civi\Cv\Command\ShowCommand();
     $commands[] = new \Civi\Cv\Command\UrlCommand();
