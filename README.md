@@ -14,8 +14,8 @@ Support may vary depending on the host environment (CMS type, file-structure, sy
  * *Untested*: Drupal 7 multi-site, WordPress multi-site, Joomla, Drupal 6, Drupal 8; any heavy symlinking
    * *Tip*: If you use an untested or incompatible host environment, then you may see the error `Failed to locate civicrm.settings.php`. See [StackExchange](http://civicrm.stackexchange.com/questions/12732/civix-reports-failed-to-locate-civicrm-settings-php) to discuss work-arounds.
 
-Download
-========
+Install
+=======
 
 `cv` is distributed in PHAR format, which is a portable executable file (for PHP). It should run on most Unix-like systems where PHP 5.3+ is installed.
 
@@ -25,6 +25,15 @@ Simply download [`cv`](https://download.civicrm.org/cv/cv.phar) and put it somew
 sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
 sudo chmod +x /usr/local/bin/cv
 ```
+
+or, without `sudo`:
+
+
+```bash
+curl -LsS https://download.civicrm.org/cv/cv.phar -o ~/bin/cv
+chmod +x ~/bin/cv
+```
+
 
 Example: CLI
 ============
