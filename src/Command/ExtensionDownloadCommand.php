@@ -23,10 +23,10 @@ class ExtensionDownloadCommand extends BaseExtensionCommand {
     $this
       ->setName('ext:download')
       ->setAliases(array('dl'))
-      ->setDescription('Download an extension')
+      ->setDescription('Download and enable an extension')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the remote list of extensions')
       ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar"). Optionally append a URL.')
-      ->setHelp('Download an extension
+      ->setHelp('Download and enable an extension
 
 Examples:
   cv ext:download org.example.foobar
