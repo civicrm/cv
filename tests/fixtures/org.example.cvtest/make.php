@@ -19,6 +19,7 @@ if (TRUE !== $zip->open($argv[1], ZipArchive::CREATE)) {
   exit(1);
 }
 
+$zip->addEmptyDir('org.example.cvtest/');
 $zip->addFile('LICENSE.txt', 'org.example.cvtest/LICENSE.txt');
 $zip->addFile('cvtest.php', 'org.example.cvtest/cvtest.php');
 $zip->addFile('info.xml', 'org.example.cvtest/info.xml');
