@@ -27,45 +27,52 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
     $cvTestZip = $this->makeCvTestZip();
     $this->extractZip($cvTestZip, $this->tmpDir);
 
-    // A small snippet of PHP code which only executes if `org.example.cvtest` is enabled.
-    $doIWork = escapeshellarg('return cvtest_doiwork();');
-
     // Make sure we start in a clean environment without the extension
-    Process::runFail($this->cv("ev $doIWork"));
+    Process::runFail($this->cvTestEnabled());
 
     // Activate and use the extension
     Process::runOk($this->cv("ext:enable -r org.example.cvtest"));
-    $p = Process::runOk($this->cv("ev $doIWork"));
+    $p = Process::runOk($this->cvTestEnabled());
     $result = json_decode($p->getOutput(), 1);
     $this->assertEquals('yes', $result['why']);
 
     // Cleanup and ensure we cleaned up.
     Process::runOk($this->cv("ext:disable org.example.cvtest"));
-    Process::runFail($this->cv("ev $doIWork"));
+    Process::runFail($this->cvTestEnabled());
     Process::runOk($this->cv("ext:uninstall org.example.cvtest"));
-    Process::runFail($this->cv("ev $doIWork"));
+    Process::runFail($this->cvTestEnabled());
   }
 
   public function testLifecycleWithShortNames() {
     $cvTestZip = $this->makeCvTestZip();
     $this->extractZip($cvTestZip, $this->tmpDir);
 
-    $doIWork = escapeshellarg('return cvtest_doiwork();');
-
     // Make sure we start in a clean environment without the extension
-    Process::runFail($this->cv("ev $doIWork"));
+    Process::runFail($this->cvTestEnabled());
 
     // Activate and use the extension
     Process::runOk($this->cv("ext:enable -r cvtest"));
-    $p = Process::runOk($this->cv("ev $doIWork"));
+    $p = Process::runOk($this->cvTestEnabled());
     $result = json_decode($p->getOutput(), 1);
     $this->assertEquals('yes', $result['why']);
 
     // Cleanup and ensure we cleaned up.
     Process::runOk($this->cv("ext:disable cvtest"));
-    Process::runFail($this->cv("ev $doIWork"));
+    Process::runFail($this->cvTestEnabled());
     Process::runOk($this->cv("ext:uninstall cvtest"));
-    Process::runFail($this->cv("ev $doIWork"));
+    Process::runFail($this->cvTestEnabled());
+  }
+
+  /**
+   * Prepare a subcommand which only succeeds if org.example.cvtest is
+   * enabled.
+   *
+   * @return \Symfony\Component\Process\Process
+   */
+  public function cvTestEnabled() {
+    // A small snippet of PHP code which only executes if `org.example.cvtest` is enabled.
+    $doIWork = escapeshellarg('return cvtest_doiwork();');
+    return $this->cv("ev $doIWork");
   }
 
   /**
