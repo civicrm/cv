@@ -1,9 +1,12 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Exception\ProcessErrorException;
 use Civi\Cv\Util\Process;
 
 class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
+
+  const EXAMPLE_DOWNLOAD_URL = 'https://download.civicrm.org/cv/fixtures/org.example.cvtest-20161227.zip';
 
   private $tmpDir;
 
@@ -23,11 +26,16 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
     parent::tearDown();
   }
 
+  /**
+   * Enable, disable, uninstall a local extension (using its full
+   * name).
+   */
   public function testLifecycleWithFullKeys() {
     $cvTestZip = $this->makeCvTestZip();
     $this->extractZip($cvTestZip, $this->tmpDir);
 
     // Make sure we start in a clean environment without the extension
+    $this->assertEquals(NULL, $this->getCvTestPath(), 'org.example.cvtest should not yet exist in the test build');
     Process::runFail($this->cvTestEnabled());
 
     // Activate and use the extension
@@ -43,15 +51,43 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
     Process::runFail($this->cvTestEnabled());
   }
 
+  /**
+   * Enable, disable, uninstall a local extension (using its short
+   * name).
+   */
   public function testLifecycleWithShortNames() {
     $cvTestZip = $this->makeCvTestZip();
     $this->extractZip($cvTestZip, $this->tmpDir);
 
     // Make sure we start in a clean environment without the extension
+    $this->assertEquals(NULL, $this->getCvTestPath(), 'org.example.cvtest should not yet exist in the test build');
     Process::runFail($this->cvTestEnabled());
 
     // Activate and use the extension
     Process::runOk($this->cv("ext:enable -r cvtest"));
+    $p = Process::runOk($this->cvTestEnabled());
+    $result = json_decode($p->getOutput(), 1);
+    $this->assertEquals('yes', $result['why']);
+
+    // Cleanup and ensure we cleaned up.
+    Process::runOk($this->cv("ext:disable cvtest"));
+    Process::runFail($this->cvTestEnabled());
+    Process::runOk($this->cv("ext:uninstall cvtest"));
+    Process::runFail($this->cvTestEnabled());
+  }
+
+  /**
+   * Download an extension using an explicit URL.
+   */
+  public function testDownloadWithExplicitUrl() {
+    // Make sure we start in a clean environment without the extension
+    $this->assertEquals(NULL, $this->getCvTestPath(), 'org.example.cvtest should not yet exist in the test build');
+    Process::runFail($this->cvTestEnabled());
+
+    // Activate and use the extension
+    $extSpec = escapeshellarg("org.example.cvtest@" . self::EXAMPLE_DOWNLOAD_URL);
+    Process::runOk($this->cv("ext:download $extSpec"));
+
     $p = Process::runOk($this->cvTestEnabled());
     $result = json_decode($p->getOutput(), 1);
     $this->assertEquals('yes', $result['why']);
@@ -107,11 +143,33 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
     }
   }
 
+  /**
+   * Lookup the path to org.example.cvtest in the site's extension system.
+   */
+  protected function getCvTestPath() {
+    $checkPath = 'try {return array("cvtest" => CRM_Extension_System::singleton()->getFullContainer()->getPath("org.example.cvtest"));} catch (CRM_Extension_Exception_MissingException $e) {return array();}';
+    $process = Process::runOk($this->cv('ev ' . escapeshellarg($checkPath)));
+    $data = json_decode($process->getOutput(), 1);
+    if (!empty($data['cvtest']) && file_exists($data['cvtest'])) {
+      return $data['cvtest'];
+    }
+    else {
+      return NULL;
+    }
+  }
+
   protected function cleanup() {
     $disablePhp = 'civicrm_api3("Extension", "disable", array("key" => "org.example.cvtest"));';
     $disablePhp .= 'civicrm_api3("Extension", "uninstall", array("key" => "org.example.cvtest"));';
     $this->cv('ev ' . escapeshellarg($disablePhp))->run();
     $this->removeDir($this->tmpDir);
+
+    try {
+      $cvTestPath = $this->getCvTestPath();
+    } catch (ProcessErrorException $e) {
+      $cvTestPath = NULL;
+    }
+    if ($cvTestPath) $this->removeDir($cvTestPath);
   }
 
 }
