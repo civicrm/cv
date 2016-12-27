@@ -8,11 +8,19 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
 
   const EXAMPLE_DOWNLOAD_URL = 'https://download.civicrm.org/cv/fixtures/org.example.cvtest-20161227.zip';
 
+  private static $first = TRUE;
+
   private $tmpDir;
 
   public function setup() {
     parent::setup();
     $this->tmpDir = $this->getExampleDir() . '/vendor/cvtest';
+
+    if (self::$first) {
+      self::$first = FALSE;
+      $this->cleanup();
+    }
+
     $this->removeDir($this->tmpDir);
     foreach (array('/vendor', '/vendor/cvtest') as $part) {
       if (!is_dir($this->getExampleDir() . $part)) {
@@ -100,6 +108,18 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
   }
 
   /**
+   * Run a DB upgrade.
+   *
+   * We don't have any way to ensure that every extension runs a
+   * proper upgrade sequence, but we can at least check if the command
+   * executes.
+   */
+  public function testUpgradeDb() {
+    $p = Process::runOk($this->cv('ext:upgrade-db'));
+    $this->assertRegExp(';Applying database upgrades from extensions;', $p->getOutput());
+  }
+
+  /**
    * Prepare a subcommand which only succeeds if org.example.cvtest is
    * enabled.
    *
@@ -166,10 +186,13 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
 
     try {
       $cvTestPath = $this->getCvTestPath();
-    } catch (ProcessErrorException $e) {
+    }
+    catch (ProcessErrorException $e) {
       $cvTestPath = NULL;
     }
-    if ($cvTestPath) $this->removeDir($cvTestPath);
+    if ($cvTestPath) {
+      $this->removeDir($cvTestPath);
+    }
   }
 
 }
