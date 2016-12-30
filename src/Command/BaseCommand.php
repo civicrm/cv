@@ -18,20 +18,45 @@ class BaseCommand extends Command {
   }
 
   protected function boot(InputInterface $input, OutputInterface $output) {
+    if ($output->isDebug()) {
+      $output->writeln(
+        'attempting to set verbose error reporting',
+        OutputInterface::VERBOSITY_DEBUG);
+      // standard php debug chat settings
+      error_reporting(E_ALL | E_STRICT);
+      ini_set('display_errors', TRUE);
+      ini_set('display_startup_errors', TRUE);
+      // add the output object to allow the bootstrapper to output debug messages
+      // and track verboisty
+      $boot_params = array(
+        'output' => $output
+      );
+    }
+    else {
+      $boot_params = array();
+    }
+
+    $output->writeln('booting', OutputInterface::VERBOSITY_DEBUG);
     if ($input->hasOption('test') && $input->getOption('test')) {
       putenv('CIVICRM_UF=UnitTests');
       $_ENV['CIVICRM_UF'] = 'UnitTests';
     }
 
     if ($input->hasOption('level') && $input->getOption('level') !== 'full') {
-      \Civi\Cv\Bootstrap::singleton()->boot(array(
+      $output->writeln('not prefetching', OutputInterface::VERBOSITY_DEBUG);
+      \Civi\Cv\Bootstrap::singleton()->boot($boot_params + array(
         'prefetch' => FALSE,
       ));
     }
     else {
-      \Civi\Cv\Bootstrap::singleton()->boot();
+      $output->writeln('doing full bootstrap', OutputInterface::VERBOSITY_DEBUG);
+      echo '$boot_params: '.json_encode($boot_params,JSON_PRETTY_PRINT).' #'.__LINE__.' '. __FILE__."\n";
+      \Civi\Cv\Bootstrap::singleton()->boot($boot_params);
+      $output->writeln('called boot', OutputInterface::VERBOSITY_DEBUG);
       \CRM_Core_Config::singleton();
+      $output->writeln('called config', OutputInterface::VERBOSITY_DEBUG);
       \CRM_Utils_System::loadBootStrap(array(), FALSE);
+      $output->writeln('loaded', OutputInterface::VERBOSITY_DEBUG);
       if ($input->getOption('user')) {
         if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
           \CRM_Utils_System::loadUser($input->getOption('user'));
