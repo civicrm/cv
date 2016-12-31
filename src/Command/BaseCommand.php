@@ -20,7 +20,7 @@ class BaseCommand extends Command {
   protected function boot(InputInterface $input, OutputInterface $output) {
     if ($output->isDebug()) {
       $output->writeln(
-        'attempting to set verbose error reporting',
+        'Attempting to set verbose error reporting',
         OutputInterface::VERBOSITY_DEBUG);
       // standard php debug chat settings
       error_reporting(E_ALL | E_STRICT);
@@ -36,30 +36,30 @@ class BaseCommand extends Command {
       $boot_params = array();
     }
 
-    $output->writeln('booting', OutputInterface::VERBOSITY_DEBUG);
+    $output->writeln('Booting', OutputInterface::VERBOSITY_DEBUG);
     if ($input->hasOption('test') && $input->getOption('test')) {
       putenv('CIVICRM_UF=UnitTests');
       $_ENV['CIVICRM_UF'] = 'UnitTests';
     }
 
     if ($input->hasOption('level') && $input->getOption('level') !== 'full') {
-      $output->writeln('not prefetching', OutputInterface::VERBOSITY_DEBUG);
+      $output->writeln('Not prefetching', OutputInterface::VERBOSITY_DEBUG);
       \Civi\Cv\Bootstrap::singleton()->boot($boot_params + array(
         'prefetch' => FALSE,
       ));
     }
     else {
-      $output->writeln('doing full bootstrap', OutputInterface::VERBOSITY_DEBUG);
-      echo '$boot_params: '.json_encode($boot_params,JSON_PRETTY_PRINT).' #'.__LINE__.' '. __FILE__."\n";
+      $output->writeln('Doing full bootstrap', OutputInterface::VERBOSITY_DEBUG);
       \Civi\Cv\Bootstrap::singleton()->boot($boot_params);
-      $output->writeln('called boot', OutputInterface::VERBOSITY_DEBUG);
+      $output->writeln('Finished boot', OutputInterface::VERBOSITY_DEBUG);
       \CRM_Core_Config::singleton();
-      $output->writeln('called config', OutputInterface::VERBOSITY_DEBUG);
+      $output->writeln('Finished config', OutputInterface::VERBOSITY_DEBUG);
       \CRM_Utils_System::loadBootStrap(array(), FALSE);
-      $output->writeln('loaded', OutputInterface::VERBOSITY_DEBUG);
+      $output->writeln('Finished load', OutputInterface::VERBOSITY_DEBUG);
       if ($input->getOption('user')) {
         if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
           \CRM_Utils_System::loadUser($input->getOption('user'));
+          $output->writeln('Finished user load', OutputInterface::VERBOSITY_DEBUG);
         }
         else {
           $output->writeln("<error>Failed to set user. Feature not supported by UF (" . CIVICRM_UF . ")</error>");

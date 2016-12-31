@@ -93,10 +93,14 @@ class Bootstrap {
    *
    * @param string $text
    * @param integer $level
+   * @param mixed $var opional value to be output
    */
-  public function writeln($text, $level = OutputInterface::VERBOSITY_NORMAL) {
+  public function writeln($text, $level = OutputInterface::VERBOSITY_NORMAL, $var = NULL) {
     if ($this->output) {
       $this->output->writeln($text, $level);
+      if (!is_null($var)) {
+        $this->output->writeln(Encoder::encode($var, 'json-pretty'), $level);
+      }
     }
   }
 
@@ -136,14 +140,11 @@ class Bootstrap {
   public function boot($options = array()) {
     if (!empty($options['output'])) {
       $this->output = $options['output'];
-      $this->writeln('bootstrapper has output',
-        OutputInterface::VERBOSITY_VERBOSE);
+      $this->writeln('Bootstrapper has output', OutputInterface::VERBOSITY_VERBOSE);
     }
     if (!defined('CIVICRM_SETTINGS_PATH')) {
       $this->options = $options = array_merge($this->options, $options);
-      $this->writeln("boostrap options: \n"
-        . json_encode($options, JSON_PRETTY_PRINT),
-        OutputInterface::VERBOSITY_DEBUG);
+      $this->writeln("Boostrap options:", OutputInterface::VERBOSITY_DEBUG, $options);
       $settings = $this->getCivicrmSettingsPhp($options);
       if (empty($settings) || !file_exists($settings)) {
         throw new \Exception("Failed to locate civicrm.settings.php."
@@ -154,12 +155,12 @@ class Bootstrap {
 
       $reader = new SiteConfigReader($settings);
       $GLOBALS['_CV'] = $reader->compile(array('buildkit', 'home'));
-      $this->writeln("done compiling reader", OutputInterface::VERBOSITY_DEBUG);
+      $this->writeln("Done compiling reader", OutputInterface::VERBOSITY_DEBUG);
 
       define('CIVICRM_SETTINGS_PATH', $settings);
-      $this->writeln("attempting to read settings file:\n" . $settings, OutputInterface::VERBOSITY_DEBUG);
+      $this->writeln("Attempting to read settings file:\n  " . $settings, OutputInterface::VERBOSITY_DEBUG);
       $error = @include_once $settings;
-      $this->writeln("settings file read complete", OutputInterface::VERBOSITY_VERBOSE);
+      $this->writeln("Settings file read complete", OutputInterface::VERBOSITY_VERBOSE);
       if ($error == FALSE) {
         throw new \Exception("Could not load the CiviCRM settings file: {$settings}");
       }
@@ -189,7 +190,7 @@ class Bootstrap {
       // has a side-effect of initializing other things?
       \CRM_Core_Config::singleton();
     }
-    $this->writeln("done bootstrapping", OutputInterface::VERBOSITY_DEBUG);
+    $this->writeln("Done bootstrapping", OutputInterface::VERBOSITY_DEBUG);
   }
 
   /**
