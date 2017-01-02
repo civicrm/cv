@@ -10,10 +10,10 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "symfony/console": "~2.3",
-        "symfony/process": "~2.3",
-        "symfony/filesystem": "~2.3",
-        "symfony/finder": "~2.3",
+        "symfony/console": "~2.8",
+        "symfony/process": "~2.8",
+        "symfony/filesystem": "~2.8",
+        "symfony/finder": "~2.8",
         "psy/psysh": "@stable"
     },
     "autoload": {
