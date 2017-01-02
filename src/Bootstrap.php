@@ -329,6 +329,8 @@ class Bootstrap {
         $wpDirs = array(
           $cmsRoot . '/*/uploads/civicrm',
           $cmsRoot . '/*/plugins/civicrm',
+          $cmsRoot . '/*/uploads/sites/*/civicrm',
+          $cmsRoot . '/*/blogs.dir/*/files/civicrm',
         );
         $settings = $this->findFirstFile($wpDirs, 'civicrm.settings.php');
         break;
