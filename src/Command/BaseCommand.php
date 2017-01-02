@@ -29,43 +29,49 @@ class BaseCommand extends Command {
       // add the output object to allow the bootstrapper to output debug messages
       // and track verboisty
       $boot_params = array(
-        'output' => $output
+        'output' => $output,
       );
     }
     else {
       $boot_params = array();
     }
 
-    $output->writeln('Booting', OutputInterface::VERBOSITY_DEBUG);
+    $output->writeln('<info>[BaseCommand::boot]</info> Start', OutputInterface::VERBOSITY_DEBUG);
+
     if ($input->hasOption('test') && $input->getOption('test')) {
+      $output->writeln('<info>[BaseCommand::boot]</info> Use test mode', OutputInterface::VERBOSITY_DEBUG);
       putenv('CIVICRM_UF=UnitTests');
       $_ENV['CIVICRM_UF'] = 'UnitTests';
     }
 
     if ($input->hasOption('level') && $input->getOption('level') !== 'full') {
-      $output->writeln('Not prefetching', OutputInterface::VERBOSITY_DEBUG);
+      $output->writeln('<info>[BaseCommand::boot]</info> Call basic cv bootstrap (' . $input->getOption('level') . ')', OutputInterface::VERBOSITY_DEBUG);
       \Civi\Cv\Bootstrap::singleton()->boot($boot_params + array(
         'prefetch' => FALSE,
       ));
     }
     else {
-      $output->writeln('Doing full bootstrap', OutputInterface::VERBOSITY_DEBUG);
+      $output->writeln('<info>[BaseCommand::boot]</info> Call standard cv bootstrap', OutputInterface::VERBOSITY_DEBUG);
       \Civi\Cv\Bootstrap::singleton()->boot($boot_params);
-      $output->writeln('Finished boot', OutputInterface::VERBOSITY_DEBUG);
+
+      $output->writeln('<info>[BaseCommand::boot]</info> Call core bootstrap', OutputInterface::VERBOSITY_DEBUG);
       \CRM_Core_Config::singleton();
-      $output->writeln('Finished config', OutputInterface::VERBOSITY_DEBUG);
+
+      $output->writeln('<info>[BaseCommand::boot]</info> Call CMS bootstrap', OutputInterface::VERBOSITY_DEBUG);
       \CRM_Utils_System::loadBootStrap(array(), FALSE);
-      $output->writeln('Finished load', OutputInterface::VERBOSITY_DEBUG);
+
       if ($input->getOption('user')) {
+        $output->writeln('<info>[BaseCommand::boot]</info> Set system user', OutputInterface::VERBOSITY_DEBUG);
         if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
           \CRM_Utils_System::loadUser($input->getOption('user'));
-          $output->writeln('Finished user load', OutputInterface::VERBOSITY_DEBUG);
         }
         else {
           $output->writeln("<error>Failed to set user. Feature not supported by UF (" . CIVICRM_UF . ")</error>");
         }
       }
     }
+
+    $output->writeln('<info>[BaseCommand::boot]</info> Finished', OutputInterface::VERBOSITY_DEBUG);
   }
 
   /**
