@@ -92,7 +92,7 @@ class BaseCommand extends Command {
     if (!isset($params['version'])) {
       $params['version'] = 3;
     }
-    $this->writeln("Calling $entity $action API", OutputInterface::VERBOSITY_DEBUG);
+    $output->writeln("Calling $entity $action API", OutputInterface::VERBOSITY_DEBUG);
     $result = \civicrm_api($entity, $action, $params);
     if (!empty($result['is_error']) || $output->isDebug()) {
       $data = array(
@@ -106,7 +106,7 @@ class BaseCommand extends Command {
           . Encoder::encode($data, 'pretty'));
       }
       else {
-        $this->writeln("API success" . Encoder::encode($data, 'pretty'),
+        $output->writeln("API success" . Encoder::encode($data, 'pretty'),
           OutputInterface::VERBOSITY_DEBUG);
       }
     }
