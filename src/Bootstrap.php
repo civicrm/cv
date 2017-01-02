@@ -97,7 +97,7 @@ class Bootstrap {
    */
   public function writeln($text, $level = OutputInterface::VERBOSITY_NORMAL, $var = NULL) {
     if ($this->output) {
-      $this->output->writeln($text, $level);
+      $this->output->writeln("<info>[Bootstrap]</info> $text", $level);
       if (!is_null($var)) {
         $this->output->writeln(Encoder::encode($var, 'json-pretty'), $level);
       }
