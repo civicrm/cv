@@ -139,7 +139,9 @@ class Bootstrap {
     }
     if (!defined('CIVICRM_SETTINGS_PATH')) {
       $this->options = $options = array_merge($this->options, $options);
-      $this->writeln("Boostrap options: " . Encoder::encode($options, 'json-pretty'), OutputInterface::VERBOSITY_DEBUG);
+      $this->writeln("Options: " . Encoder::encode($options, 'json-pretty'), OutputInterface::VERBOSITY_DEBUG);
+
+      $this->writeln("Find settings file", OutputInterface::VERBOSITY_DEBUG);
       $settings = $this->getCivicrmSettingsPhp($options);
       if (empty($settings) || !file_exists($settings)) {
         throw new \Exception("Failed to locate civicrm.settings.php."
@@ -148,20 +150,24 @@ class Bootstrap {
           . " To customize, set variable CIVICRM_SETTINGS to point to the preferred civicrm.settings.php.");
       }
 
+      $this->writeln("Load supplemental configuration for \"$settings\"", OutputInterface::VERBOSITY_DEBUG);
       $reader = new SiteConfigReader($settings);
       $GLOBALS['_CV'] = $reader->compile(array('buildkit', 'home'));
-      $this->writeln("Done compiling reader", OutputInterface::VERBOSITY_DEBUG);
 
+      $this->writeln("Load settings file \"" . $settings . "\"", OutputInterface::VERBOSITY_DEBUG);
       define('CIVICRM_SETTINGS_PATH', $settings);
-      $this->writeln("Attempting to read settings file:\n  " . $settings, OutputInterface::VERBOSITY_DEBUG);
       $error = @include_once $settings;
-      $this->writeln("Settings file read complete", OutputInterface::VERBOSITY_VERBOSE);
       if ($error == FALSE) {
+        $this->writeln("Failed to load settings file", OutputInterface::VERBOSITY_VERBOSE);
         throw new \Exception("Could not load the CiviCRM settings file: {$settings}");
       }
 
+      $this->writeln("Find CMS root for \"" . $this->getSearchDir() . "\"", OutputInterface::VERBOSITY_VERBOSE);
       list ($cmsType, $cmsBasePath) = $this->findCmsRoot($this->getSearchDir());
+      $this->writeln("Found \"$cmsType\" in \"$cmsBasePath\"", OutputInterface::VERBOSITY_VERBOSE);
+
       if (PHP_SAPI === "cli") {
+        $this->writeln("Simulate web environment in CLI", OutputInterface::VERBOSITY_VERBOSE);
         $_SERVER['SCRIPT_FILENAME'] = $cmsBasePath . '/index.php';
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['SERVER_SOFTWARE'] = NULL;
@@ -174,18 +180,20 @@ class Bootstrap {
 
     // Backward compatibility - New civicrm.settings.php files include
     // the classloader, but old ones don't.
+    $this->writeln("Initialize class loader", OutputInterface::VERBOSITY_VERBOSE);
     global $civicrm_root;
     require_once $civicrm_root . '/CRM/Core/ClassLoader.php';
     \CRM_Core_ClassLoader::singleton()->register();
 
     if (!empty($options['prefetch'])) {
+      $this->writeln("Call core bootstrap", OutputInterface::VERBOSITY_VERBOSE);
       // I'm not sure why this is called explicitly during bootstrap
       // rather than lazily. However, it seems to be done by all
       // the existing bootstrap code. Perhaps initializing Config
       // has a side-effect of initializing other things?
       \CRM_Core_Config::singleton();
     }
-    $this->writeln("Done bootstrapping", OutputInterface::VERBOSITY_DEBUG);
+    $this->writeln("Finished", OutputInterface::VERBOSITY_DEBUG);
   }
 
   /**
