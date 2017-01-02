@@ -140,7 +140,6 @@ class Bootstrap {
   public function boot($options = array()) {
     if (!empty($options['output'])) {
       $this->output = $options['output'];
-      $this->writeln('Bootstrapper has output', OutputInterface::VERBOSITY_VERBOSE);
     }
     if (!defined('CIVICRM_SETTINGS_PATH')) {
       $this->options = $options = array_merge($this->options, $options);
