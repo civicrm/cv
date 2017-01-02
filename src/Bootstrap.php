@@ -93,14 +93,10 @@ class Bootstrap {
    *
    * @param string $text
    * @param int $level
-   * @param mixed $var opional value to be output
    */
-  public function writeln($text, $level = OutputInterface::VERBOSITY_NORMAL, $var = NULL) {
+  public function writeln($text, $level = OutputInterface::VERBOSITY_NORMAL) {
     if ($this->output) {
       $this->output->writeln("<info>[Bootstrap]</info> $text", $level);
-      if (!is_null($var)) {
-        $this->output->writeln(Encoder::encode($var, 'json-pretty'), $level);
-      }
     }
   }
 
@@ -143,7 +139,7 @@ class Bootstrap {
     }
     if (!defined('CIVICRM_SETTINGS_PATH')) {
       $this->options = $options = array_merge($this->options, $options);
-      $this->writeln("Boostrap options:", OutputInterface::VERBOSITY_DEBUG, $options);
+      $this->writeln("Boostrap options: " . Encoder::encode($options, 'json-pretty'), OutputInterface::VERBOSITY_DEBUG);
       $settings = $this->getCivicrmSettingsPhp($options);
       if (empty($settings) || !file_exists($settings)) {
         throw new \Exception("Failed to locate civicrm.settings.php."
