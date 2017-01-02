@@ -92,7 +92,7 @@ class Bootstrap {
    * Wrapper around OutputInterface::writeln()
    *
    * @param string $text
-   * @param integer $level
+   * @param int $level
    * @param mixed $var opional value to be output
    */
   public function writeln($text, $level = OutputInterface::VERBOSITY_NORMAL, $var = NULL) {
@@ -212,7 +212,7 @@ class Bootstrap {
       'SCRIPT_NAME',
     );
     foreach ($srvVars as $srvVar) {
-      $code [] = sprintf('$_SERVER["%s"] = %s;',
+      $code[] = sprintf('$_SERVER["%s"] = %s;',
         $srvVar, var_export($_SERVER[$srvVar], 1));
     }
     foreach (array('CIVICRM_UF') as $envVar) {
@@ -221,18 +221,18 @@ class Bootstrap {
         $code[] = sprintf('$_ENV["%s"] = %s;', $envVar, var_export(getenv($envVar), 1));
       }
     }
-    $code [] = '}';
+    $code[] = '}';
 
-    $code [] = sprintf('$GLOBALS[\'_CV\'] = %s;', var_export($GLOBALS['_CV'], 1));
+    $code[] = sprintf('$GLOBALS[\'_CV\'] = %s;', var_export($GLOBALS['_CV'], 1));
 
-    $code [] = sprintf('define("CIVICRM_SETTINGS_PATH", %s);', var_export(CIVICRM_SETTINGS_PATH, 1));
-    $code [] = '$error = @include_once CIVICRM_SETTINGS_PATH;';
-    $code [] = 'if ($error == FALSE) {';
-    $code [] = '  throw new \Exception("Could not load the CiviCRM settings file: {$settings}");';
-    $code [] = '}';
+    $code[] = sprintf('define("CIVICRM_SETTINGS_PATH", %s);', var_export(CIVICRM_SETTINGS_PATH, 1));
+    $code[] = '$error = @include_once CIVICRM_SETTINGS_PATH;';
+    $code[] = 'if ($error == FALSE) {';
+    $code[] = '  throw new \Exception("Could not load the CiviCRM settings file: {$settings}");';
+    $code[] = '}';
 
-    $code [] = 'require_once $GLOBALS["civicrm_root"] . "/CRM/Core/ClassLoader.php";';
-    $code [] = '\CRM_Core_ClassLoader::singleton()->register();';
+    $code[] = 'require_once $GLOBALS["civicrm_root"] . "/CRM/Core/ClassLoader.php";';
+    $code[] = '\CRM_Core_ClassLoader::singleton()->register();';
 
     return implode("\n", $code);
   }
