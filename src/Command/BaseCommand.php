@@ -18,21 +18,50 @@ class BaseCommand extends Command {
   }
 
   protected function boot(InputInterface $input, OutputInterface $output) {
+    if ($output->isDebug()) {
+      $output->writeln(
+        'Attempting to set verbose error reporting',
+        OutputInterface::VERBOSITY_DEBUG);
+      // standard php debug chat settings
+      error_reporting(E_ALL | E_STRICT);
+      ini_set('display_errors', TRUE);
+      ini_set('display_startup_errors', TRUE);
+      // add the output object to allow the bootstrapper to output debug messages
+      // and track verboisty
+      $boot_params = array(
+        'output' => $output,
+      );
+    }
+    else {
+      $boot_params = array();
+    }
+
+    $output->writeln('<info>[BaseCommand::boot]</info> Start', OutputInterface::VERBOSITY_DEBUG);
+
     if ($input->hasOption('test') && $input->getOption('test')) {
+      $output->writeln('<info>[BaseCommand::boot]</info> Use test mode', OutputInterface::VERBOSITY_DEBUG);
       putenv('CIVICRM_UF=UnitTests');
       $_ENV['CIVICRM_UF'] = 'UnitTests';
     }
 
     if ($input->hasOption('level') && $input->getOption('level') !== 'full') {
-      \Civi\Cv\Bootstrap::singleton()->boot(array(
+      $output->writeln('<info>[BaseCommand::boot]</info> Call basic cv bootstrap (' . $input->getOption('level') . ')', OutputInterface::VERBOSITY_DEBUG);
+      \Civi\Cv\Bootstrap::singleton()->boot($boot_params + array(
         'prefetch' => FALSE,
       ));
     }
     else {
-      \Civi\Cv\Bootstrap::singleton()->boot();
+      $output->writeln('<info>[BaseCommand::boot]</info> Call standard cv bootstrap', OutputInterface::VERBOSITY_DEBUG);
+      \Civi\Cv\Bootstrap::singleton()->boot($boot_params);
+
+      $output->writeln('<info>[BaseCommand::boot]</info> Call core bootstrap', OutputInterface::VERBOSITY_DEBUG);
       \CRM_Core_Config::singleton();
+
+      $output->writeln('<info>[BaseCommand::boot]</info> Call CMS bootstrap', OutputInterface::VERBOSITY_DEBUG);
       \CRM_Utils_System::loadBootStrap(array(), FALSE);
+
       if ($input->getOption('user')) {
+        $output->writeln('<info>[BaseCommand::boot]</info> Set system user', OutputInterface::VERBOSITY_DEBUG);
         if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
           \CRM_Utils_System::loadUser($input->getOption('user'));
         }
@@ -41,6 +70,8 @@ class BaseCommand extends Command {
         }
       }
     }
+
+    $output->writeln('<info>[BaseCommand::boot]</info> Finished', OutputInterface::VERBOSITY_DEBUG);
   }
 
   /**
@@ -61,15 +92,23 @@ class BaseCommand extends Command {
     if (!isset($params['version'])) {
       $params['version'] = 3;
     }
+    $this->writeln("Calling $entity $action API", OutputInterface::VERBOSITY_DEBUG);
     $result = \civicrm_api($entity, $action, $params);
-    if (!empty($result['is_error'])) {
+    if (!empty($result['is_error']) || $output->isDebug()) {
       $data = array(
         'entity' => $entity,
         'action' => $action,
         'params' => $params,
         'result' => $result,
       );
-      $output->writeln("<error>Error: API Call Failed</error>: " . Encoder::encode($data, 'pretty'));
+      if (!empty($result['is_error'])) {
+        $output->writeln("<error>Error: API Call Failed</error>: "
+          . Encoder::encode($data, 'pretty'));
+      }
+      else {
+        $this->writeln("API success" . Encoder::encode($data, 'pretty'),
+          OutputInterface::VERBOSITY_DEBUG);
+      }
     }
     return $result;
   }
