@@ -321,7 +321,7 @@ class Bootstrap {
         // has the same frontend/backend split and does not need two copies of
         // civicrm.settings.php.
 
-        $settings = $cmsRoot . 'administrator/components/com_civicrm/civicrm.settings.php';
+        $settings = $cmsRoot . '/administrator/components/com_civicrm/civicrm.settings.php';
         // $result =  $cmsRoot . 'components/com_civicrm/civicrm.settings.php';
         break;
 
@@ -372,6 +372,7 @@ class Bootstrap {
       ),
       'joomla' => array(
         'administrator/components/com_civicrm/civicrm/civicrm-version.php',
+        'components/com_users/users.php',
         // Future? 'vendor/civicrm/joomla/civicrm.php' => 'joomla',
       ),
       'drupal' => array(
