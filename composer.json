@@ -8,12 +8,6 @@
             "email": "totten@civicrm.org"
         }
     ],
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/home/michael/src/pop"
-        }
-    ],
     "require": {
         "php": ">=5.3.3",
         "symfony/console": "~2.3",
