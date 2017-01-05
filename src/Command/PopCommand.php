@@ -45,12 +45,13 @@ NOTE: See doc/pop.md for usage
     $this->boot($input, $output);
     $pop = new Pop($output);
     $pop->setInteractive($input->isInteractive());
-    if($input->getOption('out') != 'json-pretty'){
+    if ($input->getOption('out') != 'json-pretty') {
       $pop->setInteractive(0);
     }
     $pop->process($input->getArgument('file'));
-    if($input->getOption('out') != 'json-pretty'){
+    if ($input->getOption('out') != 'json-pretty') {
       $this->sendResult($input, $output, $pop->getSummary());
     }
   }
+
 }
