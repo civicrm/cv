@@ -60,9 +60,7 @@ Note:
     $result = $this->callApiSuccess($input, $output, 'Extension', 'disable', array(
       'keys' => $disableKeys,
     ));
-    if (!empty($result['is_error'])) {
-      return 1;
-    }
+    return empty($result['is_error']) ? 0 : 1;
   }
 
 }

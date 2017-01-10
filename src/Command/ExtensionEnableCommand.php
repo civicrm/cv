@@ -73,9 +73,7 @@ Note:
     $result = $this->callApiSuccess($input, $output, 'Extension', 'install', array(
       'keys' => $foundKeys,
     ));
-    if (!empty($result['is_error'])) {
-      return 1;
-    }
+    return empty($result['is_error']) ? 0 : 1;
   }
 
 }

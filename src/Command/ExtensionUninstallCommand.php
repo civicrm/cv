@@ -67,9 +67,7 @@ Note:
     $result = $this->callApiSuccess($input, $output, 'Extension', 'uninstall', array(
       'keys' => $uninstallKeys,
     ));
-    if (!empty($result['is_error'])) {
-      return 1;
-    }
+    return empty($result['is_error']) ? 0 : 1;
   }
 
 }
