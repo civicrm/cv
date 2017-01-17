@@ -19,6 +19,19 @@ class ApiCommandTest extends \Civi\Cv\CivilTestCase {
     }
   }
 
+  public function testQuiet() {
+    $p = Process::runOk($this->cv("api -q System.get"));
+    $this->assertEmpty($p->getOutput());
+    $this->assertEmpty($p->getErrorOutput());
+  }
+
+  public function testQuietError() {
+    $p = Process::runFail($this->cv("api -q System.getzz"));
+    $data = json_decode($p->getOutput(), 1);
+    $this->assertTrue(!empty($data['is_error']));
+    $this->assertTrue(!empty($data['error_message']));
+  }
+
   public function testApiPipe() {
     $input = escapeshellarg(json_encode(array(
       'options' => array('limit' => 1),
