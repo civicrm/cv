@@ -58,6 +58,7 @@ NOTE: To change the default output format, set CV_OUTPUT.
 
     $result = \civicrm_api($entity, $action, $params);
     $this->sendResult($input, $output, $result);
+    return empty($result['is_error']) ? 0 : 1;
   }
 
   /**
