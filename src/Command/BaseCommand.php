@@ -119,7 +119,11 @@ class BaseCommand extends Command {
    * @param $result
    */
   protected function sendResult(InputInterface $input, OutputInterface $output, $result) {
-    $output->writeln(Encoder::encode($result, $input->getOption('out')));
+    $buf = Encoder::encode($result, $input->getOption('out'));
+    $options = empty($result['is_error'])
+      ? (OutputInterface::OUTPUT_RAW | OutputInterface::VERBOSITY_NORMAL)
+      : (OutputInterface::OUTPUT_RAW | OutputInterface::VERBOSITY_QUIET);
+    $output->writeln($buf, $options);
   }
 
 }
