@@ -42,10 +42,13 @@ me@localhost$ cv vars:show
 me@localhost$ cv scr /path/to/throwaway.php
 me@localhost$ cv ev 'echo Civi::paths()->get("[civicrm.root]/.");'
 me@localhost$ cv url civicrm/dashboard --open
-me@localhost$ cv api system.flush
+me@localhost$ cv api contact.get last_name=Smith
 me@localhost$ cv dl cividiscount
 me@localhost$ cv en cividiscount
 me@localhost$ cv dis cividiscount
+me@localhost$ cv debug:container
+me@localhost$ cv debug:event-dispatcher
+me@localhost$ cv flush
 ```
 
 If you intend to run unit-tests, and if you do *not* use `civibuild`,
