@@ -13,10 +13,10 @@ class BaseExtensionCommand extends BaseCommand {
   public function configureRepoOptions() {
     $this
       ->addOption('dev', NULL, InputOption::VALUE_NONE, 'Include developmental extensions. (Equivalent to "--filter-status=* --filter-ready=*")')
-      ->addOption('filter-ver', NULL, InputOption::VALUE_REQUIRED, 'Filter available extensions by Civi version (Ex: "4.7.15","4.6.20")', '{ver}')
-      ->addOption('filter-uf', NULL, InputOption::VALUE_REQUIRED, 'Filter available extensions by CMS compatiblity (Ex: "Drupal", "WordPress")', '{uf}')
-      ->addOption('filter-status', NULL, InputOption::VALUE_REQUIRED, 'Filter available extensions by stability flag (Ex: "stable", "*")', 'stable')
-      ->addOption('filter-ready', NULL, InputOption::VALUE_REQUIRED, 'Filter available extensions based on reviewers\' approval (Ex: "ready", "*")', 'ready');
+      ->addOption('filter-ver', NULL, InputOption::VALUE_REQUIRED, 'Filter remote extensions by Civi compatibility (Ex: "4.7.15","4.6.20")', '{ver}')
+      ->addOption('filter-uf', NULL, InputOption::VALUE_REQUIRED, 'Filter remote extensions by CMS compatibility (Ex: "Drupal", "WordPress")', '{uf}')
+      ->addOption('filter-status', NULL, InputOption::VALUE_REQUIRED, 'Filter remote extensions by stability flag (Ex: "stable", "*")', 'stable')
+      ->addOption('filter-ready', NULL, InputOption::VALUE_REQUIRED, 'Filter remote extensions based on reviewers\' approval (Ex: "ready", "*")', 'ready');
   }
 
   /**

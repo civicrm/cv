@@ -26,11 +26,11 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->setName('ext:list')
       ->setAliases(array())
       ->setDescription('List extensions')
-      ->addOption('local', 'L', InputOption::VALUE_NONE, 'Show local extensions')
-      ->addOption('remote', 'R', InputOption::VALUE_NONE, 'Show remote extensions')
+      ->addOption('local', 'L', InputOption::VALUE_NONE, 'Filter extensions by location (local)')
+      ->addOption('remote', 'R', InputOption::VALUE_NONE, 'Filter extensions by location (remote)')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the list of extensions')
-      ->addOption('installed', 'i', InputOption::VALUE_NONE, 'Equivalent to --status=installed')
-      ->addOption('statuses', NULL, InputOption::VALUE_REQUIRED, 'List of statuses to display (comma separated)', '*')
+      ->addOption('installed', 'i', InputOption::VALUE_NONE, 'Filter extensions by "installed" status (Equivalent to --statuses=installed)')
+      ->addOption('statuses', NULL, InputOption::VALUE_REQUIRED, 'Filter extensions by status (comma separated)', '*')
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated)', 'location,key,name,version,status')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (table,' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat('table'))
       ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key or short name')
@@ -43,7 +43,7 @@ Examples:
   cv ext:list -Li --columns=key,label
 
 Note:
-  If you do not specify --local or --remote, then all are listed.
+  If you do not specify --local (-L) or --remote (-R), then all are listed.
 
   Beginning circa CiviCRM v4.2+, it has been recommended that extensions
   include a unique long name ("org.example.foobar") and a unique short
