@@ -33,7 +33,7 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->addOption('statuses', NULL, InputOption::VALUE_REQUIRED, 'List of statuses to display (comma separated)', '*')
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated)', 'location,key,name,version,status')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (table,' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat('table'))
-      ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key, short name, or description')
+      ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key or short name')
       ->setHelp('List extensions
 
 Examples:
