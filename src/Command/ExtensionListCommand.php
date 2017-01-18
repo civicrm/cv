@@ -29,6 +29,8 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->addOption('local', 'L', InputOption::VALUE_NONE, 'Show local extensions')
       ->addOption('remote', 'R', InputOption::VALUE_NONE, 'Show remote extensions')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the list of extensions')
+      ->addOption('installed', 'i', InputOption::VALUE_NONE, 'Equivalent to --status=installed')
+      ->addOption('statuses', NULL, InputOption::VALUE_REQUIRED, 'List of statuses to display (comma separated)', '*')
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated)', 'location,key,name,version,status')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (table,' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat('table'))
       ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key, short name, or description')
@@ -38,16 +40,14 @@ Examples:
   cv ext:list
   cv ext:list --remote --dev /mail/
   cv ext:list /^org.civicrm.*/
+  cv ext:list -Li --columns=key,label
 
 Note:
-  Short names ("foobar") do not work when passing an explicit URL.
+  If you do not specify --local or --remote, then all are listed.
 
   Beginning circa CiviCRM v4.2+, it has been recommended that extensions
   include a unique long name ("org.example.foobar") and a unique short
   name ("foobar"). However, short names are not strongly guaranteed.
-
-  This subcommand does not output parseable data. For parseable output,
-  consider using `cv api extension.get`.
 ');
     parent::configureRepoOptions();
     parent::configureBootOptions();
@@ -58,13 +58,7 @@ Note:
       ? (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_NORMAL)
       : (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_VERBOSE);
 
-    if ($input->getOption('local') || $input->getOption('remote')) {
-      $local = (bool) $input->getOption('local');
-      $remote = (bool) $input->getOption('remote');
-    }
-    else {
-      $local = $remote = TRUE;
-    }
+    list($local, $remote) = $this->parseLocalRemote($input);
 
     if ($extRepoUrl = $this->parseRepoUrl($input)) {
       global $civicrm_setting;
@@ -89,7 +83,7 @@ Note:
     }
 
     $columns = explode(',', $input->getOption('columns'));
-    $records = $this->find($input->getArgument('regex'), $remote, $local);
+    $records = $this->sort($this->find($input), $columns);
 
     if ($input->getOption('out') === 'table') {
       $table = new Table($output);
@@ -121,15 +115,25 @@ Note:
   }
 
   /**
-   * @param string|NULL $regex
-   *   Filter by regex.
-   * @param bool $remote
-   *   Include remote extensions.
-   * @param bool $local
-   *   Include local extensions.
+   * Find extensions matching the input args.
+   *
+   * @param InputInterface $input
    * @return array
    */
-  protected function find($regex, $remote, $local) {
+  protected function find($input) {
+    $regex = $input->getArgument('regex');
+    list($local, $remote) = $this->parseLocalRemote($input);
+
+    if ($input->getOption('installed')) {
+      $statusFilter = array('installed');
+    }
+    elseif ($input->getOption('statuses') && $input->getOption('statuses') !== '*') {
+      $statusFilter = explode(',', $input->getOption('statuses'));
+    }
+    else {
+      $statusFilter = NULL;
+    }
+
     $rows = array();
 
     if ($remote) {
@@ -139,7 +143,9 @@ Note:
           'key' => $info->key,
           'name' => $info->file,
           'version' => $info->version,
+          'label' => $info->label,
           'status' => '',
+          'type' => $info->type,
         );
       }
     }
@@ -156,47 +162,59 @@ Note:
           'key' => $key,
           'name' => $info->file,
           'version' => $info->version,
+          'label' => $info->label,
           'status' => isset($statuses[$key]) ? $statuses[$key] : '',
+          'type' => $info->type,
         );
       }
     }
 
-    if ($regex) {
-      $rows = array_filter($rows, function ($row) use ($regex) {
-        // Match on name or key.
-        return preg_match($regex, $row['key']) || preg_match($regex, $row['name']);
-      });
-    }
+    $rows = array_filter($rows, function ($row) use ($regex, $statusFilter) {
+      if ($statusFilter !== NULL && !in_array($row['status'], $statusFilter)) {
+        return FALSE;
+      }
+      if ($regex) {
+        if (!preg_match($regex, $row['key']) && !preg_match($regex, $row['name'])) {
+          return FALSE;
+        }
+      }
+      return TRUE;
+    });
 
-    usort($rows, function ($a, $b) {
-      // location, descending
-      if ($a[0] < $b[0]) {
-        return 1;
-      }
-      if ($a[0] > $b[0]) {
-        return -1;
-      }
+    return $rows;
+  }
 
-      // name, ascending
-      if ($a[1] < $b[1]) {
-        return -1;
-      }
-      if ($a[1] > $b[1]) {
-        return 1;
-      }
-
-      // key, ascending
-      if ($a[2] < $b[2]) {
-        return -1;
-      }
-      if ($a[2] > $b[2]) {
-        return 1;
+  protected function sort($rows, $orderByColumns) {
+    usort($rows, function ($a, $b) use ($orderByColumns) {
+      foreach ($orderByColumns as $col) {
+        if ($a[$col] < $b[$col]) {
+          return -1;
+        }
+        if ($a[$col] > $b[$col]) {
+          return 1;
+        }
       }
 
       return 0;
     });
 
     return $rows;
+  }
+
+  /**
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   * @return array
+   */
+  protected function parseLocalRemote(InputInterface $input) {
+    if ($input->getOption('local') || $input->getOption('remote')) {
+      $local = (bool) $input->getOption('local');
+      $remote = (bool) $input->getOption('remote');
+      return array($local, $remote);
+    }
+    else {
+      $local = $remote = TRUE;
+      return array($local, $remote);
+    }
   }
 
 }

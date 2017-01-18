@@ -74,6 +74,29 @@ class ExtensionListCommandTest extends \Civi\Cv\CivilTestCase {
   }
 
   /**
+   * Get the extensions which have a given status
+   */
+  public function testFilterByStatus() {
+    $p = Process::runOk($this->cv('ext:list -Li --out=json'));
+    $data = json_decode($p->getOutput(), 1);
+    foreach ($data as $row) {
+      $this->assertEquals('installed', $row['status']);
+    }
+
+    $p = Process::runOk($this->cv('ext:list -L --statuses=uninstalled --out=json'));
+    $data = json_decode($p->getOutput(), 1);
+    foreach ($data as $row) {
+      $this->assertTrue(in_array($row['status'], array('uninstalled')));
+    }
+
+    $p = Process::runOk($this->cv('ext:list -L --statuses=disabled,uninstalled --out=json'));
+    $data = json_decode($p->getOutput(), 1);
+    foreach ($data as $row) {
+      $this->assertTrue(in_array($row['status'], array('disabled', 'uninstalled')));
+    }
+  }
+
+  /**
    * Combine a bunch of arrays into a normalized form, sorted and only containing
    * unique rows.
    *
