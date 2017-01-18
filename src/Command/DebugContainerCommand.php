@@ -27,7 +27,9 @@ Dump the container configuration
     // To probe definitions, we need access to the raw ContainerBuilder.
     $z = new \Civi\Core\Container();
     $c = $z->createContainer();
-    $c->compile();
+    if (version_compare(\CRM_Utils_System::version(), '4.7.0', '>=')) {
+      $c->compile();
+    }
 
     $rows = array();
     $definitions = $c->getDefinitions();
