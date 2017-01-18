@@ -56,7 +56,7 @@ Note:
 
     $this->boot($input, $output);
 
-    $output->writeln("<info>Using extension feed (" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . ")</info>");
+    $output->writeln("<info>Using extension feed \"" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . "\"</info>");
 
     if ($input->getOption('refresh')) {
       $output->writeln("<info>Refreshing extensions</info>");

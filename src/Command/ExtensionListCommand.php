@@ -67,7 +67,7 @@ Note:
     $this->boot($input, $output);
 
     if ($remote) {
-      $output->writeln("<info>Using extension feed (" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . ")</info>");
+      $output->writeln("<info>Using extension feed \"" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . "\"</info>");
     }
 
     if ($input->getOption('refresh')) {
