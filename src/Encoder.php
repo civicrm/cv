@@ -24,6 +24,7 @@ class Encoder {
       'php',
       'json-pretty',
       'json-strict',
+      'serialize',
       'shell',
     );
   }
@@ -48,6 +49,9 @@ class Encoder {
       case 'json':
       case 'json-strict':
         return json_encode($data);
+
+      case 'serialize':
+        return serialize($data);
 
       case 'shell':
         if (is_scalar($data)) {
