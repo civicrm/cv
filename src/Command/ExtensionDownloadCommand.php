@@ -154,8 +154,8 @@ Note:
             $keyOrName = $shortMap[$keyOrName][0];
           }
           else {
-            $otherNames = implode(', ', $shortMap[$keyOrName]);
-            $errors[] = "Ambiguous extension \"$keyOrName\". ($otherNames)";
+            $otherNames = '"' . implode('", "', $shortMap[$keyOrName]) . '"';
+            $errors[] = "Ambiguous name \"$keyOrName\". Use a more specific key: $otherNames";
             continue;
           }
         }
