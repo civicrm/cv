@@ -11,7 +11,7 @@ class DebugContainerCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function testShowAll() {
     $p = Process::runOk($this->cv("debug:container"));
-    $this->assertRegExp('/cache.default.*CRM_Utils_Cache/', $p->getOutput());
+    $this->assertRegExp('/cxn_reg_client.*Civi.Cxn.Rpc.RegistrationClient/', $p->getOutput());
     $this->assertRegExp('/civi_api_kernel.*Civi.API.Kernel/', $p->getOutput());
   }
 

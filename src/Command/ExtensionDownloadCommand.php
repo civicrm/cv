@@ -31,6 +31,7 @@ class ExtensionDownloadCommand extends BaseExtensionCommand {
 Examples:
   cv ext:download org.example.foobar
   cv dl foobar
+  cv dl --dev foobar
   cv dl "org.example.foobar@http://example.org/files/foobar.zip"
 
 Note:
@@ -43,11 +44,20 @@ Note:
   This subcommand does not output parseable data. For parseable output,
   consider using `cv api extension.install`.
 ');
+    parent::configureRepoOptions();
     parent::configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+    if ($extRepoUrl = $this->parseRepoUrl($input)) {
+      global $civicrm_setting;
+      $civicrm_setting['Extension Preferences']['ext_repo_url'] = $extRepoUrl;
+    }
+
     $this->boot($input, $output);
+
+    $output->writeln("<info>Using extension feed (" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . ")</info>");
+
     if ($input->getOption('refresh')) {
       $output->writeln("<info>Refreshing extensions</info>");
       $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
@@ -144,8 +154,8 @@ Note:
             $keyOrName = $shortMap[$keyOrName][0];
           }
           else {
-            $otherNames = implode(', ', $shortMap[$keyOrName]);
-            $errors[] = "Ambiguous extension \"$keyOrName\". ($otherNames)";
+            $otherNames = '"' . implode('", "', $shortMap[$keyOrName]) . '"';
+            $errors[] = "Ambiguous name \"$keyOrName\". Use a more specific key: $otherNames";
             continue;
           }
         }
