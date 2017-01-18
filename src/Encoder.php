@@ -6,12 +6,15 @@ class Encoder {
   /**
    * Determine the default output mode.
    *
+   * @param string $fallback
+   *   In case we can't find a default based on a policy, the caller
+   *   can suggest their own fallback.
    * @return string
    *   Ex: 'json', 'shell', 'php', 'pretty', 'none'
    */
-  public static function getDefaultFormat() {
+  public static function getDefaultFormat($fallback = 'json-pretty') {
     $e = getenv('CV_OUTPUT');
-    return $e ? $e : 'json-pretty';
+    return $e ? $e : $fallback;
   }
 
   public static function getFormats() {

@@ -3,6 +3,7 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Application;
 use Civi\Cv\Encoder;
+use Civi\Cv\Util\ArrayUtil;
 use Civi\Cv\Util\ExtensionUtil;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
@@ -28,6 +29,8 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->addOption('local', 'L', InputOption::VALUE_NONE, 'Show local extensions')
       ->addOption('remote', 'R', InputOption::VALUE_NONE, 'Show remote extensions')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the list of extensions')
+      ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated)', 'location,key,name,version,status')
+      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (table,' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat('table'))
       ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key, short name, or description')
       ->setHelp('List extensions
 
@@ -51,6 +54,10 @@ Note:
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $wo = ($input->getOption('out') === 'table')
+      ? (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_NORMAL)
+      : (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_VERBOSE);
+
     if ($input->getOption('local') || $input->getOption('remote')) {
       $local = (bool) $input->getOption('local');
       $remote = (bool) $input->getOption('remote');
@@ -67,11 +74,11 @@ Note:
     $this->boot($input, $output);
 
     if ($remote) {
-      $output->writeln("<info>Using extension feed \"" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . "\"</info>");
+      $output->writeln("<info>Using extension feed \"" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . "\"</info>", $wo);
     }
 
     if ($input->getOption('refresh')) {
-      $output->writeln("<info>Refreshing extensions</info>");
+      $output->writeln("<info>Refreshing extensions</info>", $wo);
       $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
         'local' => $local,
         'remote' => $remote,
@@ -81,10 +88,19 @@ Note:
       }
     }
 
-    $table = new Table($output);
-    $table->setHeaders(array('location', 'name', 'key', 'version', 'status'));
-    $table->addRows($this->find($input->getArgument('regex'), $remote, $local));
-    $table->render();
+    $columns = explode(',', $input->getOption('columns'));
+    $records = $this->find($input->getArgument('regex'), $remote, $local);
+
+    if ($input->getOption('out') === 'table') {
+      $table = new Table($output);
+      $table->setHeaders($columns);
+      $table->addRows(ArrayUtil::convertAssocToNum($records, $columns));
+      $table->render();
+    }
+    else {
+      $this->sendResult($input, $output,
+        ArrayUtil::filterColumns($records, $columns));
+    }
 
     return 0;
   }
@@ -118,7 +134,13 @@ Note:
 
     if ($remote) {
       foreach ($this->getRemoteInfos() as $info) {
-        $rows[] = array('remote', $info->file, $info->key, $info->version, '');
+        $rows[] = array(
+          'location' => 'remote',
+          'key' => $info->key,
+          'name' => $info->file,
+          'version' => $info->version,
+          'status' => '',
+        );
       }
     }
 
@@ -130,11 +152,11 @@ Note:
           ->getMapper()
           ->keyToInfo($key);
         $rows[] = array(
-          'local',
-          $info->file,
-          $key,
-          $info->version,
-          isset($statuses[$key]) ? $statuses[$key] : '',
+          'location' => 'local',
+          'key' => $key,
+          'name' => $info->file,
+          'version' => $info->version,
+          'status' => isset($statuses[$key]) ? $statuses[$key] : '',
         );
       }
     }
@@ -142,7 +164,7 @@ Note:
     if ($regex) {
       $rows = array_filter($rows, function ($row) use ($regex) {
         // Match on name or key.
-        return preg_match($regex, $row[1]) || preg_match($regex, $row[2]);
+        return preg_match($regex, $row['key']) || preg_match($regex, $row['name']);
       });
     }
 

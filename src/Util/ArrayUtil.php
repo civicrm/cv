@@ -27,4 +27,56 @@ class ArrayUtil {
     return $result;
   }
 
+  /**
+   * Convert a list of records from associative-arrays to numeric-arrays.
+   *
+   * @param array $records
+   *   A list of records. Each one is associative array (dictionary/hashmap).
+   *   Ex: $rows[0] = array('color' => 'red', 'length' => 5);
+   * @param array $columns
+   *   A list of columns.
+   *   Ex: array(0 => 'color', 1 => 'length').
+   * @return array
+   *   A list of records. Each one is a numerically indexed array.
+   *   Ex: $rows[0] = array(0 => 'red', 1 => 'length')
+   */
+  public static function convertAssocToNum($records, $columns) {
+    $result = array();
+    foreach ($records as $k => $oldRow) {
+      $newRow = array();
+      foreach ($columns as $newKey => $oldKey) {
+        $newRow[$newKey] = $oldRow[$oldKey];
+      }
+      $result[$k] = $newRow;
+    }
+    return $result;
+  }
+
+  /**
+   * Filter down to the whitelisted column in a set of records.
+   *
+   * @param array $records
+   *   A list of records. Each one is associative array (dictionary/hashmap).
+   *   Ex: $rows[0] = array('color' => 'red', 'length' => 5);
+   * @param array $columns
+   *   A list of columns.
+   *   Ex: array('length').
+   * @return array
+   *   A list of records. Each one is a numerically indexed array.
+   *   Ex: $rows[0] = array('length' => 5)
+   */
+  public static function filterColumns($records, $columns) {
+    $result = array();
+    foreach ($records as $k => $oldRow) {
+      $newRow = array();
+      foreach ($columns as $key) {
+        if (array_key_exists($key, $oldRow)) {
+          $newRow[$key] = $oldRow[$key];
+        }
+      }
+      $result[$k] = $newRow;
+    }
+    return $result;
+  }
+
 }

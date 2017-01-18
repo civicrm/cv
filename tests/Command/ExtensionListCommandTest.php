@@ -43,16 +43,34 @@ class ExtensionListCommandTest extends \Civi\Cv\CivilTestCase {
    */
   public function testGetRegex() {
     $p = Process::runOk($this->cv('ext:list'));
-    $this->assertRegexp('/remote.*cividiscount.*org.civicrm.module.cividiscount/', $p->getOutput());
+    $this->assertRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
 
     $p = Process::runOk($this->cv('ext:list /org.civicrm/')); // matches key
-    $this->assertRegexp('/remote.*cividiscount.*org.civicrm.module.cividiscount/', $p->getOutput());
+    $this->assertRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
 
     $p = Process::runOk($this->cv('ext:list /^cividiscount/')); // matches name
-    $this->assertRegexp('/remote.*cividiscount.*org.civicrm.module.cividiscount/', $p->getOutput());
+    $this->assertRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
 
     $p = Process::runOk($this->cv('ext:list /^com\./')); // matches name
-    $this->assertNotRegexp('/remote.*cividiscount.*org.civicrm.module.cividiscount/', $p->getOutput());
+    $this->assertNotRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
+  }
+
+  /**
+   * Get the extension data in an alternate format, eg JSON.
+   */
+  public function testGetJson() {
+    $p = Process::runOk($this->cv('ext:list /^cividiscount$/ --out=json --remote'));
+    $data = json_decode($p->getOutput(), 1);
+    $this->assertEquals(1, count($data));
+    $this->assertEquals('cividiscount', $data[0]['name']);
+    $this->assertEquals('org.civicrm.module.cividiscount', $data[0]['key']);
+
+    $p = Process::runOk($this->cv('ext:list /^cividiscount$/ --out=json --remote --columns=name,version'));
+    $data = json_decode($p->getOutput(), 1);
+    $this->assertEquals(1, count($data));
+    $this->assertEquals('cividiscount', $data[0]['name']);
+    $this->assertFalse(isset($data[0]['key']));
+    $this->assertNotEmpty($data[0]['version']);
   }
 
   /**
