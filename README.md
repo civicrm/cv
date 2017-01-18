@@ -33,6 +33,13 @@ Documentation
 
 For detailed help about a specific subcommand, use `-h` as in `cv api -h`.
 
+There are some general conventions:
+ * Many subcommands support common bootstrap options, such as `--user`,
+   `--level`, and `--test`.
+ * Many subcommands support multiple output formats using `--out`. You may
+   set a general preference with an environment variable, e.g.
+   `export CV_OUTPUT=json-pretty` or `export CV_OUTPUT=php`.
+
 Example: CLI
 ============
 
