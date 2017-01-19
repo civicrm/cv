@@ -19,6 +19,25 @@ class ApiCommandTest extends \Civi\Cv\CivilTestCase {
     }
   }
 
+  public function testCsv() {
+    $p = Process::runOk($this->cv("api OptionValue.get option_group_id=activity_type return=option_group_id,name rowCount=2 --out=csv"));
+    $lines = explode("\n", trim($p->getOutput()));
+    $expected = array(
+      'option_group_id,name',
+      '2,Meeting',
+      '2,"Phone Call"',
+    );
+    $this->assertEquals($expected, $lines);
+  }
+
+  public function testCsvMisuse() {
+    $p = Process::runOk($this->cv("api OptionValue.getsingle rowCount=1 --out=csv"));
+    $this->assertRegExp('/The output format "csv" only works with tabular data. Try using a "get" API. Forcing format to "json-pretty"./', $p->getErrorOutput());
+    $data = json_decode($p->getOutput(), 1);
+    $this->assertTrue(!empty($data['option_group_id']));
+  }
+
+
   public function testQuiet() {
     $p = Process::runOk($this->cv("api -q System.get"));
     $this->assertEmpty($p->getOutput());

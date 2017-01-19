@@ -29,7 +29,7 @@ class ApiCommand extends BaseCommand {
       ->setName('api')
       ->setDescription('Call an API')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
-      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat())
+      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat())
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
       ->setHelp('Call an API
@@ -57,7 +57,27 @@ NOTE: To change the default output format, set CV_OUTPUT.
     //    );
 
     $result = \civicrm_api($entity, $action, $params);
-    $this->sendResult($input, $output, $result);
+
+    $out = $input->getOption('out');
+    if (!in_array($out, Encoder::getFormats()) && in_array($out, Encoder::getTabularFormats())) {
+      // For tabular output, we have to be picky about what data to display.
+      if ($action !== 'get' || !isset($result['values']) || !empty($result['is_error'])) {
+        $output->getErrorOutput()
+          ->writeln("<error>The output format \"$out\" only works with tabular data. Try using a \"get\" API. Forcing format to \"json-pretty\".</error>");
+        $input->setOption('out', 'json-pretty');
+        $this->sendResult($input, $output, $result);
+      }
+      else {
+        $columns = empty($params['return']) ? NULL : explode(',',
+          $params['return']);
+        $this->sendTable($input, $output, array_values($result['values']),
+          $columns);
+      }
+    }
+    else {
+      $this->sendResult($input, $output, $result);
+    }
+
     return empty($result['is_error']) ? 0 : 1;
   }
 
