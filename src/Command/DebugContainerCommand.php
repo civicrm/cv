@@ -22,7 +22,7 @@ Dump the container configuration
 
   protected function execute(InputInterface $input, OutputInterface $output) {
     define('CIVICRM_CONTAINER_CACHE', 'never');
-    $output->writeln('<comment>The debug command ignores the container cache.</comment>');
+    $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
     $this->boot($input, $output);
 
     // To probe definitions, we need access to the raw ContainerBuilder.
