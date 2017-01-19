@@ -36,6 +36,7 @@ class Application extends \Symfony\Component\Console\Application {
     $commands[] = new \Civi\Cv\Command\ExtensionDownloadCommand();
     $commands[] = new \Civi\Cv\Command\ExtensionEnableCommand();
     $commands[] = new \Civi\Cv\Command\ExtensionDisableCommand();
+    $commands[] = new \Civi\Cv\Command\ExtensionListCommand();
     $commands[] = new \Civi\Cv\Command\ExtensionUninstallCommand();
     $commands[] = new \Civi\Cv\Command\ExtensionUpgradeDbCommand();
     $commands[] = new \Civi\Cv\Command\FillCommand();

@@ -33,6 +33,13 @@ Documentation
 
 For detailed help about a specific subcommand, use `-h` as in `cv api -h`.
 
+There are some general conventions:
+ * Many subcommands support common bootstrap options, such as `--user`,
+   `--level`, and `--test`.
+ * Many subcommands support multiple output formats using `--out`. You may
+   set a general preference with an environment variable, e.g.
+   `export CV_OUTPUT=json-pretty` or `export CV_OUTPUT=php`.
+
 Example: CLI
 ============
 
@@ -42,10 +49,13 @@ me@localhost$ cv vars:show
 me@localhost$ cv scr /path/to/throwaway.php
 me@localhost$ cv ev 'echo Civi::paths()->get("[civicrm.root]/.");'
 me@localhost$ cv url civicrm/dashboard --open
-me@localhost$ cv api system.flush
+me@localhost$ cv api contact.get last_name=Smith
 me@localhost$ cv dl cividiscount
 me@localhost$ cv en cividiscount
 me@localhost$ cv dis cividiscount
+me@localhost$ cv debug:container
+me@localhost$ cv debug:event-dispatcher
+me@localhost$ cv flush
 ```
 
 If you intend to run unit-tests, and if you do *not* use `civibuild`,

@@ -6,14 +6,36 @@ class Encoder {
   /**
    * Determine the default output mode.
    *
+   * @param string $fallback
+   *   In case we can't find a default based on a policy, the caller
+   *   can suggest their own fallback.
    * @return string
    *   Ex: 'json', 'shell', 'php', 'pretty', 'none'
    */
-  public static function getDefaultFormat() {
+  public static function getDefaultFormat($fallback = 'json-pretty') {
     $e = getenv('CV_OUTPUT');
-    return $e ? $e : 'json-pretty';
+    return $e ? $e : $fallback;
   }
 
+  /**
+   * Get a list of formats that work with tabular data.
+   *
+   * @return array
+   */
+  public static function getTabularFormats() {
+    $result = self::getFormats();
+    array_unshift($result, 'list');
+    array_unshift($result, 'csv');
+    array_unshift($result, 'table');
+    return $result;
+  }
+
+  /**
+   * Get a list of formats that work general-purpose data (strings,
+   * tables, array-trees, etc).
+   *
+   * @return array
+   */
   public static function getFormats() {
     return array(
       'none',
@@ -21,6 +43,7 @@ class Encoder {
       'php',
       'json-pretty',
       'json-strict',
+      'serialize',
       'shell',
     );
   }
@@ -45,6 +68,9 @@ class Encoder {
       case 'json':
       case 'json-strict':
         return json_encode($data);
+
+      case 'serialize':
+        return serialize($data);
 
       case 'shell':
         if (is_scalar($data)) {
