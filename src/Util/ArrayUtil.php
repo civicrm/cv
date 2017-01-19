@@ -79,4 +79,20 @@ class ArrayUtil {
     return $result;
   }
 
+  /**
+   * Autodetect the columns headers in a matrix.
+   *
+   * @param array $records
+   * @return array|null
+   */
+  public static function findColumns($records) {
+    foreach ($records as $record) {
+      $columns = array_keys($record);
+      if ($columns) {
+        return $columns;
+      }
+    }
+    return NULL;
+  }
+
 }

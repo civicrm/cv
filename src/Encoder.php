@@ -17,6 +17,25 @@ class Encoder {
     return $e ? $e : $fallback;
   }
 
+  /**
+   * Get a list of formats that work with tabular data.
+   *
+   * @return array
+   */
+  public static function getTabularFormats() {
+    $result = self::getFormats();
+    array_unshift($result, 'list');
+    array_unshift($result, 'csv');
+    array_unshift($result, 'table');
+    return $result;
+  }
+
+  /**
+   * Get a list of formats that work general-purpose data (strings,
+   * tables, array-trees, etc).
+   *
+   * @return array
+   */
   public static function getFormats() {
     return array(
       'none',

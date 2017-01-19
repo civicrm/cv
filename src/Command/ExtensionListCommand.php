@@ -32,7 +32,7 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->addOption('installed', 'i', InputOption::VALUE_NONE, 'Filter extensions by "installed" status (Equivalent to --statuses=installed)')
       ->addOption('statuses', NULL, InputOption::VALUE_REQUIRED, 'Filter extensions by status (comma separated)', '*')
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated)', 'location,key,name,version,status')
-      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (table,' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat('table'))
+      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat('table'))
       ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key or short name')
       ->setHelp('List extensions
 
@@ -85,16 +85,7 @@ Note:
     $columns = explode(',', $input->getOption('columns'));
     $records = $this->sort($this->find($input), $columns);
 
-    if ($input->getOption('out') === 'table') {
-      $table = new Table($output);
-      $table->setHeaders($columns);
-      $table->addRows(ArrayUtil::convertAssocToNum($records, $columns));
-      $table->render();
-    }
-    else {
-      $this->sendResult($input, $output,
-        ArrayUtil::filterColumns($records, $columns));
-    }
+    $this->sendTable($input, $output, $records, $columns);
 
     return 0;
   }
@@ -146,6 +137,7 @@ Note:
           'label' => $info->label,
           'status' => '',
           'type' => $info->type,
+          'path' => '',
         );
       }
     }
@@ -153,10 +145,9 @@ Note:
     if ($local) {
       $keys = \CRM_Extension_System::singleton()->getFullContainer()->getKeys();
       $statuses = \CRM_Extension_System::singleton()->getManager()->getStatuses();
+      $mapper = \CRM_Extension_System::singleton()->getMapper();
       foreach ($keys as $key) {
-        $info = \CRM_Extension_System::singleton()
-          ->getMapper()
-          ->keyToInfo($key);
+        $info = $mapper->keyToInfo($key);
         $rows[] = array(
           'location' => 'local',
           'key' => $key,
@@ -165,6 +156,7 @@ Note:
           'label' => $info->label,
           'status' => isset($statuses[$key]) ? $statuses[$key] : '',
           'type' => $info->type,
+          'path' => $mapper->keyToBasePath($key),
         );
       }
     }
