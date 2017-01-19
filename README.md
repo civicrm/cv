@@ -26,6 +26,13 @@ sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
 sudo chmod +x /usr/local/bin/cv
 ```
 
+Documentation
+=============
+
+`cv` provides a number of subcommands. To see a list, run `cv` without any arguments.
+
+For detailed help about a specific subcommand, use `-h` as in `cv api -h`.
+
 Example: CLI
 ============
 
@@ -36,6 +43,9 @@ me@localhost$ cv scr /path/to/throwaway.php
 me@localhost$ cv ev 'echo Civi::paths()->get("[civicrm.root]/.");'
 me@localhost$ cv url civicrm/dashboard --open
 me@localhost$ cv api system.flush
+me@localhost$ cv dl cividiscount
+me@localhost$ cv en cividiscount
+me@localhost$ cv dis cividiscount
 ```
 
 If you intend to run unit-tests, and if you do *not* use `civibuild`,
@@ -47,7 +57,6 @@ me@localhost$ cd /var/www/my/web/site
 me@localhost$ cv vars:fill
 me@localhost$ vi ~/.cv.json
 ```
-
 
 Example: PHP
 ============
@@ -108,9 +117,14 @@ function cv($cmd, $decode = 'json') {
 }
 
 eval(cv('php:boot', 'phpcode'));
-$config = cv('show --buildkit');
+$config = cv('vars:show');
 printf("We should navigate to the dsahboard: %s\n\n", cv('url civicrm/dashboard'));
 ```
+
+Example: NodeJS
+===============
+
+See https://github.com/civicrm/cv-nodejs
 
 Build
 =====

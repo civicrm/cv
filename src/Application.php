@@ -31,7 +31,15 @@ class Application extends \Symfony\Component\Console\Application {
   public function createCommands($context = 'default') {
     $commands = array();
     $commands[] = new \Civi\Cv\Command\ApiCommand();
+    $commands[] = new \Civi\Cv\Command\DebugContainerCommand();
+    $commands[] = new \Civi\Cv\Command\DebugDispatcherCommand();
+    $commands[] = new \Civi\Cv\Command\ExtensionDownloadCommand();
+    $commands[] = new \Civi\Cv\Command\ExtensionEnableCommand();
+    $commands[] = new \Civi\Cv\Command\ExtensionDisableCommand();
+    $commands[] = new \Civi\Cv\Command\ExtensionUninstallCommand();
+    $commands[] = new \Civi\Cv\Command\ExtensionUpgradeDbCommand();
     $commands[] = new \Civi\Cv\Command\FillCommand();
+    $commands[] = new \Civi\Cv\Command\FlushCommand();
     $commands[] = new \Civi\Cv\Command\ShowCommand();
     $commands[] = new \Civi\Cv\Command\UrlCommand();
     $commands[] = new \Civi\Cv\Command\PopCommand();
