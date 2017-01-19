@@ -1,8 +1,9 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Symfony\Component\Console\Helper\Table;
+use Civi\Cv\Encoder;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class DebugContainerCommand extends BaseCommand {
@@ -12,7 +13,7 @@ class DebugContainerCommand extends BaseCommand {
       ->setName('debug:container')
       ->setDescription('Dump the container configuration')
       ->addArgument('path')
-      // ->addOption('out', NULL, InputArgument::OPTIONAL, 'Specify return format (json,none,php,pretty,shell)', \Civi\Cv\Encoder::getDefaultFormat())
+      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat('table'))
       ->setHelp('
 Dump the container configuration
 ');
@@ -46,13 +47,10 @@ Dump the container configuration
         $extras[] = sprintf("tags[%s]", count($definition->getTags()));
       }
 
-      $rows[] = array($name, $definition->getClass(), implode(' ', $extras));
+      $rows[] = array('service' => $name, 'class' => $definition->getClass(), 'extras' => implode(' ', $extras));
     }
 
-    $table = new Table($output);
-    $table->setHeaders(array('Service', 'Class', 'Extras'));
-    $table->addRows($rows);
-    $table->render();
+    $this->sendTable($input, $output, $rows, array('service', 'class', 'extras'));
   }
 
 }
