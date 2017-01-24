@@ -72,8 +72,10 @@ Note:
     list ($downloads, $errors) = $this->parseDownloads($input);
     if (!empty($errors)) {
       foreach ($errors as $error) {
-        $output->writeln("<error>$error</error>");
+        $output->getErrorOutput()->writeln("<error>$error</error>");
       }
+      $output->getErrorOutput()->writeln("<comment>Tip: To customize the feed, review options in \"cv {$input->getFirstArgument()} --help\"");
+      $output->getErrorOutput()->writeln("<comment>Tip: To browse available downloads, run \"cv ext:list -R\"</comment>");
       return 1;
     }
 
