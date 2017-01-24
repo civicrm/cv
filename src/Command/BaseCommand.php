@@ -65,7 +65,7 @@ class BaseCommand extends Command {
       if ($input->getOption('user')) {
         $output->writeln('<info>[BaseCommand::boot]</info> Set system user', OutputInterface::VERBOSITY_DEBUG);
         if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
-          \CRM_Utils_System::loadUser($input->getOption('user'));
+          \CRM_Core_Config::singleton()->userSystem->loadUser($input->getOption('user'));
         }
         else {
           $output->getErrorOutput()->writeln("<error>Failed to set user. Feature not supported by UF (" . CIVICRM_UF . ")</error>");
