@@ -61,7 +61,7 @@ Note:
 
     if ($missingKeys) {
       foreach ($missingKeys as $key) {
-        $output->writeln("<error>Error: Unrecognized extension \"$key\"</error>");
+        $output->getErrorOutput()->writeln("<error>Error: Unrecognized extension \"$key\"</error>");
       }
       return 1;
     }
