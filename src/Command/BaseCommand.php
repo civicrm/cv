@@ -68,7 +68,7 @@ class BaseCommand extends Command {
           \CRM_Utils_System::loadUser($input->getOption('user'));
         }
         else {
-          $output->writeln("<error>Failed to set user. Feature not supported by UF (" . CIVICRM_UF . ")</error>");
+          $output->getErrorOutput()->writeln("<error>Failed to set user. Feature not supported by UF (" . CIVICRM_UF . ")</error>");
         }
       }
     }
@@ -104,7 +104,7 @@ class BaseCommand extends Command {
         'result' => $result,
       );
       if (!empty($result['is_error'])) {
-        $output->writeln("<error>Error: API Call Failed</error>: "
+        $output->getErrorOutput()->writeln("<error>Error: API Call Failed</error>: "
           . Encoder::encode($data, 'pretty'));
       }
       else {
