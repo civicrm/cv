@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Filesystem\Filesystem;
 use Civi\Pop\Pop;
 use Faker;
 
@@ -28,7 +29,7 @@ class PopCommand extends BaseCommand {
   protected function configure() {
     $this
       ->setName('pop')
-      ->addArgument('file', InputArgument::REQUIRED, 'yaml file with entities to populate?')
+      ->addArgument('file', InputArgument::REQUIRED, 'yaml file with entities to populate')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat())
       ->setDescription('Populate a site with entities from a yaml file')
       ->setHelp('Populate a site with entities from a yaml file
@@ -48,7 +49,14 @@ NOTE: See doc/pop.md for usage
     if ($input->getOption('out') != 'json-pretty') {
       $pop->setInteractive(0);
     }
-    $pop->process($input->getArgument('file'));
+    var_dump();
+    $fs = new Filesystem;
+    if($fs->isAbsolutePath($input->getArgument('file'))){
+      $pop->process($input->getArgument('file'));
+    }else{
+      $pop->process($_SERVER['PWD']. DIRECTORY_SEPARATOR . $input->getArgument('file'));
+    }
+
     if ($input->getOption('out') != 'json-pretty') {
       $this->sendResult($input, $output, $pop->getSummary());
     }
