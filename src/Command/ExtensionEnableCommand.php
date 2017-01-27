@@ -24,7 +24,7 @@ class ExtensionEnableCommand extends BaseExtensionCommand {
       ->setName('ext:enable')
       ->setAliases(array('en'))
       ->setDescription('Enable an extension')
-      ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the local list of extensions')
+      ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the local list of extensions (Default: Only refresh on cache-miss)')
       ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar")')
       ->setHelp('Enable an extension
 
@@ -45,23 +45,35 @@ Note:
 
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->boot($input, $output);
-    if ($input->getOption('refresh')) {
-      $output->writeln("<info>Refreshing extensions</info>");
-      $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
-        'local' => TRUE,
-        'remote' => FALSE,
-      ));
-      if (!empty($result['is_error'])) {
-        return 1;
+
+    // Refresh extensions if (a) ---refresh enabled or (b) there's a cache-miss.
+    $refresh = $input->getOption('refresh') ? 'yes' : 'auto';
+    // $refresh = $this->parseOptionalOption($input, array('--refresh', '-r'), 'auto', 'yes');
+    while (TRUE) {
+      if ($refresh === 'yes') {
+        $output->writeln("<info>Refreshing extension cache</info>");
+        $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
+          'local' => TRUE,
+          'remote' => FALSE,
+        ));
+        if (!empty($result['is_error'])) {
+          return 1;
+        }
       }
 
+      list ($foundKeys, $missingKeys) = $this->parseKeys($input, $output);
+      if ($refresh == 'auto' && !empty($missingKeys)) {
+        $output->writeln("<info>Extension cache does contain requested item(s)</info>");
+        $refresh = 'yes';
+      }
+      else {
+        break;
+      }
     }
-
-    list ($foundKeys, $missingKeys) = $this->parseKeys($input, $output);
 
     if ($missingKeys) {
       foreach ($missingKeys as $key) {
-        $output->writeln("<error>Error: Unrecognized extension \"$key\"</error>");
+        $output->getErrorOutput()->writeln("<error>Error: Unrecognized extension \"$key\"</error>");
       }
       return 1;
     }

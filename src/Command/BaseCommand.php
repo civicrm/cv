@@ -65,10 +65,10 @@ class BaseCommand extends Command {
       if ($input->getOption('user')) {
         $output->writeln('<info>[BaseCommand::boot]</info> Set system user', OutputInterface::VERBOSITY_DEBUG);
         if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
-          \CRM_Utils_System::loadUser($input->getOption('user'));
+          \CRM_Core_Config::singleton()->userSystem->loadUser($input->getOption('user'));
         }
         else {
-          $output->writeln("<error>Failed to set user. Feature not supported by UF (" . CIVICRM_UF . ")</error>");
+          $output->getErrorOutput()->writeln("<error>Failed to set user. Feature not supported by UF (" . CIVICRM_UF . ")</error>");
         }
       }
     }
@@ -104,7 +104,7 @@ class BaseCommand extends Command {
         'result' => $result,
       );
       if (!empty($result['is_error'])) {
-        $output->writeln("<error>Error: API Call Failed</error>: "
+        $output->getErrorOutput()->writeln("<error>Error: API Call Failed</error>: "
           . Encoder::encode($data, 'pretty'));
       }
       else {
@@ -186,6 +186,41 @@ class BaseCommand extends Command {
           $columns ? ArrayUtil::filterColumns($records, $columns) : $records);
         break;
     }
+  }
+
+  /**
+   * Parse an option's data. This is for options where the default behavior
+   * (of total omission) differs from the activated behavior
+   * (of an active but unspecified option).
+   *
+   * Example, suppose we want these interpretations:
+   *   cv en         ==> Means "--refresh=auto"; see $omittedDefault
+   *   cv en -r      ==> Means "--refresh=yes"; see $activeDefault
+   *   cv en -r=yes  ==> Means "--refresh=yes"
+   *   cv en -r=no   ==> Means "--refresh=no"
+   *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   * @param array $rawNames
+   *   Ex: array('-r', '--refresh').
+   * @param string $omittedDefault
+   *   Value to use if option is completely omitted.
+   * @param string $activeDefault
+   *   Value to use if option is activated without data.
+   * @return string
+   */
+  public function parseOptionalOption(InputInterface $input, $rawNames, $omittedDefault, $activeDefault) {
+    $value = NULL;
+    foreach ($rawNames as $rawName) {
+      if ($input->hasParameterOption($rawName)) {
+        if (NULL === $input->getParameterOption($rawName)) {
+          return $activeDefault;
+        }
+        else {
+          return $input->getParameterOption($rawName);
+        }
+      }
+    }
+    return $omittedDefault;
   }
 
 }

@@ -24,7 +24,7 @@ class ExtensionDownloadCommand extends BaseExtensionCommand {
       ->setName('ext:download')
       ->setAliases(array('dl'))
       ->setDescription('Download and enable an extension')
-      ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the remote list of extensions')
+      ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the remote list of extensions (Default: Only refresh on cache-miss)')
       ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar"). Optionally append a URL.')
       ->setHelp('Download and enable an extension
 
@@ -58,22 +58,36 @@ Note:
 
     $output->writeln("<info>Using extension feed \"" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . "\"</info>");
 
-    if ($input->getOption('refresh')) {
-      $output->writeln("<info>Refreshing extensions</info>");
-      $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
-        'local' => FALSE,
-        'remote' => TRUE,
-      ));
-      if (!empty($result['is_error'])) {
-        return 1;
+    // Refresh extensions if (a) ---refresh enabled or (b) there's a cache-miss.
+    $refresh = $input->getOption('refresh') ? 'yes' : 'auto';
+    while (TRUE) {
+      if ($refresh === 'yes') {
+        $output->writeln("<info>Refreshing extension cache</info>");
+        $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
+          'local' => FALSE,
+          'remote' => TRUE,
+        ));
+        if (!empty($result['is_error'])) {
+          return 1;
+        }
+      }
+
+      list ($downloads, $errors) = $this->parseDownloads($input);
+      if ($refresh == 'auto' && !empty($errors)) {
+        $output->writeln("<info>Extension cache does contain requested item(s)</info>");
+        $refresh = 'yes';
+      }
+      else {
+        break;
       }
     }
 
-    list ($downloads, $errors) = $this->parseDownloads($input);
     if (!empty($errors)) {
       foreach ($errors as $error) {
-        $output->writeln("<error>$error</error>");
+        $output->getErrorOutput()->writeln("<error>$error</error>");
       }
+      $output->getErrorOutput()->writeln("<comment>Tip: To customize the feed, review options in \"cv {$input->getFirstArgument()} --help\"");
+      $output->getErrorOutput()->writeln("<comment>Tip: To browse available downloads, run \"cv ext:list -R\"</comment>");
       return 1;
     }
 
