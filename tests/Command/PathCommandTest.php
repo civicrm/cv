@@ -71,6 +71,17 @@ class PathCommandTest extends \Civi\Cv\CivilTestCase {
     }
   }
 
+  public function testExtDot() {
+    $this->assertEquals(
+      $this->cvOk('path -x.'),
+      $this->cvOk('path -c extensionsDir')
+    );
+    $this->assertEquals(
+      $this->cvOk('path -x .'),
+      $this->cvOk('path -c extensionsDir')
+    );
+  }
+
   protected function cvOk($cmd) {
     $p = Process::runOk($this->cv($cmd));
     return $p->getOutput();

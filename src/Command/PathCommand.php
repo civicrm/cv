@@ -26,7 +26,7 @@ class PathCommand extends BaseExtensionCommand {
       ->setDescription('Look up the path to a file or directory')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat('list'))
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated; type, name, value)')
-      ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar")')
+      ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar"); or use "." for the default extensions-dir')
       ->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A config property. (Ex: customFileUploadDir, customPHPPathDir, customTemplateDir, extensionsDir, imageUploadDir, templateCompileDir, uploadDir)')
       ->addOption('dynamic', 'd', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A dynamic path expression (Ex: "[civicrm.root]/packages")')
       ->addArgument('file', InputArgument::IS_ARRAY, 'Optionally specify files')
@@ -35,6 +35,7 @@ class PathCommand extends BaseExtensionCommand {
 Examples (directories):
   cv path -x cividiscount
   cv path -x cividiscount -x styleguide -x flexmailer
+  cv path -x .
   cv path -c templateCompileDir
   cv path -d \'[civicrm.root]/packages\'
 
@@ -54,6 +55,15 @@ Examples (files):
 
     $mapper = \CRM_Extension_System::singleton()->getMapper();
     foreach ($input->getOption('ext') as $keyOrName) {
+      if ($keyOrName === '.') {
+        $pathResults[] = array(
+          'type' => 'ext',
+          'name' => $keyOrName,
+          'value' => \CRM_Core_Config::singleton()->extensionsDir,
+        );
+        continue;
+      }
+
       if (strpos($keyOrName, '.') === FALSE) {
         $shortMap = $this->getShortMap();
         if (isset($shortMap[$keyOrName]) && count($shortMap[$keyOrName]) === 1) {
