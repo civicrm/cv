@@ -26,23 +26,33 @@ class PathCommand extends BaseExtensionCommand {
       ->setDescription('Look up the path to a file or directory')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat('list'))
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated; type, expr, value)')
-      ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar") or use "." for the default extensions-dir.')
-      ->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A config property. (Ex: configAndLogDir, customFileUploadDir, customPHPPathDir, customTemplateDir, extensionsDir, imageUploadDir, templateCompileDir, uploadDir)')
+      ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar"). Use "." for the default extension dir.')
+      ->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A config property. (Ex: "templateCompileDir/en_US")')
       ->addOption('dynamic', 'd', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A dynamic path expression (v4.7+) (Ex: "[civicrm.root]/packages")')
-      ->setHelp('Look up the path to a file or directory
+      ->setHelp('Look up the path to a file or directory within CiviCRM.
 
-Examples: Look extension paths
+Examples: Lookup extension paths
+  cv path -x org.civicrm.module.cividiscount
   cv path -x cividiscount
   cv path -x cividiscount/info.xml
   cv path -x .
 
-Examples: Lookup configured paths
+Examples: Lookup configuration properties
+  cv path -c configAndLogDir
+  cv path -c customFileUploadDir
+  cv path -c customPHPPathDir
+  cv path -c customTemplateDir
+  cv path -c extensionsDir
+  cv path -c imageUploadDir
+  cv path -c uploadDir
   cv path -c templateCompileDir
   cv path -c templateCompileDir/en_US
 
 Examples: Lookup dynamic paths
   cv path -d \'[civicrm.root]\'
   cv path -d \'[civicrm.root]/packages/DB.php\'
+  cv path -d \'[civicrm.files]\'
+  cv path -d \'[cms.root]/index.php\'
 
 Example: Lookup multiple items
   cv path -x cividiscount/info.xml -x flexmailer/info.xml -d \'[civicrm.root]/civicrm-version.php\'
