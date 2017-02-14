@@ -25,24 +25,27 @@ class PathCommand extends BaseExtensionCommand {
       ->setAliases(array())
       ->setDescription('Look up the path to a file or directory')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat('list'))
-      ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated; type, name, value)')
-      ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar"); or use "." for the default extensions-dir')
+      ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated; type, expr, value)')
+      ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar") or use "." for the default extensions-dir.')
       ->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A config property. (Ex: customFileUploadDir, customPHPPathDir, customTemplateDir, extensionsDir, imageUploadDir, templateCompileDir, uploadDir)')
       ->addOption('dynamic', 'd', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A dynamic path expression (Ex: "[civicrm.root]/packages")')
-      ->addArgument('file', InputArgument::IS_ARRAY, 'Optionally specify files')
       ->setHelp('Look up the path to a file or directory
 
-Examples (directories):
+Examples: Look extension paths
   cv path -x cividiscount
-  cv path -x cividiscount -x styleguide -x flexmailer
+  cv path -x cividiscount/info.xml
   cv path -x .
-  cv path -c templateCompileDir
-  cv path -d \'[civicrm.root]/packages\'
 
-Examples (files):
-  cv path -x cividiscount -x styleguide -x flexmailer info.xml
-  cv path -c uploadDir hello.jpg
-  cv path -d \'[civicrm.root]\' packages/DB.php
+Examples: Lookup configured paths
+  cv path -c templateCompileDir
+  cv path -c templateCompileDir/en_US
+
+Examples: Lookup dynamic paths
+  cv path -d \'[civicrm.root]\'
+  cv path -d \'[civicrm.root]/packages/DB.php\'
+
+Example: Lookup multiple items
+  cv path -x cividiscount/info.xml -x flexmailer/info.xml -d \'[civicrm.root]/civicrm-version.php\'
 ');
     parent::configureBootOptions();
   }
@@ -50,16 +53,22 @@ Examples (files):
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->boot($input, $output);
 
-    $pathResults = array();
+    if (!$input->getOption('ext') && !$input->getOption('config') && !$input->getOption('dynamic')) {
+      $output->getErrorOutput()->writeln("<error>No paths specified. Must use -x, -c, or -d. (See also: cv path -h)</error>");
+      return 1;
+    }
+
+    $results = array();
     $returnValue = 0;
 
     $mapper = \CRM_Extension_System::singleton()->getMapper();
-    foreach ($input->getOption('ext') as $keyOrName) {
+    foreach ($input->getOption('ext') as $extExpr) {
+      list ($keyOrName, $file) = explode('/', $extExpr, 2);
       if ($keyOrName === '.') {
-        $pathResults[] = array(
+        $results[] = array(
           'type' => 'ext',
-          'name' => $keyOrName,
-          'value' => \CRM_Core_Config::singleton()->extensionsDir,
+          'expr' => $extExpr,
+          'value' => $this->pathJoin(\CRM_Core_Config::singleton()->extensionsDir, $file),
         );
         continue;
       }
@@ -72,10 +81,10 @@ Examples (files):
       }
 
       try {
-        $pathResults[] = array(
+        $results[] = array(
           'type' => 'ext',
-          'name' => $keyOrName,
-          'value' => \CRM_Utils_File::addTrailingSlash($mapper->keyToBasePath($keyOrName)),
+          'expr' => $extExpr,
+          'value' => $this->pathJoin($mapper->keyToBasePath($keyOrName), $file),
         );
       }
       catch (\CRM_Extension_Exception_MissingException $e) {
@@ -84,11 +93,12 @@ Examples (files):
       }
     }
 
-    foreach ($input->getOption('config') as $configProperty) {
-      $pathResults[] = array(
+    foreach ($input->getOption('config') as $configExpr) {
+      list ($configProperty, $file) = explode('/', $configExpr, 2);
+      $results[] = array(
         'type' => 'config',
-        'name' => $configProperty,
-        'value' => \CRM_Core_Config::singleton()->{$configProperty},
+        'expr' => $configExpr,
+        'value' => $this->pathJoin(\CRM_Core_Config::singleton()->{$configProperty}, $file),
       );
     }
 
@@ -99,40 +109,34 @@ Examples (files):
         break;
       }
 
-      $fullExpr = preg_match(';^\[[^\]]+\]$;', $dynExpr) ? "$dynExpr/." : $dynExpr;
+      if (preg_match(';^(\[[^\]]+\])([\\/]?)$;', $dynExpr, $matches)) {
+        // getPath() is wonky about "[civicrm.root]" or "[civicrm.root]/",
+        // so we have to trick it.
+        $dyn = \Civi::paths()->getPath($matches[1] . "/./");
+        $value = preg_replace(';/./$;', '', $dyn) . $matches[2];
+        $results[] = array(
+          'type' => 'dynamic',
+          'expr' => $dynExpr,
+          'value' => $value,
+        );
+      }
+      else {
+        // Phew, we can do a normal lookup.
+        $results[] = array(
+          'type' => 'dynamic',
+          'expr' => $dynExpr,
+          'value' => \Civi::paths()->getPath($dynExpr),
+        );
+      }
 
-      $pathResults[] = array(
-        'type' => 'dynamic',
-        'name' => $dynExpr,
-        'value' => \CRM_Utils_File::addTrailingSlash(\Civi::paths()->getPath($fullExpr)),
-      );
-    }
-
-    if (empty($pathResults)) {
-      $output->getErrorOutput()->writeln("<error>No paths found. Must specify -x, -s, or -d. (See also: cv path -h)</error>");
-      return 1;
     }
 
     $columns = $this->parseColumns($input, array(
       'list' => array('value'),
     ));
 
-    if (!$input->getArgument('file')) {
-      $this->sendTable($input, $output, $pathResults, $columns);
-      return $returnValue;
-    }
-    else {
-      $fileResults = array();
-      foreach ($pathResults as $pathResult) {
-        foreach ($input->getArgument('file') as $file) {
-          $fileResult = $pathResult;
-          $fileResult['value'] .= $file;
-          $fileResults[] = $fileResult;
-        }
-      }
-      $this->sendTable($input, $output, $fileResults, $columns);
-      return $returnValue;
-    }
+    $this->sendTable($input, $output, $results, $columns);
+    return $returnValue;
   }
 
   /**
@@ -140,7 +144,7 @@ Examples (files):
    *
    * @param \Symfony\Component\Console\Input\InputInterface $input
    * @param array $defaultColumns
-   *   Ex: $defaultColumns['table'] = array('name', 'value').
+   *   Ex: $defaultColumns['table'] = array('expr', 'value').
    * @return array
    *   Ex: array('*') or array('value').
    */
@@ -154,6 +158,15 @@ Examples (files):
     }
     else {
       return array('*');
+    }
+  }
+
+  protected function pathJoin($folder, $file) {
+    if ($file !== NULL && $file !== FALSE) {
+      return \CRM_Utils_File::addTrailingSlash($folder) . $file;
+    }
+    else {
+      return rtrim($folder, DIRECTORY_SEPARATOR);
     }
   }
 

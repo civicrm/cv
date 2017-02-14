@@ -9,18 +9,30 @@ class PathCommandTest extends \Civi\Cv\CivilTestCase {
     parent::setup();
   }
 
-  public function testPaths() {
+  public function testNothing() {
+    $p = Process::runFail($this->cv('path'));
+    $this->assertRegExp('/Must use -x, -c, or -d/', $p->getErrorOutput());
+  }
+
+  public function testExtPaths() {
     $vars = $this->cvJsonOk('vars:show');
     $this->assertTrue(is_dir($vars['CIVI_CORE']));
     $this->assertTrue(file_exists($vars['CIVI_CORE']));
 
     // Try "cv path -x <extension>".
     $plain = rtrim($this->cvOk("path -x civicrm"), "\n");
+    $this->assertEquals(rtrim($vars['CIVI_CORE'], '/'), $plain);
+
+    $plain = rtrim($this->cvOk("path -x civicrm/"), "\n");
     $this->assertEquals($vars['CIVI_CORE'], $plain);
+
+    $plain = rtrim($this->cvOk("path -x civicrm/packages"), "\n");
+    $this->assertEquals($vars['CIVI_CORE'] . 'packages', $plain);
+
     $json = $this->cvJsonOk("path -x civicrm --out=json");
     $this->assertEquals('ext', $json[0]['type']);
-    $this->assertEquals('civicrm', $json[0]['name']);
-    $this->assertEquals($vars['CIVI_CORE'], $json[0]['value']);
+    $this->assertEquals('civicrm', $json[0]['expr']);
+    $this->assertEquals(rtrim($vars['CIVI_CORE'], '/'), $json[0]['value']);
   }
 
   public function testDynamicExprPaths() {
@@ -33,15 +45,18 @@ class PathCommandTest extends \Civi\Cv\CivilTestCase {
     }
 
     $plain = rtrim($this->cvOk("path -d '[civicrm.root]'"), "\n");
+    $this->assertEquals(rtrim($vars['CIVI_CORE'], '/'), $plain);
+
+    $plain = rtrim($this->cvOk("path -d '[civicrm.root]/'"), "\n");
     $this->assertEquals($vars['CIVI_CORE'], $plain);
 
     $plain = rtrim($this->cvOk("path -d '[civicrm.root]/packages'"), "\n");
-    $this->assertEquals($vars['CIVI_CORE'] . 'packages/', $plain);
+    $this->assertEquals($vars['CIVI_CORE'] . 'packages', $plain);
 
-    $json = $this->cvJsonOk("path -d '[civicrm.root]/packages' --out=json");
+    $json = $this->cvJsonOk("path -d '[civicrm.root]/packages/DB.php' --out=json");
     $this->assertEquals('dynamic', $json[0]['type']);
-    $this->assertEquals('[civicrm.root]/packages', $json[0]['name']);
-    $this->assertEquals($vars['CIVI_CORE'] . 'packages/', $json[0]['value']);
+    $this->assertEquals('[civicrm.root]/packages/DB.php', $json[0]['expr']);
+    $this->assertEquals($vars['CIVI_CORE'] . 'packages/DB.php', $json[0]['value']);
   }
 
   public function testConfigPaths() {
@@ -54,6 +69,7 @@ class PathCommandTest extends \Civi\Cv\CivilTestCase {
       'extensionsDir',
       'imageUploadDir',
       'templateCompileDir',
+      'templateCompileDir/en_US',
       'uploadDir',
     );
     foreach ($mandatorySettingNames as $settingName) {
