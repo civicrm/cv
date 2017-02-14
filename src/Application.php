@@ -41,6 +41,7 @@ class Application extends \Symfony\Component\Console\Application {
     $commands[] = new \Civi\Cv\Command\ExtensionUpgradeDbCommand();
     $commands[] = new \Civi\Cv\Command\FillCommand();
     $commands[] = new \Civi\Cv\Command\FlushCommand();
+    $commands[] = new \Civi\Cv\Command\PathCommand();
     $commands[] = new \Civi\Cv\Command\ShowCommand();
     $commands[] = new \Civi\Cv\Command\UrlCommand();
     if ($context !== 'repl') {
