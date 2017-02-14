@@ -27,7 +27,7 @@ class PathCommand extends BaseExtensionCommand {
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat('list'))
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated; type, expr, value)')
       ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar") or use "." for the default extensions-dir.')
-      ->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A config property. (Ex: customFileUploadDir, customPHPPathDir, customTemplateDir, extensionsDir, imageUploadDir, templateCompileDir, uploadDir)')
+      ->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A config property. (Ex: configAndLogDir, customFileUploadDir, customPHPPathDir, customTemplateDir, extensionsDir, imageUploadDir, templateCompileDir, uploadDir)')
       ->addOption('dynamic', 'd', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A dynamic path expression (Ex: "[civicrm.root]/packages")')
       ->setHelp('Look up the path to a file or directory
 

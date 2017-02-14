@@ -65,7 +65,7 @@ class PathCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertTrue(file_exists($vars['CIVI_CORE']));
 
     $mandatorySettingNames = array(
-      'customFileUploadDir',
+      'configAndLogDir',
       'extensionsDir',
       'imageUploadDir',
       'templateCompileDir',
@@ -78,6 +78,7 @@ class PathCommandTest extends \Civi\Cv\CivilTestCase {
     }
 
     $optionalSettingNames = array(
+      'customFileUploadDir',
       'customPHPPathDir',
       'customTemplateDir',
     );
