@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 
-class ExtensionPathCommand extends BaseExtensionCommand {
+class PathCommand extends BaseExtensionCommand {
 
   /**
    * @param string|null $name
