@@ -69,22 +69,22 @@ class PathCommandTest extends \Civi\Cv\CivilTestCase {
       'extensionsDir',
       'imageUploadDir',
       'templateCompileDir',
-      'templateCompileDir/en_US',
       'uploadDir',
     );
     foreach ($mandatorySettingNames as $settingName) {
       $plain = rtrim($this->cvOk("path -c $settingName"), "\n");
-      $this->assertTrue(file_exists($plain) && is_dir($plain));
+      $this->assertTrue(file_exists($plain) && is_dir($plain), "Check $settingName");
     }
 
     $optionalSettingNames = array(
       'customFileUploadDir',
       'customPHPPathDir',
       'customTemplateDir',
+      'templateCompileDir/en_US',
     );
     foreach ($optionalSettingNames as $settingName) {
       $plain = rtrim($this->cvOk("path -c $settingName"), "\n");
-      $this->assertTrue((file_exists($plain) && is_dir($plain)) || empty($plain));
+      $this->assertTrue((file_exists($plain) && is_dir($plain)) || empty($plain), "Check $settingName");
     }
   }
 

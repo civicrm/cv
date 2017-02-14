@@ -28,7 +28,7 @@ class PathCommand extends BaseExtensionCommand {
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated; type, expr, value)')
       ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar") or use "." for the default extensions-dir.')
       ->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A config property. (Ex: configAndLogDir, customFileUploadDir, customPHPPathDir, customTemplateDir, extensionsDir, imageUploadDir, templateCompileDir, uploadDir)')
-      ->addOption('dynamic', 'd', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A dynamic path expression (Ex: "[civicrm.root]/packages")')
+      ->addOption('dynamic', 'd', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A dynamic path expression (v4.7+) (Ex: "[civicrm.root]/packages")')
       ->setHelp('Look up the path to a file or directory
 
 Examples: Look extension paths
@@ -95,10 +95,15 @@ Example: Lookup multiple items
 
     foreach ($input->getOption('config') as $configExpr) {
       list ($configProperty, $file) = explode('/', $configExpr, 2);
+      $dir = \CRM_Core_Config::singleton()->{$configProperty};
+      if (version_compare(\CRM_Utils_System::version(), '4.7', '<') && $configProperty === 'templateCompileDir') {
+        // Compatibility: 4.6 has weird notion of templates_c.
+        $dir = dirname($dir);
+      }
       $results[] = array(
         'type' => 'config',
         'expr' => $configExpr,
-        'value' => $this->pathJoin(\CRM_Core_Config::singleton()->{$configProperty}, $file),
+        'value' => $this->pathJoin($dir, $file),
       );
     }
 
