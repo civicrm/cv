@@ -223,4 +223,26 @@ class BaseCommand extends Command {
     return $omittedDefault;
   }
 
+  /**
+   * Determine the columns to display.
+   *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   * @param array $defaultColumns
+   *   Ex: $defaultColumns['table'] = array('expr', 'value').
+   * @return array
+   *   Ex: array('*') or array('value').
+   */
+  protected function parseColumns(InputInterface $input, $defaultColumns = array()) {
+    $out = $input->getOption('out');
+    if ($input->getOption('columns')) {
+      return explode(',', $input->getOption('columns'));
+    }
+    elseif (isset($defaultColumns[$out])) {
+      return $defaultColumns[$out];
+    }
+    else {
+      return array('*');
+    }
+  }
+
 }
