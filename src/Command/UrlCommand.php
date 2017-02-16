@@ -45,8 +45,8 @@ Examples: Lookup URLs for extension resources
   cv url -x cividiscount/css/example.css
 
 Examples: Lookup URLs using configuration properties
-  cv url -c imageUploadUrl
-  cv url -c imageUploadUrl/example.png
+  cv url -c imageUploadURL
+  cv url -c imageUploadURL/example.png
 
 Examples: Lookup URLs using dynamic expressions
   cv url -d \'[civicrm.root]/extern/ipn.php\'
