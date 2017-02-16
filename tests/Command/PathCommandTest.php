@@ -99,14 +99,4 @@ class PathCommandTest extends \Civi\Cv\CivilTestCase {
     );
   }
 
-  protected function cvOk($cmd) {
-    $p = Process::runOk($this->cv($cmd));
-    return $p->getOutput();
-  }
-
-  protected function cvJsonOk($cmd) {
-    $p = Process::runOk($this->cv($cmd));
-    return json_decode($p->getOutput(), 1);
-  }
-
 }
