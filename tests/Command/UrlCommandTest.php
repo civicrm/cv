@@ -2,6 +2,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\Process;
+use Symfony\Component\Console\Input\InputArgument;
 
 class UrlCommandTest extends \Civi\Cv\CivilTestCase {
 
@@ -9,10 +10,9 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
     parent::setup();
   }
 
-  public function testUrl() {
+  public function testSingleRoute() {
     $url = escapeshellarg('civicrm/a/#/mailing/new?angularDebug=1&foo=bar');
-    $p = Process::runOk($this->cv("url $url"));
-    $fullUrl = json_decode($p->getOutput());
+    $fullUrl = $this->cvJsonOk("url $url");
     $this->assertNotEmpty(parse_url($fullUrl, PHP_URL_HOST));
     $this->assertNotEmpty(parse_url($fullUrl, PHP_URL_SCHEME));
     $this->assertRegExp(':angularDebug=1:', $fullUrl);
@@ -20,16 +20,29 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertRegExp(':/mailing/new:', $fullUrl);
   }
 
+  public function testMultipleRoute() {
+    $url = escapeshellarg('civicrm/a/#/mailing/new?angularDebug=1&foo=bar');
+    $urlTable = $this->cvJsonOk("url --tabular $url $url");
+    for ($i = 0; $i < 2; $i++) {
+      $fullUrl = $urlTable[$i]['value'];
+      $this->assertNotEmpty(parse_url($fullUrl, PHP_URL_HOST));
+      $this->assertNotEmpty(parse_url($fullUrl, PHP_URL_SCHEME));
+      $this->assertRegExp(':angularDebug=1:', $fullUrl);
+      $this->assertRegExp(':foo=bar:', $fullUrl);
+      $this->assertRegExp(':/mailing/new:', $fullUrl);
+    }
+  }
+
   public function testOutput() {
-    $output = $this->cvFail('url -x. -x. --out=json');
+    $output = $this->cvFail('url -x. -c extensionsURL --out=json');
     $this->assertRegExp(';specify --tabular;', $output);
 
-    $output = $this->cvJsonOk('url -x. -x. --out=json --tabular');
+    $output = $this->cvJsonOk('url -x. -c extensionsURL --out=json --tabular');
     $this->assertEquals(2, count($output));
     $this->assertRegExp(';https?://.*;', $output[0]['value']);
     $this->assertRegExp(';https?://.*;', $output[1]['value']);
 
-    $output = explode("\n", trim($this->cvOk('url -x. -x. --out=list')));
+    $output = explode("\n", trim($this->cvOk('url -x. -c extensionsURL --out=list')));
     $this->assertEquals(2, count($output));
     $this->assertRegExp(';https?://.*;', $output[0]);
     $this->assertRegExp(';https?://.*;', $output[1]);

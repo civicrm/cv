@@ -16,7 +16,7 @@ class UrlCommand extends BaseExtensionCommand {
     $this
       ->setName('url')
       ->setDescription('Compose a URL to a CiviCRM page')
-      ->addArgument('path')
+      ->addArgument('path', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, 'Relative path to a CiviCRM page, such as "civicrm/contact/view?reset=1&cid=1"')
       ->addOption('out', NULL, InputArgument::OPTIONAL, 'Specify return format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat())
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated; type, expr, value)')
       ->addOption('relative', 'r', InputOption::VALUE_NONE, 'Prefer relative URL format. (Default: absolute)')
@@ -29,7 +29,7 @@ class UrlCommand extends BaseExtensionCommand {
       // It's ambiguous whether JSON/serialize formats should stick to the old output or multi-record output.
       ->addOption('tabular', NULL, InputOption::VALUE_NONE, 'Force display in multi-record mode. (Enabled by default for list,csv,table formats.)')
       ->setHelp('
-Compose a URL to a CiviCRM page
+Compose a URL to a CiviCRM page or resource
 
 Examples: Lookup the site root
   cv url
@@ -44,15 +44,18 @@ Examples: Lookup URLs for extension resources
   cv url -x cividiscount
   cv url -x cividiscount/css/example.css
 
-Examples: Lookup URLs from configuration properties
+Examples: Lookup URLs using configuration properties
   cv url -c imageUploadUrl
   cv url -c imageUploadUrl/example.png
 
 Examples: Lookup URLs using dynamic expressions
-  cv url -d \'[civicrm.root]\'
   cv url -d \'[civicrm.root]/extern/ipn.php\'
   cv url -d \'[civicrm.files]\'
   cv url -d \'[cms.root]/index.php\'
+
+Examples: Lookup multiple URLs
+  cv url -x cividiscount -x volunteer civicrm/admin --out=table
+  cv url -x cividiscount -x volunteer civicrm/admin --out=json --tabular
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ');
@@ -73,34 +76,23 @@ NOTE: To change the default output format, set CV_OUTPUT.
         $rows[] = $this->resolveExt($extExpr, $output);
       }
     }
-    elseif ($input->getOption('dynamic')) {
+    if ($input->getOption('dynamic')) {
       foreach ($input->getOption('dynamic') as $dynExpr) {
         $rows[] = $this->resolveDynamic($dynExpr, $output);
       }
     }
-    elseif ($input->getOption('config')) {
+    if ($input->getOption('config')) {
       foreach ($input->getOption('config') as $configExpr) {
         $rows[] = $this->resolveConfig($configExpr, $output);
       }
     }
-    else {
-      $path = parse_url($input->getArgument('path'), PHP_URL_PATH);
-      $query = parse_url($input->getArgument('path'), PHP_URL_QUERY);
-      $fragment = parse_url($input->getArgument('path'), PHP_URL_FRAGMENT);
-
-      $rows[] = array(
-        'type' => 'router',
-        'expr' => $input->getArgument('path'),
-        'value' => \CRM_Utils_System::url(
-          $path,
-          $query,
-          !$input->getOption('relative'),
-          $fragment,
-          FALSE,
-          (bool) $input->getOption('frontend'),
-          (bool) !$input->getOption('frontend')
-        ),
-      );
+    if ($input->getArgument('path')) {
+      foreach ($input->getArgument('path') as $pathExpr) {
+        $rows[] = $this->resolveRoute($pathExpr, $input);
+      }
+    }
+    if (count($rows) === 0) {
+      $rows[] = $this->resolveRoute('', $input);
     }
 
     if ($input->getOption('open')) {
@@ -260,6 +252,31 @@ NOTE: To change the default output format, set CV_OUTPUT.
     else {
       return rtrim($folder, DIRECTORY_SEPARATOR);
     }
+  }
+
+  /**
+   * @param string $pathExpr
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   * @return array
+   */
+  protected function resolveRoute($pathExpr, InputInterface $input) {
+    $path = parse_url($pathExpr, PHP_URL_PATH);
+    $query = parse_url($pathExpr, PHP_URL_QUERY);
+    $fragment = parse_url($pathExpr, PHP_URL_FRAGMENT);
+
+    return array(
+      'type' => 'router',
+      'expr' => $pathExpr,
+      'value' => \CRM_Utils_System::url(
+        $path,
+        $query,
+        !$input->getOption('relative'),
+        $fragment,
+        FALSE,
+        (bool) $input->getOption('frontend'),
+        (bool) !$input->getOption('frontend')
+      ),
+    );
   }
 
 }
