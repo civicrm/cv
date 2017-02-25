@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 
 
 class ExtensionDownloadCommand extends BaseExtensionCommand {
@@ -25,6 +26,9 @@ class ExtensionDownloadCommand extends BaseExtensionCommand {
       ->setAliases(array('dl'))
       ->setDescription('Download and enable an extension')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the remote list of extensions (Default: Only refresh on cache-miss)')
+      ->addOption('no-install', NULL, InputOption::VALUE_NONE, 'Only download. Skip the installation.')
+      ->addOption('force', 'f', InputOption::VALUE_NONE, 'If an extension already exists, download it anyway.')
+      ->addOption('keep', 'k', InputOption::VALUE_NONE, 'If an extension already exists, keep it.')
       ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar"). Optionally append a URL.')
       ->setHelp('Download and enable an extension
 
@@ -92,11 +96,32 @@ Note:
     }
 
     foreach ($downloads as $key => $url) {
-      $output->writeln("<info>Downloading extension \"$key\" ($url)</info>");
-      $result = $this->callApiSuccess($input, $output, 'Extension', 'download', array(
-        'key' => $key,
-        'url' => $url,
-      ));
+      $action = $this->pickAction($input, $output, $key);
+      switch ($action) {
+        case 'download':
+          $output->writeln("<info>Downloading extension \"$key\" ($url)</info>");
+          $result = $this->callApiSuccess($input, $output, 'Extension', 'download', array(
+            'key' => $key,
+            'url' => $url,
+            'install' => !$input->getOption('no-install'),
+          ));
+          break;
+
+        case 'install':
+          $output->writeln("<info>Found extension \"$key\". Enabling.</info>");
+          $result = $this->callApiSuccess($input, $output, 'Extension', 'enable', array(
+            'key' => $key,
+          ));
+          break;
+
+        case 'abort':
+          $output->writeln("<error>Aborted</error>");
+          return 1;
+
+        default:
+          throw new \RuntimeException("Unrecognized action: $action");
+      }
+
       if (!empty($result['is_error'])) {
         return 1;
       }
@@ -192,6 +217,60 @@ Note:
       $downloads[$keyOrName] = $url;
     }
     return array($downloads, $errors);
+  }
+
+  /**
+   * Determine what action to take with the extension -- e.g. perform
+   * a real "download" or merely "install" the existing extension.
+   *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   * @param string $key
+   *   Ex: 'org.civicrm.shoreditch'.
+   * @return string
+   *   Ex: 'download', 'install', 'abort'.
+   */
+  protected function pickAction(
+    InputInterface $input,
+    OutputInterface $output,
+    $key
+  ) {
+    $existingExts = \CRM_Extension_System::singleton()
+      ->getFullContainer()->getKeys();
+
+    $action = NULL;
+    if (!in_array($key, $existingExts)) {
+      return 'download';
+    }
+    elseif ($input->getOption('keep')) {
+      return 'install';
+    }
+    elseif ($input->getOption('force')) {
+      return 'download';
+    }
+    else {
+      $helper = $this->getHelper('question');
+      $question = new ChoiceQuestion(
+        "The extension \"$key\" already exists. What you like to do?",
+        array(
+          'k' => 'Keep existing extension. (Default) (Equivalent to option "-k")',
+          'd' => 'Download anyway. (Equivalent to option "-f")',
+          'a' => 'Abort',
+        ),
+        'k'
+      );
+      switch ($helper->ask($input, $output, $question)) {
+        case 'd':
+          return 'download';
+
+        case 'k':
+          return 'install';
+
+        case 'a':
+        default:
+          return 'abort';
+      }
+    }
   }
 
 }
