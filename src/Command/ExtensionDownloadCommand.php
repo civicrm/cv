@@ -25,6 +25,7 @@ class ExtensionDownloadCommand extends BaseExtensionCommand {
       ->setAliases(array('dl'))
       ->setDescription('Download and enable an extension')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the remote list of extensions (Default: Only refresh on cache-miss)')
+      ->addOption('no-install', NULL, InputOption::VALUE_NONE, 'Only download. Skip the installation.')
       ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar"). Optionally append a URL.')
       ->setHelp('Download and enable an extension
 
@@ -96,6 +97,7 @@ Note:
       $result = $this->callApiSuccess($input, $output, 'Extension', 'download', array(
         'key' => $key,
         'url' => $url,
+        'install' => !$input->getOption('no-install'),
       ));
       if (!empty($result['is_error'])) {
         return 1;
