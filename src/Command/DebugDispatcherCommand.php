@@ -49,10 +49,10 @@ Examples:
     }
 
     ksort($listenersByEvent);
-    foreach ($listenersByEvent as $event => $listeners) {
+    foreach ($listenersByEvent as $event => $rawListeners) {
       $rows = array();
       $i = 0;
-      foreach ($listeners as $listener) {
+      foreach ($d->getListeners($event) as $listener) {
         $handled = FALSE;
         if (is_array($listener)) {
           list ($a, $b) = $listener;
