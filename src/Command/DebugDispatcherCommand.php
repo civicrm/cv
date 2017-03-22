@@ -30,7 +30,23 @@ Examples:
     $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
     $this->boot($input, $output);
 
-    $d = \Civi::service('dispatcher');
+    $container = \Civi::container();
+
+    /*
+     * Workaround: Ensure that API kernel has registered its event listeners.
+     *
+     * At time of writing (Mar 2017), civicrm-core has its list of
+     * event-listeners in two places: Container::createEventDispatcher() and
+     * Container::createApiKernel(). That's ugly. In the long term, both of
+     * these should be replaced with a more distributed+consistent mechanism
+     * (e.g. `services.yml`). However, in the mean-time, we need to ensure
+     * that the API kernel (if applicable) has its chance to register listeners.
+     */
+    if ($container->has('civi_api_kernel')) {
+      $container->get('civi_api_kernel');
+    }
+
+    $d = $container->get('dispatcher');
 
     $eventFilter = $input->getArgument('event');
     if (!$eventFilter) {
