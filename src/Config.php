@@ -43,15 +43,13 @@ class Config {
    */
   public static function getFileName() {
     if (getenv('CV_CONFIG')) {
-      $file = getenv('CV_CONFIG');
-      return $file;
+      return getenv('CV_CONFIG');
     }
     elseif (getenv('HOME')) {
-      $file = getenv('HOME') . '/.cv.json';
-      return $file;
+      return getenv('HOME') . '/.cv.json';
     }
     else {
-      throw new \RuntimeException("Failed to determine INI file path.");
+      throw new \RuntimeException("Failed to determine file path for 'cv.json'.");
     }
   }
 
