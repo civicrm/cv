@@ -78,7 +78,7 @@ Note:
 
       list ($downloads, $errors) = $this->parseDownloads($input);
       if ($refresh == 'auto' && !empty($errors)) {
-        $output->writeln("<info>Extension cache does contain requested item(s)</info>");
+        $output->writeln("<info>Extension cache does not contain requested item(s)</info>");
         $refresh = 'yes';
       }
       else {
