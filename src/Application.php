@@ -31,6 +31,7 @@ class Application extends \Symfony\Component\Console\Application {
   public function createCommands($context = 'default') {
     $commands = array();
     $commands[] = new \Civi\Cv\Command\ApiCommand();
+    $commands[] = new \Civi\Cv\Command\ApiBatchCommand();
     $commands[] = new \Civi\Cv\Command\DebugContainerCommand();
     $commands[] = new \Civi\Cv\Command\DebugDispatcherCommand();
     $commands[] = new \Civi\Cv\Command\ExtensionDownloadCommand();
