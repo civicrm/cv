@@ -34,6 +34,12 @@ class ApiBatchCommand extends BaseCommand {
 
 Examples:
   echo \'[["Contact","get",{"id":100}],["Contact","get",{"id":100}]]\' | cv api:batch
+
+Each line of input is decoded as a JSON document. The JSON document is an array
+of API calls.
+
+Each line of output is encoded as a JSON document. The JSON document is an array
+of API results.
 ');
     parent::configureBootOptions();
   }
@@ -44,17 +50,34 @@ Examples:
       throw new \Exception("api:batch only supports JSON dialog");
     }
     $this->boot($input, $output);
+    $lineNum = 0;
 
     // stream_set_blocking(STDIN, 0);
     while (FALSE !== ($line = fgets(STDIN))) {
+      $lineNum++;
+      $line = trim($line);
+      if (empty($line)) {
+        continue;
+      }
+
       $todos = json_decode($line, TRUE);
       $result = array();
-      foreach ($todos as $k => $api) {
-        list ($entity, $action, $params) = $api;
-        if (!isset($params['version'])) {
-          $params['version'] = 3;
+      if ($todos === NULL) {
+        fwrite(STDERR, sprintf("JSON cannot be decoded (line $lineNum)"));
+      }
+      else {
+        foreach ($todos as $k => $api) {
+          if (!is_array($api) || !isset($api[1]) || !is_string($api[0]) || !is_string($api[1])) {
+            fwrite(STDERR, "JSON data is structured incorrectly (line $lineNum)\n");
+            $result[$k] = array('is_error' => 1, 'error_message' => "JSON data is structured incorrectly (line $lineNum)");
+            continue;
+          }
+          list ($entity, $action, $params) = $api;
+          if (!isset($params['version'])) {
+            $params['version'] = 3;
+          }
+          $result[$k] = \civicrm_api($entity, $action, $params);
         }
-        $result[$k] = \civicrm_api($entity, $action, $params);
       }
       echo json_encode($result);
       echo "\n";
