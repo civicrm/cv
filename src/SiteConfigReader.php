@@ -107,7 +107,7 @@ class SiteConfigReader {
         ? \Civi::paths()->getUrl('[civicrm.root]/', 'absolute')
         : '',
       'CIVI_FILES' => $paths
-        ? \Civi::paths()->getPath('[civicrm.root]/.')
+        ? \Civi::paths()->getPath('[civicrm.files]/.')
         : dirname(\CRM_Core_Config::singleton()->templateCompileDir), // ugh
     );
 
