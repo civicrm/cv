@@ -63,6 +63,7 @@ Returns a JSON object with the properties:
     // `upgradeReport` List of upgrade messages [[WRITE-ONCE]]
     // `finished`      Time (seconds since epoch) at which we generated the finish report [[WRITE-ONCE]]
     // `finishReport`  JSON report from "System.get" [[WRITE-ONCE]]
+    // `testsReport`   JSON report from a testing suite
 
     $opts = $input->getOptions();
 
@@ -77,6 +78,7 @@ Returns a JSON object with the properties:
     // Set up identity of report
     $report = array(
       'siteId' => \Civi\Cv\Util\Cv::run("ev \"return md5('We need to talk about your TPS reports' . CIVICRM_SITE_KEY);\" --level=settings"),
+      'cvVersion' => '@package_version@',
     );
 
     if ($opts['downloadurl']) {
@@ -171,7 +173,24 @@ Returns a JSON object with the properties:
     catch (\Exception $e) {
       $report = array('error' => 'Could not produce report');
     }
+    $vars = \Civi\Cv\Util\Cv::run('vars:show');
+    $domain = empty($vars['CMS_URL']) ? NULL : preg_replace(";https?://;", '', $vars['CMS_URL']);
+    $this->recursiveRedact($report, $domain);
     return $report;
+  }
+
+  protected function recursiveRedact(&$report, $domain) {
+    foreach ($report as $k => &$v) {
+      if (is_array($v)) {
+        $this->recursiveRedact($v, $domain);
+      }
+      elseif ($v == "REDACTED") {
+        unset($report[$k]);
+      }
+      elseif ($domain) {
+        $v = preg_replace(";(https?://)?$domain;", 'REDACTEDURL/', $v);
+      }
+    }
   }
 
   /**
