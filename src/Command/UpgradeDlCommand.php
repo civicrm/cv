@@ -76,7 +76,7 @@ Returns a JSON object with the properties:
     );
 
     // Rsync the files into place
-    $dest = $vars['CIVI_FILES'];
+    $dest = $vars['CIVI_CORE'];
     switch ($cms) {
       case 'WordPress':
         // Drop the final "civicrm/" from the file path, otherwise the same as Drupal

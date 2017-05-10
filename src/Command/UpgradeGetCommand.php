@@ -76,7 +76,7 @@ Returns a JSON object with the properties:
         $result['git'] = $lookup['git'];
       }
       if (!empty($lookup['tar'][$cms])) {
-        $result['path'] = $lookup['tar'][$cms];
+        $result['url'] = $lookup['tar'][$cms];
       }
     }
 
