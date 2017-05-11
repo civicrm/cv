@@ -75,7 +75,7 @@ Returns a JSON object with the properties:
     );
 
     // Figure mode(s) for the report
-    $reportProblems = $modes = array();
+    $modes = array();
     foreach (self::REPORT_MODES as $mode) {
       if (!$input->hasParameterOption("--$mode")) {
         continue;
@@ -85,67 +85,19 @@ Returns a JSON object with the properties:
       $report[$mode] = $modes[$mode] = $modeTime;
     }
 
-    // Check required fields for the mode(s)
-    $requirements = array(
-      'downloaded' => array(
-        'downloadurl' => array(
-          'label' => 'download URL',
-          'reportkey' => 'downloadurl',
-        ),
-      ),
-      'upgraded' => array(
-        'upgrademessages' => array(
-          'label' => 'upgrade messages',
-          'reportkey' => 'upgradeReport',
-        ),
-      ),
-      'problem' => array(
-        'problemmessage' => array(
-          'label' => 'problem message',
-          'reportkey' => 'problemmessage',
-        ),
-      ),
-    );
-    foreach ($requirements as $reqMode => $reqs) {
-      foreach ($reqs as $reqOpt => $req) {
-        if ($input->hasParameterOption("--$reqOpt")) {
-          $report[$req['reportkey']] = $input->getOption($reqOpt);
-        }
-        elseif (array_key_exists($reqMode, $modes)) {
-          $reportProblems[] = "You must specify the {$req['label']} as --$reqOpt.";
-        }
-      }
-    }
-
-    // Find or create name
-    $initialModes = array(
-      'started',
-      'problem',
-    );
-    if (!($report['name'] = $input->getOption('name'))) {
-      if (empty(array_intersect($initialModes, array_keys($modes)))) {
-        $reportProblems[] = 'Unless you are sending a start report (with --started or --problem), you must specify the report name (with --name)';
-      }
-      else {
-        $report['name'] = $this->createName($report);
-      }
-    }
-
-    // Check that we're not trying to report a start when it's too late
-    if (array_key_exists('started', $modes)) {
-      $tooLate = array(
-        'extracted',
-        'upgraded',
-        'finished',
-      );
-      if (!empty(array_intersect($tooLate, array_keys($modes)))) {
-        $reportProblems[] = "You can't report a start once you have extracted or upgraded. Use --problem instead.";
-      }
-    }
+    $reportProblems = $this->checkReport($input, $report);
 
     // For now, just throw an exception if the report is bad.
     if (!empty($reportProblems)) {
       throw new \RuntimeException(implode("\n", $reportProblems));
+    }
+
+    // Swap the problem timestamp to `failed` and the problem message to
+    // `problem` to match civicrm.org's expectations.
+    if (!empty($report['problem'])) {
+      $report['failed'] = $report['problem'];
+      $report['problem'] = $report['problemmessage'];
+      unset($report['problemmessage']);
     }
 
     // Set up identity of report
@@ -161,19 +113,14 @@ Returns a JSON object with the properties:
       'finished',
     );
 
-    $reportsToSend = array_intersect_key(array_fill_keys($reportPoints, NULL), $modes);
+    $reportsToSend = array_intersect($reportPoints, array_keys($report));
 
     if (!empty($reportsToSend)) {
       $systemReport = $this->systemReport();
-      foreach ($reportsToSend as $stage => $x) {
+      foreach ($reportsToSend as $stage) {
         $key = preg_replace('/ed$/', 'Report', $stage);
         $report[$key] = $systemReport;
       }
-    }
-
-    if (!empty($report['problem'])) {
-      $report['failed'] = $report['problem'];
-      $report['problem'] = $input->getOption('problemmessage') ?: 'No problem message';
     }
 
     // Send report
@@ -211,6 +158,69 @@ Returns a JSON object with the properties:
     $domain = empty($vars['CMS_URL']) ? NULL : preg_replace(";https?://;", '', $vars['CMS_URL']);
     $this->recursiveRedact($report, $domain);
     return $report;
+  }
+
+  protected function checkReport($input, &$report) {
+    $reportProblems = array();
+    // Check required fields for the mode(s)
+    $requirements = array(
+      'downloaded' => array(
+        'downloadurl' => array(
+          'label' => 'download URL',
+          'reportkey' => 'downloadurl',
+        ),
+      ),
+      'upgraded' => array(
+        'upgrademessages' => array(
+          'label' => 'upgrade messages',
+          'reportkey' => 'upgradeReport',
+        ),
+      ),
+      'problem' => array(
+        'problemmessage' => array(
+          'label' => 'problem message',
+          'reportkey' => 'problemmessage',
+        ),
+      ),
+    );
+    foreach ($requirements as $reqMode => $reqs) {
+      foreach ($reqs as $reqOpt => $req) {
+        if ($input->hasParameterOption("--$reqOpt")) {
+          $report[$req['reportkey']] = $input->getOption($reqOpt);
+        }
+        elseif (array_key_exists($reqMode, $report)) {
+          $reportProblems[] = "You must specify the {$req['label']} as --$reqOpt.";
+        }
+      }
+    }
+
+    // Find or create name
+    $initialModes = array(
+      'started',
+      'problem',
+    );
+    if (!($report['name'] = $input->getOption('name'))) {
+      if (empty(array_intersect($initialModes, array_keys($report)))) {
+        $reportProblems[] = 'Unless you are sending a start report (with --started or --problem), you must specify the report name (with --name)';
+      }
+      else {
+        $report['name'] = $this->createName($report);
+      }
+    }
+
+    // Check that we're not trying to report a start when it's too late
+    if (array_key_exists('started', $report)) {
+      $tooLate = array(
+        'extracted',
+        'upgraded',
+        'finished',
+      );
+      if (!empty(array_intersect($tooLate, array_keys($report)))) {
+        $reportProblems[] = "You can't report a start once you have extracted or upgraded. Use --problem instead.";
+      }
+    }
+
+    return $reportProblems;
   }
 
   protected function recursiveRedact(&$report, $domain) {
