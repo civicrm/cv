@@ -14,34 +14,39 @@ use Symfony\Component\Console\Output\OutputInterface;
 class UpgradeReportCommand extends BaseCommand {
   const DEFAULT_REPORT_URL = 'https://upgrade.civicrm.org/report';
 
+  const REPORT_MODES = array(
+    'started',
+    'downloaded',
+    'extracted',
+    'upgraded',
+    'finished',
+    'problem',
+  );
+
   protected function configure() {
     $this
       ->setName('upgrade:report')
       ->setDescription('Notify civicrm.org of your upgrade success or failure')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat())
       ->addOption('name', NULL, InputOption::VALUE_REQUIRED, 'Specify the name to link the report to past reports on the same upgrade')
-      ->addOption('started', NULL, InputOption::VALUE_NONE, 'Send a "started" report')
-      ->addOption('started-time', NULL, InputOption::VALUE_REQUIRED, 'Send a "started" report with a specified timestamp')
       ->addOption('downloadurl', NULL, InputOption::VALUE_REQUIRED, 'Indicate the URL for the download attempt')
-      ->addOption('downloaded', NULL, InputOption::VALUE_NONE, 'Send a "downloaded" report')
-      ->addOption('downloaded-time', NULL, InputOption::VALUE_REQUIRED, 'Send a "downloaded" report with a specified timestamp')
-      ->addOption('extracted', NULL, InputOption::VALUE_NONE, 'Send an "extracted" report')
-      ->addOption('extracted-time', NULL, InputOption::VALUE_REQUIRED, 'Send an "extracted" report with a specified timestamp')
-      ->addOption('upgraded', NULL, InputOption::VALUE_REQUIRED, 'Send an "upgraded" report (provide array of upgrade messages and version)')
-      ->addOption('upgraded-time', NULL, InputOption::VALUE_REQUIRED, 'Send an "upgraded" report with a specified timestamp')
-      ->addOption('finished', NULL, InputOption::VALUE_NONE, 'Send a "finished" report')
-      ->addOption('finished-time', NULL, InputOption::VALUE_REQUIRED, 'Send a "finished" report with a specified timestamp')
-      ->addOption('problem', NULL, InputOption::VALUE_REQUIRED, "Report a problem with the upgrade (if you haven't already reported that you started).  Value should be the stage where the problem occurred (download, extract, upgrade).")
+      ->addOption('upgrademessages', NULL, InputOption::VALUE_REQUIRED, 'Provide array of upgrade messages and version')
+      ->addOption('problemmessage', NULL, InputOption::VALUE_REQUIRED, 'Provide a message about the problem')
       ->addOption('reporter', NULL, InputOption::VALUE_REQUIRED, "Your email address so you can be contacted with questions")
       ->setHelp('Notify civicrm.org of your upgrade success or failure
 
 Examples:
-  cv upgrade:report --started-time=1475079931 --downloaded
+  cv upgrade:report --started=1475079931 --downloaded
 
 Returns a JSON object with the properties:
   name      The name under which the report was issued
 
 ');
+
+    foreach (self::REPORT_MODES as $mode) {
+      $this->addOption($mode, NULL, InputOption::VALUE_OPTIONAL, "Send a \"$mode\" report, optionally with a timestamp");
+    }
+
     parent::configureBootOptions();
   }
 
@@ -65,10 +70,54 @@ Returns a JSON object with the properties:
     // `finishReport`  JSON report from "System.get" [[WRITE-ONCE]]
     // `testsReport`   JSON report from a testing suite
 
-    $opts = $input->getOptions();
+    $report = array(
+      'cvVersion' => '@package_version@',
+    );
 
-    // Check for required fields, etc.
-    $reportProblems = $this->checkReport($opts);
+    // Figure mode(s) for the report and check required fields for the mode
+    $reportProblems = $modes = array();
+    $tooLate = array(
+      'extracted',
+      'upgraded',
+      'finished',
+    );
+    $initialModes = array(
+      'started',
+      'problem',
+    );
+    foreach (self::REPORT_MODES as $mode) {
+      if (!$input->hasParameterOption("--$mode")) {
+        continue;
+      }
+      $modeTime = $input->getOption($mode) ?: time();
+
+      if (in_array($mode, $tooLate) && in_array('started', $modes)) {
+        $reportProblems[] = "You can't report a start once you have extracted or upgraded. Use --problem instead.";
+      }
+
+      // A --downloaded report needs a download URL.
+      if ($input->hasParameterOption('--downloadurl')) {
+        $report['downloadurl'] = $input->getOption('downloadurl');
+      }
+      elseif ($mode == 'downloaded') {
+        $reportProblems[] = 'You must specify the download URL as --downloadurl.';
+      }
+
+      // Require --name if this upgrade has been reported already
+      if (!empty($report['name'])) {
+        // Just excluding this case from elses
+      }
+      elseif ($reportName = $input->getOption('name')) {
+        $report['name'] = $reportName;
+      }
+      elseif (in_array($mode, $initialModes)) {
+        $report['name'] = $this->createName($report);
+      }
+      else {
+        $reportProblems[] = 'Unless you are sending a start report (with --started or --problem), you must specify the report name (with --name)';
+      }
+      $report[$mode] = $modes[$mode] = $modeTime;
+    }
 
     // For now, just throw an exception if the report is bad.
     if (!empty($reportProblems)) {
@@ -76,70 +125,31 @@ Returns a JSON object with the properties:
     }
 
     // Set up identity of report
-    $report = array(
-      'siteId' => \Civi\Cv\Util\Cv::run("ev \"return md5('We need to talk about your TPS reports' . CIVICRM_SITE_KEY);\" --level=settings"),
-      'cvVersion' => '@package_version@',
-    );
+    $report['siteId'] = \Civi\Cv\Util\Cv::run("ev \"return md5('We need to talk about your TPS reports' . CIVICRM_SITE_KEY);\" --level=settings");
 
-    if ($opts['downloadurl']) {
-      $report['downloadUrl'] = $opts['downloadurl'];
+    if ($input->hasParameterOption('--reporter')) {
+      $report['reporter'] = $input->getOption('reporter');
     }
 
-    if ($opts['reporter']) {
-      $report['reporter'] = $opts['reporter'];
-    }
-
-    if ($opts['started'] || $opts['started-time']) {
-      $report['started'] = ($opts['started-time']) ?: time();
-      $report['startReport'] = $this->systemReport();
-      $report['name'] = ($opts['name']) ?: $this->createName($report);
-    }
-
-    if ($opts['problem']) {
-      $report['isProblem'] = TRUE;
-      switch ($opts['problem']) {
-        case 'upgrade':
-        case 'upgraded':
-          $report['upgraded'] = ($opts['upgraded-time']) ?: time();
-
-        case 'extract':
-        case 'extracted':
-          $report['extracted'] = ($opts['extracted-time']) ?: time();
-
-        case 'download':
-        case 'downloaded':
-          $report['downloaded'] = ($opts['downloaded-time']) ?: time();
-          break;
-      }
-      $report['name'] = ($opts['name']) ?: $this->createName($report);
-      $report['failed'] = time();
-
-      $report['problem'] = $this->systemReport();
-    }
-    elseif ($opts['name']) {
-      $report['name'] = $opts['name'];
-    }
-
-    foreach (array(
-      'downloaded',
-      'extracted',
+    $reportPoints = array(
+      'started',
       'upgraded',
       'finished',
-    ) as $r) {
-      if ($opts[$r . 'time']) {
-        $report[$r] = $opts[$r . 'time'];
-      }
-      elseif ($opts[$r]) {
-        $report[$r] = time();
+    );
+
+    $reportsToSend = array_intersect_key(array_fill_keys($reportPoints, NULL), $modes);
+
+    if (!empty($reportsToSend)) {
+      $systemReport = $this->systemReport();
+      foreach ($reportsToSend as $stage => $x) {
+        $key = preg_replace('/ed$/', 'Report', $stage);
+        $report[$key] = $systemReport;
       }
     }
 
-    if (!empty($opts['upgraded'])) {
-      $report['upgradeReport'] = json_decode($opts['upgraded'], TRUE);
-    }
-
-    if ($opts['finished'] || $opts['finished-time']) {
-      $report['finishReport'] = $this->systemReport();
+    if (!empty($report['problem'])) {
+      $report['failed'] = $report['problem'];
+      $report['problem'] = $input->getOption('problemmessage', 'No problem message');
     }
 
     // Send report
@@ -157,6 +167,7 @@ Returns a JSON object with the properties:
    *   The name to use
    */
   protected function createName($report) {
+    return 'dave';
     return md5(json_encode($report) . uniqid() . rand() . rand() . rand());
   }
 
@@ -191,48 +202,6 @@ Returns a JSON object with the properties:
         $v = preg_replace(";(https?://)?$domain;", 'REDACTEDURL/', $v);
       }
     }
-  }
-
-  /**
-   * Check to see if the report contains necessary information.
-   *
-   * @param array $opts
-   *   The options submitted to upgrade:report
-   * @return array
-   *   Message(s) about any problems found.
-   */
-  protected function checkReport($opts) {
-    $probs = array();
-
-    // Don't accept --start once the upgrade has gotten too far
-    if ($opts['started'] || $opts['started-time']) {
-      // Steps that occur after a useful start report could be produced:
-      $tooLate = array(
-        'extracted',
-        'extracted-time',
-        'upgraded',
-        'upgraded-time',
-        'finished',
-        'finished-time',
-      );
-      foreach ($tooLate as $too) {
-        if ($opts[$too]) {
-          $probs[] = "You can't report a start once you have extracted or upgraded. Use --problem instead.";
-        }
-      }
-    }
-
-    // A --downloaded report needs a download URL.
-    if (($opts['downloaded'] || $opts['downloaded-time']) && !$opts['downloadurl']) {
-      $probs[] = 'You must specify the download URL as --downloadUrl.';
-    }
-
-    // Require --name if this upgrade has been reported already
-    if (!($opts['started'] || $opts['started-time'] || $opts['problem']) && !$opts['name']) {
-      $probs[] = 'Unless you are sending a start report (with --started, --started-time, or --problem), you must specify the report name (with --name)';
-    }
-
-    return $probs;
   }
 
   protected function reportToCivi($report) {
