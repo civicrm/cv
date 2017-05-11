@@ -74,49 +74,73 @@ Returns a JSON object with the properties:
       'cvVersion' => '@package_version@',
     );
 
-    // Figure mode(s) for the report and check required fields for the mode
+    // Figure mode(s) for the report
     $reportProblems = $modes = array();
-    $tooLate = array(
-      'extracted',
-      'upgraded',
-      'finished',
-    );
-    $initialModes = array(
-      'started',
-      'problem',
-    );
     foreach (self::REPORT_MODES as $mode) {
       if (!$input->hasParameterOption("--$mode")) {
         continue;
       }
       $modeTime = $input->getOption($mode) ?: time();
 
-      if (in_array($mode, $tooLate) && in_array('started', $modes)) {
-        $reportProblems[] = "You can't report a start once you have extracted or upgraded. Use --problem instead.";
-      }
+      $report[$mode] = $modes[$mode] = $modeTime;
+    }
 
-      // A --downloaded report needs a download URL.
-      if ($input->hasParameterOption('--downloadurl')) {
-        $report['downloadurl'] = $input->getOption('downloadurl');
+    // Check required fields for the mode(s)
+    $requirements = array(
+      'downloaded' => array(
+        'downloadurl' => array(
+          'label' => 'download URL',
+          'reportkey' => 'downloadurl',
+        ),
+      ),
+      'upgraded' => array(
+        'upgrademessages' => array(
+          'label' => 'upgrade messages',
+          'reportkey' => 'upgradeReport',
+        ),
+      ),
+      'problem' => array(
+        'problemmessage' => array(
+          'label' => 'problem message',
+          'reportkey' => 'problemmessage',
+        ),
+      ),
+    );
+    foreach ($requirements as $reqMode => $reqs) {
+      foreach ($reqs as $reqOpt => $req) {
+        if ($input->hasParameterOption("--$reqOpt")) {
+          $report[$req['reportkey']] = $input->getOption($reqOpt);
+        }
+        elseif (array_key_exists($reqMode, $modes)) {
+          $reportProblems[] = "You must specify the {$req['label']} as --$reqOpt.";
+        }
       }
-      elseif ($mode == 'downloaded') {
-        $reportProblems[] = 'You must specify the download URL as --downloadurl.';
-      }
+    }
 
-      // Require --name if this upgrade has been reported already
-      if (!empty($report['name'])) {
-        // Just excluding this case from elses
-      }
-      elseif ($reportName = $input->getOption('name')) {
-        $report['name'] = $reportName;
-      }
-      elseif (in_array($mode, $initialModes)) {
-        $report['name'] = $this->createName($report);
-      }
-      else {
+    // Find or create name
+    $initialModes = array(
+      'started',
+      'problem',
+    );
+    if (!($report['name'] = $input->getOption('name'))) {
+      if (empty(array_intersect($initialModes, array_keys($modes)))) {
         $reportProblems[] = 'Unless you are sending a start report (with --started or --problem), you must specify the report name (with --name)';
       }
-      $report[$mode] = $modes[$mode] = $modeTime;
+      else {
+        $report['name'] = $this->createName($report);
+      }
+    }
+
+    // Check that we're not trying to report a start when it's too late
+    if (array_key_exists('started', $modes)) {
+      $tooLate = array(
+        'extracted',
+        'upgraded',
+        'finished',
+      );
+      if (!empty(array_intersect($tooLate, array_keys($modes)))) {
+        $reportProblems[] = "You can't report a start once you have extracted or upgraded. Use --problem instead.";
+      }
     }
 
     // For now, just throw an exception if the report is bad.
@@ -149,7 +173,7 @@ Returns a JSON object with the properties:
 
     if (!empty($report['problem'])) {
       $report['failed'] = $report['problem'];
-      $report['problem'] = $input->getOption('problemmessage', 'No problem message');
+      $report['problem'] = $input->getOption('problemmessage') ?: 'No problem message';
     }
 
     // Send report
@@ -167,7 +191,6 @@ Returns a JSON object with the properties:
    *   The name to use
    */
   protected function createName($report) {
-    return 'dave';
     return md5(json_encode($report) . uniqid() . rand() . rand() . rand());
   }
 
