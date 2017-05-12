@@ -14,14 +14,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 class UpgradeReportCommand extends BaseCommand {
   const DEFAULT_REPORT_URL = 'https://upgrade.civicrm.org/report';
 
-  const REPORT_MODES = array(
-    'started',
-    'downloaded',
-    'extracted',
-    'upgraded',
-    'finished',
-    'problem',
-  );
+  public static function getReportModes() {
+    return array(
+      'started',
+      'downloaded',
+      'extracted',
+      'upgraded',
+      'finished',
+      'problem',
+    );
+  }
 
   protected function configure() {
     $this
@@ -43,7 +45,7 @@ Returns a JSON object with the properties:
 
 ');
 
-    foreach (self::REPORT_MODES as $mode) {
+    foreach (self::getReportModes() as $mode) {
       $this->addOption($mode, NULL, InputOption::VALUE_OPTIONAL, "Send a \"$mode\" report, optionally with a timestamp");
     }
 
@@ -76,7 +78,7 @@ Returns a JSON object with the properties:
 
     // Figure mode(s) for the report
     $modes = array();
-    foreach (self::REPORT_MODES as $mode) {
+    foreach (self::getReportModes() as $mode) {
       if (!$input->hasParameterOption("--$mode")) {
         continue;
       }
@@ -200,7 +202,7 @@ Returns a JSON object with the properties:
       'problem',
     );
     if (!($report['name'] = $input->getOption('name'))) {
-      if (empty(array_intersect($initialModes, array_keys($report)))) {
+      if (!array_intersect($initialModes, array_keys($report))) {
         $reportProblems[] = 'Unless you are sending a start report (with --started or --problem), you must specify the report name (with --name)';
       }
       else {
@@ -215,7 +217,7 @@ Returns a JSON object with the properties:
         'upgraded',
         'finished',
       );
-      if (!empty(array_intersect($tooLate, array_keys($report)))) {
+      if (array_intersect($tooLate, array_keys($report))) {
         $reportProblems[] = "You can't report a start once you have extracted or upgraded. Use --problem instead.";
       }
     }
@@ -243,8 +245,9 @@ Returns a JSON object with the properties:
         $part = json_encode($part);
       }
     }
+
     $ch = curl_init(self::DEFAULT_REPORT_URL);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $report);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($report));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     $response = curl_exec($ch);
     curl_close($ch);
