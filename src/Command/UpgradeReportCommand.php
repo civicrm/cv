@@ -33,7 +33,7 @@ class UpgradeReportCommand extends BaseCommand {
       ->addOption('name', NULL, InputOption::VALUE_REQUIRED, 'Specify the name to link the report to past reports on the same upgrade')
       ->addOption('revision', NULL, InputOption::VALUE_REQUIRED, 'Precise revision being installed (e.g. 4.7.16-201701020304)')
       ->addOption('download-url', NULL, InputOption::VALUE_REQUIRED, 'Indicate the URL for the download attempt')
-      ->addOption('upgrade-messages', NULL, InputOption::VALUE_REQUIRED, 'Provide array of upgrade messages and version')
+      ->addOption('upgrade-messages', NULL, InputOption::VALUE_REQUIRED, 'Provide a file of upgrade messages')
       ->addOption('problem-message', NULL, InputOption::VALUE_REQUIRED, 'Provide a message about the problem')
       ->addOption('reporter', NULL, InputOption::VALUE_REQUIRED, "Your email address so you can be contacted with questions")
       ->setHelp('Notify civicrm.org of your upgrade success or failure
