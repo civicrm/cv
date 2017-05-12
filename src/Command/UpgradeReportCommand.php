@@ -61,14 +61,13 @@ Returns a JSON object with the properties:
     );
 
     // Figure mode(s) for the report
-    $modes = array();
     foreach (self::getReportModes() as $mode) {
       if (!$input->hasParameterOption("--$mode")) {
         continue;
       }
       $modeTime = $input->getOption($mode) ?: time();
 
-      $report[$mode] = $modes[$mode] = $modeTime;
+      $report[$mode] = $modeTime;
     }
 
     $reportProblems = $this->checkReport($input, $report);
@@ -148,6 +147,13 @@ Returns a JSON object with the properties:
 
   protected function checkReport($input, &$report) {
     $reportProblems = array();
+
+    // Make sure at least one report mode is used
+    $reportModes = self::getReportModes();
+    if (empty(array_intersect($reportModes, array_keys($report)))) {
+      $modeList = '--' . implode(', --', $reportModes);
+      $reportProblems[] = "Your report must include one of the following arguments: $modeList";
+    }
     // Check required fields for the mode(s)
     $requirements = array(
       'downloaded' => array(
