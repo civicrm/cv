@@ -53,24 +53,8 @@ Returns a JSON object with the properties:
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    // POST https://upgrade.civicrm.org/report
-    // Content-type: application/x-www-form-urlencoded
-    //
-    // `name`          Always required.
-    // `site_id`       An identifier of the site that carries over between upgrades
-    // `reporter`      An email address for contacting someone.
-    // `status`        'running', 'successful', or 'failed'
-    // `stage`         Read-only value computed from timestamps.
-    // `downloadUrl`   The URL used to setup [[WRITE-ONCE]]
-    // `started`       Time (seconds since epoch) at which we generated the start report  [[WRITE-ONCE]]
-    // `startReport`   JSON report from "System.get" [[WRITE-ONCE]]
-    // `downloaded`    Time (seconds since epoch) at which the download completed[[WRITE-ONCE]]
-    // `extracted`     Time (seconds since epoch) at which the tarball finished extraction [[WRITE-ONCE]]
-    // `upgraded`      Time (seconds since epoch) at which the DB upgrade  [[WRITE-ONCE]]
-    // `upgradeReport` List of upgrade messages [[WRITE-ONCE]]
-    // `finished`      Time (seconds since epoch) at which we generated the finish report [[WRITE-ONCE]]
-    // `finishReport`  JSON report from "System.get" [[WRITE-ONCE]]
-    // `testsReport`   JSON report from a testing suite
+    // $report will be POSTed too https://upgrade.civicrm.org/report.
+    // See also: https://github.com/civicrm/civicrm-dist-manager#route-post-report-web-service
 
     $report = array(
       'cvVersion' => '@package_version@',
