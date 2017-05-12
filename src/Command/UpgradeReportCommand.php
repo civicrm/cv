@@ -31,10 +31,10 @@ class UpgradeReportCommand extends BaseCommand {
       ->setDescription('Notify civicrm.org of your upgrade success or failure')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat())
       ->addOption('name', NULL, InputOption::VALUE_REQUIRED, 'Specify the name to link the report to past reports on the same upgrade')
+      ->addOption('revision', NULL, InputOption::VALUE_REQUIRED, 'Precise revision being installed (e.g. 4.7.16-201701020304)')
       ->addOption('download-url', NULL, InputOption::VALUE_REQUIRED, 'Indicate the URL for the download attempt')
       ->addOption('upgrade-messages', NULL, InputOption::VALUE_REQUIRED, 'Provide array of upgrade messages and version')
       ->addOption('problem-message', NULL, InputOption::VALUE_REQUIRED, 'Provide a message about the problem')
-      ->addOption('revision', NULL, InputOption::VALUE_OPTIONAL, 'Precise revision being installed (e.g. 4.7.16-201701020304)')
       ->addOption('reporter', NULL, InputOption::VALUE_REQUIRED, "Your email address so you can be contacted with questions")
       ->setHelp('Notify civicrm.org of your upgrade success or failure
 
@@ -78,15 +78,16 @@ Returns a JSON object with the properties:
       throw new \RuntimeException(implode("\n", $reportProblems));
     }
 
+    // Retrieve file of upgrade messages
+    if (!empty($report['upgradeReport'])) {
+      $report['upgradeReport'] = file_get_contents($report['upgradeReport']);
+    }
+
     // Set up identity of report
-    $report['siteId'] = \Civi\Cv\Util\Cv::run("ev \"return md5('We need to talk about your TPS reports' . CIVICRM_SITE_KEY);\" --level=settings");
+    $report['siteId'] = md5('We need to talk about your TPS reports' . CIVICRM_SITE_KEY);
 
     if ($input->hasParameterOption('--reporter')) {
       $report['reporter'] = $input->getOption('reporter');
-    }
-
-    if ($input->hasParameterOption('--revision')) {
-      $report['revision'] = $input->getOption('revision');
     }
 
     $reportPoints = array(
@@ -153,6 +154,12 @@ Returns a JSON object with the properties:
     }
     // Check required fields for the mode(s)
     $requirements = array(
+      'started' => array(
+        'revision' => array(
+          'label' => 'revision number',
+          'reportkey' => 'revision',
+        ),
+      ),
       'downloaded' => array(
         'download-url' => array(
           'label' => 'download URL',
@@ -169,6 +176,10 @@ Returns a JSON object with the properties:
         'problem-message' => array(
           'label' => 'problem message',
           'reportkey' => 'problem',
+        ),
+        'revision' => array(
+          'label' => 'revision number',
+          'reportkey' => 'revision',
         ),
       ),
     );
