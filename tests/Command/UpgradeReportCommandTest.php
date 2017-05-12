@@ -8,7 +8,7 @@ class UpgradeGetCommandTest extends \Civi\Cv\CivilTestCase {
   }
 
   public function testStartReport() {
-    $p = $this->cv("upgrade:report --started");
+    $p = $this->cv("upgrade:report --started --revision=4.7.123-202601040252");
     $p->run();
     $data = json_decode($p->getOutput(), 1);
     $this->assertTrue(isset($data['name']), 'Looking for name in output: ' . $p->getOutput());

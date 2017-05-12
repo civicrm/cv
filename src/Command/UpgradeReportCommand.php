@@ -39,7 +39,7 @@ class UpgradeReportCommand extends BaseCommand {
       ->setHelp('Notify civicrm.org of your upgrade success or failure
 
 Examples:
-  cv upgrade:report --started=1475079931 --downloaded
+  cv upgrade:report --started=1475079931
 
 Returns a JSON object with the properties:
   name      The name under which the report was issued
@@ -84,7 +84,7 @@ Returns a JSON object with the properties:
     }
 
     // Set up identity of report
-    $report['siteId'] = md5('We need to talk about your TPS reports' . CIVICRM_SITE_KEY);
+    $report['siteId'] = \Civi\Cv\Util\Cv::run("ev \"return md5('We need to talk about your TPS reports' . CIVICRM_SITE_KEY);\" --level=settings");
 
     if ($input->hasParameterOption('--reporter')) {
       $report['reporter'] = $input->getOption('reporter');
