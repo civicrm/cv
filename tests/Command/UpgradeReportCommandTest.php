@@ -21,7 +21,7 @@ class UpgradeGetCommandTest extends \Civi\Cv\CivilTestCase {
   public function testSetName() {
     $name = '1776521f994630387110d2c79aa0e91e';
     $downloadedTime = 1494615613;
-    $p = $this->cv("upgrade:report --downloaded $downloadedTime --downloadurl https://download.civicrm.org/civicrm-4.7.123-drupal9.tar.gz --extracted --name $name");
+    $p = $this->cv("upgrade:report --downloaded $downloadedTime --download-url https://download.civicrm.org/civicrm-4.7.123-drupal9.tar.gz --extracted --name $name");
     $p->run();
     $data = json_decode($p->getOutput(), 1);
     $this->assertEquals($name, $data['name'], 'Report name does not match the provided name.');
@@ -45,9 +45,9 @@ class UpgradeGetCommandTest extends \Civi\Cv\CivilTestCase {
   //     ),
   //   );
   //   $messages = json_encode($messageArray);
-  //   $p = $this->cv("upgrade:report --upgraded --upgrademessages=/dev/stdin --name $name");
+  //   $p = $this->cv("upgrade:report --upgraded --upgrade-messages=/dev/stdin --name $name");
   //   $p->setOptions(array(
-  //     'upgrademessages' => $messageArray,
+  //     'upgrade-messages' => $messageArray,
   //   ));
   //   $p->run();
   //   $data = json_decode($p->getOutput(), 1);

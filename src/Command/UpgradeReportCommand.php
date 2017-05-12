@@ -21,7 +21,7 @@ class UpgradeReportCommand extends BaseCommand {
       'extracted',
       'upgraded',
       'finished',
-      'problem',
+      'failed',
     );
   }
 
@@ -31,9 +31,9 @@ class UpgradeReportCommand extends BaseCommand {
       ->setDescription('Notify civicrm.org of your upgrade success or failure')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat())
       ->addOption('name', NULL, InputOption::VALUE_REQUIRED, 'Specify the name to link the report to past reports on the same upgrade')
-      ->addOption('downloadurl', NULL, InputOption::VALUE_REQUIRED, 'Indicate the URL for the download attempt')
-      ->addOption('upgrademessages', NULL, InputOption::VALUE_REQUIRED, 'Provide array of upgrade messages and version')
-      ->addOption('problemmessage', NULL, InputOption::VALUE_REQUIRED, 'Provide a message about the problem')
+      ->addOption('download-url', NULL, InputOption::VALUE_REQUIRED, 'Indicate the URL for the download attempt')
+      ->addOption('upgrade-messages', NULL, InputOption::VALUE_REQUIRED, 'Provide array of upgrade messages and version')
+      ->addOption('problem-message', NULL, InputOption::VALUE_REQUIRED, 'Provide a message about the problem')
       ->addOption('reporter', NULL, InputOption::VALUE_REQUIRED, "Your email address so you can be contacted with questions")
       ->setHelp('Notify civicrm.org of your upgrade success or failure
 
@@ -75,14 +75,6 @@ Returns a JSON object with the properties:
     // For now, just throw an exception if the report is bad.
     if (!empty($reportProblems)) {
       throw new \RuntimeException(implode("\n", $reportProblems));
-    }
-
-    // Swap the problem timestamp to `failed` and the problem message to
-    // `problem` to match civicrm.org's expectations.
-    if (!empty($report['problem'])) {
-      $report['failed'] = $report['problem'];
-      $report['problem'] = $report['problemmessage'];
-      unset($report['problemmessage']);
     }
 
     // Set up identity of report
@@ -157,21 +149,21 @@ Returns a JSON object with the properties:
     // Check required fields for the mode(s)
     $requirements = array(
       'downloaded' => array(
-        'downloadurl' => array(
+        'download-url' => array(
           'label' => 'download URL',
-          'reportkey' => 'downloadurl',
+          'reportkey' => 'downloadUrl',
         ),
       ),
       'upgraded' => array(
-        'upgrademessages' => array(
+        'upgrade-messages' => array(
           'label' => 'upgrade messages',
           'reportkey' => 'upgradeReport',
         ),
       ),
-      'problem' => array(
-        'problemmessage' => array(
+      'failed' => array(
+        'problem-message' => array(
           'label' => 'problem message',
-          'reportkey' => 'problemmessage',
+          'reportkey' => 'problem',
         ),
       ),
     );
@@ -189,11 +181,11 @@ Returns a JSON object with the properties:
     // Find or create name
     $initialModes = array(
       'started',
-      'problem',
+      'failed',
     );
     if (!($report['name'] = $input->getOption('name'))) {
       if (!array_intersect($initialModes, array_keys($report))) {
-        $reportProblems[] = 'Unless you are sending a start report (with --started or --problem), you must specify the report name (with --name)';
+        $reportProblems[] = 'Unless you are sending a start report (with --started or --failed), you must specify the report name (with --name)';
       }
       else {
         $report['name'] = $this->createName($report);
@@ -208,7 +200,7 @@ Returns a JSON object with the properties:
         'finished',
       );
       if (array_intersect($tooLate, array_keys($report))) {
-        $reportProblems[] = "You can't report a start once you have extracted or upgraded. Use --problem instead.";
+        $reportProblems[] = "You can't report a start once you have extracted or upgraded. Use --failed instead.";
       }
     }
 
