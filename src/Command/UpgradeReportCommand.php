@@ -92,7 +92,6 @@ Returns a JSON object with the properties:
 
     $reportPoints = array(
       'started',
-      'upgraded',
       'finished',
     );
 
