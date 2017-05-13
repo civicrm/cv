@@ -23,8 +23,8 @@ class UpgradeGetCommand extends BaseCommand {
       ->setName('upgrade:get')
       ->setDescription('Find out what file you should use to upgrade')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat())
-      ->addOption('stability', 's', InputOption::VALUE_REQUIRED, 'Specify the stability of the version to get (beta, rc, stable)', 'stable')
-      ->addOption('cms', 'c', InputOption::VALUE_REQUIRED, 'Specify the cms to get (Backdrop, Drupal, Drupal6, Joomla, Wordpress) instead of the current site')
+      ->addOption('stability', 's', InputOption::VALUE_REQUIRED, 'Specify the stability of the version to get (nightly, rc, stable)', 'stable')
+      ->addOption('cms', 'c', InputOption::VALUE_REQUIRED, 'Specify the CMS to get (Backdrop, Drupal, Drupal6, Joomla, WordPress) instead of the current site')
       ->setHelp('Find out what file you should use to upgrade
 
 Examples:

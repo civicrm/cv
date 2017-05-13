@@ -179,6 +179,7 @@ Returns a JSON object with the properties:
         'revision' => array(
           'label' => 'revision number',
           'reportkey' => 'revision',
+          'alternative' => 'name',
         ),
       ),
     );
@@ -188,7 +189,9 @@ Returns a JSON object with the properties:
           $report[$req['reportkey']] = $input->getOption($reqOpt);
         }
         elseif (array_key_exists($reqMode, $report)) {
-          $reportProblems[] = "You must specify the {$req['label']} as --$reqOpt.";
+          if (empty($req['alternative']) || empty($input->getOption($req['alternative']))) {
+            $reportProblems[] = "You must specify the {$req['label']} as --$reqOpt.";
+          }
         }
       }
     }

@@ -40,18 +40,32 @@ class UpgradeGetCommandTest extends \Civi\Cv\CivilTestCase {
 
 
   public function testUpgraded() {
-    $messageArray = array(
-      'Nam adipiscing condimentum netus ac mi nunc adipiscing leo aliquet non habitant eu dignissim odio egestas mattis eu ultrices orci a mi mattis malesuada mus nisi consectetur adipiscing a. Cum netus curabitur per ut venenatis donec ante volutpat a ad a parturient nulla urna ut a dictum tortor platea posuere elementum et turpis erat condimentum ullamcorper per quam. Ac accumsan a natoque ridiculus donec cum vulputate ac sit mi sociosqu curabitur posuere velit curae.',
-      'Volutpat platea venenatis ullamcorper tempor augue fusce habitant suspendisse lacus aptent ut in nibh adipiscing cubilia nunc parturient aptent a a litora cum a sem scelerisque curae quis. Scelerisque dictumst a felis eu parturient taciti platea parturient a a tristique ullamcorper eros risus condimentum a euismod scelerisque proin posuere et donec at egestas dui etiam. Adipiscing facilisi sociosqu bibendum velit etiam adipiscing ut a a vehicula a at vestibulum sem in laoreet ad varius rutrum ad lacinia commodo suspendisse arcu et malesuada. A a a quam a in massa massa turpis vivamus feugiat volutpat congue dignissim suspendisse habitasse eros torquent vestibulum adipiscing est a aptent leo urna metus facilisi faucibus nascetur. Nec tristique suscipit a habitasse ultrices suscipit inceptos metus a vel sem lacus vestibulum dolor parturient vestibulum ut malesuada sodales adipiscing molestie integer consectetur. ',
-      'Vestibulum elit dictumst ac scelerisque lacinia vestibulum adipiscing consectetur dapibus purus a ante urna orci cubilia suspendisse a lorem dignissim a condimentum iaculis congue imperdiet platea interdum. Non leo vestibulum a iaculis netus a scelerisque blandit fringilla lacus suspendisse scelerisque a id litora imperdiet faucibus a torquent parturient mi egestas vehicula purus. Arcu adipiscing donec adipiscing a scelerisque est purus parturient quisque vulputate maecenas lobortis a vestibulum amet vivamus vestibulum a. Ornare a curae ut facilisis senectus leo himenaeos a ac nunc cum ullamcorper facilisi per primis vestibulum a augue. ',
-      'Euismod justo fames suspendisse primis phasellus nunc a posuere scelerisque dictumst parturient dui eu conubia tempor. Laoreet hendrerit tempor massa cubilia eleifend condimentum nibh a fermentum velit ipsum a felis ridiculus dui condimentum a luctus facilisi curabitur a sodales augue erat mus. Diam cum penatibus scelerisque est dapibus a suspendisse a venenatis condimentum ullamcorper eleifend pulvinar id. Euismod ad aenean ipsum nisl aliquam est a litora a sapien vestibulum imperdiet parturient habitasse cras duis fusce netus erat vestibulum facilisis posuere lacus a morbi gravida a adipiscing. Feugiat adipiscing est dis a ut varius est habitasse convallis per hac scelerisque habitant lobortis sem est sapien suspendisse cursus.',
-    );
-    $messages = json_encode($messageArray);
+    $messages = <<<HERETEXT
+Nam adipiscing condimentum netus ac mi nunc adipiscing leo aliquet non habitant
+eu dignissim odio egestas mattis eu ultrices orci a mi mattis malesuada mus nisi
+consectetur adipiscing a. Cum netus curabitur per ut venenatis donec ante
+volutpat a ad a parturient nulla urna ut a dictum tortor platea posuere
+elementum et turpis erat condimentum ullamcorper per quam. Ac accumsan a natoque
+ridiculus donec cum vulputate ac sit mi sociosqu curabitur posuere velit curae.
+
+Volutpat platea venenatis ullamcorper tempor augue fusce habitant suspendisse
+lacus aptent ut in nibh adipiscing cubilia nunc parturient aptent a a litora cum
+a sem scelerisque curae quis. Scelerisque dictumst a felis eu parturient taciti
+platea parturient a a tristique ullamcorper eros risus condimentum a euismod
+scelerisque proin posuere et donec at egestas dui etiam. Adipiscing facilisi
+sociosqu bibendum velit etiam adipiscing ut a a vehicula a at vestibulum sem in
+laoreet ad varius rutrum ad lacinia commodo suspendisse arcu et malesuada. A a a
+quam a in massa massa turpis vivamus feugiat volutpat congue dignissim
+suspendisse habitasse eros torquent vestibulum adipiscing est a aptent leo urna
+metus facilisi faucibus nascetur. Nec tristique suscipit a habitasse ultrices
+suscipit inceptos metus a vel sem lacus vestibulum dolor parturient vestibulum
+ut malesuada sodales adipiscing molestie integer consectetur.
+HERETEXT;
     $p = $this->cv("upgrade:report --upgraded --upgrade-messages=php://stdin --name $this->reportName");
-    $p->setInput(json_encode($messageArray));
+    $p->setInput(json_encode($messages));
     $p->run();
     $data = json_decode($p->getOutput(), TRUE);
-    $this->assertEquals($messageArray, json_decode($data['upgradeReport'], TRUE), 'Report data does not match the provided data.');
+    $this->assertEquals($messages, json_decode($data['upgradeReport'], TRUE), 'Report data does not match the provided data.');
     $this->assertEquals(0, $p->getExitCode(), 'Upgrade report exits with an error.');
     $response = json_decode($data['response'], TRUE);
     $this->assertContains('Saved', $response['message'], "Server not responding as saved: {$response['message']}", TRUE);
@@ -67,9 +81,27 @@ class UpgradeGetCommandTest extends \Civi\Cv\CivilTestCase {
     $p = $this->cv("upgrade:report --finished --name $this->reportName");
     $p->run();
     $data = json_decode($p->getOutput(), TRUE);
+    $this->assertEquals(0, $p->getExitCode(), 'Finished report exits with an error.');
     $response = json_decode($data['response'], TRUE);
     $this->assertContains('Saved', $response['message'], "Server not responding as saved: {$response['message']}", TRUE);
-    $this->assertEquals(0, $p->getExitCode(), 'Finished report exits with an error.');
+  }
+
+  public function testFailed() {
+    $p = $this->cv("upgrade:report --failed --problem-message='test case' --name $this->reportName");
+    $p->run();
+    $data = json_decode($p->getOutput(), TRUE);
+    $this->assertEquals(0, $p->getExitCode(), 'Failed report exits with an error.');
+    $response = json_decode($data['response'], TRUE);
+    $this->assertContains('Saved', $response['message'], "Server not responding as saved: {$response['message']}", TRUE);
+  }
+
+  public function testFailedNoName() {
+    $p = $this->cv("upgrade:report --failed --problem-message='test case' --revision $this->revision");
+    $p->run();
+    $data = json_decode($p->getOutput(), TRUE);
+    $this->assertEquals(0, $p->getExitCode(), 'Failed report exits with an error.');
+    $response = json_decode($data['response'], TRUE);
+    $this->assertContains('Saved', $response['message'], "Server not responding as saved: {$response['message']}", TRUE);
   }
 
   /**
@@ -99,6 +131,28 @@ class UpgradeGetCommandTest extends \Civi\Cv\CivilTestCase {
     $p = $this->cv("upgrade:report --upgraded --name $this->reportName");
     $p->run();
     $this->assertGreaterThan(0, $p->getExitCode(), 'Upgrade report with no messages does not exit with an error.');
+  }
+
+  public function testRequireProblemMessage() {
+    $p = $this->cv("upgrade:report --failed --revision $this->revision");
+    $p->run();
+    $this->assertGreaterThan(0, $p->getExitCode(), 'Failed report with no message does not exit with an error.');
+  }
+
+  public function testRequireRevision() {
+    $p = $this->cv("upgrade:report --failed --problem-message='test problem'");
+    $p->run();
+    $this->assertGreaterThan(0, $p->getExitCode(), 'Failed report with no revision and no name does not exit with an error.');
+    $p = $this->cv("upgrade:report --started --reporter='test@example.com'");
+    $p->run();
+    $this->assertGreaterThan(0, $p->getExitCode(), 'Started report with no revision does not exit with an error.');
+  }
+
+  public function testNoRevisionNeededWithName() {
+    $newTestName = 'test2' . md5(time() . 'test');
+    $p = $this->cv("upgrade:report --failed --reporter='test@example.com' --problem-message 'bad stuff' --name=$newTestName");
+    $p->run();
+    $this->assertEquals(0, $p->getExitCode(), 'Failed report with name but no revision exits with an error.');
   }
 
 }
