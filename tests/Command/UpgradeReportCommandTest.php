@@ -1,7 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
-class UpgradeGetCommandTest extends \Civi\Cv\CivilTestCase {
+class UpgradeReportCommandTest extends \Civi\Cv\CivilTestCase {
 
   protected $revision = '4.7.123-202601040252';
   protected $reportName = '';
