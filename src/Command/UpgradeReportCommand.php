@@ -137,7 +137,7 @@ Returns a JSON object with the properties:
 
     // Make sure at least one report mode is used
     $reportModes = self::getReportModes();
-    if (empty(array_intersect($reportModes, array_keys($report)))) {
+    if (0 == count(array_intersect($reportModes, array_keys($report)))) {
       $modeList = '--' . implode(', --', $reportModes);
       $reportProblems[] = "Your report must include one of the following arguments: $modeList";
     }
