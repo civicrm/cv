@@ -50,7 +50,9 @@ Returns a JSON object with the properties:
       $this->addOption($mode, NULL, InputOption::VALUE_OPTIONAL, "Send a \"$mode\" report, optionally with a timestamp");
     }
 
-    parent::configureBootOptions();
+    // The upgrade:report command needs to be usable after *failed* upgrades,
+    // so we code it for a strictly-non-bootstrapped environment.
+    // parent::configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

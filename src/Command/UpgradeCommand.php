@@ -20,7 +20,7 @@ class UpgradeCommand extends BaseCommand {
 Examples:
   cv upgrade --stability=rc
 ');
-    parent::configureBootOptions();
+    // parent::configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

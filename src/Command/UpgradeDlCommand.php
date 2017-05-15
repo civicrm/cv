@@ -34,7 +34,7 @@ Returns a JSON object with the properties:
   extractedDir     The path to the extracted archive (not performed for Joomla)
   installedTo      The path to the `civicrm` directory of the file upgrade
 ');
-    parent::configureBootOptions();
+    // parent::configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
