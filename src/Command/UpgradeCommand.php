@@ -28,7 +28,7 @@ Examples:
     $exitCode = 0;
     $stage = 'Start';
     $result = array();
-    $reportName = md5(rand() . rand() . rand() . 'with few exceptions');
+    $reportName = \Civi\Cv\Util\Rand::createName();
     try {
       $stability = $input->getOption('stability');
       $stage = 'Lookup';

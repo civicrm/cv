@@ -114,18 +114,6 @@ Returns a JSON object with the properties:
   }
 
   /**
-   * Generates a name to identify the report
-   *
-   * @param array $report
-   *   Report information (or anything, really)
-   * @return string
-   *   The name to use
-   */
-  protected function createName($report) {
-    return md5(json_encode($report) . uniqid() . rand() . rand() . rand());
-  }
-
-  /**
    * Get a system report if available
    *
    * @return array
@@ -208,7 +196,7 @@ Returns a JSON object with the properties:
         $reportProblems[] = 'Unless you are sending a start report (with --started or --failed), you must specify the report name (with --name)';
       }
       else {
-        $report['name'] = $this->createName($report);
+        $report['name'] = \Civi\Cv\Util\Rand::createName();
       }
     }
 
