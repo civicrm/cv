@@ -9,6 +9,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class BaseCommand extends Command {
@@ -66,6 +67,9 @@ class BaseCommand extends Command {
         $output->writeln('<info>[BaseCommand::boot]</info> Set system user', OutputInterface::VERBOSITY_DEBUG);
         if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
           \CRM_Core_Config::singleton()->userSystem->loadUser($input->getOption('user'));
+          if (!$this->ensureUserContact($output)) {
+            throw new \Exception("Failed to determine contactID for user=" . $input->getOption('user'));
+          }
         }
         else {
           $output->getErrorOutput()->writeln("<error>Failed to set user. Feature not supported by UF (" . CIVICRM_UF . ")</error>");
@@ -243,6 +247,49 @@ class BaseCommand extends Command {
     else {
       return array('*');
     }
+  }
+
+  /**
+   * Ensure that the current user has a contact record.
+   *
+   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   * @return int|NULL
+   *   The user's contact ID, or NULL
+   */
+  private function ensureUserContact(OutputInterface $output) {
+    if ($cid = \CRM_Core_Session::getLoggedInContactID()) {
+      return $cid;
+    }
+
+    // Ugh, this codepath is ridiculous.
+    switch (CIVICRM_UF) {
+      case 'Drupal':
+      case 'Drupal6':
+      case 'Backdrop':
+        \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['user'], TRUE,
+          CIVICRM_UF, 'Individual');
+        break;
+
+      case 'Drupal8':
+        \CRM_Core_BAO_UFMatch::synchronize(\Drupal::currentUser(), TRUE,
+          CIVICRM_UF, 'Individual');
+        break;
+
+      case 'Joomla':
+        \CRM_Core_BAO_UFMatch::synchronize(\JFactory::getUser(), TRUE,
+          CIVICRM_UF, 'Individual');
+        break;
+
+      case 'WordPress':
+        \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['current_user'], TRUE,
+          CIVICRM_UF, 'Individual');
+        break;
+
+      default:
+        $output->writeln("<error>Unrecognized UF: " . CIVICRM_UF . "</error>");
+    }
+
+    return \CRM_Core_Session::getLoggedInContactID();
   }
 
 }

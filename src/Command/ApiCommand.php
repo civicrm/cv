@@ -49,13 +49,6 @@ NOTE: To change the default output format, set CV_OUTPUT.
 
     list($entity, $action) = explode('.', $input->getArgument('Entity.action'));
     $params = $this->parseParams($input);
-
-    // Drush does the following...?
-    //    global $user;
-    //    CRM_Core_BAO_UFMatch::synchronize($user, FALSE, 'Drupal',
-    //      civicrm_get_ctype('Individual')
-    //    );
-
     $result = \civicrm_api($entity, $action, $params);
 
     $out = $input->getOption('out');
