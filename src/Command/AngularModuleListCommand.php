@@ -28,7 +28,7 @@ class AngularModuleListCommand extends BaseCommand {
       ->setDescription('List Angular modules')
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED,
         'List of columns to display (comma separated)',
-        'name,ext,resources')
+        'name,basePages,requires')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED,
         'Output format (' . implode(',', Encoder::getTabularFormats()) . ')',
         Encoder::getDefaultFormat('table'))
@@ -38,7 +38,10 @@ class AngularModuleListCommand extends BaseCommand {
 
 Examples:
   cv ang:module:list
-  cv ang:module:list \';crmMail;\' --user=admin
+  cv ang:module:list /crmUi/
+  cv ang:module:list --columns=name,ext,extDir
+  cv ang:module:list \'/crmMail/\' --user=admin --columns=extDir,css
+  cv ang:module:list --columns=name,js,css --out=json-pretty
 ');
     parent::configureBootOptions();
   }
@@ -76,10 +79,26 @@ Examples:
         }
       }
 
+      if (!isset($module['basePages'])) {
+        $basePages = 'civicrm/a';
+      }
+      elseif (empty($module['basePages'])) {
+        $basePages = '(as-needed)';
+      }
+      else {
+        $basePages = implode(", ", $module['basePages']);
+      }
+
       $rows[] = array(
         'name' => $name,
         'ext' => $module['ext'],
+        'extDir' => \CRM_Core_Resources::singleton()->getPath($module['ext'], NULL),
         'resources' => implode(', ', $resources),
+        'basePages' => $basePages,
+        'js' => isset($module['js']) ? implode(", ", $module['js']) : '',
+        'css' => isset($module['css']) ? implode(", ", $module['css']) : '',
+        'partials' => isset($module['partials']) ? implode(", ", $module['partials']) : '',
+        'requires' => isset($module['requires']) ? implode(', ', $module['requires']) : '',
       );
     }
 
