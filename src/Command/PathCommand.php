@@ -29,6 +29,7 @@ class PathCommand extends BaseExtensionCommand {
       ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar"). Use "." for the default extension dir.')
       ->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A config property. (Ex: "templateCompileDir/en_US")')
       ->addOption('dynamic', 'd', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A dynamic path expression (v4.7+) (Ex: "[civicrm.root]/packages")')
+      ->addOption('mkdir', 'm', InputOption::VALUE_NONE, 'Make a directory for the given path(s)')
       ->setHelp('Look up the path to a file or directory within CiviCRM.
 
 Examples: Lookup extension paths
@@ -148,6 +149,14 @@ Example: Lookup multiple items
     $columns = $this->parseColumns($input, array(
       'list' => array('value'),
     ));
+
+    if ($input->getOption('mkdir')) {
+      foreach ($results as $result) {
+        if (!file_exists($result['value'])) {
+          mkdir($result['value'], 0777, TRUE);
+        }
+      }
+    }
 
     $this->sendTable($input, $output, $results, $columns);
     return $returnValue;
