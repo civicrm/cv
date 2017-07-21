@@ -372,7 +372,7 @@ class Bootstrap {
       ),
       'joomla' => array(
         'administrator/components/com_civicrm/civicrm/civicrm-version.php',
-        'components/com_users/users.php',
+        'administrator/components/com_users/users.php',
         // Future? 'vendor/civicrm/joomla/civicrm.php' => 'joomla',
       ),
       'drupal' => array(
