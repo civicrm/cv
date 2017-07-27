@@ -14,6 +14,7 @@ class FlushCommand extends BaseCommand {
     $this
       ->setName('flush')
       ->setAliases(array())
+      ->addOption('triggers', 'T', InputOption::VALUE_NONE, 'Rebuild triggers')
       ->setDescription('Flush system caches')
       ->setHelp('
 Flush system caches
@@ -27,8 +28,13 @@ Flush system caches
     define('CIVICRM_CONTAINER_CACHE', 'never');
     $this->boot($input, $output);
 
+    $params = array();
+    if ($input->getOption('triggers')) {
+      $params['triggers'] = TRUE;
+    }
+
     $output->writeln("<info>Flushing system caches</info>");
-    $result = $this->callApiSuccess($input, $output, 'System', 'flush', array());
+    $result = $this->callApiSuccess($input, $output, 'System', 'flush', $params);
     return empty($result['is_error']) ? 0 : 1;
   }
 
