@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class BaseCommand extends Command {
 
   protected function configureBootOptions() {
-    $this->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (classloader,settings,full)', 'full');
+    $this->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (none,classloader,settings,full)', 'full');
     $this->addOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)');
     $this->addOption('user', 'U', InputOption::VALUE_REQUIRED, 'CMS user');
   }
@@ -47,7 +47,11 @@ class BaseCommand extends Command {
       $_ENV['CIVICRM_UF'] = 'UnitTests';
     }
 
-    if ($input->hasOption('level') && $input->getOption('level') !== 'full') {
+    if ($input->hasOption('level') && $input->getOption('level') === 'none') {
+      $output->writeln('<info>[BaseCommand::boot]</info> Skip', OutputInterface::VERBOSITY_DEBUG);
+      return;
+    }
+    elseif ($input->hasOption('level') && $input->getOption('level') !== 'full') {
       $output->writeln('<info>[BaseCommand::boot]</info> Call basic cv bootstrap (' . $input->getOption('level') . ')', OutputInterface::VERBOSITY_DEBUG);
       \Civi\Cv\Bootstrap::singleton()->boot($boot_params + array(
         'prefetch' => FALSE,
@@ -80,6 +84,12 @@ class BaseCommand extends Command {
     $output->writeln('<info>[BaseCommand::boot]</info> Finished', OutputInterface::VERBOSITY_DEBUG);
   }
 
+  protected function assertBooted() {
+    if (!$this->isBooted()) {
+      throw new \Exception("Error: This command requires bootstrapping, but the system does not appear to be bootstrapped. Perhaps you set --level=none?");
+    }
+  }
+
   /**
    * Execute an API call. If it fails, display a formatted error.
    *
@@ -94,6 +104,7 @@ class BaseCommand extends Command {
    * @return mixed
    */
   protected function callApiSuccess(InputInterface $input, OutputInterface $output, $entity, $action, $params) {
+    $this->assertBooted();
     $params['debug'] = 1;
     if (!isset($params['version'])) {
       $params['version'] = 3;
@@ -290,6 +301,13 @@ class BaseCommand extends Command {
     }
 
     return \CRM_Core_Session::getLoggedInContactID();
+  }
+
+  /**
+   * @return bool
+   */
+  protected function isBooted() {
+    return defined('CIVICRM_DSN');
   }
 
 }
