@@ -31,7 +31,7 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the list of extensions')
       ->addOption('installed', 'i', InputOption::VALUE_NONE, 'Filter extensions by "installed" status (Equivalent to --statuses=installed)')
       ->addOption('statuses', NULL, InputOption::VALUE_REQUIRED, 'Filter extensions by status (comma separated)', '*')
-      ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated)', 'location,key,name,version,status')
+      ->addOption('columns', NULL, InputOption::VALUE_REQUIRED, 'List of columns to display (comma separated)', 'location,key,name,version,status,downloadUrl')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat('table'))
       ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key or short name')
       ->setHelp('List extensions
@@ -138,6 +138,7 @@ Note:
           'status' => '',
           'type' => $info->type,
           'path' => '',
+          'downloadUrl' => $info->downloadUrl,
         );
       }
     }
@@ -157,6 +158,7 @@ Note:
           'status' => isset($statuses[$key]) ? $statuses[$key] : '',
           'type' => $info->type,
           'path' => $mapper->keyToBasePath($key),
+          'downloadUrl' => $info->downloadUrl,
         );
       }
     }
