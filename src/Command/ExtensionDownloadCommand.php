@@ -4,6 +4,8 @@ namespace Civi\Cv\Command;
 use Civi\Cv\Application;
 use Civi\Cv\Encoder;
 use Civi\Cv\Util\ExtensionUtil;
+use Civi\Cv\Util\Filesystem;
+use Civi\Cv\Util\HeadlessDownloader;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -25,9 +27,11 @@ class ExtensionDownloadCommand extends BaseExtensionCommand {
       ->setName('ext:download')
       ->setAliases(array('dl'))
       ->setDescription('Download and enable an extension')
+      ->addOption('bare', 'b', InputOption::VALUE_NONE, 'Perform a basic download in a non-bootstrapped environment. Implies --level=none, --no-install, and no --refresh.')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the remote list of extensions (Default: Only refresh on cache-miss)')
       ->addOption('no-install', NULL, InputOption::VALUE_NONE, 'Only download. Skip the installation.')
       ->addOption('force', 'f', InputOption::VALUE_NONE, 'If an extension already exists, download it anyway.')
+      ->addOption('to', NULL, InputOption::VALUE_OPTIONAL, 'Download to a specific directory (absolute path).')
       ->addOption('keep', 'k', InputOption::VALUE_NONE, 'If an extension already exists, keep it.')
       ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar"). Optionally append a URL.')
       ->setHelp('Download and enable an extension
@@ -36,7 +40,9 @@ Examples:
   cv ext:download org.example.foobar
   cv dl foobar
   cv dl --dev foobar
+  cv dl --dev foobar --to="$PWD/foobar"
   cv dl "org.example.foobar@http://example.org/files/foobar.zip"
+  cv dl -b "@http://example.org/files/myext.xml" --to="$PWD/myext"
 
 Note:
   Short names ("foobar") do not work when passing an explicit URL.
@@ -52,7 +58,17 @@ Note:
     parent::configureBootOptions();
   }
 
+  protected function initialize(InputInterface $input, OutputInterface $output) {
+    if ($input->hasOption('bare') && $input->getOption('bare')) {
+      $input->setOption('level', 'none');
+      $input->setOption('no-install', TRUE);
+    }
+    parent::initialize($input, $output);
+  }
+
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $fs = new Filesystem();
+
     if ($extRepoUrl = $this->parseRepoUrl($input)) {
       global $civicrm_setting;
       $civicrm_setting['Extension Preferences']['ext_repo_url'] = $extRepoUrl;
@@ -60,12 +76,18 @@ Note:
 
     $this->boot($input, $output);
 
-    $output->writeln("<info>Using extension feed \"" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . "\"</info>");
+    if ($input->getOption('to') && !$fs->isAbsolutePath($input->getOption('to'))) {
+      throw new \RuntimeException("The --to argument requires an absolute path.");
+    }
+
+    if ($this->isBooted()) {
+      $output->writeln("<info>Using extension feed \"" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . "\"</info>");
+    }
 
     // Refresh extensions if (a) ---refresh enabled or (b) there's a cache-miss.
     $refresh = $input->getOption('refresh') ? 'yes' : 'auto';
     while (TRUE) {
-      if ($refresh === 'yes') {
+      if ($refresh === 'yes' && $this->isBooted()) {
         $output->writeln("<info>Refreshing extension cache</info>");
         $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
           'local' => FALSE,
@@ -95,16 +117,28 @@ Note:
       return 1;
     }
 
+    if ($input->getOption('to') && count($downloads) > 1) {
+      throw new \RuntimeException("When specifying --to, you can only download one extension at a time.");
+    }
+
     foreach ($downloads as $key => $url) {
       $action = $this->pickAction($input, $output, $key);
       switch ($action) {
         case 'download':
-          $output->writeln("<info>Downloading extension \"$key\" ($url)</info>");
-          $result = $this->callApiSuccess($input, $output, 'Extension', 'download', array(
-            'key' => $key,
-            'url' => $url,
-            'install' => !$input->getOption('no-install'),
-          ));
+          if ($to = $input->getOption('to')) {
+            $output->writeln("<info>Downloading extension \"$key\" ($url) to \"$to\"</info>");
+            $dl = new HeadlessDownloader();
+            $dl->run($url, $key, $input->getOption('to'), TRUE);
+          }
+          else {
+            $output->writeln("<info>Downloading extension \"$key\" ($url)</info>");
+            $this->assertBooted();
+            $result = $this->callApiSuccess($input, $output, 'Extension', 'download', array(
+              'key' => $key,
+              'url' => $url,
+              'install' => !$input->getOption('no-install'),
+            ));
+          }
           break;
 
         case 'install':
@@ -117,6 +151,10 @@ Note:
         case 'abort':
           $output->writeln("<error>Aborted</error>");
           return 1;
+
+        case 'skip':
+          $output->writeln("<comment>Skipped extension \"$key\".</comment>");
+          break;
 
         default:
           throw new \RuntimeException("Unrecognized action: $action");
@@ -139,6 +177,7 @@ Note:
   protected function getRemoteInfos() {
     static $cache = NULL;
     if ($cache === NULL) {
+      $this->assertBooted();
       $cache = \CRM_Extension_System::singleton()
         ->getBrowser()->getExtensions();
     }
@@ -179,12 +218,32 @@ Note:
     }
 
     foreach ($input->getArgument('key-or-name') as $keyOrName) {
+      $origExpr = $keyOrName;
       $url = NULL;
       if (strpos($keyOrName, '@') !== FALSE) {
         list ($keyOrName, $url) = explode('@', $keyOrName, 2);
       }
 
-      if (strpos($keyOrName, '.') === FALSE) {
+      if (empty($keyOrName) && !empty($url)) {
+        if (!preg_match('/\.xml$/', $url)) {
+          $errors[] = "Unclear file reference ($origExpr). Please provide either \"key@http://example/file.zip\" or \"@http://example/file.xml\".";
+          continue;
+        }
+        $xmlString = file_get_contents($url);
+        if (empty($xmlString)) {
+          $errors[] = "Failed to fetch XML file ($origExpr).";
+          continue;
+        }
+        $xml = simplexml_load_string($xmlString);
+        $keyOrName = (string) $xml->attributes()->key;
+        $url = (string) $xml->downloadUrl;
+        if (!$keyOrName || !$url) {
+          $errors[] = "The specified XML file is missing the key and/or downloadUrl ($origExpr).";
+          continue;
+        }
+      }
+
+      if ($this->isBooted() && strpos($keyOrName, '.') === FALSE) {
         if ($shortMap === NULL) {
           $shortMap = $this->getRemoteShortMap();
         }
@@ -200,7 +259,7 @@ Note:
         }
       }
 
-      if (empty($url)) {
+      if ($this->isBooted() && empty($url)) {
         if ($remoteInfos === NULL) {
           $remoteInfos = $this->getRemoteInfos();
         }
@@ -208,10 +267,13 @@ Note:
         if (!empty($remoteInfos[$keyOrName]->downloadUrl)) {
           $url = $remoteInfos[$keyOrName]->downloadUrl;
         }
-        else {
-          $errors[] = "Error: Unrecognized extension \"$keyOrName\"";
-          continue;
-        }
+      }
+
+      if (empty($url)) {
+        $errors[] = $this->isBooted()
+          ? "Error: Unrecognized extension \"$keyOrName\""
+          : "Error: unrecognized extension \"$keyOrName\" cannot be resolved in bare environment";
+        continue;
       }
 
       $downloads[$keyOrName] = $url;
@@ -235,15 +297,24 @@ Note:
     OutputInterface $output,
     $key
   ) {
-    $existingExts = \CRM_Extension_System::singleton()
-      ->getFullContainer()->getKeys();
+    if ($input->getOption('to')) {
+      $exists = file_exists($input->getOption('to'));
+    }
+    elseif ($this->isBooted()) {
+      $existingExts = \CRM_Extension_System::singleton()
+        ->getFullContainer()->getKeys();
+      $exists = in_array($key, $existingExts);
+    }
+    else {
+      throw new \RuntimeException("In --bare mode, you must specify the target path with --to.");
+    }
 
     $action = NULL;
-    if (!in_array($key, $existingExts)) {
+    if (!$exists) {
       return 'download';
     }
     elseif ($input->getOption('keep')) {
-      return 'install';
+      return $input->getOptions('no-install') ? 'skip' : 'install';
     }
     elseif ($input->getOption('force')) {
       return 'download';
@@ -264,7 +335,7 @@ Note:
           return 'download';
 
         case 'k':
-          return 'install';
+          return $input->getOptions('no-install') ? 'skip' : 'install';
 
         case 'a':
         default:
