@@ -27,7 +27,7 @@ class ExtensionDownloadCommand extends BaseExtensionCommand {
       ->setName('ext:download')
       ->setAliases(array('dl'))
       ->setDescription('Download and enable an extension')
-      ->addOption('bare', 'b', InputOption::VALUE_NONE, 'Perform a basic download in a non-bootstrapped environment. Implies --level=none, --no-install, and no --refresh.')
+      ->addOption('bare', 'b', InputOption::VALUE_NONE, 'Perform a basic download in a non-bootstrapped environment. Implies --level=none, --no-install, and no --refresh. You must specify the download URL.')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the remote list of extensions (Default: Only refresh on cache-miss)')
       ->addOption('no-install', NULL, InputOption::VALUE_NONE, 'Only download. Skip the installation.')
       ->addOption('force', 'f', InputOption::VALUE_NONE, 'If an extension already exists, download it anyway.')
@@ -40,12 +40,18 @@ Examples:
   cv ext:download org.example.foobar
   cv dl foobar
   cv dl --dev foobar
-  cv dl --dev foobar --to="$PWD/foobar"
-  cv dl "org.example.foobar@http://example.org/files/foobar.zip"
-  cv dl -b "@http://example.org/files/myext.xml" --to="$PWD/myext"
+  cv dl -b "@https://example.org/files/foobar/info.xml" --to="$PWD/myext"
+
+The extension can be specified using any of the following:
+
+  - Long name (ex: "org.example.foobar"). Resolved via civicrm.org.
+  - Short name (ex: "foobar"). Resolved via civicrm.org.
+  - Long name + Zip URL (ex: "org.example.foobar@http://example.org/files/foobar-1.2.zip")
+  - Info XML URL (ex: "@http://example.org/files/foobar/info.xml")
 
 Note:
-  Short names ("foobar") do not work when passing an explicit URL.
+  By default, extensions are downloaded to the site\'s writable
+  extension folder, but you can optionally specify --to.
 
   Beginning circa CiviCRM v4.2+, it has been recommended that extensions
   include a unique long name ("org.example.foobar") and a unique short
