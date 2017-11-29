@@ -81,6 +81,10 @@ Examples:
             $handled = TRUE;
           }
         }
+        elseif (is_string($listener)) {
+          $rows[] = array('#' . ++$i, $listener);
+          $handled = TRUE;
+        }
         if (!$handled) {
           $rows[] = array('#' . ++$i, "unidentified");
         }
