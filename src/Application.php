@@ -48,6 +48,7 @@ class Application extends \Symfony\Component\Console\Application {
     $commands[] = new \Civi\Cv\Command\PathCommand();
     $commands[] = new \Civi\Cv\Command\ShowCommand();
     $commands[] = new \Civi\Cv\Command\UrlCommand();
+    $commands[] = new \Civi\Cv\Command\PopCommand();
     if ($context !== 'repl') {
       $commands[] = new \Civi\Cv\Command\BootCommand();
       $commands[] = new \Civi\Cv\Command\CliCommand();

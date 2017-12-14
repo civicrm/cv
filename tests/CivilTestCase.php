@@ -1,7 +1,7 @@
 <?php
 namespace Civi\Cv;
 
-use Civi\Cv\Util\Process as ProcessUtil;
+use Civi\Cv\Util\Process;
 use Civi\Cv\Application;
 use Civi\Cv\Util\Process;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -49,6 +49,13 @@ class CivilTestCase extends \PHPUnit_Framework_TestCase {
   protected function cv($command) {
     $process = new \Symfony\Component\Process\Process("{$this->cv} $command");
     return $process;
+  }
+
+  protected function cvApi($entity, $action, $params = array()) {
+    $input = escapeshellarg(json_encode($params));
+    $p = Process::runOk(new \Symfony\Component\Process\Process("echo $input | {$this->cv} api $entity.$action --in=json"));
+    $data = json_decode($p->getOutput(), 1);
+    return $data;
   }
 
   /**
