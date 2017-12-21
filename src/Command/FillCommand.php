@@ -16,15 +16,16 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class FillCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   protected $fields;
 
   protected function configure() {
     $this
       ->setName('vars:fill')
       ->setDescription('Generate a configuration file for any missing site data')
-      ->addOption('file', NULL, InputOption::VALUE_REQUIRED, 'Read existing configuration from a file')
-    ;
-    parent::configureBootOptions();
+      ->addOption('file', NULL, InputOption::VALUE_REQUIRED, 'Read existing configuration from a file');
+    $this->configureBootOptions();
   }
 
   public function __construct($name = NULL) {

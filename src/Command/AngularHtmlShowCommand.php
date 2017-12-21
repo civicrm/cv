@@ -15,6 +15,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AngularHtmlShowCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   /**
    * @param string|null $name
    */
@@ -41,7 +43,7 @@ Examples:
   cv ang:html:show crmMailing/BlockMailing.html --diff | colordiff
   cv ang:html:show "~/crmMailing/BlockMailing.html"
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

@@ -14,6 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AngularModuleListCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   /**
    * @param string|null $name
    */
@@ -43,7 +45,7 @@ Examples:
   cv ang:module:list \'/crmMail/\' --user=admin --columns=extDir,css
   cv ang:module:list --columns=name,js,css --out=json-pretty
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

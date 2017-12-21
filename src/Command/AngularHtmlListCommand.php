@@ -14,6 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AngularHtmlListCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   /**
    * @param string|null $name
    */
@@ -41,7 +43,7 @@ Examples:
   cv ang:html:list crmUi/*
   cv ang:html:list \';(tabset|wizard)\\.html;\'
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

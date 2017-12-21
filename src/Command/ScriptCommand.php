@@ -9,13 +9,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ScriptCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   protected function configure() {
     $this
       ->setName('php:script')
       ->setAliases(array('scr'))
       ->setDescription('Execute a PHP script')
       ->addArgument('script', InputArgument::REQUIRED);
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

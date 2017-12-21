@@ -8,11 +8,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class BootCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   protected function configure() {
     $this
       ->setName('php:boot')
       ->setDescription('Generate PHP bootstrap code');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

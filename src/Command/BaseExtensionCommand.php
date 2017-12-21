@@ -7,6 +7,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class BaseExtensionCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   /**
    * Register CLI options for filtering the extension feed, such as "--dev" or "--filter-ver".
    */

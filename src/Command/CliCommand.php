@@ -15,11 +15,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class CliCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   protected function configure() {
     $this
       ->setName('cli')
       ->setDescription('Load interactive command line');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
