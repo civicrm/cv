@@ -1,30 +1,20 @@
 <?php
 namespace Civi\Cv;
 
-use Civi\Cv\Util\Process as ProcessUtil;
-use Civi\Cv\Application;
-use Civi\Cv\Util\Process;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Filesystem\Filesystem;
 
 class CivilTestCase extends \PHPUnit_Framework_TestCase {
+
+  use CvTestTrait;
 
   /**
    * @var string
    */
   private $originalCwd;
 
-  /**
-   * Path to the "cv" binary.
-   *
-   * @var string
-   */
-  protected $cv;
-
   public function setup() {
     $this->originalCwd = getcwd();
     chdir($this->getExampleDir());
-    $this->cv = dirname(__DIR__) . '/bin/cv';
   }
 
   public function tearDown() {
@@ -37,18 +27,6 @@ class CivilTestCase extends \PHPUnit_Framework_TestCase {
       throw new \RuntimeException('Environment variable CV_TEST_BUILD must point to a civicrm-cms build');
     }
     return $dir;
-  }
-
-  /**
-   * Create a process for `cv` subcommand.
-   *
-   * @param string $command
-   *   Ex: "vars:show --out=serialize".
-   * @return \Symfony\Component\Process\Process
-   */
-  protected function cv($command) {
-    $process = new \Symfony\Component\Process\Process("{$this->cv} $command");
-    return $process;
   }
 
   /**
@@ -66,39 +44,6 @@ class CivilTestCase extends \PHPUnit_Framework_TestCase {
     $commandTester = new CommandTester($command);
     $commandTester->execute($args);
     return $commandTester;
-  }
-
-  /**
-   * Run a `cv` subcommand. Assert success and return output.
-   *
-   * @param string $cmd
-   * @return string
-   */
-  protected function cvOk($cmd) {
-    $p = Process::runOk($this->cv($cmd));
-    return $p->getOutput();
-  }
-
-  /**
-   * Run a `cv` subcommand. Assert success and return output.
-   *
-   * @param string $cmd
-   * @return string
-   */
-  protected function cvFail($cmd) {
-    $p = Process::runFail($this->cv($cmd));
-    return $p->getErrorOutput() . $p->getOutput();
-  }
-
-  /**
-   * Run a `cv` subcommand. Assert success and return output.
-   *
-   * @param string $cmd
-   * @return string
-   */
-  protected function cvJsonOk($cmd) {
-    $p = Process::runOk($this->cv($cmd));
-    return json_decode($p->getOutput(), 1);
   }
 
 }
