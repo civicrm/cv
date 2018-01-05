@@ -1,6 +1,10 @@
 <?php
 namespace Civi\Cv\Util;
 
+/**
+ * @group std
+ * @group util
+ */
 class FilesystemTest extends \PHPUnit_Framework_TestCase {
   public function dataIsDescendent() {
     return array(

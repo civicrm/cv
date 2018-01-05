@@ -3,6 +3,10 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\Process;
 
+/**
+ * @group std
+ * @group php
+ */
 class BootCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function setup() {

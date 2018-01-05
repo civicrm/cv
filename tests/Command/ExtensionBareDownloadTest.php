@@ -4,6 +4,10 @@ namespace Civi\Cv\Command;
 use Civi\Cv\Exception\ProcessErrorException;
 use Civi\Cv\Util\Process;
 
+/**
+ * @group std
+ * @group ext
+ */
 class ExtensionBareDownloadTest extends \Civi\Cv\CivilTestCase {
 
   private static $first = TRUE;

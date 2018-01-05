@@ -4,6 +4,9 @@ namespace Civi\Cv\Command;
 use Civi\Cv\Util\Process;
 use Symfony\Component\Console\Input\InputArgument;
 
+/**
+ * @group std
+ */
 class UrlCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function setup() {

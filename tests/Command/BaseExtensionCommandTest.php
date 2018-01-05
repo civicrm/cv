@@ -5,6 +5,10 @@ use Civi\Cv\Exception\ProcessErrorException;
 use Civi\Cv\Util\Process;
 use Symfony\Component\Console\Input\ArgvInput;
 
+/**
+ * @group std
+ * @group ext
+ */
 class BaseExtensionCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function repoOptionExamples() {

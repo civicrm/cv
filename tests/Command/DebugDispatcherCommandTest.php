@@ -3,6 +3,9 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\Process;
 
+/**
+ * @group std
+ */
 class DebugDispatcherCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function setup() {
