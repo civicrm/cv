@@ -53,6 +53,7 @@ class Application extends \Symfony\Component\Console\Application {
       $commands[] = new \Civi\Cv\Command\CliCommand();
       $commands[] = new \Civi\Cv\Command\EvalCommand();
       $commands[] = new \Civi\Cv\Command\ScriptCommand();
+      $commands[] = new \Civi\Cv\Command\SetupCommand();
     }
     return $commands;
   }
