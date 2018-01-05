@@ -148,19 +148,19 @@ $ composer install
 $ php -dphar.readonly=0 `which box` build
 ```
 
-Unit-Tests
-==========
+Unit-Tests (Standard)
+=====================
 
-To run the test suite, you will need an existing CiviCRM installation,
-preferrably based on buildkit. (Example: `/home/me/buildkit/build/dmaster/`)
+To run the standard test suite, you will need to pick an existing CiviCRM
+installation and put it in `CV_TEST_BUILD`, as in:
 
 ```
 $ git clone https://github.com/civicrm/cv
 $ cd cv
 $ composer install
 $ export CV_TEST_BUILD=/home/me/buildkit/build/dmaster/
-$ ./bin/phpunit
-PHPUnit 3.7.10 by Sebastian Bergmann.
+$ phpunit4 --group std
+PHPUnit 4.8.21 by Sebastian Bergmann and contributors.
 
 Configuration read from /home/me/src/cv/phpunit.xml.dist
 
@@ -169,4 +169,38 @@ Configuration read from /home/me/src/cv/phpunit.xml.dist
 Time: 2 seconds, Memory: 6.50Mb
 
 OK (49 tests, 121 assertions)
+```
+
+> We generally choose an existing installation based on `civibuild`
+> configuration like `dmaster`. The above example assumes that your
+> build is located at `/home/me/buildkit/build/dmaster/`.
+
+
+To be quite thorough, you may want to test against multiple builds (e.g.
+with various CMS's and file structures).  Prepare these builds separately
+and loop through them, e.g.
+
+```
+$ for CV_TEST_BUILD in /home/me/buildkit/build/{dmaster,wpmaster,bmaster} ; do export CV_TEST_BUILD; phpunit4 --group std; done
+```
+
+Unit-Tests (Setup)
+==================
+
+The `cv core:setup` command has more stringent execution requirements, e.g.
+
+* Each test-run needs to work with an empty build (which does not have a Civi database or settings file).
+  It specifically calls `civibuild` and `amp` to create+destroy builds during execution.
+* These commands, in turn, may add new vhosts and databases. This can require elevated privileges (`sudo`).
+* These commands have more potential failure points (e.g. intermittent networking issues can disrupt
+  the test). To monitor them, you should set `DEBUG=1`.
+* There must be a copy of the `civicrm-setup` source tree.  At time of writing, this is not yet bundled with
+  the main tarballs, but you can set `CV_SETUP_PATH` to point to your own copy.
+
+Given these extra requirements, this test runs as a separate group.
+
+A typical execution might look like:
+
+```
+$ env DEBUG=1 OFFLINE=1 CV_SETUP_PATH=$HOME/src/civicrm-setup phpunit4 --group setup
 ```
