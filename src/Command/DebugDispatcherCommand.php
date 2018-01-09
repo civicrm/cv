@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -46,57 +45,12 @@ Examples:
       $container->get('civi_api_kernel');
     }
 
-    $d = $container->get('dispatcher');
-
+    $dispatcher = $container->get('dispatcher');
     $eventFilter = $input->getArgument('event');
-    if (!$eventFilter) {
-      $listenersByEvent = $d->getListeners();
-    }
-    elseif ($eventFilter{0} === '/') {
-      $listenersByEvent = array();
-      foreach ($d->getListeners() as $e => $ls) {
-        if (preg_match($eventFilter, $e)) {
-          $listenersByEvent[$e] = $ls;
-        }
-      }
-    }
-    else {
-      $listenersByEvent = array($eventFilter => $d->getListeners($eventFilter));
-    }
-
-    ksort($listenersByEvent);
-    foreach ($listenersByEvent as $event => $rawListeners) {
-      $rows = array();
-      $i = 0;
-      foreach ($d->getListeners($event) as $listener) {
-        $handled = FALSE;
-        if (is_array($listener)) {
-          list ($a, $b) = $listener;
-          if (is_object($a)) {
-            $rows[] = array('#' . ++$i, get_class($a) . "->$b()");
-            $handled = TRUE;
-          }
-          elseif (is_string($a)) {
-            $rows[] = array('#' . ++$i, "$a::$b()");
-            $handled = TRUE;
-          }
-        }
-        elseif (is_string($listener)) {
-          $rows[] = array('#' . ++$i, $listener);
-          $handled = TRUE;
-        }
-        if (!$handled) {
-          $rows[] = array('#' . ++$i, "unidentified");
-        }
-      }
-
-      $output->writeln("<info>[Event]</info> $event");
-      $table = new Table($output);
-      $table->setHeaders(array('Order', 'Callable'));
-      $table->addRows($rows);
-      $table->render();
-      $output->writeln("");
-    }
+    $eventNames = $this->findEventNames($dispatcher, $eventFilter);
+    $this->printEventListeners($output, $dispatcher, $eventNames);
   }
+
+  use \Civi\Cv\Util\DebugDispatcherTrait;
 
 }
