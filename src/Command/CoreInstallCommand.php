@@ -8,14 +8,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 
-class SetupCommand extends BaseCommand {
+class CoreInstallCommand extends BaseCommand {
 
   use \Civi\Cv\Util\SetupCommandTrait;
   use \Civi\Cv\Util\DebugDispatcherTrait;
 
   protected function configure() {
     $this
-      ->setName('core:setup')
+      ->setName('core:install')
       ->setDescription('Install CiviCRM schema and settings files')
       ->configureSetupOptions()
       ->addOption('abort', 'A', InputOption::VALUE_NONE, 'In the event of conflict, abort.')
@@ -27,10 +27,10 @@ class SetupCommand extends BaseCommand {
 Install CiviCRM schema and settings files
 
 Example: Install on a typical Drupal site. Autodetect settings.
-$ cv core:setup
+$ cv core:install
 
 Example: Install on a custom DB with an alternative language.
-$ cv core:setup --db=mysql://user:pass@host:3306/database --lang=fr_FR
+$ cv core:install --db=mysql://user:pass@host:3306/database --lang=fr_FR
 ');
     $this->configureBootOptions();
   }

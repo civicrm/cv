@@ -6,9 +6,9 @@ use Civi\Cv\Exception\ProcessErrorException;
 use Civi\Cv\Util\Process;
 
 /**
- * @group setup
+ * @group installer
  */
-class SetupCommandTest extends \PHPUnit_Framework_TestCase {
+class CoreInstallCommandTest extends \PHPUnit_Framework_TestCase {
 
   use CvTestTrait;
 
@@ -79,7 +79,7 @@ class SetupCommandTest extends \PHPUnit_Framework_TestCase {
 
     // $this->cvFail("ev 'return CRM_Utils_System::version();'");
 
-    $this->cvOk('core:setup -f');
+    $this->cvOk('core:install -f');
 
     $result = $this->cvJsonOk("ev 'return CRM_Utils_System::version();'");
     $this->assertRegExp('/^[0-9\.]+$/', $result);
