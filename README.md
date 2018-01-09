@@ -184,10 +184,10 @@ and loop through them, e.g.
 $ for CV_TEST_BUILD in /home/me/buildkit/build/{dmaster,wpmaster,bmaster} ; do export CV_TEST_BUILD; phpunit4 --group std; done
 ```
 
-Unit-Tests (Setup)
-==================
+Unit-Tests (Installer)
+======================
 
-The `cv core:setup` command has more stringent execution requirements, e.g.
+The `cv core:install` and `cv core:uninstall` commands have more stringent execution requirements, e.g.
 
 * Each test-run needs to work with an empty build (which does not have a Civi database or settings file).
   It specifically calls `civibuild` and `amp` to create+destroy builds during execution.
@@ -202,5 +202,5 @@ Given these extra requirements, this test runs as a separate group.
 A typical execution might look like:
 
 ```
-$ env DEBUG=1 OFFLINE=1 CV_SETUP_PATH=$HOME/src/civicrm-setup phpunit4 --group setup
+$ env DEBUG=1 OFFLINE=1 CV_SETUP_PATH=$HOME/src/civicrm-setup phpunit4 --group installer
 ```
