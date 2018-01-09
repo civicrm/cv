@@ -62,11 +62,23 @@ trait DebugDispatcherTrait {
             $handled = TRUE;
           }
         }
+        elseif (is_string($listener)) {
+          $handled = TRUE;
+          $rows[] = array('#' . ++$i, $listener . '()');
+        }
+        else {
+          $f = new \ReflectionFunction($listener);
+          $rows[] = array(
+            '#' . ++$i,
+            'closure(' . $f->getFileName() . '@' . $f->getStartLine() . ')',
+          );
+          $handled = TRUE;
+        }
+
         if (!$handled) {
           $rows[] = array('#' . ++$i, "unidentified");
         }
       }
-
       $output->writeln("<info>[Event]</info> $event");
       $table = new Table($output);
       $table->setHeaders(array('Order', 'Callable'));
