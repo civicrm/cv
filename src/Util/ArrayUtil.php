@@ -95,4 +95,19 @@ class ArrayUtil {
     return NULL;
   }
 
+  /**
+   * Grab the first non-empty-ish value.
+   *
+   * @param array $values
+   * @return mixed|NULL
+   */
+  public static function pickFirst($values) {
+    foreach ($values as $value) {
+      if ($value) {
+        return $value;
+      }
+    }
+    return NULL;
+  }
+
 }
