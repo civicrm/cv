@@ -6,9 +6,11 @@ use Civi\Cv\Exception\ProcessErrorException;
 use Civi\Cv\Util\Process;
 
 /**
+ * Test the installation and uninstallation process.
+ *
  * @group installer
  */
-class CoreInstallCommandTest extends \PHPUnit_Framework_TestCase {
+class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
 
   use CvTestTrait;
 
@@ -58,13 +60,16 @@ class CoreInstallCommandTest extends \PHPUnit_Framework_TestCase {
   }
 
   /**
+   * Create an empty CMS build; install Civi; and remove it. At each step,
+   * verify that Civi is (or is not) operational.
+   *
    * @param string $buildType
    *   Ex: 'drupal-empty'.
    * @param array $downloads
    *   Ex: ['my/rel/path' => 'http://example/foo.zip']
    * @dataProvider getTestCases
    */
-  public function testSetup($buildType, $downloads) {
+  public function testStandardLifecycle($buildType, $downloads) {
     $createResult = Process::runOk($this->proc(
       sprintf('civibuild create %s --type %s', escapeshellarg($this->buildName), escapeshellarg($buildType))
     ));
@@ -77,13 +82,26 @@ class CoreInstallCommandTest extends \PHPUnit_Framework_TestCase {
       ));
     }
 
-    // $this->cvFail("ev 'return CRM_Utils_System::version();'");
+    // We've installed CMS -- but not Civi. Expect an error.
+    $output = $this->cvFail("ev 'return CRM_Utils_System::version();'");
+    $this->assertRegExp('/Failed to locate civicrm.settings.php/', $output);
 
-    $this->cvOk('core:install -f');
+    $output = $this->cvOk('core:install -f');
+    $this->assertRegExp('/Creating file.*civicrm.settings.php/', $output);
+    $this->assertRegExp('/Creating civicrm_\* database/', $output);
 
+    // We've installed CMS+Civi. All should be well.
     $result = $this->cvJsonOk("ev 'return CRM_Utils_System::version();'");
     $this->assertRegExp('/^[0-9\.]+$/', $result);
     $this->assertTrue(version_compare($result, '4.6.0', '>='));
+
+    $output = $this->cvOk('core:uninstall -f');
+    $this->assertRegExp('/Removing .*civicrm.settings.php/', $output);
+    $this->assertRegExp('/Removing civicrm_\*/', $output);
+
+    // We've n o longer got Civi - expect an error.
+    $output = $this->cvFail("ev 'return CRM_Utils_System::version();'");
+    $this->assertRegExp('/Failed to locate civicrm.settings.php/', $output);
   }
 
   /**
