@@ -21,7 +21,6 @@ class CoreInstallCommand extends BaseCommand {
       ->addOption('abort', 'A', InputOption::VALUE_NONE, 'In the event of conflict, abort.')
       ->addOption('keep', 'K', InputOption::VALUE_NONE, 'In the event of conflict, keep existing files/tables.')
       ->addOption('force', 'f', InputOption::VALUE_NONE, 'In the event of conflict, overwrite existing files/tables.')
-      ->addOption('out', NULL, InputArgument::OPTIONAL, 'Specify return format (auto,' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat())
       ->addOption('debug-event', NULL, InputOption::VALUE_OPTIONAL, 'Display debug information about events and exit. Give an event name or regex.')
       ->setHelp('
 Install CiviCRM schema and settings files
@@ -46,9 +45,9 @@ $ cv core:install --db=mysql://user:pass@host:3306/database --lang=fr_FR
     }
 
     $this->runSetup($input, $output, $setup);
-    $this->sendResult($input, $output, [
-      'model' => $setup->getModel()->getValues()
-    ]);
+    if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
+      $output->writeln(Encoder::encode($setup->getModel()->getValues(), 'json-pretty'));
+    }
   }
 
   /**
@@ -124,15 +123,15 @@ $ cv core:install --db=mysql://user:pass@host:3306/database --lang=fr_FR
       $setup->installSettings();
     }
     else {
-      $output->writeln(sprintf("<info>Found existing file <comment>%s</comment>.</info>", $setup->getModel()->settingsPath));
+      $output->writeln(sprintf("<info>Found existing <comment>%s</comment> in <comment>%s</comment>.</info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
       switch ($this->pickConflictAction($input, $output, 'civicrm.settings.php')) {
         case 'abort':
           throw new \Exception("Aborted");
 
         case 'overwrite':
-          $output->writeln(sprintf("<info>Removing file <comment>%s</comment>.</info>", $setup->getModel()->settingsPath));
+          $output->writeln(sprintf("<info>Removing <comment>%s</comment> from <comment>%s</comment>.</info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
           $setup->removeSettings();
-          $output->writeln(sprintf("<info>Creating file <comment>%s</comment>.</info>", $setup->getModel()->settingsPath));
+          $output->writeln(sprintf("<info>Creating <comment>%s</comment> in <comment>%s</comment>.</info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
           $setup->installSettings();
           break;
 
