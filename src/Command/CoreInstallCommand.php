@@ -16,20 +16,29 @@ class CoreInstallCommand extends BaseCommand {
   protected function configure() {
     $this
       ->setName('core:install')
-      ->setDescription('Install CiviCRM schema and settings files')
+      ->setDescription('Initialize the CiviCRM data-files and database-schema')
       ->configureSetupOptions()
       ->addOption('abort', 'A', InputOption::VALUE_NONE, 'In the event of conflict, abort.')
       ->addOption('keep', 'K', InputOption::VALUE_NONE, 'In the event of conflict, keep existing files/tables.')
       ->addOption('force', 'f', InputOption::VALUE_NONE, 'In the event of conflict, overwrite existing files/tables.')
       ->addOption('debug-event', NULL, InputOption::VALUE_OPTIONAL, 'Display debug information about events and exit. Give an event name or regex.')
       ->setHelp('
-Install CiviCRM schema and settings files
+Initialize the CiviCRM data-files and database-schema
 
-Example: Install on a typical Drupal site. Autodetect settings.
+Example: Install on a basic WordPress build.
 $ cv core:install
+$ wp plugin activate civicrm
 
-Example: Install on a custom DB with an alternative language.
-$ cv core:install --db=mysql://user:pass@host:3306/database --lang=fr_FR
+Example: Install on a basic Drupal 7 build.
+$ cv core:install --cms-base-url=http://example.com/
+$ drush -y en civicrm
+
+Example: Install on WordPress with a custom language and database.
+$ cv core:install --lang=fr_FR --db=mysql://user:pass@host:3306/database
+$ wp plugin activate civicrm
+
+Example: Forcibly reinstall/overwrite. Display verbose debug info.
+$ cv core:install -f -vv
 ');
     $this->configureBootOptions();
   }
