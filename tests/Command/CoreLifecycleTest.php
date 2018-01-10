@@ -27,13 +27,15 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
     //   'backdrop-empty',
     //   ['modules' => 'https://download.civicrm.org/latest/civicrm-RC-backdrop.tar.gz'],
     // ];
-    // $cases[] = [
-    //   'drupal-empty',
-    //   ['sites/all/modules' => 'https://download.civicrm.org/latest/civicrm-RC-drupal.tar.gz'],
-    // ];
+    $cases[] = [
+      'drupal-empty',
+      ['sites/all/modules' => 'https://download.civicrm.org/latest/civicrm-RC-drupal.tar.gz'],
+      'drush -y en civicrm'
+    ];
     $cases[] = [
       'wp-empty',
       ['wp-content/plugins' => 'https://download.civicrm.org/latest/civicrm-RC-wordpress.zip'],
+      'wp plugin activate civicrm'
     ];
     return $cases;
   }
@@ -67,9 +69,11 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
    *   Ex: 'drupal-empty'.
    * @param array $downloads
    *   Ex: ['my/rel/path' => 'http://example/foo.zip']
+   * @param string $postInstallCmd
+   *   Ex: 'drush -y en civicrm' or 'wp plugin activate civicrm'.
    * @dataProvider getTestCases
    */
-  public function testStandardLifecycle($buildType, $downloads) {
+  public function testStandardLifecycle($buildType, $downloads, $postInstallCmd) {
     $createResult = Process::runOk($this->proc(
       sprintf('civibuild create %s --type %s', escapeshellarg($this->buildName), escapeshellarg($buildType))
     ));
@@ -89,6 +93,10 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
     $output = $this->cvOk('core:install -f');
     $this->assertRegExp('/Creating file.*civicrm.settings.php/', $output);
     $this->assertRegExp('/Creating civicrm_\* database/', $output);
+
+    if ($postInstallCmd) {
+      Process::runOk(new \Symfony\Component\Process\Process($postInstallCmd));
+    }
 
     // We've installed CMS+Civi. All should be well.
     $result = $this->cvJsonOk("ev 'return CRM_Utils_System::version();'");
