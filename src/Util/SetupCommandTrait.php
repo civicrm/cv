@@ -28,6 +28,8 @@ trait SetupCommandTrait {
       ->addOption('src-path', NULL, InputOption::VALUE_OPTIONAL, 'The path to CivCRM-Core source tree. (If omitted, read CV_SETUP_SRC_PATH or scan common defaults.)')
       ->addOption('cms-base-url', NULL, InputOption::VALUE_OPTIONAL, 'The URL of the CMS (If omitted, attempt to autodetect.)')
       ->addOption('lang', NULL, InputOption::VALUE_OPTIONAL, 'Specify the installation language')
+      ->addOption('comp', NULL, InputOption::VALUE_OPTIONAL, 'Comma-separated list of CiviCRM components to enable. (Ex: CiviEvent,CiviContribute,CiviMember,CiviMail,CiviReport)')
+      ->addOption('ext', NULL, InputOption::VALUE_OPTIONAL, 'Comma-separated list of CiviCRM extensions to enable. (Ex: org.civicrm.shoreditch,org.civicrm.flexmailer)')
       ->addOption('db', NULL, InputOption::VALUE_OPTIONAL, 'Database credentials for primary Civi database.');
     return $this;
   }
@@ -85,6 +87,17 @@ trait SetupCommandTrait {
     }
     if ($input->getOption('lang')) {
       $setup->getModel()->lang = $input->getOption('lang');
+    }
+    if ($input->getOption('comp')) {
+      $setup->getModel()->components = explode(',', $input->getOption('comp'));
+    }
+    if ($input->getOption('ext')) {
+      $setup->getModel()->extensions = array_unique(
+        array_merge(
+          $setup->getModel()->extensions,
+          explode(',', $input->getOption('ext'))
+        )
+      );
     }
 
     return $setup;
