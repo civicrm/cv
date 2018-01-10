@@ -57,10 +57,12 @@ trait SetupCommandTrait {
       getenv('CV_SETUP_PATH'),
       implode(DIRECTORY_SEPARATOR, [$setupOptions['srcPath'], 'setup']),
     ]);
-    foreach (['srcPath', 'setupPath'] as $key) {
-      if (!$setupOptions[$key] || !file_exists($setupOptions[$key])) {
-        throw new \Exception("The $key is not a valid directory ($setupOptions[$key]).");
-      }
+
+    if (!$setupOptions['srcPath'] || !file_exists($setupOptions['srcPath'])) {
+      throw new \Exception("The 'srcPath' is not a valid directory ({$setupOptions['srcPath']}). Consider downloading it, setting --src-path, or setting CV_SETUP_SRC_PATH.");
+    }
+    if (!$setupOptions['setupPath'] || !file_exists($setupOptions['setupPath'])) {
+      throw new \Exception("The 'setupPath' is not a valid directory ({$setupOptions['setupPath']}). Consider downloading it, setting --setup-path, or setting CV_SETUP_PATH.");
     }
 
     $this->setupAutoloaders($setupOptions['srcPath'], $setupOptions['setupPath']);
