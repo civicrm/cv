@@ -120,7 +120,7 @@ $ cv core:install --db=mysql://user:pass@host:3306/database --lang=fr_FR
     $installed = $setup->checkInstalled();
     if (!$installed->isSettingInstalled()) {
       $output->writeln(sprintf("<info>Creating file <comment>%s</comment>.</info>", $setup->getModel()->settingsPath));
-      $setup->installSettings();
+      $setup->installFiles();
     }
     else {
       $output->writeln(sprintf("<info>Found existing <comment>%s</comment> in <comment>%s</comment>.</info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
@@ -130,9 +130,9 @@ $ cv core:install --db=mysql://user:pass@host:3306/database --lang=fr_FR
 
         case 'overwrite':
           $output->writeln(sprintf("<info>Removing <comment>%s</comment> from <comment>%s</comment>.</info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
-          $setup->removeSettings();
+          $setup->uninstallFiles();
           $output->writeln(sprintf("<info>Creating <comment>%s</comment> in <comment>%s</comment>.</info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
-          $setup->installSettings();
+          $setup->installFiles();
           break;
 
         case 'keep':
@@ -145,7 +145,7 @@ $ cv core:install --db=mysql://user:pass@host:3306/database --lang=fr_FR
 
     if (!$installed->isDatabaseInstalled()) {
       $output->writeln(sprintf("<info>Creating <comment>civicrm_*</comment> database tables in <comment>%s</comment>.</info>", $setup->getModel()->db['database']));
-      $setup->installSchema();
+      $setup->installDatabase();
     }
     else {
       $output->writeln(sprintf("<info>Found existing <comment>civicrm_*</comment> database tables in <comment>%s</comment>.</info>", $setup->getModel()->db['database']));
@@ -155,9 +155,9 @@ $ cv core:install --db=mysql://user:pass@host:3306/database --lang=fr_FR
 
         case 'overwrite':
           $output->writeln(sprintf("<info>Removing <comment>civicrm_*</comment> database tables in <comment>%s</comment>.</info>", $setup->getModel()->db['database']));
-          $setup->removeSchema();
+          $setup->uninstallDatabase();
           $output->writeln(sprintf("<info>Creating <comment>civicrm_*</comment> database tables in <comment>%s</comment>.</info>", $setup->getModel()->db['database']));
-          $setup->installSchema();
+          $setup->installDatabase();
           break;
 
         case 'keep':
