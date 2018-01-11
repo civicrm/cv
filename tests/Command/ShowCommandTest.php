@@ -1,6 +1,9 @@
 <?php
 namespace Civi\Cv\Command;
 
+/**
+ * @group std
+ */
 class ShowCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function setup() {

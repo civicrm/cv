@@ -1,6 +1,9 @@
 <?php
 namespace Civi\Cv\Command;
 
+/**
+ * @group std
+ */
 class FillCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function testShowJson() {

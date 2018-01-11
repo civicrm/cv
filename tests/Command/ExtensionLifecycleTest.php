@@ -4,6 +4,10 @@ namespace Civi\Cv\Command;
 use Civi\Cv\Exception\ProcessErrorException;
 use Civi\Cv\Util\Process;
 
+/**
+ * @group std
+ * @group ext
+ */
 class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
 
   const EXAMPLE_DOWNLOAD_URL = 'https://download.civicrm.org/cv/fixtures/org.example.cvtest-20161227.zip';

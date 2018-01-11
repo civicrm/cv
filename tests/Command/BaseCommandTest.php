@@ -4,6 +4,9 @@ namespace Civi\Cv\Command;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputOption;
 
+/**
+ * @group std
+ */
 class BaseCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function refreshExamples() {

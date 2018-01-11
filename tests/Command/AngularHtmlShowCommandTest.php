@@ -4,6 +4,10 @@ namespace Civi\Cv\Command;
 use Civi\Cv\Exception\ProcessErrorException;
 use Civi\Cv\Util\Process;
 
+/**
+ * @group std
+ * @group angular
+ */
 class AngularHtmlShowCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function setUp() {
