@@ -96,7 +96,7 @@ class HeadlessDownloader {
         throw new \Exception("$extractedZipPath already exists");
       }
       if (!is_dir($tmpDir)) {
-        mkdir($tmpDir);
+        mkdir($tmpDir, 0777, TRUE);
       }
       if (!$zip->extractTo($tmpDir)) {
         throw new \Exception("Unable to extract the extension to $tmpDir.");
