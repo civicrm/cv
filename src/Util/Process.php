@@ -9,8 +9,39 @@ class Process {
    * @return \Symfony\Component\Process\Process
    * @throws \RuntimeException
    */
+  public static function runDebug($process) {
+    if (getenv('DEBUG')) {
+      var_dump(array(
+        'Working Directory' => $process->getWorkingDirectory(),
+        'Command' => $process->getCommandLine(),
+      ));
+      ob_flush();
+    }
+
+    $process->run(function ($type, $buffer) {
+      if (getenv('DEBUG')) {
+        if (\Symfony\Component\Process\Process::ERR === $type) {
+          echo 'STDERR > ' . $buffer;
+        }
+        else {
+          echo 'STDOUT > ' . $buffer;
+        }
+        ob_flush();
+      }
+    });
+
+    return $process;
+  }
+
+  /**
+   * Helper which synchronously runs a command and verifies that it doesn't generate an error.
+   *
+   * @param \Symfony\Component\Process\Process $process
+   * @return \Symfony\Component\Process\Process
+   * @throws \RuntimeException
+   */
   public static function runOk(\Symfony\Component\Process\Process $process) {
-    $process->run();
+    self::runDebug($process);
     if (!$process->isSuccessful()) {
       throw new \Civi\Cv\Exception\ProcessErrorException($process);
     }
@@ -25,7 +56,7 @@ class Process {
    * @throws \RuntimeException
    */
   public static function runFail(\Symfony\Component\Process\Process $process) {
-    $process->run();
+    self::runDebug($process);
     if ($process->isSuccessful()) {
       Process::dump($process);
       throw new \Civi\Cv\Exception\ProcessErrorException($process, "Process succeeded unexpectedly");
