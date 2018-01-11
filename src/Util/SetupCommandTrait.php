@@ -67,6 +67,9 @@ trait SetupCommandTrait {
       throw new \Exception("The 'setupPath' is not a valid directory ({$setupOptions['setupPath']}). Consider downloading it, setting --setup-path, or setting CV_SETUP_PATH.");
     }
 
+    $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment>.</info>', 'civicrm-core', $setupOptions['srcPath']));
+    $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment>.</info>', 'civicrm-setup', $setupOptions['setupPath']));
+
     $this->setupAutoloaders($setupOptions['srcPath'], $setupOptions['setupPath']);
     \Civi\Setup::init($setupOptions, NULL, new ConsoleLogger($output));
     $setup = \Civi\Setup::instance();
