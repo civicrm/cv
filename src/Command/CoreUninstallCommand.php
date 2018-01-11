@@ -55,12 +55,12 @@ options for "core:uninstall" as the preceding "core:install".
     }
 
     if ($installed->isDatabaseInstalled()) {
-      $output->writeln(sprintf("<info>Removing <comment>civicrm_*</comment> database tables in <comment>%s</comment>.</info>", $setup->getModel()->db['database']));
+      $output->writeln(sprintf("<info>Removing <comment>civicrm_*</comment> database tables in <comment>%s</comment></info>", $setup->getModel()->db['database']));
       $setup->uninstallDatabase();
     }
 
     if ($installed->isSettingInstalled()) {
-      $output->writeln(sprintf("<info>Removing <comment>%s</comment> from <comment>%s</comment>.</info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
+      $output->writeln(sprintf("<info>Removing <comment>%s</comment> from <comment>%s</comment></info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
       $setup->uninstallFiles();
     }
   }

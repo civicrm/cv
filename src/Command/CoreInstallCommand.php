@@ -128,19 +128,19 @@ $ cv core:install -f -vv
     // Install!
     $installed = $setup->checkInstalled();
     if (!$installed->isSettingInstalled()) {
-      $output->writeln(sprintf("<info>Creating file <comment>%s</comment>.</info>", $setup->getModel()->settingsPath));
+      $output->writeln(sprintf("<info>Creating file <comment>%s</comment></info>", $setup->getModel()->settingsPath));
       $setup->installFiles();
     }
     else {
-      $output->writeln(sprintf("<info>Found existing <comment>%s</comment> in <comment>%s</comment>.</info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
+      $output->writeln(sprintf("<info>Found existing <comment>%s</comment> in <comment>%s</comment></info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
       switch ($this->pickConflictAction($input, $output, 'civicrm.settings.php')) {
         case 'abort':
           throw new \Exception("Aborted");
 
         case 'overwrite':
-          $output->writeln(sprintf("<info>Removing <comment>%s</comment> from <comment>%s</comment>.</info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
+          $output->writeln(sprintf("<info>Removing <comment>%s</comment> from <comment>%s</comment></info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
           $setup->uninstallFiles();
-          $output->writeln(sprintf("<info>Creating <comment>%s</comment> in <comment>%s</comment>.</info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
+          $output->writeln(sprintf("<info>Creating <comment>%s</comment> in <comment>%s</comment></info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
           $setup->installFiles();
           break;
 
@@ -153,19 +153,19 @@ $ cv core:install -f -vv
     }
 
     if (!$installed->isDatabaseInstalled()) {
-      $output->writeln(sprintf("<info>Creating <comment>civicrm_*</comment> database tables in <comment>%s</comment>.</info>", $setup->getModel()->db['database']));
+      $output->writeln(sprintf("<info>Creating <comment>civicrm_*</comment> database tables in <comment>%s</comment></info>", $setup->getModel()->db['database']));
       $setup->installDatabase();
     }
     else {
-      $output->writeln(sprintf("<info>Found existing <comment>civicrm_*</comment> database tables in <comment>%s</comment>.</info>", $setup->getModel()->db['database']));
+      $output->writeln(sprintf("<info>Found existing <comment>civicrm_*</comment> database tables in <comment>%s</comment></info>", $setup->getModel()->db['database']));
       switch ($this->pickConflictAction($input, $output, 'database tables')) {
         case 'abort':
           throw new \Exception("Aborted");
 
         case 'overwrite':
-          $output->writeln(sprintf("<info>Removing <comment>civicrm_*</comment> database tables in <comment>%s</comment>.</info>", $setup->getModel()->db['database']));
+          $output->writeln(sprintf("<info>Removing <comment>civicrm_*</comment> database tables in <comment>%s</comment></info>", $setup->getModel()->db['database']));
           $setup->uninstallDatabase();
-          $output->writeln(sprintf("<info>Creating <comment>civicrm_*</comment> database tables in <comment>%s</comment>.</info>", $setup->getModel()->db['database']));
+          $output->writeln(sprintf("<info>Creating <comment>civicrm_*</comment> database tables in <comment>%s</comment></info>", $setup->getModel()->db['database']));
           $setup->installDatabase();
           break;
 
