@@ -88,9 +88,9 @@ $ cv core:install -f -vv
     $question = new ChoiceQuestion(
       "The $title already exists. What you like to do?",
       array(
-        'a' => "Abort (default).",
-        'k' => "Keep existing $title. (WARNING: This may fail if the existing version is out-of-date.)",
-        'o' => "Overwrite with new $title. (WARNING: This may destroy data.)",
+        'a' => "Abort. (Default.) (Equivalent to -A.)",
+        'k' => "Keep existing $title. (WARNING: This may fail if the existing version is out-of-date.) (Equivalent to -K.)",
+        'o' => "Overwrite with new $title. (WARNING: This may destroy data.) (Equivalent to -f.)",
       ),
       'a'
     );
