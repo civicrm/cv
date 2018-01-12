@@ -49,26 +49,38 @@ trait SetupCommandTrait {
     $setupOptions = array();
     $setupOptions['cms'] = $b->getBootedCmsType();
 
-    $setupOptions['srcPath'] = ArrayUtil::pickFirst([
+    $possibleSrcPaths = [
       $input->getOption('src-path'),
       getenv('CV_SETUP_SRC_PATH'),
-      $this->findCiviSrcPath($b->getBootedCmsType(), $b->getBootedCmsPath()),
-    ]);
-    $setupOptions['setupPath'] = ArrayUtil::pickFirst([
+      implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'sites', 'all', 'modules', 'civicrm']),
+      implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'wp-content', 'plugins', 'civicrm', 'civicrm']),
+      implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'modules', 'civicrm']),
+    ];
+    $setupOptions['srcPath'] = ArrayUtil::pickFirst($possibleSrcPaths, 'file_exists');
+    if ($setupOptions['srcPath']) {
+      $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-core', $setupOptions['srcPath']));
+    }
+    else {
+      $this->printPathError($output, 'civicrm-core', '--src-path', 'CV_SETUP_SRC_PATH', $possibleSrcPaths);
+      throw new \Exception("Failed to locate civicrm-core");
+    }
+
+    $possibleSetupPaths = [
       $input->getOption('setup-path'),
       getenv('CV_SETUP_PATH'),
+      implode(DIRECTORY_SEPARATOR, [$setupOptions['srcPath'], 'vendor', 'civicrm', 'civicrm-setup']),
+      implode(DIRECTORY_SEPARATOR, [$setupOptions['srcPath'], 'packages', 'civicrm-setup']),
       implode(DIRECTORY_SEPARATOR, [$setupOptions['srcPath'], 'setup']),
-    ]);
-
-    if (!$setupOptions['srcPath'] || !file_exists($setupOptions['srcPath'])) {
-      throw new \Exception("The 'srcPath' is not a valid directory ({$setupOptions['srcPath']}). Consider downloading it, setting --src-path, or setting CV_SETUP_SRC_PATH.");
+      implode(DIRECTORY_SEPARATOR, ['/usr', 'local', 'share', 'civicrm-setup'])
+    ];
+    $setupOptions['setupPath'] = ArrayUtil::pickFirst($possibleSetupPaths, 'file_exists');
+    if ($setupOptions['setupPath']) {
+      $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-setup', $setupOptions['setupPath']));
     }
-    if (!$setupOptions['setupPath'] || !file_exists($setupOptions['setupPath'])) {
-      throw new \Exception("The 'setupPath' is not a valid directory ({$setupOptions['setupPath']}). Consider downloading it, setting --setup-path, or setting CV_SETUP_PATH.");
+    else {
+      $this->printPathError($output, 'civicrm-setup', '--setup-path', 'CV_SETUP_PATH', $possibleSetupPaths);
+      throw new \Exception("Failed to locate civicrm-setup");
     }
-
-    $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-core', $setupOptions['srcPath']));
-    $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-setup', $setupOptions['setupPath']));
 
     $this->setupAutoloaders($setupOptions['srcPath'], $setupOptions['setupPath']);
     \Civi\Setup::init($setupOptions, NULL, new ConsoleLogger($output));
@@ -130,27 +142,20 @@ trait SetupCommandTrait {
   }
 
   /**
-   * Try to guess the location of the main "civicrm" source tree.
-   *
-   * @param string $cmsType
-   *   Ex: 'Backdrop', 'Drupal', 'Drupal8', 'Joomla', 'WordPress'.
-   * @param string $cmsPath
-   *   Ex: '/var/www'.
-   * @return null|string
+   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   * @param $name
+   * @param $optName
+   * @param $envName
+   * @param $possibleSrcPaths
    */
-  protected function findCiviSrcPath($cmsType, $cmsPath) {
-    $commonDirs = array(
-      'sites/all/modules/civicrm',
-      'wp-content/plugins/civicrm/civicrm',
-      'modules/civicrm',
-    );
-    foreach ($commonDirs as $commonDir) {
-      if (file_exists($cmsPath . DIRECTORY_SEPARATOR . $commonDir)) {
-        return $cmsPath . DIRECTORY_SEPARATOR . $commonDir;
+  protected function printPathError(OutputInterface $output, $name, $optName, $envName, $possibleSrcPaths) {
+    $output->writeln(sprintf('<error>Failed to locate %s</error>', $name));
+    $output->writeln(sprintf('<info>Consider setting <comment>%s</comment>, setting <comment>%s</comment>, or placing it one of these folders:</info>', $optName, $envName));
+    foreach ($possibleSrcPaths as $path) {
+      if ($path) {
+        $output->writeln(sprintf('<info> * <comment>%s</comment></info>', $path));
       }
     }
-
-    return NULL;
   }
 
 }
