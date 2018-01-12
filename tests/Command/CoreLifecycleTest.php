@@ -26,15 +26,18 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
     // $cases[] = [
     //   'backdrop-empty',
     //   ['modules' => 'https://download.civicrm.org/latest/civicrm-RC-backdrop.tar.gz'],
+    //   'core:install -f --cms-base-url=http://localhost',
     // ];
     $cases[] = [
       'drupal-empty',
       ['sites/all/modules' => 'https://download.civicrm.org/latest/civicrm-RC-drupal.tar.gz'],
+      'core:install -f --cms-base-url=http://localhost',
       'drush -y en civicrm'
     ];
     $cases[] = [
       'wp-empty',
       ['wp-content/plugins' => 'https://download.civicrm.org/latest/civicrm-RC-wordpress.zip'],
+      'core:install -f',
       'wp plugin activate civicrm'
     ];
     return $cases;
@@ -69,11 +72,13 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
    *   Ex: 'drupal-empty'.
    * @param array $downloads
    *   Ex: ['my/rel/path' => 'http://example/foo.zip']
+   * @param string $installCmd
+   *   Ex: 'core:install -f'
    * @param string $postInstallCmd
    *   Ex: 'drush -y en civicrm' or 'wp plugin activate civicrm'.
    * @dataProvider getTestCases
    */
-  public function testStandardLifecycle($buildType, $downloads, $postInstallCmd) {
+  public function testStandardLifecycle($buildType, $downloads, $installCmd, $postInstallCmd) {
     $createResult = Process::runOk($this->proc(
       sprintf('civibuild create %s --type %s', escapeshellarg($this->buildName), escapeshellarg($buildType))
     ));
@@ -90,7 +95,7 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
     $output = $this->cvFail("ev 'return CRM_Utils_System::version();'");
     $this->assertRegExp('/Failed to locate civicrm.settings.php/', $output);
 
-    $output = $this->cvOk('core:install -f');
+    $output = $this->cvOk($installCmd);
     $this->assertRegExp('/Creating file.*civicrm.settings.php/', $output);
     $this->assertRegExp('/Creating civicrm_\* database/', $output);
 
