@@ -39,6 +39,9 @@ $ wp plugin activate civicrm
 
 Example: Forcibly reinstall/overwrite. Display verbose debug info.
 $ cv core:install -f -vv
+
+Example: Inspect the installer events+plugins
+$ cv core:install --debug-event
 ');
     $this->configureBootOptions();
   }
