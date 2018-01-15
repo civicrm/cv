@@ -95,6 +95,11 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
     $output = $this->cvFail("ev 'return CRM_Utils_System::version();'");
     $this->assertRegExp('/Failed to locate civicrm.settings.php/', $output);
 
+    $output = Process::runDebug($this->cv('core:check-req --out=table'))->getOutput();
+    $this->assertRegExp('/Found.*civicrm-core/', $output);
+    $this->assertRegExp('/Found.*civicrm-setup/', $output);
+    $this->assertRegExp('/| *info *| *lang/', $output);
+
     $output = $this->cvOk($installCmd);
     $this->assertRegExp('/Creating file.*civicrm.settings.php/', $output);
     $this->assertRegExp('/Creating civicrm_\* database/', $output);
