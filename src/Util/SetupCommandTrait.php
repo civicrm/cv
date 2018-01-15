@@ -42,7 +42,7 @@ trait SetupCommandTrait {
    * @return \Civi\Setup
    * @throws \Exception
    */
-  protected function bootSetupSubsystem(InputInterface $input, OutputInterface $output) {
+  protected function bootSetupSubsystem(InputInterface $input, OutputInterface $output, $defaultOutputOptions = 0) {
     $b = $this->bootCms($input, $output);
 
     // Initialize setup model.
@@ -58,7 +58,7 @@ trait SetupCommandTrait {
     ];
     $setupOptions['srcPath'] = ArrayUtil::pickFirst($possibleSrcPaths, 'file_exists');
     if ($setupOptions['srcPath']) {
-      $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-core', $setupOptions['srcPath']));
+      $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-core', $setupOptions['srcPath']), $defaultOutputOptions);
     }
     else {
       $this->printPathError($output, 'civicrm-core', '--src-path', 'CV_SETUP_SRC_PATH', $possibleSrcPaths);
@@ -75,7 +75,7 @@ trait SetupCommandTrait {
     ];
     $setupOptions['setupPath'] = ArrayUtil::pickFirst($possibleSetupPaths, 'file_exists');
     if ($setupOptions['setupPath']) {
-      $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-setup', $setupOptions['setupPath']));
+      $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-setup', $setupOptions['setupPath']), $defaultOutputOptions);
     }
     else {
       $this->printPathError($output, 'civicrm-setup', '--setup-path', 'CV_SETUP_PATH', $possibleSetupPaths);
