@@ -98,7 +98,6 @@ trait SetupCommandTrait {
     ]);
     if ($input->getOption('db')) {
       $setup->getModel()->db = DbUtil::parseDsn($input->getOption('db'));
-      return $setup;
     }
     if ($input->getOption('lang')) {
       $setup->getModel()->lang = $input->getOption('lang');
