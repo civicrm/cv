@@ -32,13 +32,13 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
       'drupal-empty',
       ['sites/all/modules' => 'https://download.civicrm.org/latest/civicrm-RC-drupal.tar.gz'],
       'core:install -f --cms-base-url=http://localhost',
-      'drush -y en civicrm'
+      '', // 'drush -y en civicrm', // No longer needed -- FlushDrupal plugin autoenables.
     ];
     $cases[] = [
       'wp-empty',
       ['wp-content/plugins' => 'https://download.civicrm.org/latest/civicrm-RC-wordpress.zip'],
       'core:install -f',
-      'wp plugin activate civicrm'
+      'wp plugin activate civicrm',
     ];
     return $cases;
   }
