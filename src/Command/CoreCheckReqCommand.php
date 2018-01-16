@@ -46,11 +46,13 @@ $ cv core:check-req -we
     $messages = array_filter($reqs->getMessages(), function ($m) use ($filterLevels) {
       return in_array($m['level'], $filterLevels);
     });
-    usort($messages, function($a, $b){
-      $nameCmp = strcmp($a['name'], $b['name']);
-      return $nameCmp;
+    uasort($messages, function ($a, $b) {
+      return strcmp(
+        $a['level'] . '-' . $a['section'] . '-' . $a['name'],
+        $b['level'] . '-' . $b['section'] . '-' . $b['name']
+      );
     });
-    $this->sendTable($input, $output, $messages, array('level', 'name', 'message'));
+    $this->sendTable($input, $output, $messages, array('level', 'section', 'name', 'message'));
     return $reqs->getErrors() ? 1 : 0;
   }
 
