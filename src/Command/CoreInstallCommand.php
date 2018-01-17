@@ -43,6 +43,10 @@ $ cv core:install -f -vv
 
 Example: Inspect the installer events+plugins
 $ cv core:install --debug-event
+
+Example: Install while setting a hidden option
+$ cv core:install --model=extras.opt-in.versionCheck=1
+$ cv core:install -m extras.opt-in.versionCheck=1
 ');
     $this->configureBootOptions();
   }

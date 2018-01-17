@@ -30,7 +30,9 @@ trait SetupCommandTrait {
       ->addOption('lang', NULL, InputOption::VALUE_OPTIONAL, 'Specify the installation language')
       ->addOption('comp', NULL, InputOption::VALUE_OPTIONAL, 'Comma-separated list of CiviCRM components to enable. (Ex: CiviEvent,CiviContribute,CiviMember,CiviMail,CiviReport)')
       ->addOption('ext', NULL, InputOption::VALUE_OPTIONAL, 'Comma-separated list of CiviCRM extensions to enable. (Ex: org.civicrm.shoreditch,org.civicrm.flexmailer)')
-      ->addOption('db', NULL, InputOption::VALUE_OPTIONAL, 'Database credentials for primary Civi database.');
+      ->addOption('db', NULL, InputOption::VALUE_OPTIONAL, 'Database credentials for primary Civi database.')
+      ->addOption('model', 'm', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Set additional field in the model. Key-value pair.');
+
     return $this;
   }
 
@@ -112,6 +114,18 @@ trait SetupCommandTrait {
           explode(',', $input->getOption('ext'))
         )
       );
+    }
+    foreach ($input->getOption('model') as $modelExpr) {
+      $obj = $setup->getModel();
+      list ($key, $value) = explode('=', $modelExpr, 2);
+      $keyPath = explode('.', $key);
+      $firstKey = array_shift($keyPath);
+      if ($keyPath) {
+        ArrayUtil::pathSet($obj->{$firstKey}, $keyPath, $value);
+      }
+      else {
+        $obj->{$firstKey} = $value;
+      }
     }
 
     return $setup;
