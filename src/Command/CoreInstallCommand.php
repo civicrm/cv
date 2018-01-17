@@ -136,10 +136,13 @@ $ cv core:install -m extras.opt-in.versionCheck=1
   protected function runSetup(InputInterface $input, OutputInterface $output, $setup) {
     // Validate system requirements
     $reqs = $setup->checkRequirements();
+    foreach ($reqs->getWarnings() as $msg) {
+      $output->writeln(sprintf("<comment>WARNING: (<info>%s</info>) %s:</comment> %s", $msg['section'], $msg['name'], $msg['message']));
+    }
     $errors = $reqs->getErrors();
     if ($errors) {
       foreach ($errors as $msg) {
-        $output->writeln(sprintf("<error>(%s) %s</error>", $msg['name'], $msg['message']));
+        $output->writeln(sprintf("<error>ERROR: (%s) %s:</error> %s", $msg['section'], $msg['name'], $msg['message']));
       }
       throw new \Exception('Requirements check failed.');
     }

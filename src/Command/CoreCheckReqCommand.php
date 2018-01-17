@@ -38,21 +38,21 @@ $ cv core:check-req -we
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $filterLevels = $this->parseFilter($input);
+    $filterSeverities = $this->parseFilter($input);
 
     $showBootMsgsByDefault = in_array($input->getOption('out'), ['table', 'pretty']);
     $setup = $this->bootSetupSubsystem($input, $output, $showBootMsgsByDefault ? 0 : OutputInterface::VERBOSITY_VERBOSE);
     $reqs = $setup->checkRequirements();
-    $messages = array_filter($reqs->getMessages(), function ($m) use ($filterLevels) {
-      return in_array($m['level'], $filterLevels);
+    $messages = array_filter($reqs->getMessages(), function ($m) use ($filterSeverities) {
+      return in_array($m['severity'], $filterSeverities);
     });
     uasort($messages, function ($a, $b) {
       return strcmp(
-        $a['level'] . '-' . $a['section'] . '-' . $a['name'],
-        $b['level'] . '-' . $b['section'] . '-' . $b['name']
+        $a['severity'] . '-' . $a['section'] . '-' . $a['name'],
+        $b['severity'] . '-' . $b['section'] . '-' . $b['name']
       );
     });
-    $this->sendTable($input, $output, $messages, array('level', 'section', 'name', 'message'));
+    $this->sendTable($input, $output, $messages, array('severity', 'section', 'name', 'message'));
     return $reqs->getErrors() ? 1 : 0;
   }
 
@@ -61,21 +61,20 @@ $ cv core:check-req -we
    * @return array
    */
   protected function parseFilter(InputInterface $input) {
-    $filterLevels = array();
+    $filterSeverities = array();
     if ($input->getOption('filter-warnings')) {
-      $filterLevels[] = 'warning';
+      $filterSeverities[] = 'warning';
     }
     if ($input->getOption('filter-errors')) {
-      $filterLevels[] = 'error';
+      $filterSeverities[] = 'error';
     }
     if ($input->getOption('filter-infos')) {
-      $filterLevels[] = 'info';
+      $filterSeverities[] = 'info';
     }
-    if ($filterLevels === array()) {
-      $filterLevels = array('warning', 'error', 'info');
-      return $filterLevels;
+    if ($filterSeverities === array()) {
+      $filterSeverities = array('warning', 'error', 'info');
     }
-    return $filterLevels;
+    return $filterSeverities;
   }
 
 }
