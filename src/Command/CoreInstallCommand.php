@@ -22,6 +22,7 @@ class CoreInstallCommand extends BaseCommand {
       ->addOption('keep', 'K', InputOption::VALUE_NONE, 'In the event of conflict, keep existing files/tables.')
       ->addOption('force', 'f', InputOption::VALUE_NONE, 'In the event of conflict, overwrite existing files/tables.')
       ->addOption('debug-event', NULL, InputOption::VALUE_OPTIONAL, 'Display debug information about events and exit. Give an event name or regex.')
+      ->addOption('debug-model', NULL, InputOption::VALUE_NONE, 'Display debug information about model and exit.')
       ->setHelp('
 Initialize the CiviCRM data-files and database-schema
 
@@ -49,10 +50,21 @@ $ cv core:install --debug-event
   protected function execute(InputInterface $input, OutputInterface $output) {
     $setup = $this->bootSetupSubsystem($input, $output);
 
+    $debugMode = FALSE;
+
     $debugEvent = $this->parseOptionalOption($input, ['--debug-event'], NULL, '');
     if ($debugEvent !== NULL) {
       $eventNames = $this->findEventNames($setup->getDispatcher(), $debugEvent);
       $this->printEventListeners($output, $setup->getDispatcher(), $eventNames);
+      $debugMode = TRUE;
+    }
+
+    if ($input->getOption('debug-model')) {
+      $output->writeln(Encoder::encode($setup->getModel()->getValues(), 'json-pretty'));
+      $debugMode = 1;
+    }
+
+    if ($debugMode) {
       return 0;
     }
 
