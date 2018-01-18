@@ -8,6 +8,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 
+define('CV_SETUP_PROTOCOL_VER', '0.1');
+
 /**
  * This trait can be mixed into a Symfony `Command` to take advantage of the
  * civicrm-setup framework.
@@ -85,6 +87,7 @@ trait SetupCommandTrait {
     }
 
     $this->setupAutoloaders($setupOptions['srcPath'], $setupOptions['setupPath']);
+    \Civi\Setup::assertProtocolCompatibility(CV_SETUP_PROTOCOL_VER);
     \Civi\Setup::init($setupOptions, NULL, new ConsoleLogger($output));
     $setup = \Civi\Setup::instance();
 
