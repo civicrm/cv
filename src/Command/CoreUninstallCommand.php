@@ -46,10 +46,20 @@ options for "core:uninstall" as the preceding "core:install".
       return 0;
     }
 
+    if ($installed->isDatabaseInstalled()) {
+      $output->writeln(sprintf("<info>Found <comment>civicrm_*</comment> database tables in <comment>%s</comment></info>", $setup->getModel()->db['database']));
+    }
+
+    if ($installed->isSettingInstalled()) {
+      $output->writeln(sprintf("<info>Found <comment>%s</comment> in <comment>%s</comment></info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
+    }
+
     if (!$input->getOption('force')) {
+      $output->writeln('');
       $helper = $this->getHelper('question');
-      $question = new ConfirmationQuestion('<comment>Are you sure want to purge CiviCRM schema and settings? Data may be permanently destroyed.</comment> (y/N) ', FALSE);
+      $question = new ConfirmationQuestion('<comment>Are you sure want to purge the CiviCRM database and data files? Data may be permanently destroyed.</comment> (y/N) ', FALSE);
       if (!$helper->ask($input, $output, $question)) {
+        $output->writeln("<comment>Aborted</comment>");
         return 1;
       }
     }
