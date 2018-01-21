@@ -11,6 +11,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class EvalCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   protected function configure() {
     $this
       ->setName('php:eval')
@@ -35,7 +37,7 @@ you use a "return" statement. In that case, it will use the default (' . \Civi\C
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

@@ -28,6 +28,28 @@ class ArrayUtil {
   }
 
   /**
+   * Set a single value in an array tree.
+   *
+   * @param array $arr
+   *   Ex: array('foo'=>array('bar'=>123)).
+   * @param array $pathParts
+   *   Ex: array('foo',bar').
+   * @param $value
+   *   Ex: 456.
+   */
+  public static function pathSet(&$arr, $pathParts, $value) {
+    $r = &$arr;
+    $last = array_pop($pathParts);
+    foreach ($pathParts as $part) {
+      if (!isset($r[$part])) {
+        $r[$part] = array();
+      }
+      $r = &$r[$part];
+    }
+    $r[$last] = $value;
+  }
+
+  /**
    * Convert a list of records from associative-arrays to numeric-arrays.
    *
    * @param array $records
@@ -99,11 +121,12 @@ class ArrayUtil {
    * Grab the first non-empty-ish value.
    *
    * @param array $values
+   * @param callable|NULL $filter
    * @return mixed|NULL
    */
-  public static function pickFirst($values) {
+  public static function pickFirst($values, $filter = NULL) {
     foreach ($values as $value) {
-      if ($value) {
+      if (($filter !== NULL && $filter($value)) || ($filter === NULL && $value)) {
         return $value;
       }
     }

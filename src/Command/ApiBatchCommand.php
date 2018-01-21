@@ -11,6 +11,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ApiBatchCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   /**
    * @var array
    */
@@ -41,7 +43,7 @@ of API calls.
 Each line of output is encoded as a JSON document. The JSON document is an array
 of API results.
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

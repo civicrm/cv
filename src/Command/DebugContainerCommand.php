@@ -8,6 +8,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class DebugContainerCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   protected function configure() {
     $this
       ->setName('debug:container')
@@ -17,7 +19,7 @@ class DebugContainerCommand extends BaseCommand {
       ->setHelp('
 Dump the container configuration
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

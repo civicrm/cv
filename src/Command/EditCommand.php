@@ -19,6 +19,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class EditCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   /**
    * @var \Civi\Cv\Util\CliEditor
    */
@@ -28,7 +30,7 @@ class EditCommand extends BaseCommand {
     $this
       ->setName('vars:edit')
       ->setDescription('Edit configuration values for this build');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   public function __construct($name = NULL) {
@@ -40,7 +42,7 @@ class EditCommand extends BaseCommand {
       if ($data === NULL) {
         return array(
           FALSE,
-          '// The JSON document was malformed. Please resolve syntax errors and then remove this message.'
+          '// The JSON document was malformed. Please resolve syntax errors and then remove this message.',
         );
       }
       else {
@@ -60,10 +62,10 @@ class EditCommand extends BaseCommand {
 
     print "NEW DATA\n\n====\n$newJson\n====\n";
 
-//    Config::update(function ($config) use ($newSiteData) {
-//      $config['sites'][CIVICRM_SETTINGS_PATH] = $newSiteData;
-//      return $config;
-//    });
+    //    Config::update(function ($config) use ($newSiteData) {
+    //      $config['sites'][CIVICRM_SETTINGS_PATH] = $newSiteData;
+    //      return $config;
+    //    });
   }
 
 }

@@ -10,6 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class FlushCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\BootTrait;
+
   protected function configure() {
     $this
       ->setName('flush')
@@ -19,7 +21,7 @@ class FlushCommand extends BaseCommand {
       ->setHelp('
 Flush system caches
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

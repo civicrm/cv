@@ -59,7 +59,7 @@ Examples: Lookup multiple URLs
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

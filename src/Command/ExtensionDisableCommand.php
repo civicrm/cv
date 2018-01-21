@@ -39,7 +39,7 @@ Note:
   This subcommand does not output parseable data. For parseable output,
   consider using `cv api extension.disable`.
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
