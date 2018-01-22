@@ -8,6 +8,8 @@ Requirements
 
 A local CiviCRM installation.
 
+PHP v5.4+.
+
 Support may vary depending on the host environment (CMS type, file-structure, symlinks, etc).
  * *Tested heavily*: Drupal 7 single-site, WordPress single-site, UnitTests
  * *Tested lightly*: Backdrop single-site, WordPress (alternate content root)
@@ -25,6 +27,9 @@ Simply download [`cv`](https://download.civicrm.org/cv/cv.phar) and put it somew
 sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
 sudo chmod +x /usr/local/bin/cv
 ```
+
+> __Need PHP 5.3?__: The last version to support PHP v5.3 was [cv v0.1.32](https://download.civicrm.org/cv/cv.phar-2018-01-11-8dd41af7).
+> Please note that the current version of `civicrm-core` no longer supports PHP v5.3.
 
 Documentation
 =============
