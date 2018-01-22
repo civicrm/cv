@@ -5,6 +5,10 @@ if (PHP_SAPI !== 'cli') {
   echo "cv is a command-line tool\n";
   exit(1);
 }
+if (version_compare(PHP_VERSION, '5.4', '<')) {
+  echo "cv requires PHP 5.4+\n";
+  exit(2);
+}
 $found = 0;
 $autoloaders = array(
   dirname(__DIR__) . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php',
