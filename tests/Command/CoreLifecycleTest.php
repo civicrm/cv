@@ -23,11 +23,12 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
 
   public function getTestCases() {
     $cases = [];
-    // $cases[] = [
-    //   'backdrop-empty',
-    //   ['modules' => 'https://download.civicrm.org/latest/civicrm-RC-backdrop.tar.gz'],
-    //   'core:install -f --cms-base-url=http://localhost',
-    // ];
+    $cases[] = [
+      'backdrop-empty',
+      ['modules' => 'https://download.civicrm.org/latest/civicrm-RC-backdrop.tar.gz'],
+      'core:install -f --cms-base-url=http://localhost',
+      '',
+    ];
     $cases[] = [
       'drupal-empty',
       ['sites/all/modules' => 'https://download.civicrm.org/latest/civicrm-RC-drupal.tar.gz'],
