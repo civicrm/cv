@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 
-define('CV_SETUP_PROTOCOL_VER', '0.1');
+define('CV_SETUP_PROTOCOL_VER', '1.0');
 
 /**
  * This trait can be mixed into a Symfony `Command` to take advantage of the
@@ -142,18 +142,19 @@ trait SetupCommandTrait {
    * @throws \Exception
    */
   protected function setupAutoloaders($srcPath, $setupPath) {
-    $autoloaders = [];
-    $autoloaders[] = implode(DIRECTORY_SEPARATOR,
-      [$setupPath, 'civicrm-setup-autoload.php']);
-    $autoloaders[] = implode(DIRECTORY_SEPARATOR,
-      [$srcPath, 'CRM', 'Core', 'ClassLoader.php']);
-
-    foreach ($autoloaders as $autoloader) {
-      if (!file_exists($autoloader)) {
-        throw new \Exception("Failed to load $autoloader");
-      }
-      require_once $autoloader;
+    // Optional - Use our own setup autoloader.
+    $setupAL = implode(DIRECTORY_SEPARATOR, [$setupPath, 'civicrm-setup-autoload.php']);
+    if (file_exists($setupAL)) {
+      require_once $setupAL;
     }
+
+    // Required - Use core's autoloader.
+    $coreAL = implode(DIRECTORY_SEPARATOR, [$srcPath, 'CRM', 'Core', 'ClassLoader.php']);
+    if (!file_exists($coreAL)) {
+      throw new \Exception("Failed to load $coreAL");
+    }
+    require_once $coreAL;
+
     \CRM_Core_ClassLoader::singleton()->register();
   }
 
