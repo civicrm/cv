@@ -12,9 +12,17 @@ class CivilTestCase extends \PHPUnit_Framework_TestCase {
    */
   private $originalCwd;
 
+  /**
+   * Path to the "cv" binary.
+   *
+   * @var string
+   */
+  protected $cv;
+
   public function setup() {
     $this->originalCwd = getcwd();
     chdir($this->getExampleDir());
+    $this->cv = dirname(__DIR__) . '/bin/cv';
   }
 
   public function tearDown() {
