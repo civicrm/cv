@@ -65,7 +65,14 @@ class FillCommand extends BaseCommand {
       $liveData = $reader->compile(array('buildkit', 'home', 'active'));
     }
     else {
-      $liveData = json_decode(file_get_contents($input->getOption('file')), 1);
+      $file = $input->getOption('file');
+      if (strpos($file, '://') !== FALSE) {
+        throw new \RuntimeException("Failed to extract current configuration.");
+      }
+      if ($file === '/dev/stdin') {
+        $file = 'php://stdin';
+      }
+      $liveData = json_decode(file_get_contents($file), 1);
     }
 
     if ($liveData === NULL) {
