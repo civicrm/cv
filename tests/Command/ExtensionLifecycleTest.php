@@ -10,7 +10,7 @@ use Civi\Cv\Util\Process;
  */
 class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
 
-  const EXAMPLE_DOWNLOAD_URL = 'https://download.civicrm.org/cv/fixtures/org.example.cvtest-20161227.zip';
+  const EXAMPLE_DOWNLOAD_URL = 'https://download.civicrm.org/cv/org.example.cvtest-20161227.zip';
 
   private static $first = TRUE;
 
