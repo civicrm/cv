@@ -15,6 +15,8 @@ class UpgradeGetCommand extends BaseCommand {
   const DEFAULT_CHECK_URL = "https://upgrade.civicrm.org/check";
   // const DEFAULT_CHECK_URL = "http://civicrm-upgrade-manager.l/check";
 
+  use \Civi\Cv\Util\BootTrait;
+
   /**
    * Define the command options.
    */
@@ -37,7 +39,7 @@ Returns a JSON object with the properties:
   vars       the site variables from cv vars:show
   error      only appears if there is an error
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

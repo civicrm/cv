@@ -12,6 +12,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Command for asking CiviCRM for the appropriate tarball to download.
  */
 class UpgradeDbCommand extends BaseCommand {
+
+  use \Civi\Cv\Util\BootTrait;
+
   protected function configure() {
     $this
       ->setName('upgrade:db')
@@ -27,7 +30,7 @@ Returns a JSON object with the properties:
   message     A HTML version of the upgrade messages
   text        A plain-text version of the upgrade messages
 ');
-    parent::configureBootOptions();
+    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
