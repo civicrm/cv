@@ -47,11 +47,11 @@ class Application extends \Symfony\Component\Console\Application {
     $commands[] = new \Civi\Cv\Command\FlushCommand();
     $commands[] = new \Civi\Cv\Command\PathCommand();
     $commands[] = new \Civi\Cv\Command\ShowCommand();
-    $commands[] = new \Civi\Cv\Command\UpgradeCommand();
+    // $commands[] = new \Civi\Cv\Command\UpgradeCommand();
     $commands[] = new \Civi\Cv\Command\UpgradeDbCommand();
-    $commands[] = new \Civi\Cv\Command\UpgradeDlCommand();
-    $commands[] = new \Civi\Cv\Command\UpgradeGetCommand();
-    $commands[] = new \Civi\Cv\Command\UpgradeReportCommand();
+    // $commands[] = new \Civi\Cv\Command\UpgradeDlCommand();
+    // $commands[] = new \Civi\Cv\Command\UpgradeGetCommand();
+    // $commands[] = new \Civi\Cv\Command\UpgradeReportCommand();
     $commands[] = new \Civi\Cv\Command\UrlCommand();
     if ($context !== 'repl') {
       $commands[] = new \Civi\Cv\Command\BootCommand();
