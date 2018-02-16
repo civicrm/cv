@@ -224,7 +224,7 @@ class CmsBootstrap {
 
     if ($cmsUser) {
       global $user;
-      $user = \user_load(array('name' => $cmsUser));
+      $user = \user_load_by_name($cmsUser);
     }
 
     return $this;
