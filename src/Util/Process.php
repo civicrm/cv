@@ -3,6 +3,25 @@ namespace Civi\Cv\Util;
 class Process {
 
   /**
+   * Evaluate a string, replacing `%s` tokens with escaped strings.
+   *
+   * Ex: sprintf('ls -lr %s', $theDir);
+   *
+   * @param string $expr
+   * @return mixed
+   * @see escapeshellarg()
+   */
+  public static function sprintf($expr) {
+    $args = func_get_args();
+    $newArgs = array();
+    $newArgs[] = array_shift($args);
+    foreach ($args as $arg) {
+      $newArgs[] = preg_match(';^[a-zA-Z0-9\.\/]+$;', $arg) ? $arg : escapeshellarg($arg);
+    }
+    return call_user_func_array('sprintf', $newArgs);
+  }
+
+  /**
    * Helper which synchronously runs a command and verifies that it doesn't generate an error.
    *
    * @param \Symfony\Component\Process\Process $process
