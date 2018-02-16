@@ -136,10 +136,6 @@ class CmsBootstrap {
     call_user_func([$this, $func],
       $cms['path'], $this->options['user'], $this->options['httpHost']);
 
-    if (!empty($this->options['user'])) {
-      $this->ensureUserContact();
-    }
-
     if (PHP_SAPI === "cli") {
       error_reporting(1);
     }
@@ -182,7 +178,11 @@ class CmsBootstrap {
     else {
       throw new \Exception("This system does not appear to have CiviCRM");
     }
-    $this->ensureUserContact();
+
+    if (!empty($this->options['user'])) {
+      $this->ensureUserContact();
+    }
+
     return $this;
   }
 
@@ -210,6 +210,7 @@ class CmsBootstrap {
 
   public function bootDrupal($cmsPath, $cmsUser) {
     if (!file_exists("$cmsPath/includes/bootstrap.inc")) {
+      // Sanity check.
       throw new \Exception('Sorry, could not locate Drupal\'s bootstrap.inc');
     }
     chdir($cmsPath);
@@ -223,13 +224,52 @@ class CmsBootstrap {
 
     if ($cmsUser) {
       global $user;
-      $user = \user_load(array('name' => $cmsUser));
+      $user = \user_load_by_name($cmsUser);
     }
 
     return $this;
   }
 
-  // TODO public function bootDrupal8($cmsRootPath, $cmsUser) { }
+  public function bootDrupal8($cmsRootPath, $cmsUser) {
+    if (!file_exists("$cmsRootPath/core/core.services.yml")) {
+      // Sanity check.
+      throw new \Exception('Sorry, could not locate Drupal8\'s core.services.yml');
+    }
+
+    chdir($cmsRootPath);
+    define('DRUPAL_DIR', $cmsRootPath);
+    $autoloader = require_once DRUPAL_DIR . '/autoload.php';
+    $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    $kernel = \Drupal\Core\DrupalKernel::createFromRequest($request, $autoloader, 'prod');
+    $kernel->boot();
+    $kernel->prepareLegacyRequest($request);
+
+    if (!function_exists('t')) {
+      throw new \Exception('Sorry, could not bootstrap Drupal8.');
+    }
+
+    if ($cmsUser) {
+      $entity_manager = \Drupal::entityManager();
+      $users = $entity_manager->getStorage($entity_manager->getEntityTypeFromClass('Drupal\user\Entity\User'))
+        ->loadByProperties(array(
+          'name' => $cmsUser,
+        ));
+      if (count($users) == 1) {
+        foreach ($users as $uid => $user) {
+          user_login_finalize($user);
+        }
+      }
+      elseif (empty($users)) {
+        throw new \Exception(sprintf("Failed to find Drupal8 user (%s)", $cmsUser));
+      }
+      else {
+        throw new \Exception(sprintf("Found too many Drupal8 users (%d)", count($users)));
+      }
+    }
+
+    return $this;
+  }
+
   // TODO public function bootJoomla($cmsRootPath, $cmsUser) { }
 
   /**
@@ -238,8 +278,16 @@ class CmsBootstrap {
    * @return $this
    */
   public function bootWordPress($cmsRootPath, $cmsUser) {
+    if (!file_exists($cmsRootPath . DIRECTORY_SEPARATOR . 'wp-load.php')) {
+      throw new \Exception('Sorry, could not locate WordPress\'s wp-load.php.');
+    }
     chdir($cmsRootPath);
     require_once $cmsRootPath . DIRECTORY_SEPARATOR . 'wp-load.php';
+
+    if (!function_exists('wp_set_current_user')) {
+      throw new \Exception('Sorry, could not bootstrap WordPress.');
+    }
+
     if ($cmsUser) {
       wp_set_current_user(NULL, $cmsUser);
     }
