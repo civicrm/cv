@@ -65,7 +65,7 @@ class CmsBootstrap {
    */
   public function writeln($text, $level = OutputInterface::VERBOSITY_NORMAL) {
     if ($this->output) {
-      $this->output->writeln("<info>[Bootstrap2]</info> $text", $level);
+      $this->output->writeln("<info>[CmsBootstrap]</info> $text", $level);
     }
   }
 
