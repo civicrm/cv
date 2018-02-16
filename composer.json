@@ -13,7 +13,6 @@
         "symfony/console": "~2.8|^3",
         "symfony/process": "~2.8|^3",
         "symfony/filesystem": "~2.8|^3",
-        "symfony/finder": "~2.8|^3",
         "psy/psysh": "@stable"
     },
     "autoload": {
