@@ -136,10 +136,6 @@ class CmsBootstrap {
     call_user_func([$this, $func],
       $cms['path'], $this->options['user'], $this->options['httpHost']);
 
-    if (!empty($this->options['user'])) {
-      $this->ensureUserContact();
-    }
-
     if (PHP_SAPI === "cli") {
       error_reporting(1);
     }
@@ -182,7 +178,11 @@ class CmsBootstrap {
     else {
       throw new \Exception("This system does not appear to have CiviCRM");
     }
-    $this->ensureUserContact();
+
+    if (!empty($this->options['user'])) {
+      $this->ensureUserContact();
+    }
+
     return $this;
   }
 
