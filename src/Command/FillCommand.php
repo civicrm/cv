@@ -6,7 +6,6 @@ use Civi\Cv\Config;
 use Civi\Cv\Encoder;
 use Civi\Cv\SiteConfigReader;
 use Civi\Cv\Util\CliEditor;
-use Civi\Cv\Util\Filesystem;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
