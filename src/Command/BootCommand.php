@@ -37,8 +37,11 @@ class BootCommand extends BaseCommand {
           . '\CRM_Utils_System::loadBootStrap(array(), FALSE);';
         break;
 
-      default:
+      case 'none':
         break;
+
+      default:
+        throw new \Exception("Cannot generate boot instructions for given boot level.");
     }
 
     $output->writeln('/*BEGINPHP*/');
