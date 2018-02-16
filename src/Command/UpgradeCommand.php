@@ -25,6 +25,8 @@ Examples:
 
   protected function execute(InputInterface $input, OutputInterface $output) {
 
+    throw new \RuntimeException("FIXME: Calls to run() should be escaped, e.g. with Process::sprintf()");
+
     $exitCode = 0;
     $stage = 'Start';
     $result = array();
