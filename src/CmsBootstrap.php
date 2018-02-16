@@ -278,8 +278,16 @@ class CmsBootstrap {
    * @return $this
    */
   public function bootWordPress($cmsRootPath, $cmsUser) {
+    if (!file_exists($cmsRootPath . DIRECTORY_SEPARATOR . 'wp-load.php')) {
+      throw new \Exception('Sorry, could not locate WordPress\'s wp-load.php.');
+    }
     chdir($cmsRootPath);
     require_once $cmsRootPath . DIRECTORY_SEPARATOR . 'wp-load.php';
+
+    if (!function_exists('wp_set_current_user')) {
+      throw new \Exception('Sorry, could not bootstrap WordPress.');
+    }
+
     if ($cmsUser) {
       wp_set_current_user(NULL, $cmsUser);
     }
