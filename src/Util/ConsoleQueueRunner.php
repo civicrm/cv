@@ -56,7 +56,7 @@ class ConsoleQueueRunner {
     // CRM_Core_Error::createDebugLogger()
 
     while ($this->queue->numberOfItems()) {
-      $item = $this->queue->claimItem();
+      $item = $this->queue->stealItem(); // In case we're retrying a failed job.
       $task = $item->data;
 
       if ($this->output->getVerbosity() === OutputInterface::VERBOSITY_NORMAL) {
@@ -68,7 +68,7 @@ class ConsoleQueueRunner {
         $this->output->writeln(sprintf("<info>%s</info>", $task->title));
       }
       elseif ($this->output->getVerbosity() > OutputInterface::VERBOSITY_VERBOSE) {
-        $this->output->writeln(sprintf("<info>%s</info> (%s)", $task->title, self::formatTaskCallback($task)));
+        $this->output->writeln(sprintf("<info>%s</info> (<comment>%s</comment>)", $task->title, self::formatTaskCallback($task)));
       }
 
       if (!$this->dryRun) {

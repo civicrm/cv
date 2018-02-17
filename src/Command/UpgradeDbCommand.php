@@ -64,9 +64,6 @@ Examples:
     if ($isFirstTry && FALSE !== stripos($dbVer, 'upgrade')) {
       throw new \Exception("Cannot begin upgrade: The database indicates that an incomplete upgrade is pending. If you would like to resume, use --retry or --skip.");
     }
-    if (!$isFirstTry && FALSE === stripos($dbVer, 'upgrade')) {
-      throw new \Exception("Cannot resume upgrade: The database does not show a pending upgrade. Consider a regular upgrade (without --retry or --skip).");
-    }
     if (!$isFirstTry && !file_exists($postUpgradeMessageFile)) {
       throw new \Exception("Cannot resume upgrade: The log file ($postUpgradeMessageFile) is missing. Consider a regular upgrade (without --retry or --skip).");
     }
@@ -122,6 +119,13 @@ Examples:
         'name' => \CRM_Upgrade_Form::QUEUE_NAME,
         'type' => 'Sql',
       ));
+
+      if ($input->getOption('skip')) {
+        $item = $queue->stealItem();
+        $output->writeln(sprintf("<error>Skip task: %s</error>", $item->data->title));
+        $queue->deleteItem($item);
+      }
+
     }
 
     $output->writeln("<info>Executing upgrade...</info>", $niceMsgVerbosity);
