@@ -3,6 +3,7 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Application;
 use Civi\Cv\Encoder;
+use Civi\Cv\Util\ConsoleQueueRunner;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -124,16 +125,8 @@ Examples:
     }
 
     $output->writeln("<info>Executing upgrade...</info>", $niceMsgVerbosity);
-
-    if (!$input->getOption('dry-run')) {
-      $queueResult = $this->runAllViaCLI($input, $output, $queue, $niceMsgVerbosity);
-      if ($queueResult !== TRUE) {
-        throw $queueResult['exception'];
-      }
-    }
-    else {
-      $this->previewAllViaCLI($input, $output, $queue, $niceMsgVerbosity);
-    }
+    $runner = new ConsoleQueueRunner($input, $output, $queue, $input->getOption('dry-run'));
+    $runner->runAll();
 
     $output->writeln("<info>Finishing upgrade...</info>", $niceMsgVerbosity);
     if (!$input->getOption('dry-run')) {
@@ -161,74 +154,6 @@ Examples:
       ));
     }
     unlink($postUpgradeMessageFile);
-  }
-
-  /**
-   * @param \Symfony\Component\Console\Input\InputInterface $input
-   * @param \Symfony\Component\Console\Output\OutputInterface $output
-   * @param \CRM_Queue_Queue $queue
-   * @return bool
-   */
-  protected function runAllViaCLI(InputInterface $input, OutputInterface $output, $queue) {
-    $queueRunner = new \CRM_Queue_Runner(array(
-      'title' => ts('CiviCRM Upgrade Tasks'),
-      'queue' => $queue,
-    ));
-
-    $taskResult = $queueRunner->formatTaskResult(TRUE);
-    while ($taskResult['is_continue']) {
-      // setRaiseException should't be necessary here, but there's a bug
-      // somewhere which causes this setting to be lost.  Observed while
-      // upgrading 4.0=>4.2.  This preference really shouldn't be a global
-      // setting -- it should be more of a contextual/stack-based setting.
-      // This should be appropriate because queue-runners are not used with
-      // basic web pages -- they're used with CLI/REST/AJAX.
-      $errorScope = \CRM_Core_TemporaryErrorScope::useException();
-      $taskResult = $queueRunner->runNext();
-      $output->writeln(sprintf("* <info>(Executed)</info> %s", $taskResult['last_task_title']), OutputInterface::VERBOSITY_VERBOSE);
-      $errorScope = NULL;
-    }
-
-    if ($taskResult['numberOfItems'] == 0) {
-      $result = $queueRunner->handleEnd();
-      return TRUE;
-    }
-    else {
-      return $taskResult;
-    }
-  }
-
-  /**
-   * @param \Symfony\Component\Console\Input\InputInterface $input
-   * @param \Symfony\Component\Console\Output\OutputInterface $output
-   * @param \CRM_Queue_Queue $queue
-   * @return bool
-   */
-  protected function previewAllViaCLI(InputInterface $input, OutputInterface $output, $queue) {
-    $queueRunner = new \CRM_Queue_Runner(array(
-      'title' => ts('CiviCRM Upgrade Tasks'),
-      'queue' => $queue,
-    ));
-
-    $taskResult = $queueRunner->formatTaskResult(TRUE);
-    while ($taskResult['is_continue']) {
-      // setRaiseException should't be necessary here, but there's a bug
-      // somewhere which causes this setting to be lost.  Observed while
-      // upgrading 4.0=>4.2.  This preference really shouldn't be a global
-      // setting -- it should be more of a contextual/stack-based setting.
-      // This should be appropriate because queue-runners are not used with
-      // basic web pages -- they're used with CLI/REST/AJAX.
-      $taskResult = $queueRunner->skipNext();
-      $output->writeln(sprintf("* <info>(Dry Run)</info> %s", $taskResult['last_task_title']), OutputInterface::VERBOSITY_VERBOSE);
-    }
-
-    if ($taskResult['numberOfItems'] == 0) {
-      $result = $queueRunner->handleEnd();
-      return TRUE;
-    }
-    else {
-      return $taskResult;
-    }
   }
 
   /**
