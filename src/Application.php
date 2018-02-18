@@ -50,8 +50,8 @@ class Application extends \Symfony\Component\Console\Application {
     // $commands[] = new \Civi\Cv\Command\UpgradeCommand();
     $commands[] = new \Civi\Cv\Command\UpgradeDbCommand();
     // $commands[] = new \Civi\Cv\Command\UpgradeDlCommand();
-    // $commands[] = new \Civi\Cv\Command\UpgradeGetCommand();
-    // $commands[] = new \Civi\Cv\Command\UpgradeReportCommand();
+    // $commands[] = new \Civi\Cv\Command\UpgradeGetCommand(); // FIXME: Revalidate and add UpgradeGetCommandTest to the group "std".
+    // $commands[] = new \Civi\Cv\Command\UpgradeReportCommand(); // FIXME: Revalidate and add UpgradeReportCommandTest to the group "std".
     $commands[] = new \Civi\Cv\Command\UrlCommand();
     if ($context !== 'repl') {
       $commands[] = new \Civi\Cv\Command\BootCommand();
