@@ -7,7 +7,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Class ConsoleQueueRunner
  * @package Civi\Cv\Util
  *
- * Execute tasks in a CRM_Queue_Queue, without output directed to the console.
+ * Execute tasks in a CRM_Queue_Queue, with output directed to the console.
  */
 class ConsoleQueueRunner {
 
