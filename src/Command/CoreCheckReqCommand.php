@@ -34,7 +34,7 @@ $ cv core:check-req -e
 Example: Show warnings and errors
 $ cv core:check-req -we
 ');
-    $this->configureBootOptions();
+    $this->configureBootOptions('none');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

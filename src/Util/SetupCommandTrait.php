@@ -15,7 +15,7 @@ define('CV_SETUP_PROTOCOL_VER', '1.0');
  * civicrm-setup framework.
  */
 trait SetupCommandTrait {
-  use \Civi\Cv\Util\CmsBootTrait;
+  use \Civi\Cv\Util\BootTrait;
 
   /**
    * Register any CLI options which affect the initialization of the
@@ -47,7 +47,7 @@ trait SetupCommandTrait {
    * @throws \Exception
    */
   protected function bootSetupSubsystem(InputInterface $input, OutputInterface $output, $defaultOutputOptions = 0) {
-    $b = $this->bootCms($input, $output);
+    $b = $this->_boot_cms_only($input, $output);
 
     // Initialize setup model.
     $setupOptions = array();

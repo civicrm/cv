@@ -32,6 +32,28 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertRegExp('/^found$/', $p1->getOutput());
   }
 
+  public function getLevels() {
+    return [
+      ['settings'],
+      ['classloader'],
+      ['full'],
+      ['cms-only'],
+      ['cms-full'],
+    ];
+  }
+
+  /**
+   * @param string $level
+   * @dataProvider getLevels
+   */
+  public function testBootLevels($level) {
+    $checkBoot = escapeshellarg('echo "Hello world";');
+
+    $p1 = Process::runOk($this->cv("ev $checkBoot --level=$level"));
+    $this->assertRegExp('/^Hello world/', $p1->getOutput());
+  }
+
+
   public function testTestMode() {
     $checkUf = escapeshellarg('return CIVICRM_UF;');
 
