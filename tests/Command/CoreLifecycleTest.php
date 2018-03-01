@@ -114,6 +114,14 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
     $this->assertRegExp('/^[0-9\.]+$/', $result);
     $this->assertTrue(version_compare($result, '4.6.0', '>='));
 
+    // The upgrade command doesn't have much to do, but let's make sure it doesn't crash.
+    $output = $this->cvOk("upgrade:db");
+    $this->assertRegExp('/Found CiviCRM database version [0-9\.]+/', $output);
+    $this->assertRegExp('/Found CiviCRM code version [0-9\.]+/', $output);
+    $this->assertRegExp('/\[latestVer\] => [0-9\.]+/', $output);
+    $this->assertRegExp('/\[message\] => You are already/', $output);
+    $this->assertRegExp('/\[text\] => You are already/', $output);
+
     $output = $this->cvOk('core:uninstall -f');
     $this->assertRegExp('/Removing .*civicrm.settings.php/', $output);
     $this->assertRegExp('/Removing civicrm_\*/', $output);
