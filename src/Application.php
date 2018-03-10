@@ -24,6 +24,31 @@ class Application extends \Symfony\Component\Console\Application {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  protected function getDefaultInputDefinition() {
+    $definition = parent::getDefaultInputDefinition();
+    $definition->addOption(new InputOption('cwd', NULL, InputOption::VALUE_REQUIRED, 'If specified, use the given directory as working directory.'));
+    return $definition;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function doRun(InputInterface $input, OutputInterface $output) {
+    $workingDir = $input->getParameterOption(array('--cwd'));
+    if (FALSE !== $workingDir && '' !== $workingDir) {
+      if (!is_dir($workingDir)) {
+        throw new \RuntimeException("Invalid working directory specified, $workingDir does not exist.");
+      }
+      if (!chdir($workingDir)) {
+        throw new \RuntimeException("Failed to use directory specified, $workingDir as working directory.");
+      }
+    }
+    return parent::doRun($input, $output);
+  }
+
+  /**
    * Construct command objects
    *
    * @return array of Symfony Command objects
