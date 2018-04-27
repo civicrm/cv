@@ -64,4 +64,16 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertRegExp('/UnitTests/i', $p1->getOutput());
   }
 
+  /**
+   * Tests --cwd option.
+   */
+  public function testEvalWithCwdOption() {
+    // Go somewhere else, where cv won't work.
+    chdir(sys_get_temp_dir());
+    $cwdOpt = "--cwd=" . escapeshellarg($this->getExampleDir());
+    $helloPhp = escapeshellarg('printf("eval says version is %s\n", CRM_Utils_System::version());');
+    $p = Process::runOk($this->cv("ev $cwdOpt $helloPhp"));
+    $this->assertRegExp('/^eval says version is [0-9a-z\.]+\s*$/', $p->getOutput());
+  }
+
 }
