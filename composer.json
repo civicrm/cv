@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=5.3.3",
-        "michaelmcandrew/pop": "@stable",
+        "michaelmcandrew/pop": "1.0.1",
         "symfony/console": "~2.8",
         "symfony/process": "~2.8",
         "symfony/filesystem": "~2.8",
