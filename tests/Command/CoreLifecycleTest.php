@@ -111,14 +111,14 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
 
     // We've installed CMS+Civi. All should be well.
     $result = $this->cvJsonOk("ev 'return CRM_Utils_System::version();'");
-    $this->assertRegExp('/^[0-9\.]+$/', $result);
+    $this->assertRegExp('/^[0-9]([0-9\.]|alpha|beta)+$/', $result);
     $this->assertTrue(version_compare($result, '4.6.0', '>='));
 
     // The upgrade command doesn't have much to do, but let's make sure it doesn't crash.
     $output = $this->cvOk("upgrade:db");
-    $this->assertRegExp('/Found CiviCRM database version [0-9\.]+/', $output);
-    $this->assertRegExp('/Found CiviCRM code version [0-9\.]+/', $output);
-    $this->assertRegExp('/\[latestVer\] => [0-9\.]+/', $output);
+    $this->assertRegExp('/Found CiviCRM database version ([0-9\.]|alpha|beta)+/', $output);
+    $this->assertRegExp('/Found CiviCRM code version ([0-9\.]|alpha|beta)+/', $output);
+    $this->assertRegExp('/\[latestVer\] => ([0-9\.]|alpha|beta)+/', $output);
     $this->assertRegExp('/\[message\] => You are already/', $output);
     $this->assertRegExp('/\[text\] => You are already/', $output);
 
