@@ -25,6 +25,7 @@ class ExtensionEnableCommand extends BaseExtensionCommand {
       ->setAliases(array('en'))
       ->setDescription('Enable an extension')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the local list of extensions (Default: Only refresh on cache-miss)')
+      ->addOption('ignore-missing', NULL, InputOption::VALUE_NONE, 'If a requested extension is missing, skip it')
       ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar")')
       ->setHelp('Enable an extension
 
@@ -72,10 +73,18 @@ Note:
     }
 
     if ($missingKeys) {
-      foreach ($missingKeys as $key) {
-        $output->getErrorOutput()->writeln("<error>Error: Unrecognized extension \"$key\"</error>");
+      if ($input->getOption('ignore-missing')) {
+        foreach ($missingKeys as $key) {
+          $output->getErrorOutput()->writeln("<error>Warning: Skipped unrecognized extension \"$key\"</error>");
+        }
+
       }
-      return 1;
+      else {
+        foreach ($missingKeys as $key) {
+          $output->getErrorOutput()->writeln("<error>Error: Unrecognized extension \"$key\"</error>");
+        }
+        return 1;
+      }
     }
 
     foreach ($foundKeys as $key) {
