@@ -62,7 +62,12 @@ $ cv core:download drupal
         $this->cacheTar($l10nTarName, $output);
       }
       $output->writeln("<info>Extracting {$l10nTarName}...</info>");
-      exec("tar -xf {$this->cacheDir}/{$l10nTarName}");
+      if ($cms == 'wordpress') {
+        exec("tar -xf {$this->cacheDir}/{$l10nTarName} -C civicrm");
+      } else {
+        exec("tar -xf {$this->cacheDir}/{$l10nTarName}");
+      }
+      
     }
   }
 
