@@ -117,6 +117,11 @@ trait BootTrait {
         $output->getErrorOutput()->writeln("<error>Failed to set user. Feature not supported by UF (" . CIVICRM_UF . ")</error>");
       }
     }
+
+    if (is_callable([\CRM_Core_Config::singleton()->userSystem, 'setMySQLTimeZone'])) {
+      $output->writeln('<info>[BootTrait]</info> Set active MySQL timezone', OutputInterface::VERBOSITY_DEBUG);
+      \CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
+    }
   }
 
   /**
