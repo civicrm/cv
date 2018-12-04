@@ -183,6 +183,11 @@ class CmsBootstrap {
       $this->ensureUserContact();
     }
 
+    // Some UF integrations/versions don't seem to do this... work-around...
+    if (is_callable([\CRM_Core_Config::singleton()->userSystem, 'setMySQLTimeZone'])) {
+      \CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
+    }
+
     return $this;
   }
 
