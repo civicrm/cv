@@ -7,7 +7,7 @@ namespace Civi\Cv\Util;
  */
 class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
 
-  public function getExamples() {
+  public function getGoodExamples() {
     $exs = [];
     $exs[] = [
       ['limit=10', '+select=display_name'],
@@ -33,18 +33,46 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
       ['colors={"red":"#f00","green":"#0f0"}'],
       ['colors' => ['red' => '#f00', 'green' => '#0f0']],
     ];
+    $exs[] = [
+      ['{"version":4,"select":["foo"]}'],
+      ['version' => 4, 'select' => ['foo']],
+    ];
+    $exs[] = [
+      ['version=4', 'limit=10', '{"version":44,"select":["foo"]}'],
+      ['version' => 44, 'limit' => 10, 'select' => ['foo']],
+    ];
     return $exs;
   }
 
   /**
    * @param $input
    * @param $expected
-   * @dataProvider getExamples
+   * @dataProvider getGoodExamples
    */
-  public function testParser($input, $expected) {
+  public function testGoodInput($input, $expected) {
     $p = new Api4ArgParser();
     $actual = $p->parse($input);
     $this->assertEquals($expected, $actual);
+  }
+
+  public function getBadExamples() {
+    $exs = [];
+    $exs[] = [['{foo']];
+    $exs[] = [['foo={bar']];
+    $exs[] = [['foo={"bar":foo"']];
+    $exs[] = [['+foo=[bar']];
+    $exs[] = [['foo="bar']];
+    return $exs;
+  }
+
+  /**
+   * @param $input
+   * @dataProvider getBadExamples
+   * @expectedException \RuntimeException
+   */
+  public function testBadInput($input) {
+    $p = new Api4ArgParser();
+    $p->parse($input);
   }
 
 }

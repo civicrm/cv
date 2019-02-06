@@ -11,7 +11,7 @@ class Api4ArgParser {
         $mode = $matches[1];
         $key = $matches[2];
         if (strpos('{["\'', $matches[3]{0}) !== FALSE) {
-          $value = json_decode($matches[3], 1);
+          $value = $this->parseJsonNoisily($matches[3]);
         }
         else {
           $value = $matches[3];
@@ -28,11 +28,26 @@ class Api4ArgParser {
         }
 
       }
+      elseif (preg_match('/^\{.*\}$/', $arg)) {
+        $params = array_merge($params, $this->parseJsonNoisily($arg));
+      }
       else {
         throw new \RuntimeException("Unrecognized option format: $arg");
       }
     }
     return $params;
+  }
+
+  /**
+   * @param string $arg
+   * @return mixed
+   */
+  protected function parseJsonNoisily($arg) {
+    $values = json_decode($arg, 1);
+    if ($values === NULL) {
+      throw new \RuntimeException("Failed to parse JSON: $values");
+    }
+    return $values;
   }
 
 }
