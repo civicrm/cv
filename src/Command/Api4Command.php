@@ -51,8 +51,8 @@ usage it may be easier to asssign parameters on the command-line. Key pieces:
 
 Examples:
   cv api4 system.get
-  cv api4 -- contact.get +select=display_name \'+where=["id",">",123]\' limit=10
-  cv api4 -- contact.get \'select=["display_name"]\' \'where=[["id","=",123]]\'
+  cv api4 contact.get +select=display_name \'+where=["id",">",123]\' limit=10
+  cv api4 contact.get \'select=["display_name"]\' \'where=[["id","=",123]]\'
   echo \'{"id":10, "api.Email.get": 1}\' | cv api4 contact.get --in=json
 
 NOTE: To change the default output format, set CV_OUTPUT.
