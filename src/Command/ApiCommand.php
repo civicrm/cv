@@ -28,12 +28,13 @@ class ApiCommand extends BaseCommand {
   protected function configure() {
     $this
       ->setName('api')
-      ->setDescription('Call an API')
+      ->setAliases(['api3'])
+      ->setDescription('Call APIv3')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat())
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
-      ->setHelp('Call an API
+      ->setHelp('Call APIv3
 
 Examples:
   cv api system.get
