@@ -56,6 +56,7 @@ class Application extends \Symfony\Component\Console\Application {
   public function createCommands($context = 'default') {
     $commands = array();
     $commands[] = new \Civi\Cv\Command\ApiCommand();
+    $commands[] = new \Civi\Cv\Command\Api4Command();
     $commands[] = new \Civi\Cv\Command\ApiBatchCommand();
     $commands[] = new \Civi\Cv\Command\AngularModuleListCommand();
     $commands[] = new \Civi\Cv\Command\AngularHtmlListCommand();
