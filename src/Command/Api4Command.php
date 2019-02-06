@@ -33,27 +33,35 @@ class Api4Command extends BaseCommand {
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat())
       ->addArgument('Entity.action', InputArgument::REQUIRED)
-      ->addArgument('key:json-value', InputArgument::IS_ARRAY)
+      ->addArgument('key=value', InputArgument::IS_ARRAY)
       ->setHelp('Call APIv4
 
 Usage:
-  cv api4 ENTITY.ACTION
-  cv api4 -- ENTITY.ACTION [+]KEY=VALUE...
+  cv api4 ENTITY.ACTION [+]KEY=VALUE...
+  cv api4 ENTITY.ACTION [+]KEY:LIST...
   echo JSON | cv api4 ENTITY.ACTION --in=json
 
 The most precise way to input information is to pipe JSON, but in day-to-day
 usage it may be easier to asssign parameters on the command-line. Key pieces:
 
-  +        Use the "add" mode (in which values are added to a sub-array)
-  KEY      Set the value of KEY
-  VALUE    The new value. This may be JSON (beginning with \'[\' or \'{\' or \'"\');
-           otherwise, it is treated as a string-literal.
+  [+]      Enable append mode
+  KEY      Set the value of KEY. Use "+" to append sub-values.
+  =VALUE   The new value. This may be JSON (beginning with
+           \'[\' or \'{\' or \'"\'); otherwise, it is treated as a string-literal.
+  :LIST    The new value, as a space-delimited list. This may be JSON
+           (beginning with \'"\').
 
-Examples:
-  cv api4 system.get
-  cv api4 contact.get +select=display_name \'+where=["id",">",123]\' limit=10
+Example: Get all contacts
+  cv api4 contact.get
+
+Example: Find ten contacts named "Adam"
+  cv api4 contact.get select:\'id display_name\' +where:\'display_name LIKE "Adam%"\' limit=10
+
+Additional Examples
+  cv api4 contact.get +where:\'id > 100\' +where:\'id < 200\'
   cv api4 contact.get \'select=["display_name"]\' \'where=[["id","=",123]]\'
-  echo \'{"id":10, "api.Email.get": 1}\' | cv api4 contact.get --in=json
+  cv api4 contact.get \'{"select":["display_name"], "where":[["id","=",123]]}\'
+  echo \'{"select":["display_name"], "where":[["id","=",123]]}\' | cv api4 contact.get --in=json
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ');
@@ -103,7 +111,7 @@ NOTE: To change the default output format, set CV_OUTPUT.
    * @return array
    */
   protected function parseParams(InputInterface $input) {
-    $args = $input->getArgument('key:json-value');
+    $args = $input->getArgument('key=value');
     switch ($input->getOption('in')) {
       case 'args':
         $p = new Api4ArgParser();

@@ -18,9 +18,22 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
       ['limit' => 10, 'select' => ['display_name', 'contact_type']],
     ];
     $exs[] = [
-      ['limit:10', '+select:display_name', '+select:contact_type'],
-      ['limit' => 10, 'select' => ['display_name', 'contact_type']],
+      ['limit=10', 'select:display_name contact_type', '+where:id > 123'],
+      [
+        'limit' => 10,
+        'select' => ['display_name', 'contact_type'],
+        'where' => [['id', '>', '123']]
+      ],
     ];
+    $exs[] = [
+      ['+where:display_name like "alice%"'],
+      [
+        'where' => [
+          ['display_name', 'like', 'alice%'],
+        ],
+      ],
+    ];
+
     $exs[] = [
       ['limit=10', 'select=["display_name"]'],
       ['limit' => 10, 'select' => ['display_name']],
@@ -73,6 +86,12 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
   public function testBadInput($input) {
     $p = new Api4ArgParser();
     $p->parse($input);
+  }
+
+  public function testExplode() {
+    $p = new Api4ArgParser();
+    $this->assertEquals(['ab', '>=', 'cd'], $p->explode('ab >= cd'));
+    $this->assertEquals(['ab', '>=', '"cd ef"'], $p->explode('ab >= "cd ef"'));
   }
 
 }
