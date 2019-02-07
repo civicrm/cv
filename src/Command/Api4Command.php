@@ -37,6 +37,7 @@ class Api4Command extends BaseCommand {
       ->setDescription('Call APIv4')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat())
+      ->addOption('dry-run', 'N', InputOption::VALUE_NONE, 'Preview the API call. Do not execute.')
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
       ->setHelp("
@@ -83,22 +84,22 @@ is to pipe JSON. For quick manual usage, one can pass parameters inline
     For + options, the \"=\" may be replaced by a single space or \":\".
 
 {$C}Example: Get all contacts{$_C}
-    cv api4 contact.get
+    cv api4 Contact.get
 
 {$C}Example: Get ten contacts (KEY=VALUE){$_C}
-    cv api4 contact.get select='[\"display_name\"]' limit=10
+    cv api4 Contact.get select='[\"display_name\"]' limit=10
 
 {$C}Example: Find ten contacts named \"Adam\" (+Options){$_C}
-    cv api4 contact.get +select=display_name +where='display_name LIKE \"Adam%\" limit=10'
+    cv api4 Contact.get +select=display_name +where='display_name LIKE \"Adam%\" limit=10'
 
 {$C}Example: Find ten contacts named \"Adam\"  (JSON){$_C}
     echo '{\"select\":[\"display_name\"],\"where\":[[\"display_name\",\"LIKE\",\"Adam%\"]],\"limit\":10}' | cv api4 contact.get --in=json
 
 {$C}Example: Find contact names for IDs between 100 and 200, ordered by last name{$_C}
-    cv api4 contact.get +s display_name +o last_name +w 'id >= 100' +w 'id <= 200'
+    cv api4 Contact.get +s display_name +o last_name +w 'id >= 100' +w 'id <= 200'
 
 {$C}Example: Change do_not_phone for everyone named Adam{$_C}
-    cv api4 contact.update +w 'display_name like %Adam%' +v do_not_phone=1
+    cv api4 Contact.update +w 'display_name like %Adam%' +v do_not_phone=1
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ");
@@ -106,6 +107,11 @@ NOTE: To change the default output format, set CV_OUTPUT.
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $C = '<comment>';
+    $_C = '</comment>';
+    $I = '<info>';
+    $_I = '</info>';
+
     $this->boot($input, $output);
 
     if (!function_exists('civicrm_api4')) {
@@ -114,10 +120,13 @@ NOTE: To change the default output format, set CV_OUTPUT.
 
     list($entity, $action) = explode('.', $input->getArgument('Entity.action'));
     $params = $this->parseParams($input);
-    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-      $output->writeln("{$I}Entity{$_I}: $entity");
-      $output->writeln("{$I}Action{$_I}: $action");
+    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE || $input->getOption('dry-run')) {
+      $output->writeln("{$I}Entity{$_I}: {$C}$entity{$_C}");
+      $output->writeln("{$I}Action{$_I}: {$C}$action{$_C}");
       $output->writeln("{$I}Params{$_I}: " . json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+    if ($input->getOption('dry-run')) {
+      return 0;
     }
     $result = \civicrm_api4($entity, $action, $params);
 
