@@ -14,11 +14,27 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
       ['limit' => 10, 'select' => ['display_name']],
     ];
     $exs[] = [
+      ['+limit=100'],
+      ['limit' => 100],
+    ];
+    $exs[] = [
+      ['+limit=15@90'],
+      ['limit' => 15, 'offset' => 90],
+    ];
+    $exs[] = [
       ['limit=10', '+select=display_name', '+select=contact_type'],
       ['limit' => 10, 'select' => ['display_name', 'contact_type']],
     ];
     $exs[] = [
-      ['limit=10', 'select:display_name contact_type', '+where:id > 123'],
+      ['limit=10', '+select=display_name,contact_type'],
+      ['limit' => 10, 'select' => ['display_name', 'contact_type']],
+    ];
+    $exs[] = [
+      ['limit=10', '+select', 'display_name,contact_type'],
+      ['limit' => 10, 'select' => ['display_name', 'contact_type']],
+    ];
+    $exs[] = [
+      ['limit=10', '+select=display_name,contact_type', '+where=id > 123'],
       [
         'limit' => 10,
         'select' => ['display_name', 'contact_type'],
@@ -26,21 +42,25 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
       ],
     ];
     $exs[] = [
-      ['+where:display_name like "alice%"'],
+      ['+where:display_name like "alice%"', '+w:id >= 234'],
       [
         'where' => [
           ['display_name', 'like', 'alice%'],
+          ['id', '>=', 234],
         ],
       ],
     ];
-
+    $exs[] = [
+      ['+orderBy:last_name asc'],
+      ['orderBy' => ['last_name' => 'ASC']],
+    ];
+    $exs[] = [
+      ['+orderBy:last_name, first_name DESC'],
+      ['orderBy' => ['last_name' => 'ASC', 'first_name' => 'DESC']],
+    ];
     $exs[] = [
       ['limit=10', 'select=["display_name"]'],
       ['limit' => 10, 'select' => ['display_name']],
-    ];
-    $exs[] = [
-      ['limit=10', '+where=["first_name","not like","foo%"]'],
-      ['limit' => 10, 'where' => [['first_name', 'not like', 'foo%']]],
     ];
     $exs[] = [
       ['colors={"red":"#f00","green":"#0f0"}'],

@@ -22,11 +22,16 @@ class Api4Command extends BaseCommand {
    * @param string|null $name
    */
   public function __construct($name = NULL) {
-    $this->defaults = array('version' => 4);
+    $this->defaults = array('version' => 4, 'checkPermissions' => FALSE);
     parent::__construct($name);
   }
 
   protected function configure() {
+    $C = '<comment>';
+    $_C = '</comment>';
+    $I = '<info>';
+    $_I = '</info>';
+
     $this
       ->setName('api4')
       ->setDescription('Call APIv4')
@@ -34,37 +39,63 @@ class Api4Command extends BaseCommand {
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat())
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
-      ->setHelp('Call APIv4
+      ->setHelp("
+When passing arguments to APIv4, this command supports a few input formats.
+For scripting with untrusted data, the most precise way to input information
+is to pipe JSON. For quick manual usage, one can pass parameters inline
+(as part of the main command).
 
-Usage:
-  cv api4 ENTITY.ACTION [+]KEY=VALUE...
-  cv api4 ENTITY.ACTION [+]KEY:LIST...
-  echo JSON | cv api4 ENTITY.ACTION --in=json
+{$C}Pipe Data (JSON):${_C}
 
-The most precise way to input information is to pipe JSON, but in day-to-day
-usage it may be easier to asssign parameters on the command-line. Key pieces:
+    {$C}echo{$_C} {$I}JSON{$_I} | {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} {$C}--in=json${_C}
 
-  [+]      Enable append mode
-  KEY      Set the value of KEY. Use "+" to append sub-values.
-  =VALUE   The new value. This may be JSON (beginning with
-           \'[\' or \'{\' or \'"\'); otherwise, it is treated as a string-literal.
-  :LIST    The new value, as a space-delimited list. This may be JSON
-           (beginning with \'"\').
+{$C}Inline Data (JSON):${_C}
 
-Example: Get all contacts
-  cv api4 contact.get
+    {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} {$I}KEY{$_I}={$I}VALUE{$_I}... {$I}JSON-OBJECT...{$_I}
 
-Example: Find ten contacts named "Adam"
-  cv api4 contact.get select:\'id display_name\' +where:\'display_name LIKE "Adam%"\' limit=10
+    Use ${I}KEY{$_I}={$I}VALUE{$_I} to set an input to a specific value. The value may be a bare string
+    or it may be JSON (beginning with '[' or '{' or '\"').
 
-Additional Examples
-  cv api4 contact.get +where:\'id > 100\' +where:\'id < 200\'
-  cv api4 contact.get \'select=["display_name"]\' \'where=[["id","=",123]]\'
-  cv api4 contact.get \'{"select":["display_name"], "where":[["id","=",123]]}\'
-  echo \'{"select":["display_name"], "where":[["id","=",123]]}\' | cv api4 contact.get --in=json
+    Similarly, a parameter which begins with '{' will be interpreted as a JSON expression.
+
+{$C}Inline Data (+Options):${_C}
+
+    {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} +{$I}OP{$_I}={$I}EXPR{$_I}...
+
+    Some inputs are common and cumbersome to type in JSON. To allow quicker data entry,
+    they support special syntaxes in the form +{$I}OP{$_I}={$I}EXPR{$_I} or +{$I}OP{$_I} {$I}EXPR{$_I}. For example:
+
+    Option         Examples
+    {$C}+s{$_C}|{$C}+select{$_C}     +select=id,display_name
+                   +select id,display_name
+                   +s id,display_name
+    {$C}+w{$_C}|{$C}+where{$_C}      +where 'first_name like \"Adams%\"'
+                   +w 'first_name like \"Adams%\"'
+    {$C}+o{$_C}|{$C}+orderBy{$_C}    +orderBy last_name,first_name
+                   +o last_name,first_name
+                   +o 'last_name DESC,first_name ASC'
+    {$C}+l{$_C}|{$C}+limit{$_C}      +limit 15@60
+                   +l 15
+
+    For + options, the \"=\" may be replaced by a single space or \":\".
+
+{$C}Example: Get all contacts{$_C}
+    cv api4 contact.get
+
+{$C}Example: Get ten contacts (KEY=VALUE){$_C}
+    cv api4 contact.get select='[\"display_name\"]' limit=10
+
+{$C}Example: Find ten contacts named \"Adam\" (+Options){$_C}
+    cv api4 contact.get +select=display_name +where='display_name LIKE \"Adam%\" limit=10'
+
+{$C}Example: Find ten contacts named \"Adam\"  (JSON){$_C}
+    echo '{\"select\":[\"display_name\"],\"where\":[[\"display_name\",\"LIKE\",\"Adam%\"]],\"limit\":10}' | cv api4 contact.get --in=json
+
+{$C}Example: Find contact names for IDs between 100 and 200, ordered by last name{$_C}
+    cv api4 contact.get +s display_name +o last_name +w 'id >= 100' +w 'id <= 200'
 
 NOTE: To change the default output format, set CV_OUTPUT.
-');
+");
     $this->configureBootOptions();
   }
 
@@ -78,9 +109,9 @@ NOTE: To change the default output format, set CV_OUTPUT.
     list($entity, $action) = explode('.', $input->getArgument('Entity.action'));
     $params = $this->parseParams($input);
     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-      $output->writeln("<info>Entity</info>: $entity");
-      $output->writeln("<info>Action</info>: $action");
-      $output->writeln("<info>Params</info>: " . json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+      $output->writeln("{$I}Entity{$_I}: $entity");
+      $output->writeln("{$I}Action{$_I}: $action");
+      $output->writeln("{$I}Params{$_I}: " . json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
     $result = \civicrm_api4($entity, $action, $params);
 
