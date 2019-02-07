@@ -71,42 +71,6 @@ class Api4ArgParser {
     }
   }
 
-  public function explode($expr) {
-    $items = [];
-    $buf = '';
-    $delim = ' ';
-    $state = 'top';
-    $len = strlen($expr);
-    for ($i = 0; $i < $len; $i++) {
-      if ($state === 'top' && $expr{$i} === $delim) {
-        $items[] = $buf;
-        $buf = '';
-      }
-      elseif ($state === 'top' && $expr{$i} === '"') {
-        $state = 'dbl';
-        $buf .= $expr{$i};
-      }
-      elseif ($state === 'top') {
-        $buf .= $expr{$i};
-      }
-      elseif ($state === 'dbl' && $expr{$i} === '"') {
-        $state = 'top';
-        $buf .= $expr{$i};
-      }
-      elseif ($state === 'dbl' && $expr{$i} !== '"') {
-        $buf .= $expr{$i};
-      }
-      else {
-        throw new \RuntimeException("Error parsing: $expr (state=$state, i=$i, ch={$expr{$i}})");
-      }
-    }
-
-    if (!empty($buf)) {
-      $items[] = $buf;
-    }
-    return $items;
-  }
-
   /**
    * @param $params
    * @param $key
@@ -114,7 +78,12 @@ class Api4ArgParser {
    * @return mixed
    */
   protected function applyOption(&$params, $key, $expr) {
-    $aliases = ['s' => 'select', 'w' => 'where', 'o' => 'orderBy', 'l' => 'limit'];
+    $aliases = [
+      's' => 'select',
+      'w' => 'where',
+      'o' => 'orderBy',
+      'l' => 'limit',
+    ];
     $key = isset($aliases[$key]) ? $aliases[$key] : $key;
 
     switch ($key) {
@@ -126,10 +95,7 @@ class Api4ArgParser {
         break;
 
       case 'where':
-        self::appendInto($params, $key, array_map([
-          $this,
-          'parseValueExpr'
-        ], $this->explode($expr)));
+        self::appendInto($params, $key, $this->parseWhere($expr));
         break;
 
       case 'orderBy':
@@ -155,6 +121,20 @@ class Api4ArgParser {
 
       default:
         throw new \RuntimeException("Unrecognized option: +$key");
+    }
+  }
+
+  public function parseWhere($expr) {
+    if (preg_match('/([a-zA-Z0-9_\.]+)\s*(\<=|\>=|=|!=|\<|\>|IS NULL|IS NOT NULL|LIKE|NOT LIKE|IN|NOT IN)\s*(.*)$/i', $expr, $matches)) {
+      if (!empty($matches[3])) {
+        return [$matches[1], strtoupper(trim($matches[2])), $this->parseValueExpr(trim($matches[3]))];
+      }
+      else {
+        return [$matches[1], strtoupper($matches[2])];
+      }
+    }
+    else {
+      throw new \RuntimeException("Error parsing \"where\": $expr");
     }
   }
 

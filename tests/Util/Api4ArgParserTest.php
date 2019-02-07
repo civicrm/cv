@@ -42,14 +42,19 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
       ],
     ];
     $exs[] = [
+      ['+w=id is not null'],
+      ['where' => [['id', 'IS NOT NULL']]],
+    ];
+    $exs[] = [
       ['+where:display_name like "alice%"', '+w:id >= 234'],
       [
         'where' => [
-          ['display_name', 'like', 'alice%'],
+          ['display_name', 'LIKE', 'alice%'],
           ['id', '>=', 234],
         ],
       ],
     ];
+
     $exs[] = [
       ['+orderBy:last_name asc'],
       ['orderBy' => ['last_name' => 'ASC']],
@@ -85,6 +90,7 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
   public function testGoodInput($input, $expected) {
     $p = new Api4ArgParser();
     $actual = $p->parse($input);
+    // print_r(['expected' => $expected, 'actual' => $actual]);
     $this->assertEquals($expected, $actual);
   }
 
@@ -108,10 +114,14 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
     $p->parse($input);
   }
 
-  public function testExplode() {
+  public function testParseWhere() {
     $p = new Api4ArgParser();
-    $this->assertEquals(['ab', '>=', 'cd'], $p->explode('ab >= cd'));
-    $this->assertEquals(['ab', '>=', '"cd ef"'], $p->explode('ab >= "cd ef"'));
+    $this->assertEquals(['ab', '>=', 'cd'], $p->parseWhere('ab >= cd'));
+    $this->assertEquals(['ab', '>=', 'cd ef'], $p->parseWhere('ab >= cd ef'));
+    $this->assertEquals(['ab', '>=', 'cd ef'], $p->parseWhere('ab >= "cd ef"'));
+    $this->assertEquals(['ab', 'NOT LIKE', 'abcd%'], $p->parseWhere('ab not like abcd%'));
+    $this->assertEquals(['ab', 'NOT LIKE', 'abcd%'], $p->parseWhere('ab not like "abcd%"'));
+
   }
 
 }
