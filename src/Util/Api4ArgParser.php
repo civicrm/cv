@@ -83,6 +83,8 @@ class Api4ArgParser {
       'w' => 'where',
       'o' => 'orderBy',
       'l' => 'limit',
+      'v' => 'values',
+      'value' => 'values',
     ];
     $key = isset($aliases[$key]) ? $aliases[$key] : $key;
 
@@ -119,13 +121,26 @@ class Api4ArgParser {
         }
         break;
 
+      case 'values':
+        self::mergeInto($params, $key, $this->parseAssignment($expr));
+        break;
+
       default:
         throw new \RuntimeException("Unrecognized option: +$key");
     }
   }
 
+  public function parseAssignment($expr) {
+    if (preg_match('/^([a-zA-Z0-9_\.]+)\s*=\s*(.*)$/', $expr, $matches)) {
+      return [$matches[1] => $this->parseValueExpr($matches[2])];
+    }
+    else {
+      throw new \RuntimeException("Error parsing \"value\": $expr");
+    }
+  }
+
   public function parseWhere($expr) {
-    if (preg_match('/([a-zA-Z0-9_\.]+)\s*(\<=|\>=|=|!=|\<|\>|IS NULL|IS NOT NULL|LIKE|NOT LIKE|IN|NOT IN)\s*(.*)$/i', $expr, $matches)) {
+    if (preg_match('/^([a-zA-Z0-9_\.]+)\s*(\<=|\>=|=|!=|\<|\>|IS NULL|IS NOT NULL|LIKE|NOT LIKE|IN|NOT IN)\s*(.*)$/i', $expr, $matches)) {
       if (!empty($matches[3])) {
         return [$matches[1], strtoupper(trim($matches[2])), $this->parseValueExpr(trim($matches[3]))];
       }

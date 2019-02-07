@@ -76,6 +76,9 @@ is to pipe JSON. For quick manual usage, one can pass parameters inline
                    +o 'last_name DESC,first_name ASC'
     {$C}+l{$_C}|{$C}+limit{$_C}      +limit 15@60
                    +l 15
+    {$C}+v{$_C}|{$C}+value{$_C}      +v name=Alice
+                   +v name=Alice
+
 
     For + options, the \"=\" may be replaced by a single space or \":\".
 
@@ -93,6 +96,9 @@ is to pipe JSON. For quick manual usage, one can pass parameters inline
 
 {$C}Example: Find contact names for IDs between 100 and 200, ordered by last name{$_C}
     cv api4 contact.get +s display_name +o last_name +w 'id >= 100' +w 'id <= 200'
+
+{$C}Example: Change do_not_phone for everyone named Adam{$_C}
+    cv api4 contact.update +w 'display_name like %Adam%' +v do_not_phone=1
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ");

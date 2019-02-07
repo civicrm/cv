@@ -10,6 +10,16 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
   public function getGoodExamples() {
     $exs = [];
     $exs[] = [
+      ['+v=first_name=foo', '+v=middle_name=Foo Bar', '+v=last_name="Whiz Bang"'],
+      [
+        'values' => [
+          'first_name' => 'foo',
+          'middle_name' => 'Foo Bar',
+          'last_name' => 'Whiz Bang',
+        ],
+      ],
+    ];
+    $exs[] = [
       ['limit=10', '+select=display_name'],
       ['limit' => 10, 'select' => ['display_name']],
     ];
@@ -42,8 +52,8 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
       ],
     ];
     $exs[] = [
-      ['+w=id is not null'],
-      ['where' => [['id', 'IS NOT NULL']]],
+      ['+w=id is not null', '+w=id>=234'],
+      ['where' => [['id', 'IS NOT NULL'], ['id', '>=', '234']]],
     ];
     $exs[] = [
       ['+where:display_name like "alice%"', '+w:id >= 234'],
@@ -116,6 +126,9 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
 
   public function testParseWhere() {
     $p = new Api4ArgParser();
+    $this->assertEquals(['ab', '>=', '123'], $p->parseWhere('ab>=123'));
+    $this->assertEquals(['ab', '<=', '123'], $p->parseWhere('ab<= 123'));
+    $this->assertEquals(['ab', 'NOT IN', [1, 2, 3]], $p->parseWhere('ab not in [1,2,3]'));
     $this->assertEquals(['ab', '>=', 'cd'], $p->parseWhere('ab >= cd'));
     $this->assertEquals(['ab', '>=', 'cd ef'], $p->parseWhere('ab >= cd ef'));
     $this->assertEquals(['ab', '>=', 'cd ef'], $p->parseWhere('ab >= "cd ef"'));
