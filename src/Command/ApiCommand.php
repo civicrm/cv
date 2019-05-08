@@ -72,7 +72,7 @@ TIP: To display a full backtrace of any errors, pass "-vv" (very verbose).
     $result = \civicrm_api($entity, $action, $params);
 
     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE && $result['trace']) {
-      $output->getErrorOutput()->writeln("<error>Error:</error>");
+      $output->getErrorOutput()->writeln("<error>Error: " . (isset($result['error_message']) ? $result['error_message'] : "") . "</error>");
       $output->getErrorOutput()->writeln("  " . str_replace("\n", "\n  ", $result['trace']), OutputInterface::OUTPUT_RAW);
       $output->getErrorOutput()->write("\n");
       unset($result['trace']);
