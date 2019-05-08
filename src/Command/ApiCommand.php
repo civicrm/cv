@@ -41,17 +41,42 @@ Examples:
   cv api contact.get id=10
   echo \'{"id":10, "api.Email.get": 1}\' | cv api contact.get --in=json
 
-NOTE: To change the default output format, set CV_OUTPUT.
+TIP: To change the default output format, set CV_OUTPUT.
+
+TIP: To display a full backtrace of any errors, pass "-vv" (very verbose).
 ');
     $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $C = '<comment>';
+    $_C = '</comment>';
+    $I = '<info>';
+    $_I = '</info>';
+
     $this->boot($input, $output);
 
     list($entity, $action) = explode('.', $input->getArgument('Entity.action'));
     $params = $this->parseParams($input);
+
+    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE && !array_key_exists('debug', $params)) {
+      $params['debug'] = 1;
+    }
+
+    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+      $output->writeln("{$I}Entity{$_I}: {$C}$entity{$_C}");
+      $output->writeln("{$I}Action{$_I}: {$C}$action{$_C}");
+      $output->writeln("{$I}Params{$_I}: " . json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
     $result = \civicrm_api($entity, $action, $params);
+
+    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE && $result['trace']) {
+      $output->getErrorOutput()->writeln("<error>Error:</error>");
+      $output->getErrorOutput()->writeln("  " . str_replace("\n", "\n  ", $result['trace']), OutputInterface::OUTPUT_RAW);
+      $output->getErrorOutput()->write("\n");
+      unset($result['trace']);
+    }
 
     $out = $input->getOption('out');
     if (!in_array($out, Encoder::getFormats()) && in_array($out, Encoder::getTabularFormats())) {
