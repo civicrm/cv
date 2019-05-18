@@ -1,10 +1,11 @@
 <?php
 namespace Civi\Cv\Util;
 
-// **********************
-// ** WORK IN PROGRESS **
-// **********************
-
+/**
+ * ----------------
+ * WORK IN PROGRESS
+ * ----------------
+ */
 class CliEditor {
 
   /**
@@ -53,7 +54,6 @@ class CliEditor {
       if (!$return !== 0) {
         return FALSE;
       }
-
 
       if ($this->validator === NULL) {
         $isValid = TRUE;

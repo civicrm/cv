@@ -65,7 +65,6 @@ class HeadlessDownloader {
     return $basedirs;
   }
 
-
   public function guessBasedir(ZipArchive $zip, $expected) {
     $candidate = FALSE;
     $basedirs = $this->findBaseDirs($zip);

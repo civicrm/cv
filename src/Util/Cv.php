@@ -1,7 +1,9 @@
 <?php
 
 namespace Civi\Cv\Util;
+
 class Cv {
+
   /**
    * Call the "cv" command.
    *

@@ -2,6 +2,7 @@
 namespace Civi\Cv\Util;
 
 class Filesystem extends \Symfony\Component\Filesystem\Filesystem {
+
   /**
    * @param string $path
    * @return string updated $path
@@ -88,9 +89,8 @@ class Filesystem extends \Symfony\Component\Filesystem\Filesystem {
    *   A function which accepts full file content as input,
    *   and returns new content as output.
    * @param int|float $maxWait
-   * @param int $maxSize
    * @return bool
-   * @throws
+   * @throws \RuntimeException
    */
   public function update($file, $filter, $maxWait = 5.0) {
     $mode = file_exists($file) ? 'r+' : 'w+';
@@ -112,7 +112,7 @@ class Filesystem extends \Symfony\Component\Filesystem\Filesystem {
     // TODO throw an error $maxSize exceeded.
     $buf = '';
     while (!feof($fh)) {
-      $buf .= fread($fh, 1024*1024);
+      $buf .= fread($fh, 1024 * 1024);
     }
     $rawOut = call_user_func($filter, $buf);
 

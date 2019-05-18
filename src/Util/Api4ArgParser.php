@@ -1,6 +1,7 @@
 <?php
 
 namespace Civi\Cv\Util;
+
 class Api4ArgParser {
 
   public function parse($args, $defaults = []) {
@@ -92,7 +93,7 @@ class Api4ArgParser {
       case 'select':
         self::mergeInto($params, $key, array_map([
           $this,
-          'parseValueExpr'
+          'parseValueExpr',
         ], preg_split('/[, ]/', $expr)));
         break;
 

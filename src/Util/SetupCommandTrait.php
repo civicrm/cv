@@ -2,7 +2,6 @@
 namespace Civi\Cv\Util;
 
 use Civi\Setup\DbUtil;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -43,6 +42,9 @@ trait SetupCommandTrait {
    *
    * @param \Symfony\Component\Console\Input\InputInterface $input
    * @param \Symfony\Component\Console\Output\OutputInterface $output
+   * @param int $defaultOutputOptions
+   *   Extra options for displaying bootstrap messages.
+   *   Ex: OutputInterface::VERBOSITY_NORMAL
    * @return \Civi\Setup
    * @throws \Exception
    */
@@ -75,7 +77,7 @@ trait SetupCommandTrait {
       implode(DIRECTORY_SEPARATOR, [$setupOptions['srcPath'], 'vendor', 'civicrm', 'civicrm-setup']),
       implode(DIRECTORY_SEPARATOR, [$setupOptions['srcPath'], 'packages', 'civicrm-setup']),
       implode(DIRECTORY_SEPARATOR, [$setupOptions['srcPath'], 'setup']),
-      implode(DIRECTORY_SEPARATOR, ['/usr', 'local', 'share', 'civicrm-setup'])
+      implode(DIRECTORY_SEPARATOR, ['/usr', 'local', 'share', 'civicrm-setup']),
     ];
     $setupOptions['setupPath'] = ArrayUtil::pickFirst($possibleSetupPaths, 'file_exists');
     if ($setupOptions['setupPath']) {
@@ -99,7 +101,7 @@ trait SetupCommandTrait {
     ]);
     $setup->getModel()->cmsBaseUrl = ArrayUtil::pickFirst([
       $input->getOption('cms-base-url'),
-      $setup->getModel()->cmsBaseUrl
+      $setup->getModel()->cmsBaseUrl,
     ]);
     if ($input->getOption('db')) {
       $setup->getModel()->db = DbUtil::parseDsn($input->getOption('db'));

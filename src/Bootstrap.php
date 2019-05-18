@@ -1,5 +1,6 @@
 <?php
 namespace Civi\Cv;
+
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -82,8 +83,8 @@ class Bootstrap {
   protected $options = array();
 
   /**
-   * Symphony OutputInterface provide during booting to enable the command-line
-   * 'v', 'vv' and 'vvv' options
+   * @var \Symfony\Component\Console\Output\OutputInterface
+   *   Output mechanism for verbose boot messages.
    * @see http://symfony.com/doc/current/console/verbosity.html
    */
   protected $output = FALSE;
@@ -376,8 +377,10 @@ class Bootstrap {
         // Future? 'vendor/civicrm/joomla/civicrm.php' => 'joomla',
       ),
       'drupal' => array(
-        'modules/system/system.module', // D7
-        'core/core.services.yml', // D8
+        // D7
+        'modules/system/system.module',
+        // D8
+        'core/core.services.yml',
       ),
       'backdrop' => array(
         'core/modules/layout/layout.module',

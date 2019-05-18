@@ -1,6 +1,6 @@
 <?php
 namespace Civi\Cv\Util;
-use Symfony\Component\Console\Input\InputInterface;
+
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -52,11 +52,13 @@ class ConsoleQueueRunner {
   public function runAll() {
     $taskCtx = new \CRM_Queue_TaskContext();
     $taskCtx->queue = $this->queue;
-    $taskCtx->log = \Log::singleton('display'); // WISHLIST: Wrap $output
+    // WISHLIST: Wrap $output
+    $taskCtx->log = \Log::singleton('display');
     // CRM_Core_Error::createDebugLogger()
 
     while ($this->queue->numberOfItems()) {
-      $item = $this->queue->stealItem(); // In case we're retrying a failed job.
+      // In case we're retrying a failed job.
+      $item = $this->queue->stealItem();
       $task = $item->data;
 
       if ($this->output->getVerbosity() === OutputInterface::VERBOSITY_NORMAL) {
