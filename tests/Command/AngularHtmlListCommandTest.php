@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Exception\ProcessErrorException;
 use Civi\Cv\Util\Process;
 
 /**
@@ -17,13 +16,16 @@ class AngularHtmlListCommandTest extends \Civi\Cv\CivilTestCase {
     $p = Process::runOk($this->cv('ang:html:list'));
     $this->assertRegexp(';crmUi/field.html;', $p->getOutput());
 
-    $p = Process::runOk($this->cv('ang:html:list crmUi')); // matches key
+    // matches key
+    $p = Process::runOk($this->cv('ang:html:list crmUi'));
     $this->assertRegexp(';crmUi/field.html;', $p->getOutput());
 
-    $p = Process::runOk($this->cv('ang:html:list ";field;"')); // matches name
+    // matches name
+    $p = Process::runOk($this->cv('ang:html:list ";field;"'));
     $this->assertRegexp(';crmUi/field.html;', $p->getOutput());
 
-    $p = Process::runOk($this->cv('ang:html:list crmAttachment')); // matches name
+    // matches name
+    $p = Process::runOk($this->cv('ang:html:list crmAttachment'));
     $this->assertNotRegexp(';crmUi/field.html;', $p->getOutput());
   }
 

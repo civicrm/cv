@@ -6,6 +6,7 @@ namespace Civi\Cv\Util;
  * @group util
  */
 class FilesystemTest extends \PHPUnit_Framework_TestCase {
+
   public function dataIsDescendent() {
     return array(
       array('/ex', '/ex', FALSE),

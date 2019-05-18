@@ -48,7 +48,7 @@ class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
       [
         'limit' => 10,
         'select' => ['display_name', 'contact_type'],
-        'where' => [['id', '>', '123']]
+        'where' => [['id', '>', '123']],
       ],
     ];
     $exs[] = [

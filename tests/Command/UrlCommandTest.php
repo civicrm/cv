@@ -1,9 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\Process;
-use Symfony\Component\Console\Input\InputArgument;
-
 /**
  * @group std
  */

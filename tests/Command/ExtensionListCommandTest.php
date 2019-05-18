@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Exception\ProcessErrorException;
 use Civi\Cv\Util\Process;
 
 /**
@@ -49,13 +48,16 @@ class ExtensionListCommandTest extends \Civi\Cv\CivilTestCase {
     $p = Process::runOk($this->cv('ext:list'));
     $this->assertRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
 
-    $p = Process::runOk($this->cv('ext:list /org.civicrm/')); // matches key
+    // matches key
+    $p = Process::runOk($this->cv('ext:list /org.civicrm/'));
     $this->assertRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
 
-    $p = Process::runOk($this->cv('ext:list /^cividiscount/')); // matches name
+    // matches name
+    $p = Process::runOk($this->cv('ext:list /^cividiscount/'));
     $this->assertRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
 
-    $p = Process::runOk($this->cv('ext:list /^com\./')); // matches name
+    // matches name
+    $p = Process::runOk($this->cv('ext:list /^com\./'));
     $this->assertNotRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
   }
 

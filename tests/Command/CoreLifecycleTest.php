@@ -2,7 +2,6 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\CvTestTrait;
-use Civi\Cv\Exception\ProcessErrorException;
 use Civi\Cv\Util\Process;
 
 /**
@@ -33,7 +32,8 @@ class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
       'drupal-empty',
       ['sites/all/modules' => 'https://download.civicrm.org/latest/civicrm-RC-drupal.tar.gz'],
       'core:install -f --cms-base-url=http://localhost',
-      '', // 'drush -y en civicrm', // No longer needed -- FlushDrupal plugin autoenables.
+    // 'drush -y en civicrm', // No longer needed -- FlushDrupal plugin autoenables.
+      '',
     ];
     $cases[] = [
       'wp-empty',

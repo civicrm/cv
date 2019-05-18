@@ -40,7 +40,6 @@ class ApiCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertTrue(!empty($data['option_group_id']));
   }
 
-
   public function testQuiet() {
     $p = Process::runOk($this->cv("api -q System.get"));
     $this->assertEmpty($p->getOutput());

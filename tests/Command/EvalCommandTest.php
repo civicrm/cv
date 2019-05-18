@@ -53,7 +53,6 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertRegExp('/^Hello world/', $p1->getOutput());
   }
 
-
   public function testTestMode() {
     $checkUf = escapeshellarg('return CIVICRM_UF;');
 

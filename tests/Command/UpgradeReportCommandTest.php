@@ -38,7 +38,6 @@ class UpgradeReportCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertContains('Saved', $response['message'], "Server not responding as saved: {$response['message']}", TRUE);
   }
 
-
   public function testUpgraded() {
     $messages = <<<HERETEXT
 Nam adipiscing condimentum netus ac mi nunc adipiscing leo aliquet non habitant
@@ -122,7 +121,6 @@ HERETEXT;
     $p->run();
     $this->assertGreaterThan(0, $p->getExitCode(), 'Download report with no download URL does not exit with an error.');
   }
-
 
   /**
    * An upgrade report needs upgrade messages
