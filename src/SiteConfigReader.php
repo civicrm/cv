@@ -94,22 +94,29 @@ class SiteConfigReader {
       'CIVI_UF' => \CRM_Core_Config::singleton()->userFramework,
       'IS_INSTALLED' => '1',
       'SITE_TYPE' => 'cv-auto',
-      'CMS_URL' => $paths
-        ? \Civi::paths()->getUrl('[cms.root]/', 'absolute')
-        : \CRM_Utils_System::languageNegotiationURL(\CRM_Utils_System::baseCMSURL(), FALSE, TRUE),
-      'CMS_ROOT' => $paths
-        ? \Civi::paths()->getPath('[cms.root]/.')
-        : \CRM_Core_Config::singleton()->userSystem->cmsRootPath(),
-      'CIVI_CORE' => $paths
-        ? \Civi::paths()->getPath('[civicrm.root]/.')
-        : $GLOBALS['civicrm_root'],
-      'CIVI_URL' => $paths // NOTE: not in bulidkit!
-        ? \Civi::paths()->getUrl('[civicrm.root]/', 'absolute')
-        : '',
-      'CIVI_FILES' => $paths
-        ? \Civi::paths()->getPath('[civicrm.files]/.')
-        : dirname(\CRM_Core_Config::singleton()->templateCompileDir), // ugh
     );
+
+    if (is_callable(array('Civi', 'paths'))) {
+      $data += [
+        'CMS_URL' => \Civi::paths()->getUrl('[cms.root]/', 'absolute'),
+        'CMS_ROOT' => \Civi::paths()->getPath('[cms.root]/.'),
+        'CIVI_CORE' => \Civi::paths()->getPath('[civicrm.root]/.'),
+         // NOTE: not in buildkit:
+        'CIVI_URL' => \Civi::paths()->getUrl('[civicrm.root]/', 'absolute'),
+        'CIVI_FILES' => \Civi::paths()->getPath('[civicrm.files]/.'),
+      ];
+    }
+    else {
+      $data += [
+        'CMS_URL' => \CRM_Utils_System::languageNegotiationURL(\CRM_Utils_System::baseCMSURL(), FALSE, TRUE),
+        'CMS_ROOT' => \CRM_Core_Config::singleton()->userSystem->cmsRootPath(),
+        'CIVI_CORE' => $GLOBALS['civicrm_root'],
+        // NOTE: not in buildkit:
+        'CIVI_URL' => '',
+        // NOTE: This was ill-defined in older versions:
+        'CIVI_FILES' => dirname(\CRM_Core_Config::singleton()->templateCompileDir),
+      ];
+    }
 
     return $data;
   }
