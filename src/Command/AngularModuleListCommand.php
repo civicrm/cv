@@ -1,16 +1,11 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Application;
 use Civi\Cv\Encoder;
-use Civi\Cv\Util\ArrayUtil;
-use Civi\Cv\Util\ExtensionUtil;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
 
 class AngularModuleListCommand extends BaseCommand {
 
@@ -65,7 +60,7 @@ Examples:
   /**
    * Find extensions matching the input args.
    *
-   * @param InputInterface $input
+   * @param \Symfony\Component\Console\Input\InputInterface $input
    * @return array
    */
   protected function find($input) {

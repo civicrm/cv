@@ -1,13 +1,9 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Application;
-use Civi\Cv\Encoder;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
 
 class ApiBatchCommand extends BaseCommand {
 
@@ -16,7 +12,7 @@ class ApiBatchCommand extends BaseCommand {
   /**
    * @var array
    */
-  var $defaults;
+  public $defaults;
 
   /**
    * @param string|null $name

@@ -1,9 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Application;
-use Civi\Cv\Encoder;
-use Civi\Cv\Util\ExtensionUtil;
 use Civi\Cv\Util\Filesystem;
 use Civi\Cv\Util\HeadlessDownloader;
 use Symfony\Component\Console\Input\InputArgument;
@@ -11,7 +8,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
-
 
 class ExtensionDownloadCommand extends BaseExtensionCommand {
 
@@ -213,8 +209,10 @@ Note:
    *   Array(array $downloads, array $errors).
    */
   protected function parseDownloads(InputInterface $input) {
-    $downloads = array(); // Array(string $key => null|string $url)
-    $errors = array(); // Array(string $message).
+    // Array(string $key => null|string $url)
+    $downloads = array();
+    // Array(string $message).
+    $errors = array();
 
     $remoteInfos = NULL;
     $shortMap = NULL;

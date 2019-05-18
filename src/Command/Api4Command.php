@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Application;
 use Civi\Cv\Encoder;
 use Civi\Cv\Util\Api4ArgParser;
 use Symfony\Component\Console\Input\InputArgument;
@@ -16,7 +15,7 @@ class Api4Command extends BaseCommand {
   /**
    * @var array
    */
-  var $defaults;
+  public $defaults;
 
   /**
    * @param string|null $name

@@ -1,10 +1,8 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Application;
 use Civi\Cv\Encoder;
 use Civi\Cv\Util\ConsoleQueueRunner;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -182,14 +180,22 @@ Examples:
     }
 
     $id = md5(implode(\CRM_Core_DAO::VALUE_SEPARATOR, array(
-        posix_getuid(),
-        CIVICRM_SETTINGS_PATH,
-        $GLOBALS['civicrm_root'],
-        parse_url(CIVICRM_DSN, PHP_URL_PATH), // e.g. one codebase, multi database
-        \CRM_Utils_Array::value('SCRIPT_FILENAME', $_SERVER, ''), // e.g. CMS vs extern vs installer
-        \CRM_Utils_Array::value('HTTP_HOST', $_SERVER, ''), // e.g. name-based vhosts
-        \CRM_Utils_Array::value('SERVER_PORT', $_SERVER, ''), // e.g. port-based vhosts
-      )));
+      posix_getuid(),
+      CIVICRM_SETTINGS_PATH,
+      $GLOBALS['civicrm_root'],
+
+      // e.g. one codebase, multi database
+      parse_url(CIVICRM_DSN, PHP_URL_PATH),
+
+      // e.g. CMS vs extern vs installer
+      \CRM_Utils_Array::value('SCRIPT_FILENAME', $_SERVER, ''),
+
+      // e.g. name-based vhosts
+      \CRM_Utils_Array::value('HTTP_HOST', $_SERVER, ''),
+
+      // e.g. port-based vhosts
+      \CRM_Utils_Array::value('SERVER_PORT', $_SERVER, ''),
+    )));
 
     return $dir . DIRECTORY_SEPARATOR . $id . '.dat';
   }

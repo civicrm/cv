@@ -2,7 +2,6 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Encoder;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -125,7 +124,6 @@ $ cv core:install -m extras.opt-in.versionCheck=1
         return 'abort';
     }
   }
-
 
   /**
    * @param \Symfony\Component\Console\Input\InputInterface $input

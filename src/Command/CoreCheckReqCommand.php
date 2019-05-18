@@ -2,11 +2,9 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Encoder;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 
 class CoreCheckReqCommand extends BaseCommand {
 

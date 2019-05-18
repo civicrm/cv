@@ -1,9 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Application;
 use Civi\Cv\Encoder;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -52,7 +50,8 @@ Returns a JSON object with the properties:
       if (defined('CIVICRM_UF')) {
         $cms = CIVICRM_UF;
       }
-      $result['vars'] = $GLOBALS['_CV']; // REMOVE
+      // REMOVE:
+      $result['vars'] = $GLOBALS['_CV'];
     }
     if (empty($cms)) {
       throw new \RuntimeException("Cannot determine download URL without CMS");

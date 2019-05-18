@@ -1,12 +1,9 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Encoder;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
 
 class FlushCommand extends BaseCommand {
 
