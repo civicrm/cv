@@ -39,35 +39,37 @@ class Api4Command extends BaseCommand {
       ->addOption('dry-run', 'N', InputOption::VALUE_NONE, 'Preview the API call. Do not execute.')
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
-      ->setHelp("
-When passing arguments to APIv4, this command supports a few input formats.
-For scripting with untrusted data, the most precise way to input information
-is to pipe JSON. For quick manual usage, one can pass parameters inline
-(as part of the main command).
+      ->setHelp("Call an entity/action in APIv4
 
-{$C}Pipe Data (JSON):${_C}
+If your inputs are determined dynamically (e.g. from an external or untrusted
+data-source), then it is better to pass parameters via pipe using strict JSON format.
+This minimizes the risk that a dynamic value will be incorrectly escaped.
+
+Alas, strict JSON is cumbersome to manually enter on the CLI.
+
+If your inputs are entered manually, then it is easier to use a mix of \"+Options\"
+and \"JSON-ish Key-Value\". The \"+Options\" are ideal for common parameters
+(like \"select\" or \"where\"), and \"JSON-ish Key-Value\" is a decent fallback
+for less common parameters.
+
+Below, we consider a specification for each format and a set of examples.
+
+If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_I} ({$I}-N{$_I}).
+
+{$C}Specification: Piped JSON${_C}
 
     {$C}echo{$_C} {$I}JSON{$_I} | {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} {$C}--in=json${_C}
 
-{$C}Inline Data (JSON):${_C}
+{$C}Specification: +Options${_C}
 
-    {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} {$I}KEY{$_I}={$I}VALUE{$_I}... {$I}JSON-OBJECT...{$_I}
+    {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} [{$C}+{$_C}{$I}OP{$_I}{$C} {$_C}{$I}EXPR{$_I}]...
 
-    Use ${I}KEY{$_I}={$I}VALUE{$_I} to set an input to a specific value. The value may be a bare string
-    or it may be JSON (beginning with '[' or '{' or '\"').
-
-    Similarly, a parameter which begins with '{' will be interpreted as a JSON expression.
-
-{$C}Inline Data (+Options):${_C}
-
-    {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} +{$I}OP{$_I}={$I}EXPR{$_I}...
-
-    Some inputs are common and cumbersome to type in JSON. To allow quicker data entry,
-    they support special syntaxes in the form +{$I}OP{$_I}={$I}EXPR{$_I} or +{$I}OP{$_I} {$I}EXPR{$_I}. For example:
+    Each \"+Option\" allows you to specify a common APIv4 parameter using a
+    pithy, purpose-built notation. For example:
 
     Option         Examples
-    {$C}+s{$_C}|{$C}+select{$_C}     +select=id,display_name
-                   +select id,display_name
+    {$C}+s{$_C}|{$C}+select{$_C}     +select id,display_name
+                   +select=id,display_name
                    +s id,display_name
     {$C}+w{$_C}|{$C}+where{$_C}      +where 'first_name like \"Adams%\"'
                    +w 'first_name like \"Adams%\"'
@@ -79,20 +81,30 @@ is to pipe JSON. For quick manual usage, one can pass parameters inline
     {$C}+v{$_C}|{$C}+value{$_C}      +v name=Alice
                    +v name=Alice
 
+    NOTE: The +{$I}OP{$_I} may be written long ({$C}+where{$_C}) or short ({$C}+w{$_C}). It is
+    valid to separate the +{$I}OP{$_I} and {$I}EXPR{$_I} using a space, colon, or equals sign.
 
-    For + options, the \"=\" may be replaced by a single space or \":\".
+{$C}Specification: JSON-ish Key-Value${_C}
+
+    {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} [{$I}KEY{$_I}={$I}VALUE{$_I}]... [{$I}JSON-OBJECT{$_I}]...
+
+    Use ${I}KEY{$_I}={$I}VALUE{$_I} to set an input to a specific value. The value may be a bare string
+    or it may be JSON (beginning with '[' or '{' or '\"').
+
+    Use {$I}JSON-OBJECT{$_I} if you want to pass several fields as one pure JSON string.
+    A parameter which begins with '{' will be interpreted as a JSON expression.
 
 {$C}Example: Get all contacts{$_C}
     cv api4 Contact.get
 
-{$C}Example: Get ten contacts (KEY=VALUE){$_C}
-    cv api4 Contact.get select='[\"display_name\"]' limit=10
+{$C}Example: Get ten contacts{$_C} (All examples are equivalent.)
+    cv api4 Contact.get +s id,display_name +l 10
+    cv api4 Contact.get select='[\"id\",\"display_name\"]' limit=10
+    cv api4 Contact.get '{\"select\":[\"id\",\"display_name\"],\"limit\":10}'
+    echo '{\"select\":[\"id\",\"display_name\"],\"limit\":10}' | cv api4 Contact.get --in=json
 
-{$C}Example: Find ten contacts named \"Adam\" (+Options){$_C}
-    cv api4 Contact.get +select=display_name +where='display_name LIKE \"Adam%\" limit=10'
-
-{$C}Example: Find ten contacts named \"Adam\"  (JSON){$_C}
-    echo '{\"select\":[\"display_name\"],\"where\":[[\"display_name\",\"LIKE\",\"Adam%\"]],\"limit\":10}' | cv api4 contact.get --in=json
+{$C}Example: Find ten contacts named \"Adam\"{$_C}
+    cv api4 Contact.get +s display_name +w 'display_name LIKE \"Adam%\"' limit=10
 
 {$C}Example: Find contact names for IDs between 100 and 200, ordered by last name{$_C}
     cv api4 Contact.get +s display_name +o last_name +w 'id >= 100' +w 'id <= 200'
