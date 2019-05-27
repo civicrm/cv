@@ -38,8 +38,10 @@ trait StructuredOutputTrait {
    * @return $this
    */
   protected function configureOutputOptions($config = []) {
-    $formats = !empty($config['tabular']) ? Encoder::getTabularFormats() : Encoder::getFormats();
     $fallback = !empty($config['fallback']) ? $config['fallback'] : 'json-pretty';
+
+    $formats = !empty($config['tabular']) ? Encoder::getTabularFormats() : Encoder::getFormats();
+    sort($formats);
 
     $this->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', $formats) . ')', Encoder::getDefaultFormat($fallback));
 
