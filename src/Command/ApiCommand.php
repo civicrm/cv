@@ -31,7 +31,7 @@ class ApiCommand extends BaseCommand {
       ->setAliases(['api3'])
       ->setDescription('Call APIv3')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
-      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat())
+      ->configureOutputOptions(['tabular' => TRUE])
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
       ->setHelp('Call APIv3

@@ -15,6 +15,7 @@ class DebugDispatcherCommand extends BaseCommand {
       ->setDescription('Dump the list of event listeners')
       ->addArgument('event', InputArgument::OPTIONAL, 'An event name or regex')
       // ->addOption('out', NULL, InputArgument::OPTIONAL, 'Specify return format (json,none,php,pretty,shell)', \Civi\Cv\Encoder::getDefaultFormat())
+      // ->configureOutputOptions()
       ->setHelp('
 Dump the list of event listeners
 

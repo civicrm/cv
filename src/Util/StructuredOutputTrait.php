@@ -4,6 +4,7 @@ namespace Civi\Cv\Util;
 use Civi\Cv\Encoder;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -12,9 +13,31 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * This trait helps with implementing a command in which the output is
  * structured and user-configurable -- e.g. a user may choose to display
- * output as JSON, PHP code, shell variables, or a colorful table.
+ * output as JSON, PHP code, shell variables, CSV, or a colorful table.
  */
 trait StructuredOutputTrait {
+
+  /**
+   * Register CLI options related to output.
+   *
+   * Ex:
+   *   $this->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'json-pretty']);
+   *
+   * @param array $config
+   *   Any mix of the following options:
+   *   - tabular: bool, this command supports tabular formats (such as CSV)
+   *     (Default: FALSE)
+   *   - fallback: string, the format to use if the inputs+environment do not
+   *     specify a format. (Default: json-pretty)
+   * @return $this
+   */
+  protected function configureOutputOptions($config = []) {
+    $formats = !empty($config['tabular']) ? Encoder::getTabularFormats() : Encoder::getFormats();
+    $fallback = !empty($config['fallback']) ? $config['fallback'] : 'json-pretty';
+
+    $this->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', $formats) . ')', Encoder::getDefaultFormat($fallback));
+    return $this;
+  }
 
   /**
    * @param \Symfony\Component\Console\Input\InputInterface $input

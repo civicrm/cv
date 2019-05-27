@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Encoder;
 use Civi\Cv\Util\ConsoleQueueRunner;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -20,7 +19,7 @@ class UpgradeDbCommand extends BaseCommand {
     $this
       ->setName('upgrade:db')
       ->setDescription('Run the database upgrade')
-      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getFormats()) . ')', Encoder::getDefaultFormat('pretty'))
+      ->configureOutputOptions(['fallback' => 'pretty'])
       ->addOption('dry-run', NULL, InputOption::VALUE_NONE, 'Preview the list of upgrade tasks')
       ->addOption('retry', NULL, InputOption::VALUE_NONE, 'Resume a failed upgrade, retrying the last step')
       ->addOption('skip', NULL, InputOption::VALUE_NONE, 'Resume a failed upgrade, skipping the last step')

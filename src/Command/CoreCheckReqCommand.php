@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Encoder;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,7 +15,7 @@ class CoreCheckReqCommand extends BaseCommand {
     $this
       ->setName('core:check-req')
       ->setDescription('Check installation requirements')
-      ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', Encoder::getTabularFormats()) . ')', Encoder::getDefaultFormat('table'))
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table'])
       ->addOption('filter-warnings', 'w', InputOption::VALUE_NONE, 'Show warnings')
       ->addOption('filter-errors', 'e', InputOption::VALUE_NONE, 'Show errors')
       ->addOption('filter-infos', 'i', InputOption::VALUE_NONE, 'Show info')

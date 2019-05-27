@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Encoder;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -27,9 +26,7 @@ class AngularModuleListCommand extends BaseCommand {
       ->addOption('columns', NULL, InputOption::VALUE_REQUIRED,
         'List of columns to display (comma separated)',
         'name,basePages,requires')
-      ->addOption('out', NULL, InputOption::VALUE_REQUIRED,
-        'Output format (' . implode(',', Encoder::getTabularFormats()) . ')',
-        Encoder::getDefaultFormat('table'))
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table'])
       ->addArgument('regex', InputArgument::OPTIONAL,
         'Filter extensions by full key or short name')
       ->setHelp('List Angular modules
