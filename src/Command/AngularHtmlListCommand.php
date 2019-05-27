@@ -3,7 +3,6 @@ namespace Civi\Cv\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class AngularHtmlListCommand extends BaseCommand {
@@ -23,10 +22,7 @@ class AngularHtmlListCommand extends BaseCommand {
       ->setName('ang:html:list')
       ->setAliases(array())
       ->setDescription('List Angular HTML files')
-      ->addOption('columns', NULL, InputOption::VALUE_REQUIRED,
-        'List of columns to display (comma separated)',
-        'file')
-      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'list'])
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'list', 'defaultColumns' => 'file'])
       ->addArgument('filter', InputArgument::OPTIONAL,
         'Filter by filename. For regex filtering, use semicolon delimiter.')
       ->setHelp('List Angular HTML files

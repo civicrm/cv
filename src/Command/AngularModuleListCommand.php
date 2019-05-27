@@ -3,7 +3,6 @@ namespace Civi\Cv\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class AngularModuleListCommand extends BaseCommand {
@@ -23,10 +22,7 @@ class AngularModuleListCommand extends BaseCommand {
       ->setName('ang:module:list')
       ->setAliases(array())
       ->setDescription('List Angular modules')
-      ->addOption('columns', NULL, InputOption::VALUE_REQUIRED,
-        'List of columns to display (comma separated)',
-        'name,basePages,requires')
-      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table'])
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => 'name,basePages,requires'])
       ->addArgument('regex', InputArgument::OPTIONAL,
         'Filter extensions by full key or short name')
       ->setHelp('List Angular modules

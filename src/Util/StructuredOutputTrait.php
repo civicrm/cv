@@ -29,6 +29,12 @@ trait StructuredOutputTrait {
    *     (Default: FALSE)
    *   - fallback: string, the format to use if the inputs+environment do not
    *     specify a format. (Default: json-pretty)
+   *   - defaultColumns: string|NULL, a comma-separated list of default columns to display
+   *   - availColumns: string|NULL, a comma-separated list of columns which may be displayed
+   *
+   * NOTE: The --columns option will only defined if 'defaultColumns' or/and 'availColumns'
+   * is passed.
+   *
    * @return $this
    */
   protected function configureOutputOptions($config = []) {
@@ -36,6 +42,16 @@ trait StructuredOutputTrait {
     $fallback = !empty($config['fallback']) ? $config['fallback'] : 'json-pretty';
 
     $this->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', $formats) . ')', Encoder::getDefaultFormat($fallback));
+
+    if (array_key_exists('defaultColumns', $config) || array_key_exists('availColumns', $config)) {
+      $defaultValue = array_key_exists('defaultColumns', $config) ? $config['defaultColumns'] : NULL;
+      $desc = 'Comma-separated list of columns to display';
+      if (!empty($config['availColumns'])) {
+        $desc .= ' <comment>[available: ' . $config['availColumns'] . ']</comment>';
+      }
+      $this->addOption('columns', NULL, InputOption::VALUE_REQUIRED, $desc, $defaultValue);
+    }
+
     return $this;
   }
 
