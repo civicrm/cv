@@ -12,6 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class UpgradeReportCommand extends BaseCommand {
   const DEFAULT_REPORT_URL = 'https://upgrade.civicrm.org/report';
 
+  use \Civi\Cv\Util\StructuredOutputTrait;
+
   public static function getReportModes() {
     return array(
       'started',

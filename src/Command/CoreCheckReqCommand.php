@@ -10,6 +10,7 @@ class CoreCheckReqCommand extends BaseCommand {
 
   use \Civi\Cv\Util\SetupCommandTrait;
   use \Civi\Cv\Util\DebugDispatcherTrait;
+  use \Civi\Cv\Util\StructuredOutputTrait;
 
   protected function configure() {
     $this

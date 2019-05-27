@@ -14,6 +14,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class UpgradeDbCommand extends BaseCommand {
 
   use \Civi\Cv\Util\BootTrait;
+  use \Civi\Cv\Util\StructuredOutputTrait;
 
   protected function configure() {
     $this

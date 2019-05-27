@@ -9,6 +9,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ExtensionListCommand extends BaseExtensionCommand {
 
+  use \Civi\Cv\Util\StructuredOutputTrait;
+
   /**
    * @param string|null $name
    */

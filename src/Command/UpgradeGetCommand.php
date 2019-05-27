@@ -14,6 +14,7 @@ class UpgradeGetCommand extends BaseCommand {
   // const DEFAULT_CHECK_URL = "http://civicrm-upgrade-manager.l/check";
 
   use \Civi\Cv\Util\BootTrait;
+  use \Civi\Cv\Util\StructuredOutputTrait;
 
   /**
    * Define the command options.

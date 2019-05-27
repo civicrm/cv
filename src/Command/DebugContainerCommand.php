@@ -9,6 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class DebugContainerCommand extends BaseCommand {
 
   use \Civi\Cv\Util\BootTrait;
+  use \Civi\Cv\Util\StructuredOutputTrait;
 
   protected function configure() {
     $this

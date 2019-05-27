@@ -10,6 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ApiCommand extends BaseCommand {
 
   use \Civi\Cv\Util\BootTrait;
+  use \Civi\Cv\Util\StructuredOutputTrait;
 
   /**
    * @var array

@@ -10,6 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class AngularHtmlListCommand extends BaseCommand {
 
   use \Civi\Cv\Util\BootTrait;
+  use \Civi\Cv\Util\StructuredOutputTrait;
 
   /**
    * @param string|null $name

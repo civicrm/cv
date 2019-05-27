@@ -10,6 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class UrlCommand extends BaseExtensionCommand {
 
+  use \Civi\Cv\Util\StructuredOutputTrait;
+
   protected function configure() {
     $this
       ->setName('url')

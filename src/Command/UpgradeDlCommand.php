@@ -13,6 +13,8 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
  */
 class UpgradeDlCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\StructuredOutputTrait;
+
   protected function configure() {
     $this
       ->setName('upgrade:dl')

@@ -8,6 +8,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class PathCommand extends BaseExtensionCommand {
 
+  use \Civi\Cv\Util\StructuredOutputTrait;
+
   /**
    * @param string|null $name
    */

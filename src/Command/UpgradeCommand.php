@@ -8,6 +8,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class UpgradeCommand extends BaseCommand {
 
+  use \Civi\Cv\Util\StructuredOutputTrait;
+
   protected function configure() {
     $this
       ->setName('upgrade')
