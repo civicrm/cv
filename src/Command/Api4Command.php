@@ -152,7 +152,7 @@ NOTE: To change the default output format, set CV_OUTPUT.
         $this->sendResult($input, $output, $result);
       }
       else {
-        $columns = empty($params['select']) ? array_keys($result->first()) : explode(',', $params['select']);
+        $columns = empty($params['select']) ? array_keys($result->first()) : $params['select'];
         $this->sendTable($input, $output, (array) $result, $columns);
       }
     }
