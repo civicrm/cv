@@ -18,6 +18,21 @@ use Symfony\Component\Console\Output\OutputInterface;
 trait StructuredOutputTrait {
 
   /**
+   * @var array
+   *   Array(string $outputFormat => string $cliShortcut).
+   */
+  private $outputFormatShortcuts = ['table' => 'T', 'csv' => 'C', 'list' => 'I'];
+
+  /**
+   * @param string $name
+   * @param mixed $callback
+   * @return $this
+   *
+   * @see OptionCallbackTrait::addOptionCallback()
+   */
+  abstract public function addOptionCallback($name, $callback);
+
+  /**
    * Register CLI options related to output.
    *
    * Ex:
@@ -27,6 +42,8 @@ trait StructuredOutputTrait {
    *   Any mix of the following options:
    *   - tabular: bool, this command supports tabular formats (such as CSV)
    *     (Default: FALSE)
+   *   - shortcuts: array
+   *     List of formats which should have shortcut options.
    *   - fallback: string, the format to use if the inputs+environment do not
    *     specify a format. (Default: json-pretty)
    *   - defaultColumns: string|NULL, a comma-separated list of default columns to display
@@ -44,6 +61,19 @@ trait StructuredOutputTrait {
     sort($formats);
 
     $this->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', $formats) . ')', Encoder::getDefaultFormat($fallback));
+
+    if (!empty($config['shortcuts'])) {
+      foreach ($config['shortcuts'] as $format) {
+        $shortcut = $this->outputFormatShortcuts[$format];
+        $optName = 'out=' . $format;
+        $this->addOption($optName, $shortcut, InputOption::VALUE_NONE, 'Shortcut for --out=' . $format);
+        $this->addOptionCallback($optName, function(InputInterface $input, OutputInterface $output, InputOption $option) use ($optName, $format) {
+          if ($input->getOption($optName)) {
+            $input->setOption('out', $format);
+          }
+        });
+      }
+    }
 
     if (array_key_exists('defaultColumns', $config) || array_key_exists('availColumns', $config)) {
       $defaultValue = array_key_exists('defaultColumns', $config) ? $config['defaultColumns'] : NULL;

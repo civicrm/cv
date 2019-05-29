@@ -18,7 +18,7 @@ class UrlCommand extends BaseExtensionCommand {
       ->setAliases(['open'])
       ->setDescription('Compose a URL to a CiviCRM page. (Optionally, open in a browser.)')
       ->addArgument('path', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, 'Relative path to a CiviCRM page, such as "civicrm/contact/view?reset=1&cid=1"')
-      ->configureOutputOptions(['tabular' => TRUE, 'availColumns' => 'type,expr,value'])
+      ->configureOutputOptions(['tabular' => TRUE, 'availColumns' => 'type,expr,value', 'shortcuts' => ['table', 'list']])
       ->addOption('relative', 'r', InputOption::VALUE_NONE, 'Prefer relative URL format. (Default: absolute)')
       ->addOption('frontend', 'f', InputOption::VALUE_NONE, 'Generate a frontend URL (Default: backend)')
       ->addOption('open', 'O', InputOption::VALUE_NONE, 'Open a local web browser')

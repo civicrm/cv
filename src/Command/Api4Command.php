@@ -36,7 +36,7 @@ class Api4Command extends BaseCommand {
       ->setName('api4')
       ->setDescription('Call APIv4')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
-      ->configureOutputOptions(['tabular' => TRUE])
+      ->configureOutputOptions(['tabular' => TRUE, 'shortcuts' => ['table', 'list']])
       ->addOption('dry-run', 'N', InputOption::VALUE_NONE, 'Preview the API call. Do not execute.')
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
