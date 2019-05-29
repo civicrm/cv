@@ -144,17 +144,8 @@ NOTE: To change the default output format, set CV_OUTPUT.
 
     $out = $input->getOption('out');
     if (!in_array($out, Encoder::getFormats()) && in_array($out, Encoder::getTabularFormats())) {
-      // For tabular output, we have to be picky about what data to display.
-      if ($action !== 'get' || !$result) {
-        $output->getErrorOutput()
-          ->writeln("<error>The output format \"$out\" only works with tabular data. Try using a \"get\" API. Forcing format to \"json-pretty\".</error>");
-        $input->setOption('out', 'json-pretty');
-        $this->sendResult($input, $output, $result);
-      }
-      else {
-        $columns = empty($params['select']) ? array_keys($result->first()) : $params['select'];
-        $this->sendTable($input, $output, (array) $result, $columns);
-      }
+      $columns = empty($params['select']) ? array_keys($result->first()) : $params['select'];
+      $this->sendTable($input, $output, (array) $result, $columns);
     }
     else {
       $this->sendResult($input, $output, $result);
