@@ -27,6 +27,7 @@ trait SetupCommandTrait {
       ->addOption('settings-path', NULL, InputOption::VALUE_OPTIONAL, 'The path to CivCRM settings file. (If omitted, use CV_SETUP_SETTINGS or try to use default.)')
       ->addOption('setup-path', NULL, InputOption::VALUE_OPTIONAL, 'The path to CivCRM-Setup source tree. (If omitted, read CV_SETUP_PATH or scan common defaults.)')
       ->addOption('src-path', NULL, InputOption::VALUE_OPTIONAL, 'The path to CivCRM-Core source tree. (If omitted, read CV_SETUP_SRC_PATH or scan common defaults.)')
+      ->addOption('plugin-path', NULL, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'A directory with extra installer plugins')
       ->addOption('cms-base-url', NULL, InputOption::VALUE_OPTIONAL, 'The URL of the CMS (If omitted, attempt to autodetect.)')
       ->addOption('lang', NULL, InputOption::VALUE_OPTIONAL, 'Specify the installation language')
       ->addOption('comp', NULL, InputOption::VALUE_OPTIONAL, 'Comma-separated list of CiviCRM components to enable. (Ex: CiviEvent,CiviContribute,CiviMember,CiviMail,CiviReport)')
@@ -88,9 +89,23 @@ trait SetupCommandTrait {
       throw new \Exception("Failed to locate civicrm-setup");
     }
 
+    $pluginCallback = function($pluginFiles) use ($input) {
+      foreach ($input->getOption('plugin-path') as $pluginDir) {
+        foreach (['*.civi-setup.php'] as $pattern) {
+          foreach ((array) glob("$pluginDir/$pattern") as $file) {
+            $key = substr($file, strlen($pluginDir) + 1);
+            $key = preg_replace('/\.civi-setup\.php$/', '', $key);
+            $pluginFiles[$key] = $file;
+          }
+        }
+      }
+      ksort($pluginFiles);
+      return $pluginFiles;
+    };
+
     $this->setupAutoloaders($setupOptions['srcPath'], $setupOptions['setupPath']);
     \Civi\Setup::assertProtocolCompatibility(CV_SETUP_PROTOCOL_VER);
-    \Civi\Setup::init($setupOptions, NULL, new ConsoleLogger($output));
+    \Civi\Setup::init($setupOptions, $pluginCallback, new ConsoleLogger($output));
     $setup = \Civi\Setup::instance();
 
     // Override defaults detected by setup initialization.
