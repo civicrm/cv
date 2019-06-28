@@ -107,6 +107,12 @@ trait SetupCommandTrait {
     };
 
     $this->setupAutoloaders($setupOptions['srcPath'], $setupOptions['setupPath']);
+    $c = new \ReflectionClass('Civi\Setup');
+    if (substr($c->getFileName(), 0, strlen($setupOptions['setupPath'])) !== $setupOptions['setupPath']) {
+      $effSetupPath = dirname(dirname($c->getFileName()));
+      $output->writeln(sprintf('Warning: Autoloader prioritized code from <comment>%s</comment> instead of requested <comment>%s</comment>.', $effSetupPath, $setupOptions['setupPath']));
+    }
+
     \Civi\Setup::assertProtocolCompatibility(CV_SETUP_PROTOCOL_VER);
     \Civi\Setup::init($setupOptions, $pluginCallback, new ConsoleLogger($output));
     $setup = \Civi\Setup::instance();
