@@ -378,8 +378,8 @@ class Bootstrap {
       'drupal' => array(
         // D7
         'modules/system/system.module',
-        // D8 - this finds the project root - the directory ABOVE the webroot - comparable to drush 9+.
-        'web/core/core.services.yml',
+        // D8
+        'core/core.services.yml',
       ),
       'backdrop' => array(
         'core/modules/layout/layout.module',
@@ -397,11 +397,11 @@ class Bootstrap {
         foreach ($relPaths as $relPath) {
           $matches = glob("$basePath/$relPath");
           if (!empty($matches)) {
-            // Support D8 in the directory root, not just the webroot.
-            if ($relPath == 'web/core/core.services.yml') {
-              $basePath .= '/web';
-            }
             return array($cmsType, $basePath);
+          }
+          $matches = glob("$basePath/web/$relPath");
+          if (!empty($matches)) {
+            return array($cmsType, "$basePath/web");
           }
         }
       }
