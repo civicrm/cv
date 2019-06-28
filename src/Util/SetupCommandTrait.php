@@ -62,6 +62,8 @@ trait SetupCommandTrait {
       implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'sites', 'all', 'modules', 'civicrm']),
       implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'wp-content', 'plugins', 'civicrm', 'civicrm']),
       implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'modules', 'civicrm']),
+      implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'vendor', 'civicrm', 'civicrm-core']),
+      implode(DIRECTORY_SEPARATOR, [dirname($b->getBootedCmsPath()), 'vendor', 'civicrm', 'civicrm-core']),
     ];
     $setupOptions['srcPath'] = ArrayUtil::pickFirst($possibleSrcPaths, 'file_exists');
     if ($setupOptions['srcPath']) {
@@ -78,6 +80,7 @@ trait SetupCommandTrait {
       implode(DIRECTORY_SEPARATOR, [$setupOptions['srcPath'], 'vendor', 'civicrm', 'civicrm-setup']),
       implode(DIRECTORY_SEPARATOR, [$setupOptions['srcPath'], 'packages', 'civicrm-setup']),
       implode(DIRECTORY_SEPARATOR, [$setupOptions['srcPath'], 'setup']),
+      implode(DIRECTORY_SEPARATOR, [dirname($setupOptions['srcPath']), 'civicrm-setup']),
       implode(DIRECTORY_SEPARATOR, ['/usr', 'local', 'share', 'civicrm-setup']),
     ];
     $setupOptions['setupPath'] = ArrayUtil::pickFirst($possibleSetupPaths, 'file_exists');
