@@ -92,6 +92,14 @@ trait SetupCommandTrait {
       throw new \Exception("Failed to locate civicrm-setup");
     }
 
+    // Note: We set 'cms-base-url' both before and after init. The "before"
+    // lets us give hints to init code which reads cmsBaseUrl. The "after"
+    // lets us override any changes made by init code (i.e. this user-input
+    // is mandatory).
+    if ($input->getOption('cms-base-url')) {
+      $setupOptions['cmsBaseUrl'] = $input->getOption('cms-base-url');
+    }
+
     $pluginCallback = function($pluginFiles) use ($input) {
       foreach ($input->getOption('plugin-path') as $pluginDir) {
         foreach (['*.civi-setup.php'] as $pattern) {
