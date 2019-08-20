@@ -78,6 +78,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Bootstrap {
 
+  const PHP_RECOMMENDED_MIN = '7.0.0';
+
   protected static $singleton = NULL;
 
   protected $options = array();
@@ -150,7 +152,13 @@ class Bootstrap {
         case E_ERROR:
         case E_PARSE:
         case E_COMPILE_ERROR:
-          $errMsg = sprintf("\nPHP Error: %s\nat line %s in %s", $last_error['message'], $last_error['line'], $last_error['file']);
+          $errMsg = sprintf("PHP Error: %s\nat line %s in %s", $last_error['message'], $last_error['line'], $last_error['file']);
+          // We only warn about PHP version if there's actually a fatal; for older versions of civicrm-core, it would be incorrect for
+          // cv to start outputting PHP version errors.
+          if (!version_compare(PHP_VERSION, self::PHP_RECOMMENDED_MIN, '>=')) {
+            $errMsg .= sprintf("\n\nWARNING: cv recommends PHP %s+ for use with current CiviCRM versions. This command is running PHP %s.", self::PHP_RECOMMENDED_MIN, PHP_VERSION);
+          }
+
           if ($this->output && is_callable([$this->output, 'getErrorOutput'])) {
             $this->output->getErrorOutput()->writeln("<error>$errMsg</error>");
           }
