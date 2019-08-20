@@ -138,7 +138,34 @@ class Bootstrap {
     if (!empty($options['output'])) {
       $this->output = $options['output'];
     }
+
+    $isBooting = TRUE;
+    register_shutdown_function(function() use (&$isBooting) {
+      if (!$isBooting) {
+        // Someone will probably handle it
+        return;
+      }
+      $last_error = error_get_last();
+      switch ($last_error['type']) {
+        case E_ERROR:
+        case E_PARSE:
+        case E_COMPILE_ERROR:
+          $errMsg = sprintf("\nPHP Error: %s\nat line %s in %s", $last_error['message'], $last_error['line'], $last_error['file']);
+          if ($this->output && is_callable([$this->output, 'getErrorOutput'])) {
+            $this->output->getErrorOutput()->writeln("<error>$errMsg</error>");
+          }
+          elseif ($this->output) {
+            $this->output->writeln("<error>$errMsg</error>");
+          }
+          else {
+            fwrite(STDERR, "$errMsg\n");
+          }
+          break;
+      }
+    });
+
     if (!defined('CIVICRM_SETTINGS_PATH')) {
+
       $this->options = $options = array_merge($this->options, $options);
       $this->writeln("Options: " . Encoder::encode($options, 'json-pretty'), OutputInterface::VERBOSITY_DEBUG);
 
@@ -195,6 +222,7 @@ class Bootstrap {
       \CRM_Core_Config::singleton();
     }
     $this->writeln("Finished", OutputInterface::VERBOSITY_DEBUG);
+    $isBooting = FALSE;
   }
 
   /**
