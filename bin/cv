@@ -2,7 +2,7 @@
 <?php
 ini_set('display_errors', 1);
 if (PHP_SAPI !== 'cli') {
-  echo "cv is a command-line tool\n";
+  echo "cv is a command-line tool, but you are trying to use it through interface: " . PHP_SAPI .  "\n";
   exit(1);
 }
 if (version_compare(PHP_VERSION, '5.4', '<')) {
