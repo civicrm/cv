@@ -104,7 +104,7 @@ and output parsing:
 function cv($cmd, $decode = 'json') {
   $cmd = 'cv ' . $cmd;
   $descriptorSpec = array(0 => array("pipe", "r"), 1 => array("pipe", "w"), 2 => STDERR);
-  $env = getenv() + array('CV_OUTPUT' => 'json');
+  $env = (function_exists('getenv') ? getenv() : $_ENV) + array('CV_OUTPUT' => 'json');
   $process = proc_open($cmd, $descriptorSpec, $pipes, __DIR__, $env);
   fclose($pipes[0]);
   $result = stream_get_contents($pipes[1]);
