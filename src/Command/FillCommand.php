@@ -4,13 +4,14 @@ namespace Civi\Cv\Command;
 use Civi\Cv\Config;
 use Civi\Cv\Encoder;
 use Civi\Cv\SiteConfigReader;
+use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class FillCommand extends BaseCommand {
 
-  use \Civi\Cv\Util\BootTrait;
+  use BootTrait;
 
   protected $fields;
 

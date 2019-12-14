@@ -1,6 +1,8 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\BootTrait;
+use Civi\Cv\Util\StructuredOutputTrait;
 use Civi\Cv\Util\ConsoleQueueRunner;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -12,8 +14,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
  */
 class UpgradeDbCommand extends BaseCommand {
 
-  use \Civi\Cv\Util\BootTrait;
-  use \Civi\Cv\Util\StructuredOutputTrait;
+  use BootTrait;
+  use StructuredOutputTrait;
 
   protected function configure() {
     $this

@@ -3,13 +3,14 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\Datasource;
 use Civi\Cv\Util\Process;
+use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SqlCliCommand extends BaseCommand {
 
-  use \Civi\Cv\Util\BootTrait;
+  use BootTrait;
 
   protected function configure() {
     $this

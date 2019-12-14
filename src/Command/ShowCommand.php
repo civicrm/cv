@@ -2,13 +2,15 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\SiteConfigReader;
+use Civi\Cv\Util\BootTrait;
+use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ShowCommand extends BaseCommand {
 
-  use \Civi\Cv\Util\BootTrait;
-  use \Civi\Cv\Util\StructuredOutputTrait;
+  use BootTrait;
+  use StructuredOutputTrait;
 
   protected function configure() {
     $this

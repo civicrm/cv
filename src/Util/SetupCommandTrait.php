@@ -2,6 +2,7 @@
 namespace Civi\Cv\Util;
 
 use Civi\Setup\DbUtil;
+use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
@@ -14,7 +15,7 @@ define('CV_SETUP_PROTOCOL_VER', '1.0');
  * civicrm-setup framework.
  */
 trait SetupCommandTrait {
-  use \Civi\Cv\Util\BootTrait;
+  use BootTrait;
 
   /**
    * Register any CLI options which affect the initialization of the

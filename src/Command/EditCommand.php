@@ -10,12 +10,13 @@ use Civi\Cv\Config;
 use Civi\Cv\Encoder;
 use Civi\Cv\Util\CliEditor;
 use Civi\Cv\Util\Filesystem;
+use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class EditCommand extends BaseCommand {
 
-  use \Civi\Cv\Util\BootTrait;
+  use BootTrait;
 
   /**
    * @var \Civi\Cv\Util\CliEditor

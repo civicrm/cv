@@ -1,6 +1,8 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\BootTrait;
+use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -12,8 +14,8 @@ class UpgradeGetCommand extends BaseCommand {
   const DEFAULT_CHECK_URL = "https://upgrade.civicrm.org/check";
   // const DEFAULT_CHECK_URL = "http://civicrm-upgrade-manager.l/check";
 
-  use \Civi\Cv\Util\BootTrait;
-  use \Civi\Cv\Util\StructuredOutputTrait;
+  use BootTrait;
+  use StructuredOutputTrait;
 
   /**
    * Define the command options.

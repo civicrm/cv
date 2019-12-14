@@ -1,6 +1,9 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\SetupCommandTrait;
+use Civi\Cv\Util\DebugDispatcherTrait;
+use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -8,9 +11,9 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class CoreUninstallCommand extends BaseCommand {
 
-  use \Civi\Cv\Util\SetupCommandTrait;
-  use \Civi\Cv\Util\DebugDispatcherTrait;
-  use \Civi\Cv\Util\StructuredOutputTrait;
+  use SetupCommandTrait;
+  use DebugDispatcherTrait;
+  use StructuredOutputTrait;
 
   protected function configure() {
     $this

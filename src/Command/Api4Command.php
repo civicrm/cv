@@ -3,6 +3,8 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Encoder;
 use Civi\Cv\Util\Api4ArgParser;
+use Civi\Cv\Util\BootTrait;
+use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -10,8 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Api4Command extends BaseCommand {
 
-  use \Civi\Cv\Util\BootTrait;
-  use \Civi\Cv\Util\StructuredOutputTrait;
+  use BootTrait;
+  use StructuredOutputTrait;
 
   /**
    * @var array

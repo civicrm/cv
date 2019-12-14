@@ -2,13 +2,14 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\Filesystem;
+use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ScriptCommand extends BaseCommand {
 
-  use \Civi\Cv\Util\BootTrait;
+  use BootTrait;
 
   protected function configure() {
     $this

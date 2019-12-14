@@ -1,13 +1,16 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\BootTrait;
+use Civi\Cv\Util\DebugDispatcherTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class DebugDispatcherCommand extends BaseCommand {
 
-  use \Civi\Cv\Util\BootTrait;
+  use BootTrait;
+  use DebugDispatcherTrait;
 
   protected function configure() {
     $this
@@ -53,7 +56,5 @@ Examples:
     $eventNames = $this->findEventNames($dispatcher, $eventFilter);
     $this->printEventListeners($output, $dispatcher, $eventNames);
   }
-
-  use \Civi\Cv\Util\DebugDispatcherTrait;
 
 }
