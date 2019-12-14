@@ -1,6 +1,8 @@
 /vendor
 /.idea
 *~
+.composer-downloads
+/bin/box
 /bin/cv.phar
 /bin/phpunit
 /bin/php-parse

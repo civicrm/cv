@@ -13,7 +13,8 @@
         "symfony/console": "~2.8|^3",
         "symfony/process": "~2.8|^3",
         "symfony/filesystem": "~2.8|^3",
-        "psy/psysh": "@stable"
+        "psy/psysh": "@stable",
+        "civicrm/composer-downloads-plugin": "~2.1"
     },
     "autoload": {
         "psr-4": {
@@ -25,5 +26,14 @@
     ],
     "config": {
         "bin-dir": "bin"
+    },
+    "extra": {
+        "downloads": {
+            "box": {
+                "url": "https://github.com/humbug/box/releases/download/3.8.3/box.phar",
+                "path": "bin/box",
+                "type": "phar"
+            }
+        }
     }
 }
