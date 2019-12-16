@@ -14,6 +14,7 @@ trait BootTrait {
 
   public function configureBootOptions($defaultLevel = 'full') {
     $this->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (none,classloader,settings,full,cms-only,cms-full)', $defaultLevel);
+    $this->addOption('hostname', NULL, InputOption::VALUE_REQUIRED, 'Hostname (for a multisite system)');
     $this->addOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)');
     $this->addOption('user', 'U', InputOption::VALUE_REQUIRED, 'CMS user');
   }
@@ -27,6 +28,10 @@ trait BootTrait {
       $output->writeln('<info>[BootTrait]</info> Use test mode', OutputInterface::VERBOSITY_DEBUG);
       putenv('CIVICRM_UF=UnitTests');
       $_ENV['CIVICRM_UF'] = 'UnitTests';
+    }
+
+    if ($input->hasOption('hostname')) {
+      $_SERVER['HTTP_HOST'] = $input->getOption('hostname');
     }
 
     if (getenv('CIVICRM_UF') === 'UnitTests' && preg_match('/^cms-/', $input->getOption('level'))) {
