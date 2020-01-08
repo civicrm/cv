@@ -51,6 +51,7 @@ trait SetupCommandTrait {
    * @throws \Exception
    */
   protected function bootSetupSubsystem(InputInterface $input, OutputInterface $output, $defaultOutputOptions = 0) {
+    $this->setupHost($input);
     $b = $this->_boot_cms_only($input, $output);
 
     // Initialize setup model.

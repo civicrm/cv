@@ -14,6 +14,7 @@ trait BootTrait {
 
   public function configureBootOptions($defaultLevel = 'full') {
     $this->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (none,classloader,settings,full,cms-only,cms-full)', $defaultLevel);
+    $this->addOption('hostname', NULL, InputOption::VALUE_REQUIRED, 'Hostname (for a multisite system)');
     $this->addOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)');
     $this->addOption('user', 'U', InputOption::VALUE_REQUIRED, 'CMS user');
   }
@@ -22,6 +23,7 @@ trait BootTrait {
     $output->writeln('<info>[BootTrait]</info> Start', OutputInterface::VERBOSITY_DEBUG);
 
     $this->setupErrorHandling($output);
+    $this->setupHost($input);
 
     if ($input->hasOption('test') && $input->getOption('test')) {
       $output->writeln('<info>[BootTrait]</info> Use test mode', OutputInterface::VERBOSITY_DEBUG);
@@ -208,6 +210,12 @@ trait BootTrait {
     }
 
     return \CRM_Core_Session::getLoggedInContactID();
+  }
+
+  protected function setupHost(InputInterface $input) {
+    if ($input->hasOption('hostname')) {
+      $_SERVER['HTTP_HOST'] = $input->getOption('hostname');
+    }
   }
 
   protected function setupErrorHandling(OutputInterface $output) {
