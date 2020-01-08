@@ -382,10 +382,18 @@ class Bootstrap {
    * @return array
    */
   protected function findDrupalDirs($cmsRoot) {
+    $sites = array();
+    if (file_exists("$cmsRoot/sites/sites.php")) {
+      include("$cmsRoot/sites/sites.php");
+    }
     $dirs = array();
     $server = explode('.', implode('.', array_reverse(explode(':', rtrim($this->options['httpHost'], '.')))));
     for ($j = count($server); $j > 0; $j--) {
-      $dirs[] = "$cmsRoot/sites/" . implode('.', array_slice($server, -$j));
+      $s = implode('.', array_slice($server, -$j));
+      if (isset($sites[$s]) && file_exists("$cmsRoot/sites/" . $sites[$s])) {
+        $s = $sites[$s];
+      }
+      $dirs[] = "$cmsRoot/sites/$s";
     }
     $dirs[] = "$cmsRoot/sites/default";
     return $dirs;
