@@ -30,10 +30,6 @@ trait BootTrait {
       $_ENV['CIVICRM_UF'] = 'UnitTests';
     }
 
-    if ($input->hasOption('hostname')) {
-      $_SERVER['HTTP_HOST'] = $input->getOption('hostname');
-    }
-
     if ($input->getOption('level') === 'full|cms-full') {
       $input->setOption('level', getenv('CIVICRM_BOOT') ? 'cms-full' : 'full');
     }
@@ -72,7 +68,7 @@ trait BootTrait {
    */
   public function _boot_classloader(InputInterface $input, OutputInterface $output) {
     $output->writeln('<info>[BootTrait]</info> Call basic cv bootstrap (' . $input->getOption('level') . ')', OutputInterface::VERBOSITY_DEBUG);
-    \Civi\Cv\Bootstrap::singleton()->boot($this->createBootParams($output) + array(
+    \Civi\Cv\Bootstrap::singleton()->boot($this->createBootParams($input, $output) + array(
       'prefetch' => FALSE,
     ));
   }
@@ -85,7 +81,7 @@ trait BootTrait {
    */
   public function _boot_settings(InputInterface $input, OutputInterface $output) {
     $output->writeln('<info>[BootTrait]</info> Call basic cv bootstrap (' . $input->getOption('level') . ')', OutputInterface::VERBOSITY_DEBUG);
-    \Civi\Cv\Bootstrap::singleton()->boot($this->createBootParams($output) + array(
+    \Civi\Cv\Bootstrap::singleton()->boot($this->createBootParams($input, $output) + array(
       'prefetch' => FALSE,
     ));
   }
@@ -99,7 +95,7 @@ trait BootTrait {
    */
   public function _boot_full(InputInterface $input, OutputInterface $output) {
     $output->writeln('<info>[BootTrait]</info> Call standard cv bootstrap', OutputInterface::VERBOSITY_DEBUG);
-    \Civi\Cv\Bootstrap::singleton()->boot($this->createBootParams($output));
+    \Civi\Cv\Bootstrap::singleton()->boot($this->createBootParams($input, $output));
 
     $output->writeln('<info>[BootTrait]</info> Call core bootstrap', OutputInterface::VERBOSITY_DEBUG);
     \CRM_Core_Config::singleton();
@@ -172,6 +168,9 @@ trait BootTrait {
     if ($input->getOption('user')) {
       $boot_params['user'] = $input->getOption('user');
     }
+    if ($input->getOption('hostname')) {
+      $boot_params['httpHost'] = $input->getOption('hostname');
+    }
 
     return \Civi\Cv\CmsBootstrap::singleton()->addOptions($boot_params);
   }
@@ -231,12 +230,13 @@ trait BootTrait {
    * @param \Symfony\Component\Console\Output\OutputInterface $output
    * @return array
    */
-  protected function createBootParams(OutputInterface $output) {
+  protected function createBootParams(InputInterface $input, OutputInterface $output) {
+    $boot_params = [] ;
     if ($output->isDebug()) {
-      $boot_params = array('output' => $output);
+      $boot_params['output'] = $output;
     }
-    else {
-      $boot_params = array();
+    if ($input->getOption('hostname')) {
+      $boot_params['httpHost'] = $input->getOption('hostname');
     }
     return $boot_params;
   }

@@ -208,6 +208,10 @@ class Bootstrap {
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['SERVER_SOFTWARE'] = NULL;
         $_SERVER['REQUEST_METHOD'] = 'GET';
+        if (!empty($options['httpHost'])) {
+          // Hint for D7 multisite
+          $_SERVER['HTTP_HOST'] = $options['httpHost'];
+        }
         if (ord($_SERVER['SCRIPT_NAME']) != 47) {
           $_SERVER['SCRIPT_NAME'] = '/' . $_SERVER['SCRIPT_NAME'];
         }
