@@ -46,8 +46,9 @@ class CmsBootstrap {
   protected $options = array();
 
   /**
-   * Symphony OutputInterface provide during booting to enable the command-line
-   * 'v', 'vv' and 'vvv' options
+   * @var \Symfony\Component\Console\Output\OutputInterface
+   *   Provide during booting to enable the command-line verbosity
+   *   options ('v', 'vv' and 'vvv').
    * @see http://symfony.com/doc/current/console/verbosity.html
    */
   protected $output = FALSE;
@@ -112,6 +113,12 @@ class CmsBootstrap {
       if (!isset($this->options['user']) && parse_url($cmsExpr, PHP_URL_USER)) {
         $this->options['user'] = parse_url($cmsExpr, PHP_URL_USER);
       }
+      if (parse_url($cmsExpr, PHP_URL_QUERY)) {
+        parse_str(parse_url($cmsExpr, PHP_URL_QUERY), $query);
+        if (!empty($query['host'])) {
+          $this->options['httpHost'] = $query['host'];
+        }
+      }
     }
     else {
       $this->writeln("Find CMS...", OutputInterface::VERBOSITY_DEBUG);
@@ -120,7 +127,8 @@ class CmsBootstrap {
 
     $this->writeln("CMS: " . Encoder::encode($cms, 'json-pretty'), OutputInterface::VERBOSITY_DEBUG);
     if (empty($cms['path']) || empty($cms['type']) || !file_exists($cms['path'])) {
-      throw new \Exception("Failed to parse or find a CMS");
+      $cmsJson = json_encode($cms, JSON_UNESCAPED_SLASHES);
+      throw new \Exception("Failed to parse or find a CMS $cmsJson");
     }
 
     if (PHP_SAPI === "cli") {
