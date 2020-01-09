@@ -36,6 +36,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *     Boolean TRUE means it should use a default (PWD).
  *     (Default: TRUE aka PWD)
  *   - user: string|NULL. The name of a CMS user to authenticate as.
+ *   - httpHost: string|NULL. For multisite, the HTTP hostname.
  *
  * @package Civi
  */

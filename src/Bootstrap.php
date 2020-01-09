@@ -63,6 +63,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *   - env: string|NULL. The environment variable which may contain the path to
  *     civicrm.settings.php. Set NULL to disable.
  *     (Default: CIVICRM_SETTINGS)
+ *   - httpHost: string|NULL. For multisite, the HTTP hostname.
  *   - prefetch: bool. Whether to load various caches.
  *     (Default: TRUE)
  *   - settingsFile: string|NULL. The full path to the civicrm.settings.php
