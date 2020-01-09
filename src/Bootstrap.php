@@ -340,13 +340,13 @@ class Bootstrap {
     switch ($cmsType) {
       case 'backdrop':
         $settings = $this->findFirstFile(
-           array_merge($this->findDrupalDirs($cmsRoot), array($cmsRoot)),
+           array_merge($this->findDrupalDirs($cmsRoot, $searchDir), array($cmsRoot)),
           'civicrm.settings.php'
         );
         break;
 
       case 'drupal':
-        $settings = $this->findFirstFile($this->findDrupalDirs($cmsRoot), 'civicrm.settings.php');
+        $settings = $this->findFirstFile($this->findDrupalDirs($cmsRoot, $searchDir), 'civicrm.settings.php');
         break;
 
       case 'joomla':
@@ -379,9 +379,20 @@ class Bootstrap {
    *
    * @param string $cmsRoot
    *   The root of the Drupal installation.
+   * @param string $searchDir
+   *   The location from which we're searching. Usually PWD.
    * @return array
    */
-  protected function findDrupalDirs($cmsRoot) {
+  protected function findDrupalDirs($cmsRoot, $searchDir) {
+    // If there's no explicit host and we start the search from "web/sites/FOO/...", then infer subsite path.
+    $sitesRoot = "$cmsRoot/sites";
+    $sitesRootQt = preg_quote($sitesRoot, ';');
+    if (empty($this->options['httpHost']) && preg_match(";^($sitesRootQt/[^/]+);", $searchDir, $m)) {
+      if (basename($m[1]) !== 'all') {
+        return [$m[1]];
+      }
+    }
+
     $sites = array();
     if (file_exists("$cmsRoot/sites/sites.php")) {
       include("$cmsRoot/sites/sites.php");
