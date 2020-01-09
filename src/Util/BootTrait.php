@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 trait BootTrait {
 
-  public function configureBootOptions($defaultLevel = 'full') {
+  public function configureBootOptions($defaultLevel = 'full|cms-full') {
     $this->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (none,classloader,settings,full,cms-only,cms-full)', $defaultLevel);
     $this->addOption('hostname', NULL, InputOption::VALUE_REQUIRED, 'Hostname (for a multisite system)');
     $this->addOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)');
@@ -32,6 +32,10 @@ trait BootTrait {
 
     if ($input->hasOption('hostname')) {
       $_SERVER['HTTP_HOST'] = $input->getOption('hostname');
+    }
+
+    if ($input->getOption('level') === 'full|cms-full') {
+      $input->setOption('level', getenv('CIVICRM_BOOT') ? 'cms-full' : 'full');
     }
 
     if (getenv('CIVICRM_UF') === 'UnitTests' && preg_match('/^cms-/', $input->getOption('level'))) {
