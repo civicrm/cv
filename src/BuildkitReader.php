@@ -35,7 +35,7 @@ class BuildkitReader {
     $lines = explode("\n", file_get_contents($shFile));
     $result = array();
     foreach ($lines as $line) {
-      if (empty($line) || $line{0} == '#') {
+      if (empty($line) || $line[0] == '#') {
         continue;
       }
       if (preg_match('/^([A-Z0-9_]+)=\"(.*)\"$/', $line, $matches)) {
