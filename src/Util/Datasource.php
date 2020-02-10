@@ -137,7 +137,7 @@ class Datasource {
     $data = "[client]\n";
     $data .= "host={$this->host}\n";
     $data .= "user={$this->username}\n";
-    $data .= "password={$this->password}\n";
+    $data .= "password='{$this->password}'\n";
     if ($this->port != NULL) {
       $data .= "port={$this->port}\n";
     }
