@@ -101,7 +101,7 @@ Examples:
   }
 
   protected function createRegex($filterExpr) {
-    if ($filterExpr{0} === ';') {
+    if ($filterExpr[0] === ';') {
       return $filterExpr;
     }
     // $filterExpr = preg_replace(';^~/;', '', $filterExpr);

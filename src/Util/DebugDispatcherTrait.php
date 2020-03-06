@@ -21,7 +21,7 @@ trait DebugDispatcherTrait {
     if (!$eventFilter) {
       $listenersByEvent = $dispatcher->getListeners();
     }
-    elseif ($eventFilter{0} === '/') {
+    elseif ($eventFilter[0] === '/') {
       $listenersByEvent = array();
       foreach ($dispatcher->getListeners() as $e => $ls) {
         if (preg_match($eventFilter, $e)) {

@@ -64,7 +64,7 @@ class Api4ArgParser {
    * @return mixed
    */
   protected function parseValueExpr($expr) {
-    if (strpos('{["\'', $expr{0}) !== FALSE) {
+    if (strpos('{["\'', $expr[0]) !== FALSE) {
       return $this->parseJsonNoisily($expr);
     }
     else {
