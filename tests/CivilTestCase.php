@@ -3,7 +3,7 @@ namespace Civi\Cv;
 
 use Symfony\Component\Console\Tester\CommandTester;
 
-class CivilTestCase extends \PHPUnit_Framework_TestCase {
+class CivilTestCase extends \PHPUnit\Framework\TestCase {
 
   use CvTestTrait;
 

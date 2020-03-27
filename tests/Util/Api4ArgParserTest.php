@@ -5,7 +5,7 @@ namespace Civi\Cv\Util;
  * @group std
  * @group util
  */
-class Api4ArgParserTest extends \PHPUnit_Framework_TestCase {
+class Api4ArgParserTest extends \PHPUnit\Framework\TestCase {
 
   public function getGoodExamples() {
     $exs = [];

@@ -9,7 +9,7 @@ use Civi\Cv\Util\Process;
  *
  * @group installer
  */
-class CoreLifecycleTest extends \PHPUnit_Framework_TestCase {
+class CoreLifecycleTest extends \PHPUnit\Framework\TestCase {
 
   use CvTestTrait;
 
