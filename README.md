@@ -163,7 +163,7 @@ installation and put it in `CV_TEST_BUILD`, as in:
 $ git clone https://github.com/civicrm/cv
 $ cd cv
 $ composer install
-$ export CV_TEST_BUILD=/home/me/buildkit/build/dmaster/
+$ export CV_TEST_BUILD=/home/me/buildkit/build/dmaster/web/
 $ phpunit5 --group std
 PHPUnit 5.7.27 by Sebastian Bergmann and contributors.
 
