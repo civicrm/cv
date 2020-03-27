@@ -5,7 +5,7 @@ namespace Civi\Cv\Util;
  * @group std
  * @group util
  */
-class FilesystemTest extends \PHPUnit_Framework_TestCase {
+class FilesystemTest extends \PHPUnit\Framework\TestCase {
 
   public function dataIsDescendent() {
     return array(

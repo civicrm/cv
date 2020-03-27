@@ -8,7 +8,7 @@ use Symfony\Component\Process\Process;
  * @group std
  * @group util
  */
-class ProcessTest extends \PHPUnit_Framework_TestCase {
+class ProcessTest extends \PHPUnit\Framework\TestCase {
 
   public function testSprintf() {
     $this->assertEquals(
