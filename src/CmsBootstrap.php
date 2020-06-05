@@ -2,6 +2,8 @@
 namespace Civi\Cv;
 
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Cmf\Component\Routing\RouteObjectInterface;
+use Symfony\Component\Routing\Route;
 
 /**
  * Bootstrap the CMS runtime.
@@ -247,7 +249,13 @@ class CmsBootstrap {
     $request = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
     $kernel = \Drupal\Core\DrupalKernel::createFromRequest($request, $autoloader, 'prod');
     $kernel->boot();
-    $kernel->prepareLegacyRequest($request);
+    $kernel->preHandle($request);
+    $container = $kernel->rebuildContainer();
+    // Add our request to the stack and route context.
+    $request->attributes->set(RouteObjectInterface::ROUTE_OBJECT, new Route('<none>'));
+    $request->attributes->set(RouteObjectInterface::ROUTE_NAME, '<none>');
+    $container->get('request_stack')->push($request);
+    $container->get('router.request_context')->fromRequest($request);
 
     if (!function_exists('t')) {
       throw new \Exception('Sorry, could not bootstrap Drupal8.');
