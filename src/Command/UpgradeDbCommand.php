@@ -94,6 +94,10 @@ Examples:
       }
     }
 
+    if (!defined('CIVICRM_UPGRADE_ACTIVE')) {
+      define('CIVICRM_UPGRADE_ACTIVE', 1);
+    }
+
     // Why is dropTriggers() hard-coded? Can't we just enqueue this as part of buildQueue()?
     if ($isFirstTry) {
       $output->writeln("<info>Dropping SQL triggers...</info>", $niceMsgVerbosity);
