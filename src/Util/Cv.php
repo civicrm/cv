@@ -59,4 +59,29 @@ class Cv {
     }
   }
 
+  /**
+   * Call the "cv" command on an interactive "passthru" basis, meaning that output is displayed on our console.
+   *
+   * @param string $cmd
+   *   The rest of the command to send.
+   * @return int
+   *   The exit code
+   * @throws \RuntimeException
+   *   If the command terminates abnormally.
+   */
+  public static function passthru($cmd) {
+    $cmd = 'cv ' . $cmd;
+    $process = proc_open(
+      $cmd,
+      array(
+        // 0 => array('pipe', 'r'),
+        0 => STDIN,
+        1 => STDOUT,
+        2 => STDERR,
+      ),
+      $pipes
+    );
+    return proc_close($process);
+  }
+
 }
