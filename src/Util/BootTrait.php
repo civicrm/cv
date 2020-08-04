@@ -42,6 +42,15 @@ trait BootTrait {
       throw new \Exception("Unrecognized bootstrap level");
     }
 
+    if (!$input->getOption('user') && is_callable(['Civi', 'dispatcher'])) {
+      // The CLI user has superpowers.
+      \Civi::dispatcher()->addListener('hook_civicrm_permission_check', function($e) {
+        if ($e->contactId === NULL) {
+          $e->granted = TRUE;
+        }
+      });
+    }
+
     $output->writeln('<info>[BootTrait]</info> Finished', OutputInterface::VERBOSITY_DEBUG);
   }
 
