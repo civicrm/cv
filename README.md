@@ -8,7 +8,7 @@ Requirements
 
 A local CiviCRM installation.
 
-PHP v5.4+.
+PHP v5.6+.
 
 Support may vary depending on the host environment (CMS type, file-structure, symlinks, etc).
  * *Tested heavily*: Drupal 7 single-site, WordPress single-site, UnitTests
