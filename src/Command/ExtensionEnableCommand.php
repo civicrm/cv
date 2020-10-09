@@ -22,7 +22,7 @@ class ExtensionEnableCommand extends BaseExtensionCommand {
       ->setDescription('Enable an extension')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the local list of extensions (Default: Only refresh on cache-miss)')
       ->addOption('ignore-missing', NULL, InputOption::VALUE_NONE, 'If a requested extension is missing, skip it')
-      ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar")')
+      ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar") or tag ("@tagname")')
       ->setHelp('Enable an extension
 
 Examples:

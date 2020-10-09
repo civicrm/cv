@@ -19,7 +19,7 @@ class ExtensionUninstallCommand extends BaseExtensionCommand {
       ->setName('ext:uninstall')
       ->setAliases(array())
       ->setDescription('Uninstall an extension and purge its data')
-      ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar")')
+      ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar")  or tag ("@tagname")')
       ->setHelp('Uninstall an extension and purge its data.
 
 Examples:
