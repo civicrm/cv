@@ -50,13 +50,24 @@ class BaseExtensionCommand extends BaseCommand {
    *   Array(0=>$keys, 1=>$errors).
    */
   protected function parseKeys(InputInterface $input, OutputInterface $output) {
-    $allKeys = \CRM_Extension_System::singleton()->getFullContainer()->getKeys();
+    $system = \CRM_Extension_System::singleton();
+    $allKeys = $system->getFullContainer()->getKeys();
+    $allTags = is_callable([$system->getMapper(), 'getAllTags']) ? $system->getMapper()->getAllTags() : [];
     $foundKeys = array();
     $missingKeys = array();
     $shortMap = NULL;
 
     foreach ($input->getArgument('key-or-name') as $keyOrName) {
-      if (strpos($keyOrName, '.') !== FALSE) {
+      if ($keyOrName[0] === '@') {
+        $tag = substr($keyOrName, 1);
+        if (isset($allTags[$tag])) {
+          $foundKeys = array_merge($foundKeys, $allTags[$tag]);
+        }
+        else {
+          $missingKeys[] = $keyOrName;
+        }
+      }
+      elseif (strpos($keyOrName, '.') !== FALSE) {
         if (in_array($keyOrName, $allKeys)) {
           $foundKeys[] = $keyOrName;
         }

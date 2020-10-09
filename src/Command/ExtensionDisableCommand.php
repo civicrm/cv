@@ -19,7 +19,7 @@ class ExtensionDisableCommand extends BaseExtensionCommand {
       ->setName('ext:disable')
       ->setAliases(array('dis'))
       ->setDescription('Disable an extension')
-      ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar")')
+      ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar") or tag ("@tagname")')
       ->setHelp('Disable an extension
 
 Examples:
