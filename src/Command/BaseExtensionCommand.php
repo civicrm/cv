@@ -56,25 +56,20 @@ class BaseExtensionCommand extends BaseCommand {
     $shortMap = NULL;
 
     foreach ($input->getArgument('key-or-name') as $keyOrName) {
-      if (strpos($keyOrName, '.') !== FALSE) {
-        if (in_array($keyOrName, $allKeys)) {
-          $foundKeys[] = $keyOrName;
-        }
-        else {
-          $missingKeys[] = $keyOrName;
-        }
+      if (in_array($keyOrName, $allKeys)) {
+        $foundKeys[] = $keyOrName;
+        continue;
       }
-      else {
-        if ($shortMap === NULL) {
-          $shortMap = $this->getShortMap();
-        }
-        if ($shortMap[$keyOrName]) {
-          $foundKeys = array_merge($foundKeys, $shortMap[$keyOrName]);
-        }
-        else {
-          $missingKeys[] = $keyOrName;
-        }
+
+      if ($shortMap === NULL) {
+        $shortMap = $this->getShortMap();
       }
+      if ($shortMap[$keyOrName]) {
+        $foundKeys = array_merge($foundKeys, $shortMap[$keyOrName]);
+        continue;
+      }
+
+      $missingKeys[] = $keyOrName;
     }
 
     return array($foundKeys, $missingKeys);
