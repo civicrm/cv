@@ -11,9 +11,9 @@ A local CiviCRM installation.
 PHP v5.6+.
 
 Support may vary depending on the host environment (CMS type, file-structure, symlinks, etc).
- * *Tested heavily*: Drupal 7 single-site, WordPress single-site, UnitTests
- * *Tested lightly*: Backdrop single-site, WordPress (alternate content root)
- * *Untested*: Drupal 7 multi-site, WordPress multi-site, Joomla, Drupal 6, Drupal 8; any heavy symlinking
+ * *Tested heavily*: Drupal 7/8 single-site, WordPress single-site, UnitTests
+ * *Tested lightly*: Drupal 9 single-site, Backdrop single-site, WordPress (alternate content root)
+ * *Untested*: Drupal 7 multi-site, WordPress multi-site, Joomla, Drupal 6; any heavy symlinking
    * *Tip*: If you use an untested or incompatible host environment, then you may see the error `Failed to locate civicrm.settings.php`. See [StackExchange](http://civicrm.stackexchange.com/questions/12732/civix-reports-failed-to-locate-civicrm-settings-php) to discuss work-arounds.
 
 Download
