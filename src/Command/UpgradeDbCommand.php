@@ -36,6 +36,9 @@ Examples:
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+    if (!defined('CIVICRM_UPGRADE_ACTIVE')) {
+      define('CIVICRM_UPGRADE_ACTIVE', 1);
+    }
     $this->boot($input, $output);
 
     if (!ini_get('safe_mode')) {
@@ -92,10 +95,6 @@ Examples:
       else {
         $output->writeln("(No messages)", $niceMsgVerbosity);
       }
-    }
-
-    if (!defined('CIVICRM_UPGRADE_ACTIVE')) {
-      define('CIVICRM_UPGRADE_ACTIVE', 1);
     }
 
     // Why is dropTriggers() hard-coded? Can't we just enqueue this as part of buildQueue()?
