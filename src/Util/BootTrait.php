@@ -101,8 +101,7 @@ trait BootTrait {
     if ($input->getOption('user')) {
       $output->writeln('<info>[BootTrait]</info> Set system user', OutputInterface::VERBOSITY_DEBUG);
       if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
-        \CRM_Core_Config::singleton()->userSystem->loadUser($input->getOption('user'));
-        if (!$this->ensureUserContact($output)) {
+        if (!\CRM_Core_Config::singleton()->userSystem->loadUser($input->getOption('user')) || !$this->ensureUserContact($output)) {
           throw new \Exception("Failed to determine contactID for user=" . $input->getOption('user'));
         }
       }
