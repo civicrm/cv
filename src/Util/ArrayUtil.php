@@ -52,6 +52,29 @@ class ArrayUtil {
   }
 
   /**
+   * Convert an associative array to a list of records with properties.
+   *
+   * @param array $records
+   *   Ex: ['red' => '#f00']
+   * @param string|int $keyProp
+   *   Name of the new property in the result record.
+   *   Ex: 'key', 'color-name'
+   * @param string|int $valueProp
+   *   Name of the new property in the result record.
+   *   Ex: 'value', 'color-hex'
+   * @return array
+   *   Ex: [['key' => 'red', 'value' => '#f00']]
+   *   Ex: [['color-name' => 'red', 'color-hex' => '#f00']]
+   */
+  public static function convertKeyValueRecord($records, $keyProp = 0, $valueProp = 1) {
+    $result = [];
+    foreach ($records as $key => $value) {
+      $result[] = [$keyProp => $key, $valueProp => $value];
+    }
+    return $result;
+  }
+
+  /**
    * Convert a list of records from associative-arrays to numeric-arrays.
    *
    * @param array $records
