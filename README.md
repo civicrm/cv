@@ -52,7 +52,8 @@ Example: CLI
 me@localhost$ cd /var/www/my/web/site
 me@localhost$ cv vars:show
 me@localhost$ cv scr /path/to/throwaway.php
-me@localhost$ cv ev 'echo Civi::paths()->get("[civicrm.root]/.");'
+me@localhost$ cv ev 'echo Civi::paths()->getPath("[civicrm.root]/.");'
+me@localhost$ cv ev 'echo Civi::paths()->getUrl("[civicrm.root]/.");'
 me@localhost$ cv url civicrm/dashboard --open
 me@localhost$ cv api contact.get last_name=Smith
 me@localhost$ cv dl cividiscount
