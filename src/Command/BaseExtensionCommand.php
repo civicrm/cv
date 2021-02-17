@@ -64,7 +64,7 @@ class BaseExtensionCommand extends BaseCommand {
       if ($shortMap === NULL) {
         $shortMap = $this->getShortMap();
       }
-      if ($shortMap[$keyOrName]) {
+      if (isset($shortMap[$keyOrName])) {
         $foundKeys = array_merge($foundKeys, $shortMap[$keyOrName]);
         continue;
       }
