@@ -1,6 +1,6 @@
 #!/usr/bin/env php
 <?php
-ini_set('display_errors', 1);
+ini_set('display_errors', 'stderr');
 if (PHP_SAPI !== 'cli') {
   printf("cv is a command-line tool. It is designed to run with PHP_SAPI \"%s\". The active PHP_SAPI is \"%s\".\n", 'cli', PHP_SAPI);
   printf("TIP: In a typical shell environment, the \"php\" command should execute php-cli - not php-cgi or similar.\n");
