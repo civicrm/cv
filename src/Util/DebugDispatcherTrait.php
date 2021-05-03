@@ -64,6 +64,10 @@ trait DebugDispatcherTrait {
           $handled = TRUE;
           $rows[] = array('#' . ++$i, $listener . '()');
         }
+        elseif ($listener instanceof \Civi\Core\Event\ServiceListener) {
+          $handled = TRUE;
+          $rows[] = ['#' . ++$i, (string) $listener];
+        }
         else {
           $f = new \ReflectionFunction($listener);
           $rows[] = array(
