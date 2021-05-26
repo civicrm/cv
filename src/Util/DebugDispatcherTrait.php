@@ -44,12 +44,19 @@ trait DebugDispatcherTrait {
    * @param array $eventNames
    */
   public function printEventListeners(OutputInterface $output, $dispatcher, $eventNames) {
+    $fmt = class_exists('\Civi\Core\Event\EventPrinter')
+      ? ['\Civi\Core\Event\EventPrinter', 'formatName'] : NULL;
+
     foreach ($eventNames as $event) {
       $rows = array();
       $i = 0;
       foreach ($dispatcher->getListeners($event) as $listener) {
         $handled = FALSE;
-        if (is_array($listener)) {
+        if ($fmt != NULL) {
+          $rows[] = array('#' . ++$i, $fmt($listener));
+          $handled = TRUE;
+        }
+        elseif (is_array($listener)) {
           list ($a, $b) = $listener;
           if (is_object($a)) {
             $rows[] = array('#' . ++$i, get_class($a) . "->$b()");
@@ -69,12 +76,16 @@ trait DebugDispatcherTrait {
           $rows[] = ['#' . ++$i, (string) $listener];
         }
         else {
-          $f = new \ReflectionFunction($listener);
-          $rows[] = array(
-            '#' . ++$i,
-            'closure(' . $f->getFileName() . '@' . $f->getStartLine() . ')',
-          );
-          $handled = TRUE;
+          try {
+            $f = new \ReflectionFunction($listener);
+            $rows[] = array(
+              '#' . ++$i,
+              'closure(' . $f->getFileName() . '@' . $f->getStartLine() . ')',
+            );
+            $handled = TRUE;
+          }
+          catch (\ReflectionException $e) {
+          }
         }
 
         if (!$handled) {
