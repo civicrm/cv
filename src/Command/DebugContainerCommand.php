@@ -40,8 +40,10 @@ Dump the container configuration
     ksort($definitions);
     foreach ($definitions as $name => $definition) {
       $extras = array();
-      if ($definition->getFactoryClass() || $definition->getFactoryMethod() || $definition->getFactoryService()) {
-        $extras[] = 'factory';
+      foreach (['getFactoryClass', 'getFactoryMethod', 'getFactoryService', 'getFactory'] as $factoryCheck) {
+        if (is_callable([$definition, $factoryCheck]) && $definition->$factoryCheck()) {
+          $extras[] = 'factory';
+        }
       }
       if ($definition->getMethodCalls()) {
         $extras[] = sprintf("calls[%s]", count($definition->getMethodCalls()));
