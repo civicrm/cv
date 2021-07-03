@@ -132,7 +132,7 @@ NOTE: To change the default output format, set CV_OUTPUT.
       throw new \RuntimeException("Please enable APIv4 before running APIv4 commands.");
     }
 
-    list($entity, $action) = explode('.', $input->getArgument('Entity.action'));
+    [$entity, $action] = explode('.', $input->getArgument('Entity.action'));
     $params = $this->parseParams($input);
     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE || $input->getOption('dry-run')) {
       $output->writeln("{$I}Entity{$_I}: {$C}$entity{$_C}");
@@ -149,11 +149,14 @@ NOTE: To change the default output format, set CV_OUTPUT.
       $columns = empty($params['select']) ? array_keys($result->first()) : $params['select'];
       $this->sendTable($input, $output, (array) $result, $columns);
     }
+    elseif (!empty($params['select']) && $params['select'] === ['row_count']) {
+      $this->sendResult($input, $output, $result->count());
+    }
     else {
       $this->sendResult($input, $output, $result);
     }
 
-    return empty($result['is_error']) ? 0 : 1;
+    return 0;
   }
 
   /**
