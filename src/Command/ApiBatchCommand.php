@@ -29,13 +29,14 @@ class ApiBatchCommand extends BaseCommand {
       ->setDescription('Call an API (batch mode)')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (json)', 'json')
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (json)', 'json')
+      ->addOption('defaults', NULL, InputOption::VALUE_REQUIRED, 'Set default options for all requests (JSON-formatted)', '')
       ->setHelp('Call a series of APIs
 
 Example: APIv3 with two distinct calls
   echo \'[["Contact","get",{"id":100}],["Contact","get",{"id":101}]]\' | cv api:batch
 
 Example: APIv4 with one call
-  echo \'[["Contact","get",{"version":4,"checkPermissions":false,"where":[["id","=",100]]}]]\' | cv api:batch
+  echo \'[["Contact","get",{"where":[["id","=",100]]}]]\' | cv api:batch --default=\'{"version":4,"checkPermissions":false}\'
 
 Each line of input is decoded as a JSON document. The JSON document is an array
 of API calls.
@@ -52,6 +53,15 @@ of API results.
       throw new \Exception("api:batch only supports JSON dialog");
     }
     $this->boot($input, $output);
+
+    if (!empty($input->getOption('defaults'))) {
+      $newDefaults = json_decode($input->getOption('defaults'), 1);
+      $this->defaults = \CRM_Utils_Array::crmArrayMerge($newDefaults, $this->defaults);
+      if ($output->isVerbose()) {
+        fwrite(STDERR, sprintf("Set API defaults: %s\n", json_encode($this->defaults, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
+      }
+    }
+
     $lineNum = 0;
 
     // stream_set_blocking(STDIN, 0);
@@ -75,8 +85,9 @@ of API results.
             continue;
           }
           list ($entity, $action, $params) = $api;
-          if (!isset($params['version'])) {
-            $params['version'] = 3;
+          $params = \CRM_Utils_Array::crmArrayMerge($params, $this->defaults);
+          if ($output->isVerbose()) {
+            fwrite(STDERR, sprintf("Execute API calls: %s\n", json_encode([$entity, $action, $params], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
           }
           $result[$k] = \civicrm_api($entity, $action, $params);
         }
