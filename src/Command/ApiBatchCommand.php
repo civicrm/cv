@@ -31,8 +31,11 @@ class ApiBatchCommand extends BaseCommand {
       ->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (json)', 'json')
       ->setHelp('Call a series of APIs
 
-Examples:
-  echo \'[["Contact","get",{"id":100}],["Contact","get",{"id":100}]]\' | cv api:batch
+Example: APIv3 with two distinct calls
+  echo \'[["Contact","get",{"id":100}],["Contact","get",{"id":101}]]\' | cv api:batch
+
+Example: APIv4 with one call
+  echo \'[["Contact","get",{"version":4,"checkPermissions":false,"where":[["id","=",100]]}]]\' | cv api:batch
 
 Each line of input is decoded as a JSON document. The JSON document is an array
 of API calls.
