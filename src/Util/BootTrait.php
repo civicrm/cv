@@ -213,7 +213,7 @@ trait BootTrait {
     $output->writeln('[BootTrait] Attempting to set verbose error reporting', OutputInterface::VERBOSITY_DEBUG);
     // standard php debug chat settings
     error_reporting(E_ALL | E_STRICT);
-    ini_set('display_errors', TRUE);
+    ini_set('display_errors', 'stderr');
     ini_set('display_startup_errors', TRUE);
   }
 
