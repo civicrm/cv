@@ -12,17 +12,21 @@ class Api4ArgParser {
         $this->applyOption($params, $state, $arg);
         $state = '_TOP_';
       }
-      elseif (preg_match('/^([a-zA-Z0-9_]+)=(.*)/', $arg, $matches)) {
+      // Ex: 'foo=bar', 'fo.oo=bar', 'fo:oo=bar'
+      elseif (preg_match('/^([a-zA-Z0-9_:\.]+)=(.*)/', $arg, $matches)) {
         list (, $key, $value) = $matches;
         $params[$key] = $this->parseValueExpr($value);
       }
+      // Ex: '+w', '+where'
       elseif (preg_match('/^\+([a-zA-Z0-9_]+)$/', $arg, $matches)) {
         $state = $matches[1];
       }
+      // Ex: '+l=2', '+l:2'
       elseif (preg_match('/^\+([a-zA-Z0-9_]+)[:=](.*)/', $arg, $matches)) {
         list (, $key, $expr) = $matches;
         $this->applyOption($params, $key, $expr);
       }
+      // Ex: '{"foo": "bar"}'
       elseif (preg_match('/^\{.*\}$/', $arg)) {
         $params = array_merge($params, $this->parseJsonNoisily($arg));
       }
@@ -132,7 +136,7 @@ class Api4ArgParser {
   }
 
   public function parseAssignment($expr) {
-    if (preg_match('/^([a-zA-Z0-9_\.]+)\s*=\s*(.*)$/', $expr, $matches)) {
+    if (preg_match('/^([a-zA-Z0-9_:\.]+)\s*=\s*(.*)$/', $expr, $matches)) {
       return [$matches[1] => $this->parseValueExpr($matches[2])];
     }
     else {
@@ -141,7 +145,7 @@ class Api4ArgParser {
   }
 
   public function parseWhere($expr) {
-    if (preg_match('/^([a-zA-Z0-9_\.]+)\s*(\<=|\>=|=|!=|\<|\>|IS NULL|IS NOT NULL|LIKE|NOT LIKE|IN|NOT IN)\s*(.*)$/i', $expr, $matches)) {
+    if (preg_match('/^([a-zA-Z0-9_:\.]+)\s*(\<=|\>=|=|!=|\<|\>|IS NULL|IS NOT NULL|LIKE|NOT LIKE|IN|NOT IN)\s*(.*)$/i', $expr, $matches)) {
       if (!empty($matches[3])) {
         return [$matches[1], strtoupper(trim($matches[2])), $this->parseValueExpr(trim($matches[3]))];
       }
