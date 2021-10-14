@@ -133,7 +133,7 @@ trait StructuredOutputTrait {
     // If it's not one of our, then fallback to generic rendering
     if (!in_array($input->getOption('out'), ['table', 'csv', 'list'])) {
       // Use a generic format.
-      $this->sendResult($input, $output, $records);
+      $this->sendResult($input, $output, ArrayUtil::filterColumns($records, $columns));
       return;
     }
 
