@@ -186,9 +186,15 @@ class Bootstrap {
           . " To customize, set variable CIVICRM_SETTINGS to point to the preferred civicrm.settings.php.");
       }
 
-      $this->writeln("Load supplemental configuration for \"$settings\"", OutputInterface::VERBOSITY_DEBUG);
-      $reader = new SiteConfigReader($settings);
-      $GLOBALS['_CV'] = $reader->compile(array('buildkit', 'home'));
+      if (class_exists('Civi\Cv\SiteConfigReader')) {
+        $this->writeln("Load supplemental configuration for \"$settings\"", OutputInterface::VERBOSITY_DEBUG);
+        $reader = new SiteConfigReader($settings);
+        $GLOBALS['_CV'] = $reader->compile(array('buildkit', 'home'));
+      }
+      else {
+        $this->writeln("Warning: Not loading supplemental configuration for \"$settings\". SiteConfigReader is missing.", OutputInterface::VERBOSITY_DEBUG);
+        $GLOBALS['_CV'] = [];
+      }
 
       $this->writeln("Load settings file \"" . $settings . "\"", OutputInterface::VERBOSITY_DEBUG);
       define('CIVICRM_SETTINGS_PATH', $settings);
