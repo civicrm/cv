@@ -50,12 +50,13 @@ class CmsBootstrap {
   /**
    * Symphony OutputInterface provide during booting to enable the command-line
    * 'v', 'vv' and 'vvv' options
+   * @var \Symfony\Component\Console\Output\OutputInterface
    * @see http://symfony.com/doc/current/console/verbosity.html
    */
   protected $output = FALSE;
 
   /**
-   * @var array|NULL
+   * @var array|null
    */
   protected $bootedCms = NULL;
 
