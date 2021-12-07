@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @endcode
  *
  * This class is intended to be run *before* the classloader is available. Therefore, it
- * must be self-sufficient.
+ * must be self-sufficient - do not rely on other classes, even in the same package.
  *
  * A key issue is locating the civicrm.settings.php file -- this is complicated because
  * each CMS has a different structure, because some CMS's have multisite features, and
@@ -175,7 +175,7 @@ class Bootstrap {
     if (!defined('CIVICRM_SETTINGS_PATH')) {
 
       $this->options = $options = array_merge($this->options, $options);
-      $this->writeln("Options: " . Encoder::encode($options, 'json-pretty'), OutputInterface::VERBOSITY_DEBUG);
+      $this->writeln("Options: " . json_encode($options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
 
       $this->writeln("Find settings file", OutputInterface::VERBOSITY_DEBUG);
       $settings = $this->getCivicrmSettingsPhp($options);
@@ -186,9 +186,15 @@ class Bootstrap {
           . " To customize, set variable CIVICRM_SETTINGS to point to the preferred civicrm.settings.php.");
       }
 
-      $this->writeln("Load supplemental configuration for \"$settings\"", OutputInterface::VERBOSITY_DEBUG);
-      $reader = new SiteConfigReader($settings);
-      $GLOBALS['_CV'] = $reader->compile(array('buildkit', 'home'));
+      if (class_exists('Civi\Cv\SiteConfigReader')) {
+        $this->writeln("Load supplemental configuration for \"$settings\"", OutputInterface::VERBOSITY_DEBUG);
+        $reader = new SiteConfigReader($settings);
+        $GLOBALS['_CV'] = $reader->compile(array('buildkit', 'home'));
+      }
+      else {
+        $this->writeln("Warning: Not loading supplemental configuration for \"$settings\". SiteConfigReader is missing.", OutputInterface::VERBOSITY_DEBUG);
+        $GLOBALS['_CV'] = [];
+      }
 
       $this->writeln("Load settings file \"" . $settings . "\"", OutputInterface::VERBOSITY_DEBUG);
       define('CIVICRM_SETTINGS_PATH', $settings);
