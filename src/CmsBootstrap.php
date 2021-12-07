@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Route;
  * @endcode
  *
  * This class is intended to be run *before* the classloader is available. Therefore, it
- * must be self-sufficient.
+ * must be self-sufficient - do not rely on other classes, even in the same package.
  *
  * By default, bootstrap will scan PWD and every ancestor directory to see if it
  * contains a supported CMS. If you have performance considerations, or if the
@@ -102,7 +102,7 @@ class CmsBootstrap {
    * @throws \Exception
    */
   public function bootCms() {
-    $this->writeln("Options: " . Encoder::encode($this->options, 'json-pretty'), OutputInterface::VERBOSITY_DEBUG);
+    $this->writeln("Options: " . json_encode($this->options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
 
     if ($this->options['env'] && getenv($this->options['env'])) {
       $cmsExpr = getenv($this->options['env']);
@@ -121,7 +121,7 @@ class CmsBootstrap {
       $cms = $this->findCmsRoot($this->getSearchDir());
     }
 
-    $this->writeln("CMS: " . Encoder::encode($cms, 'json-pretty'), OutputInterface::VERBOSITY_DEBUG);
+    $this->writeln("CMS: " . json_encode($options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
     if (empty($cms['path']) || empty($cms['type']) || !file_exists($cms['path'])) {
       throw new \Exception("Failed to parse or find a CMS");
     }
