@@ -130,7 +130,6 @@ class CmsBootstrap {
       $this->writeln("Simulate web environment in CLI", OutputInterface::VERBOSITY_DEBUG);
       $this->simulateWebEnv($this->options['httpHost'], $cms['path'] . '/index.php');
     }
-
     $func = 'boot' . $cms['type'];
     if (!is_callable([$this, $func])) {
       throw new \Exception("Failed to locate boot function ($func)");
@@ -176,6 +175,10 @@ class CmsBootstrap {
     // PRE-CONDITIONS: CMS has already been booted, and Civi is already installed.
     if (function_exists('civicrm_initialize')) {
       civicrm_initialize();
+    }
+    elseif (class_exists('Drupal')) {
+      //Drupal 8 / 9
+      \Drupal::service('civicrm')->initialize();
     }
     // else if Joomla weirdness, do that
     else {

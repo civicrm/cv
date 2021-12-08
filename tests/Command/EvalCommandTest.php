@@ -26,7 +26,7 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
   }
 
   public function testBoot() {
-    $checkBoot = escapeshellarg('echo (function_exists("drupal_add_js") || function_exists("wp_redirect") || class_exists("JFactory")) ? "found" : "not-found";');
+    $checkBoot = escapeshellarg('echo (function_exists("drupal_add_js") || function_exists("wp_redirect") || class_exists("JFactory") || class_exists("Drupal")) ? "found" : "not-found";');
 
     $p1 = Process::runOk($this->cv("ev $checkBoot"));
     $this->assertRegExp('/^found$/', $p1->getOutput());

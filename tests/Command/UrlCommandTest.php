@@ -53,13 +53,13 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function testExtPaths() {
     $plain = rtrim($this->cvJsonOk("url -x civicrm"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm$;', $plain);
+    $this->assertRegExp(';https?://.*/civicrm($|/core$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -x civicrm/"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm/$;', $plain);
+    $this->assertRegExp(';https?://.*/civicrm(/$|/core/$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -x civicrm/packages"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm/packages$;', $plain);
+    $this->assertRegExp(';https?://.*/civicrm(/|/core/)packages$;', $plain);
   }
 
   public function testDynamicExprPaths() {
@@ -69,12 +69,15 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
     }
 
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.root]'"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm$;', $plain);
+    $this->assertRegExp(';https?://.*/civicrm($|/\w+$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.root]/'"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm/$;', $plain);
+    $this->assertRegExp(';https?://.*/civicrm(/$|/\w+/$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.root]/packages'"), "\n");
+    $this->assertRegExp(';https?://.*/civicrm(/|/core/)packages$;', $plain);
+
+    $plain = rtrim($this->cvJsonOk("url -d '[civicrm.packages]'"), "\n");
     $this->assertRegExp(';https?://.*/civicrm/packages$;', $plain);
   }
 
