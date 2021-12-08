@@ -4,6 +4,7 @@ namespace Civi\Cv;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Debug\ErrorHandler;
 
 class Application extends \Symfony\Component\Console\Application {
 
@@ -12,7 +13,19 @@ class Application extends \Symfony\Component\Console\Application {
    */
   public static function main($binDir) {
     $application = new Application('cv', '@package_version@');
-    $application->run();
+
+    $application->setAutoExit(FALSE);
+    $running = TRUE;
+    register_shutdown_function(function () use (&$running) {
+      if ($running) {
+        // Something - like a bad eval() - interrupted normal execution.
+        // Make sure the status code reflects that.
+        exit(255);
+      }
+    });
+    $result = $application->run();
+    $running = FALSE;
+    exit($result);
   }
 
   public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN') {

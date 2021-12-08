@@ -10,7 +10,7 @@
     ],
     "require": {
         "php": ">=7.1.3",
-        "symfony/console": "~2.8|^3",
+        "symfony/console": "^4",
         "symfony/process": "^4",
         "symfony/filesystem": "^4",
         "psy/psysh": "@stable",
