@@ -7,3 +7,4 @@
 /bin/phpunit
 /bin/php-parse
 /bin/psysh
+/bin/var-dump-server
