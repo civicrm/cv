@@ -4,7 +4,6 @@ namespace Civi\Cv;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Debug\ErrorHandler;
 
 class Application extends \Symfony\Component\Console\Application {
 
@@ -83,6 +82,7 @@ class Application extends \Symfony\Component\Console\Application {
     $commands[] = new \Civi\Cv\Command\FillCommand();
     $commands[] = new \Civi\Cv\Command\FlushCommand();
     $commands[] = new \Civi\Cv\Command\PathCommand();
+    $commands[] = new \Civi\Cv\Command\PipeCommand();
     $commands[] = new \Civi\Cv\Command\SqlCliCommand();
     $commands[] = new \Civi\Cv\Command\ShowCommand();
     // $commands[] = new \Civi\Cv\Command\UpgradeCommand();
