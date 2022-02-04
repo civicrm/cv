@@ -150,13 +150,40 @@ trait StructuredOutputTrait {
     else {
       $convertAssocToNum = [ArrayUtil::class, 'convertAssocToNum'];
     }
+    $flattenValues = function($rows) {
+      return array_map(
+        function($row) {
+          return array_map(
+            function($value) {
+              if (is_scalar($value)) {
+                return $value;
+              }
+              elseif ($value === NULL) {
+                return '';
+              }
+              elseif (is_array($value)) {
+                return json_encode($value);
+              }
+              elseif (is_object($value)) {
+                return '(' . get_class($value) . ')';
+              }
+              else {
+                return '(' . gettype($value) . ')';
+              }
+            },
+            $row
+          );
+        },
+        $rows
+      );
+    };
 
     switch ($input->getOption('out')) {
       case 'table':
         // Display a pleasant-looking table.
         $table = new Table($output);
-        $table->setHeaders($columns);
-        $table->addRows($convertAssocToNum($records, $columns));
+        $table->setHeaders($columns ?: []);
+        $table->addRows($flattenValues($convertAssocToNum($records, $columns)));
         $table->render();
         break;
 
