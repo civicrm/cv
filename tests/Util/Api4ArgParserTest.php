@@ -135,11 +135,16 @@ class Api4ArgParserTest extends \PHPUnit\Framework\TestCase {
   /**
    * @param $input
    * @dataProvider getBadExamples
-   * @expectedException \RuntimeException
    */
   public function testBadInput($input) {
-    $p = new Api4ArgParser();
-    $p->parse($input);
+    try {
+      $p = new Api4ArgParser();
+      $p->parse($input);
+      $this->fail('Expected a runtime exception');
+    }
+    catch (\RuntimeException $e) {
+      $this->assertRegExp(';(Unrecognized option|Failed to parse);', $e->getMessage());
+    }
   }
 
   public function testParseWhere() {

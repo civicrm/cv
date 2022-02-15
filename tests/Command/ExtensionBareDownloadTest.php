@@ -13,7 +13,7 @@ class ExtensionBareDownloadTest extends \Civi\Cv\CivilTestCase {
 
   private $tmpDir;
 
-  public function setup() {
+  public function setUp(): void {
     parent::setup();
     $this->tmpDir = sys_get_temp_dir() . '/baredl';
 
@@ -27,7 +27,7 @@ class ExtensionBareDownloadTest extends \Civi\Cv\CivilTestCase {
     chdir($this->tmpDir);
   }
 
-  public function tearDown() {
+  public function tearDown(): void {
     parent::tearDown();
     $this->cleanup();
   }

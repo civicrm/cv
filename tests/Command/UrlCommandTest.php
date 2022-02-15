@@ -6,8 +6,8 @@ namespace Civi\Cv\Command;
  */
 class UrlCommandTest extends \Civi\Cv\CivilTestCase {
 
-  public function setup() {
-    parent::setup();
+  public function setUp(): void {
+    parent::setUp();
   }
 
   public function testSingleRoute() {

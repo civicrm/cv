@@ -6,7 +6,7 @@ namespace Civi\Cv\Command;
  */
 class ShowCommandTest extends \Civi\Cv\CivilTestCase {
 
-  public function setup() {
+  public function setUp(): void {
     parent::setup();
   }
 

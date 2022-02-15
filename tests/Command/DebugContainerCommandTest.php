@@ -8,8 +8,8 @@ use Civi\Cv\Util\Process;
  */
 class DebugContainerCommandTest extends \Civi\Cv\CivilTestCase {
 
-  public function setup() {
-    parent::setup();
+  public function setUp(): void {
+    parent::setUp();
   }
 
   public function testShowAll() {

@@ -44,7 +44,7 @@ class CoreLifecycleTest extends \PHPUnit\Framework\TestCase {
     return $cases;
   }
 
-  public function setup() {
+  public function setUp(): void {
     foreach (array('civibuild', 'cv') as $cmd) {
       if (Process::findCommand($cmd) === NULL) {
         $this->markTestSkipped("The SetupCommandTest requires $cmd to be available in the PATH.");
@@ -56,7 +56,7 @@ class CoreLifecycleTest extends \PHPUnit\Framework\TestCase {
     parent::setup();
   }
 
-  public function tearDown() {
+  public function tearDown(): void {
     chdir($this->originalCwd);
     if (!empty($this->build['CMS_ROOT'])) {
       $this->removeDir($this->build['CMS_ROOT']);

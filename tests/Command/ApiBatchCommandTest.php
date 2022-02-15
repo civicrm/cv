@@ -8,8 +8,8 @@ use Civi\Cv\Util\Process;
  */
 class ApiBatchCommandTest extends \Civi\Cv\CivilTestCase {
 
-  public function setup() {
-    parent::setup();
+  public function setUp(): void {
+    parent::setUp();
   }
 
   public function testApi_NumArray() {

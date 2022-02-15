@@ -16,7 +16,7 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
 
   private $tmpDir;
 
-  public function setup() {
+  public function setUp(): void {
     parent::setup();
     $this->tmpDir = $this->getExampleDir() . '/vendor/cvtest';
 
@@ -33,7 +33,7 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
     }
   }
 
-  public function tearDown() {
+  public function tearDown(): void {
     $this->cleanup();
     parent::tearDown();
   }

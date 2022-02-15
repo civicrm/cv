@@ -9,7 +9,7 @@ use Civi\Cv\Util\Process;
  */
 class AngularHtmlShowCommandTest extends \Civi\Cv\CivilTestCase {
 
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     $p = Process::runOk($this->cv('php:eval \'return is_callable(array(Civi::service("angular"),"getRawPartials"));\''));
     $supported = json_decode($p->getOutput(), 1);

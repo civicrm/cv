@@ -9,8 +9,8 @@ use Civi\Cv\Util\Process;
  */
 class ScriptCommandTest extends \Civi\Cv\CivilTestCase {
 
-  public function setup() {
-    parent::setup();
+  public function setUp(): void {
+    parent::setUp();
   }
 
   public function testScr() {

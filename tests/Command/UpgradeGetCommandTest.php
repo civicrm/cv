@@ -3,8 +3,8 @@ namespace Civi\Cv\Command;
 
 class UpgradeGetCommandTest extends \Civi\Cv\CivilTestCase {
 
-  public function setup() {
-    parent::setup();
+  public function setUp(): void {
+    parent::setUp();
   }
 
   public function testGetStable() {

@@ -19,13 +19,13 @@ class CivilTestCase extends \PHPUnit\Framework\TestCase {
    */
   protected $cv;
 
-  public function setup() {
+  public function setUp(): void {
     $this->originalCwd = getcwd();
     chdir($this->getExampleDir());
     $this->cv = dirname(__DIR__) . '/bin/cv';
   }
 
-  public function tearDown() {
+  public function tearDown(): void {
     chdir($this->originalCwd);
   }
 

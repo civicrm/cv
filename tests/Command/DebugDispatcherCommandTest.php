@@ -8,8 +8,8 @@ use Civi\Cv\Util\Process;
  */
 class DebugDispatcherCommandTest extends \Civi\Cv\CivilTestCase {
 
-  public function setup() {
-    parent::setup();
+  public function setUp(): void {
+    parent::setUp();
   }
 
   public function testNoArg() {

@@ -6,9 +6,9 @@ class UpgradeReportCommandTest extends \Civi\Cv\CivilTestCase {
   protected $revision = '4.7.123-202601040252';
   protected $reportName = '';
 
-  public function setup() {
+  public function setUp(): void {
     $this->reportName = 'test' . md5(time() . 'test');
-    parent::setup();
+    parent::setUp();
   }
 
   public function testStartReport() {
