@@ -56,6 +56,15 @@ class Api4ArgParserTest extends \PHPUnit\Framework\TestCase {
       ['where' => [['id', 'IS NOT NULL'], ['id', '>=', '234']]],
     ];
     $exs[] = [
+      ['+w=id is empty', '+w=id>=234'],
+      ['where' => [['id', 'IS EMPTY'], ['id', '>=', '234']]],
+    ];
+    $exs[] = [
+      ['+w=id Is Not Empty', '+w=id>=234'],
+      ['where' => [['id', 'IS NOT EMPTY'], ['id', '>=', '234']]],
+    ];
+
+    $exs[] = [
       ['+w', 'foo:bar=apple', '+where', 'whiz.bang=banana'],
       ['where' => [['foo:bar', '=', 'apple'], ['whiz.bang', '=', 'banana']]],
     ];
@@ -119,6 +128,7 @@ class Api4ArgParserTest extends \PHPUnit\Framework\TestCase {
     $exs[] = [['foo={"bar":foo"']];
     $exs[] = [['+foo=[bar']];
     $exs[] = [['foo="bar']];
+    $exs[] = [['foo is bar']];
     return $exs;
   }
 
