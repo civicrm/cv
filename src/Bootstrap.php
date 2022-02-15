@@ -148,7 +148,7 @@ class Bootstrap {
         return;
       }
       $last_error = error_get_last();
-      switch ($last_error['type']) {
+      switch ($last_error['type'] ?? NULL) {
         case E_ERROR:
         case E_PARSE:
         case E_COMPILE_ERROR:
