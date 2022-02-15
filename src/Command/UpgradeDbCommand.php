@@ -192,6 +192,7 @@ Examples:
     }
 
     $id = md5(implode(\CRM_Core_DAO::VALUE_SEPARATOR, array(
+      function_exists('posix_getuid') ? posix_getuid() : 0,
       $home,
       CIVICRM_SETTINGS_PATH,
       $GLOBALS['civicrm_root'],
