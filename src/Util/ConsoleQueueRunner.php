@@ -79,7 +79,7 @@ class ConsoleQueueRunner {
         }
         catch (\Exception $e) {
           // WISHLIST: For interactive mode, perhaps allow retry/skip?
-          $this->output->writeln("<error>Error executing task: %s</error>", $task->title);
+          $this->output->writeln(sprintf("<error>Error executing task \"%s\"</error>", $task->title));
           throw $e;
         }
       }
