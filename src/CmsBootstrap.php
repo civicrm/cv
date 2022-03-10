@@ -272,11 +272,21 @@ class CmsBootstrap {
     }
 
     if ($cmsUser) {
-      $entity_manager = \Drupal::entityManager();
-      $users = $entity_manager->getStorage($entity_manager->getEntityTypeFromClass('Drupal\user\Entity\User'))
-        ->loadByProperties(array(
-          'name' => $cmsUser,
-        ));
+      // Drupal 8
+      if (method_exists('Drupal', 'entityManager')) {
+        $entity_manager = \Drupal::entityManager();
+        $users = $entity_manager->getStorage($entity_manager->getEntityTypeFromClass('Drupal\user\Entity\User'))
+          ->loadByProperties(array(
+            'name' => $cmsUser,
+          ));
+      } else {
+        // Drupal 9
+        $entity_manager = \Drupal::entityTypeManager();
+        $users = $entity_manager->getStorage(\Drupal::service('entity_type.repository')->getEntityTypeFromClass('Drupal\user\Entity\User'))
+          ->loadByProperties([
+            'name' => $cmsUser,
+          ]);
+      }
       if (count($users) == 1) {
         foreach ($users as $uid => $user) {
           user_login_finalize($user);
