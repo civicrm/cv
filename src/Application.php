@@ -16,7 +16,8 @@ class Application extends \Symfony\Component\Console\Application {
     $application->setAutoExit(FALSE);
     $running = TRUE;
     register_shutdown_function(function () use (&$running) {
-      if ($running) {
+      $error = error_get_last();
+      if ($running && $error) {
         // Something - like a bad eval() - interrupted normal execution.
         // Make sure the status code reflects that.
         exit(255);
