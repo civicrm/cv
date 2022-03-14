@@ -25,6 +25,21 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertRegExp('/^eval says version is [0-9a-z\.]+\s*$/', $p->getOutput());
   }
 
+  public function testPhpEval_Exit0() {
+    $p = Process::runDebug($this->cv("ev 'exit(0);'"));
+    $this->assertEquals(0, $p->getExitCode());
+  }
+
+  public function testPhpEval_Exit1() {
+    $p = Process::runDebug($this->cv("ev 'exit(1);'"));
+    $this->assertEquals(1, $p->getExitCode());
+  }
+
+  public function testPhpEval_ExitCodeError() {
+    $p = Process::runDebug($this->cv("ev 'invalid();'"));
+    $this->assertEquals(255, $p->getExitCode());
+  }
+
   public function testBoot() {
     $checkBoot = escapeshellarg('echo (function_exists("drupal_add_js") || function_exists("wp_redirect") || class_exists("JFactory") || class_exists("Drupal")) ? "found" : "not-found";');
 
