@@ -137,7 +137,7 @@ Examples:
     }
 
     $output->writeln("<info>Executing upgrade...</info>", $niceMsgVerbosity);
-    $runner = new ConsoleQueueRunner($this->getIO(), $output, $queue, $input->getOption('dry-run'), $input->getOption('step'));
+    $runner = new ConsoleQueueRunner($this->getIO(), $queue, $input->getOption('dry-run'), $input->getOption('step'));
     $runner->runAll();
 
     $output->writeln("<info>Finishing upgrade...</info>", $niceMsgVerbosity);

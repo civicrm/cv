@@ -22,11 +22,6 @@ class ConsoleQueueRunner {
   private $io;
 
   /**
-   * @var \Symfony\Component\Console\Output\OutputInterface
-   */
-  private $output;
-
-  /**
    * @var \CRM_Queue_Queue
    */
   private $queue;
@@ -40,14 +35,12 @@ class ConsoleQueueRunner {
    * ConsoleQueueRunner constructor.
    *
    * @param \Symfony\Component\Console\Style\SymfonyStyle $io
-   * @param \Symfony\Component\Console\Output\OutputInterface $output
    * @param \CRM_Queue_Queue $queue
    * @param bool $dryRun
    * @param bool $step
    */
-  public function __construct(\Symfony\Component\Console\Style\SymfonyStyle $io, \Symfony\Component\Console\Output\OutputInterface $output, \CRM_Queue_Queue $queue, $dryRun = FALSE, $step = FALSE) {
+  public function __construct(\Symfony\Component\Console\Style\SymfonyStyle $io, \CRM_Queue_Queue $queue, $dryRun = FALSE, $step = FALSE) {
     $this->io = $io;
-    $this->output = $output;
     $this->queue = $queue;
     $this->dryRun = $dryRun;
     $this->step = (bool) $step;
@@ -71,16 +64,16 @@ class ConsoleQueueRunner {
       $item = $this->queue->stealItem();
       $task = $item->data;
 
-      if ($this->output->getVerbosity() === OutputInterface::VERBOSITY_NORMAL) {
-        // Symfony progress bar would be prettier, but they don't allow
+      if ($io->getVerbosity() === OutputInterface::VERBOSITY_NORMAL) {
+        // Symfony progress bar would be prettier, but (when last checked) they didn't allow
         // resetting when the queue-length expands dynamically.
-        $this->output->write(".");
+        $io->write(".");
       }
-      elseif ($this->output->getVerbosity() === OutputInterface::VERBOSITY_VERBOSE) {
-        $this->output->writeln(sprintf("<info>%s</info>", $task->title));
+      elseif ($io->getVerbosity() === OutputInterface::VERBOSITY_VERBOSE) {
+        $io->writeln(sprintf("<info>%s</info>", $task->title));
       }
-      elseif ($this->output->getVerbosity() > OutputInterface::VERBOSITY_VERBOSE) {
-        $this->output->writeln(sprintf("<info>%s</info> (<comment>%s</comment>)", $task->title, self::formatTaskCallback($task)));
+      elseif ($io->getVerbosity() > OutputInterface::VERBOSITY_VERBOSE) {
+        $io->writeln(sprintf("<info>%s</info> (<comment>%s</comment>)", $task->title, self::formatTaskCallback($task)));
       }
 
       $action = 'y';
@@ -97,7 +90,7 @@ class ConsoleQueueRunner {
         }
         catch (\Exception $e) {
           // WISHLIST: For interactive mode, perhaps allow retry/skip?
-          $this->output->writeln(sprintf("<error>Error executing task \"%s\"</error>", $task->title));
+          $io->writeln(sprintf("<error>Error executing task \"%s\"</error>", $task->title));
           throw $e;
         }
       }
@@ -105,8 +98,8 @@ class ConsoleQueueRunner {
       $this->queue->deleteItem($item);
     }
 
-    if ($this->output->getVerbosity() === OutputInterface::VERBOSITY_NORMAL) {
-      $this->output->writeln("");
+    if ($io->getVerbosity() === OutputInterface::VERBOSITY_NORMAL) {
+      $io->newLine();
     }
   }
 
