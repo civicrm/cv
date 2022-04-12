@@ -17,14 +17,9 @@ class ConsoleQueueRunner {
   private $dryRun;
 
   /**
-   * @var \Symfony\Component\Console\Input\InputInterface
+   * @var \Symfony\Component\Console\Style\SymfonyStyle
    */
-  private $input;
-
-  /**
-   * @var \Symfony\Component\Console\Output\OutputInterface
-   */
-  private $output;
+  private $io;
 
   /**
    * @var \CRM_Queue_Queue
@@ -32,24 +27,32 @@ class ConsoleQueueRunner {
   private $queue;
 
   /**
+   * @var bool
+   */
+  private $step;
+
+  /**
    * ConsoleQueueRunner constructor.
    *
-   * @param \Symfony\Component\Console\Input\InputInterface $input
-   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   * @param \Symfony\Component\Console\Style\SymfonyStyle $io
    * @param \CRM_Queue_Queue $queue
    * @param bool $dryRun
+   * @param bool $step
    */
-  public function __construct(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output, \CRM_Queue_Queue $queue, $dryRun = FALSE) {
-    $this->input = $input;
-    $this->output = $output;
+  public function __construct(\Symfony\Component\Console\Style\SymfonyStyle $io, \CRM_Queue_Queue $queue, $dryRun = FALSE, $step = FALSE) {
+    $this->io = $io;
     $this->queue = $queue;
     $this->dryRun = $dryRun;
+    $this->step = (bool) $step;
   }
 
   /**
    * @throws \Exception
    */
   public function runAll() {
+    /** @var \Symfony\Component\Console\Style\SymfonyStyle $io */
+    $io = $this->io;
+
     $taskCtx = new \CRM_Queue_TaskContext();
     $taskCtx->queue = $this->queue;
     // WISHLIST: Wrap $output
@@ -61,25 +64,33 @@ class ConsoleQueueRunner {
       $item = $this->queue->stealItem();
       $task = $item->data;
 
-      if ($this->output->getVerbosity() === OutputInterface::VERBOSITY_NORMAL) {
-        // Symfony progress bar would be prettier, but they don't allow
+      if ($io->getVerbosity() === OutputInterface::VERBOSITY_NORMAL) {
+        // Symfony progress bar would be prettier, but (when last checked) they didn't allow
         // resetting when the queue-length expands dynamically.
-        $this->output->write(".");
+        $io->write(".");
       }
-      elseif ($this->output->getVerbosity() === OutputInterface::VERBOSITY_VERBOSE) {
-        $this->output->writeln(sprintf("<info>%s</info>", $task->title));
+      elseif ($io->getVerbosity() === OutputInterface::VERBOSITY_VERBOSE) {
+        $io->writeln(sprintf("<info>%s</info>", $task->title));
       }
-      elseif ($this->output->getVerbosity() > OutputInterface::VERBOSITY_VERBOSE) {
-        $this->output->writeln(sprintf("<info>%s</info> (<comment>%s</comment>)", $task->title, self::formatTaskCallback($task)));
+      elseif ($io->getVerbosity() > OutputInterface::VERBOSITY_VERBOSE) {
+        $io->writeln(sprintf("<info>%s</info> (<comment>%s</comment>)", $task->title, self::formatTaskCallback($task)));
       }
 
-      if (!$this->dryRun) {
+      $action = 'y';
+      if ($this->step) {
+        $action = $io->choice('Execute this step?', ['y' => 'yes', 's' => 'skip', 'a' => 'abort'], 'y');
+      }
+      if ($action === 'a') {
+        throw new \Exception('Aborted');
+      }
+
+      if ($action === 'y' && !$this->dryRun) {
         try {
           $task->run($taskCtx);
         }
         catch (\Exception $e) {
           // WISHLIST: For interactive mode, perhaps allow retry/skip?
-          $this->output->writeln(sprintf("<error>Error executing task \"%s\"</error>", $task->title));
+          $io->writeln(sprintf("<error>Error executing task \"%s\"</error>", $task->title));
           throw $e;
         }
       }
@@ -87,8 +98,8 @@ class ConsoleQueueRunner {
       $this->queue->deleteItem($item);
     }
 
-    if ($this->output->getVerbosity() === OutputInterface::VERBOSITY_NORMAL) {
-      $this->output->writeln("");
+    if ($io->getVerbosity() === OutputInterface::VERBOSITY_NORMAL) {
+      $io->newLine();
     }
   }
 
