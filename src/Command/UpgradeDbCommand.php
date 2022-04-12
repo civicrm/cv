@@ -7,7 +7,6 @@ use Civi\Cv\Util\ConsoleQueueRunner;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
  * Command for asking CiviCRM for the appropriate tarball to download.
@@ -25,6 +24,7 @@ class UpgradeDbCommand extends BaseCommand {
       ->addOption('dry-run', NULL, InputOption::VALUE_NONE, 'Preview the list of upgrade tasks')
       ->addOption('retry', NULL, InputOption::VALUE_NONE, 'Resume a failed upgrade, retrying the last step')
       ->addOption('skip', NULL, InputOption::VALUE_NONE, 'Resume a failed upgrade, skipping the last step')
+      ->addOption('step', NULL, InputOption::VALUE_NONE, 'Run the upgrade queue in steps, pausing before each step')
       ->setHelp('Run the database upgrade
 
 Examples:
@@ -43,6 +43,15 @@ Examples:
 
     if (!ini_get('safe_mode')) {
       set_time_limit(0);
+    }
+
+    if ($input->getOption('step')) {
+      if ($input->getOption('out') !== 'pretty') {
+        throw new \RuntimeException('The --step option only works with "pretty" output.');
+      }
+      if ($output->getVerbosity() < OutputInterface::VERBOSITY_VERY_VERBOSE) {
+        $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
+      }
     }
 
     $niceMsgVerbosity = $input->getOption('out') === 'pretty' ? OutputInterface::VERBOSITY_NORMAL : OutputInterface::VERBOSITY_VERBOSE;
@@ -83,13 +92,9 @@ Examples:
       $upgrade->setPreUpgradeMessage($preUpgradeMessage, $dbVer, $codeVer);
       if ($preUpgradeMessage) {
         $output->writeln(\CRM_Utils_String::htmlToText($preUpgradeMessage), $niceMsgVerbosity);
-        if ($input->isInteractive() && $input->getOption('out') === 'pretty') {
-          $helper = $this->getHelper('question');
-          $question = new ConfirmationQuestion("\n<comment>Press ENTER to continue</comment>\n", TRUE);
-          if (!$helper->ask($input, $output, $question)) {
-            $output->writeln("<error>Abort</error>");
-            return 1;
-          }
+        if (!$this->getIO()->confirm('Continue?')) {
+          $output->writeln("<error>Abort</error>");
+          return 1;
         }
       }
       else {
@@ -132,7 +137,7 @@ Examples:
     }
 
     $output->writeln("<info>Executing upgrade...</info>", $niceMsgVerbosity);
-    $runner = new ConsoleQueueRunner($input, $output, $queue, $input->getOption('dry-run'));
+    $runner = new ConsoleQueueRunner($this->getIO(), $output, $queue, $input->getOption('dry-run'), $input->getOption('step'));
     $runner->runAll();
 
     $output->writeln("<info>Finishing upgrade...</info>", $niceMsgVerbosity);

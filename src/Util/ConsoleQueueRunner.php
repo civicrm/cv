@@ -17,9 +17,9 @@ class ConsoleQueueRunner {
   private $dryRun;
 
   /**
-   * @var \Symfony\Component\Console\Input\InputInterface
+   * @var \Symfony\Component\Console\Style\SymfonyStyle
    */
-  private $input;
+  private $io;
 
   /**
    * @var \Symfony\Component\Console\Output\OutputInterface
@@ -32,24 +32,34 @@ class ConsoleQueueRunner {
   private $queue;
 
   /**
+   * @var bool
+   */
+  private $step;
+
+  /**
    * ConsoleQueueRunner constructor.
    *
-   * @param \Symfony\Component\Console\Input\InputInterface $input
+   * @param \Symfony\Component\Console\Style\SymfonyStyle $io
    * @param \Symfony\Component\Console\Output\OutputInterface $output
    * @param \CRM_Queue_Queue $queue
    * @param bool $dryRun
+   * @param bool $step
    */
-  public function __construct(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output, \CRM_Queue_Queue $queue, $dryRun = FALSE) {
-    $this->input = $input;
+  public function __construct(\Symfony\Component\Console\Style\SymfonyStyle $io, \Symfony\Component\Console\Output\OutputInterface $output, \CRM_Queue_Queue $queue, $dryRun = FALSE, $step = FALSE) {
+    $this->io = $io;
     $this->output = $output;
     $this->queue = $queue;
     $this->dryRun = $dryRun;
+    $this->step = (bool) $step;
   }
 
   /**
    * @throws \Exception
    */
   public function runAll() {
+    /** @var \Symfony\Component\Console\Style\SymfonyStyle $io */
+    $io = $this->io;
+
     $taskCtx = new \CRM_Queue_TaskContext();
     $taskCtx->queue = $this->queue;
     // WISHLIST: Wrap $output
@@ -73,7 +83,15 @@ class ConsoleQueueRunner {
         $this->output->writeln(sprintf("<info>%s</info> (<comment>%s</comment>)", $task->title, self::formatTaskCallback($task)));
       }
 
-      if (!$this->dryRun) {
+      $action = 'y';
+      if ($this->step) {
+        $action = $io->choice('Execute this step?', ['y' => 'yes', 's' => 'skip', 'a' => 'abort'], 'y');
+      }
+      if ($action === 'a') {
+        throw new \Exception('Aborted');
+      }
+
+      if ($action === 'y' && !$this->dryRun) {
         try {
           $task->run($taskCtx);
         }
