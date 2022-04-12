@@ -13,6 +13,8 @@ class UrlCommand extends BaseExtensionCommand {
 
   use StructuredOutputTrait;
 
+  const DEFAULT_JWT_TIMEOUT = 300;
+
   protected function configure() {
     $this
       ->setName('url')
@@ -22,6 +24,7 @@ class UrlCommand extends BaseExtensionCommand {
       ->configureOutputOptions(['tabular' => TRUE, 'availColumns' => 'type,expr,value', 'shortcuts' => ['table', 'list']])
       ->addOption('relative', 'r', InputOption::VALUE_NONE, 'Prefer relative URL format. (Default: absolute)')
       ->addOption('frontend', 'f', InputOption::VALUE_NONE, 'Generate a frontend URL (Default: backend)')
+      ->addOption('login', NULL, InputOption::VALUE_NONE, 'Add an authentication code (based on current user; uses authx; expires=' . static::DEFAULT_JWT_TIMEOUT . 's)')
       ->addOption('open', 'O', InputOption::VALUE_NONE, 'Open a local web browser')
       ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar"). Use "." for the default extension dir.')
       ->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A config property. (Ex: "templateCompileDir/en_US")')
@@ -38,9 +41,11 @@ Examples: Lookup the site root
 Examples: Lookup URLs with the standard router
   cv url civicrm/dashboard
   cv url \'civicrm/a/#/mailing/123?angularDebug=1\'
+  cv url civicrm/dashboard --user=bob --login
 
 Examples: Open URLs in a local browser (Linux/OSX)
   cv open civicrm/dashboard
+  cv open civicrm/dashboard --user=bob --login
   cv url civicrm/dashboard --open
 
 Examples: Lookup URLs for extension resources
@@ -63,6 +68,10 @@ Examples: Lookup multiple URLs
 
 
 NOTE: To change the default output format, set CV_OUTPUT.
+
+NOTE: If you use `--login` and do not have `authx`, then it prompts about
+      enabling the extension. The extra I/O may influence some scripted
+      use-cases.
 ');
     $this->configureBootOptions();
   }
@@ -105,6 +114,36 @@ NOTE: To change the default output format, set CV_OUTPUT.
     }
     if (count($rows) === 0) {
       $rows[] = $this->resolveRoute('', $input);
+    }
+
+    if ($input->getOption('login')) {
+      if (!\CRM_Extension_System::singleton()->getMapper()->isActiveModule('authx')) {
+        if ($this->getIO()->confirm('Enable authx?')) {
+          // ^^ Does the question go to STDERR or STDOUT?
+          $output->getErrorOutput()->writeln('<info>Enabling extension "authx"</info>');
+          civicrm_api3('Extension', 'enable', ['key' => 'authx']);
+        }
+        else {
+          throw new \RuntimeException('Missing required extension: authx');
+        }
+      }
+      $cid = \CRM_Core_Session::getLoggedInContactID();
+      if (!$cid) {
+        throw new \RuntimeException('The "--login" option requires specifying an active user/contact ("--user=X").');
+      }
+      $token = \Civi::service('crypto.jwt')->encode([
+        'exp' => time() + static::DEFAULT_JWT_TIMEOUT,
+        'sub' => 'cid:' . $cid,
+        'scope' => 'authx',
+      ]);
+      $rows = array_map(
+        function($row) use ($token) {
+          $delim = strpos($row['value'], '?') === FALSE ? '?' : '&';
+          $row['value'] .= $delim . '_authxSes=1&_authx=Bearer+' . urlencode($token);
+          return $row;
+        },
+        $rows
+      );
     }
 
     if ($input->getOption('open')) {
