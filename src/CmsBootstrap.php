@@ -2,7 +2,6 @@
 namespace Civi\Cv;
 
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Routing\Route;
 
 /**
  * Bootstrap the CMS runtime.
@@ -255,8 +254,11 @@ class CmsBootstrap {
     $kernel->preHandle($request);
     $container = $kernel->rebuildContainer();
     // Add our request to the stack and route context.
-    $request->attributes->set(\Drupal\Core\Routing\RouteObjectInterface::ROUTE_OBJECT, new Route('<none>'));
-    $request->attributes->set(\Drupal\Core\Routing\RouteObjectInterface::ROUTE_NAME, '<none>');
+    $routeInterface = class_exists('\Drupal\Core\Routing\RouteObjectInterface')
+      ? '\Drupal\Core\Routing\RouteObjectInterface'
+      : '\Symfony\Cmf\Component\Routing\RouteObjectInterface';
+    $request->attributes->set($routeInterface::ROUTE_OBJECT, new \Symfony\Component\Routing\Route('<none>'));
+    $request->attributes->set($routeInterface::ROUTE_NAME, '<none>');
     $container->get('request_stack')->push($request);
     $container->get('router.request_context')->fromRequest($request);
 
