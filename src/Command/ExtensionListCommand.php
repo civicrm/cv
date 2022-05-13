@@ -154,7 +154,7 @@ Note:
           'status' => isset($statuses[$key]) ? $statuses[$key] : '',
           'type' => $info->type,
           'path' => $mapper->keyToBasePath($key),
-          'downloadUrl' => $info->downloadUrl,
+          'downloadUrl' => property_exists($info, 'downloadUrl') ? $info->downloadUrl : NULL,
         );
       }
     }
