@@ -83,16 +83,20 @@ class ArrayUtil {
    * @param array $columns
    *   A list of columns.
    *   Ex: array(0 => 'color', 1 => 'length').
+   * @param array $defaults
+   *   Default values for any columns that are missing.
+   *   NULL if omitted.
+   *   Ex: array(0 => 'transparent', 1 => '0 ft')
    * @return array
    *   A list of records. Each one is a numerically indexed array.
    *   Ex: $rows[0] = array(0 => 'red', 1 => 'length')
    */
-  public static function convertAssocToNum($records, $columns) {
+  public static function convertAssocToNum($records, $columns, $defaults = []) {
     $result = array();
     foreach ($records as $k => $oldRow) {
       $newRow = array();
       foreach ($columns as $newKey => $oldKey) {
-        $newRow[$newKey] = $oldRow[$oldKey];
+        $newRow[$newKey] = $oldRow[$oldKey] ?? $defaults[$newKey] ?? NULL;
       }
       $result[$k] = $newRow;
     }
