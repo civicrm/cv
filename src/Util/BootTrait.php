@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Util;
 
+use Civi\Cv\PharOut\PharOut;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -89,6 +90,8 @@ trait BootTrait {
    * @throws \Exception
    */
   public function _boot_full(InputInterface $input, OutputInterface $output) {
+    PharOut::prepare();
+
     $output->writeln('<info>[BootTrait]</info> Call standard cv bootstrap', OutputInterface::VERBOSITY_DEBUG);
     \Civi\Cv\Bootstrap::singleton()->boot($this->createBootParams($output));
 
@@ -113,6 +116,10 @@ trait BootTrait {
     if (is_callable([\CRM_Core_Config::singleton()->userSystem, 'setMySQLTimeZone'])) {
       $output->writeln('<info>[BootTrait]</info> Set active MySQL timezone', OutputInterface::VERBOSITY_DEBUG);
       \CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
+    }
+
+    if (CIVICRM_UF === 'Joomla') {
+      PharOut::reset();
     }
   }
 
