@@ -63,6 +63,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *   - env: string|NULL. The environment variable which may contain the path to
  *     civicrm.settings.php. Set NULL to disable.
  *     (Default: CIVICRM_SETTINGS)
+ *   - httpHost: string|NULL. For multisite, the HTTP hostname.
  *   - prefetch: bool. Whether to load various caches.
  *     (Default: TRUE)
  *   - settingsFile: string|NULL. The full path to the civicrm.settings.php
@@ -196,14 +197,6 @@ class Bootstrap {
         $GLOBALS['_CV'] = [];
       }
 
-      $this->writeln("Load settings file \"" . $settings . "\"", OutputInterface::VERBOSITY_DEBUG);
-      define('CIVICRM_SETTINGS_PATH', $settings);
-      $error = @include_once $settings;
-      if ($error == FALSE) {
-        $this->writeln("Failed to load settings file", OutputInterface::VERBOSITY_VERBOSE);
-        throw new \Exception("Could not load the CiviCRM settings file: {$settings}");
-      }
-
       $this->writeln("Find CMS root for \"" . $this->getSearchDir() . "\"", OutputInterface::VERBOSITY_VERBOSE);
       list ($cmsType, $cmsBasePath) = $this->findCmsRoot($this->getSearchDir());
       $this->writeln("Found \"$cmsType\" in \"$cmsBasePath\"", OutputInterface::VERBOSITY_VERBOSE);
@@ -214,9 +207,21 @@ class Bootstrap {
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['SERVER_SOFTWARE'] = NULL;
         $_SERVER['REQUEST_METHOD'] = 'GET';
+        if (!empty($options['httpHost'])) {
+          // Hint for D7 multisite
+          $_SERVER['HTTP_HOST'] = $options['httpHost'];
+        }
         if (ord($_SERVER['SCRIPT_NAME']) != 47) {
           $_SERVER['SCRIPT_NAME'] = '/' . $_SERVER['SCRIPT_NAME'];
         }
+      }
+
+      $this->writeln("Load settings file \"" . $settings . "\"", OutputInterface::VERBOSITY_DEBUG);
+      define('CIVICRM_SETTINGS_PATH', $settings);
+      $error = @include_once $settings;
+      if ($error == FALSE) {
+        $this->writeln("Failed to load settings file", OutputInterface::VERBOSITY_VERBOSE);
+        throw new \Exception("Could not load the CiviCRM settings file: {$settings}");
       }
     }
 
@@ -346,13 +351,13 @@ class Bootstrap {
     switch ($cmsType) {
       case 'backdrop':
         $settings = $this->findFirstFile(
-           array_merge($this->findDrupalDirs($cmsRoot), array($cmsRoot)),
+           array_merge($this->findDrupalDirs($cmsRoot, $searchDir), array($cmsRoot)),
           'civicrm.settings.php'
         );
         break;
 
       case 'drupal':
-        $settings = $this->findFirstFile($this->findDrupalDirs($cmsRoot), 'civicrm.settings.php');
+        $settings = $this->findFirstFile($this->findDrupalDirs($cmsRoot, $searchDir), 'civicrm.settings.php');
         break;
 
       case 'joomla':
@@ -385,13 +390,32 @@ class Bootstrap {
    *
    * @param string $cmsRoot
    *   The root of the Drupal installation.
+   * @param string $searchDir
+   *   The location from which we're searching. Usually PWD.
    * @return array
    */
-  protected function findDrupalDirs($cmsRoot) {
+  protected function findDrupalDirs($cmsRoot, $searchDir) {
+    // If there's no explicit host and we start the search from "web/sites/FOO/...", then infer subsite path.
+    $sitesRoot = "$cmsRoot/sites";
+    $sitesRootQt = preg_quote($sitesRoot, ';');
+    if (empty($this->options['httpHost']) && preg_match(";^($sitesRootQt/[^/]+);", $searchDir, $m)) {
+      if (basename($m[1]) !== 'all') {
+        return [$m[1]];
+      }
+    }
+
+    $sites = array();
+    if (file_exists("$cmsRoot/sites/sites.php")) {
+      include("$cmsRoot/sites/sites.php");
+    }
     $dirs = array();
     $server = explode('.', implode('.', array_reverse(explode(':', rtrim($this->options['httpHost'], '.')))));
     for ($j = count($server); $j > 0; $j--) {
-      $dirs[] = "$cmsRoot/sites/" . implode('.', array_slice($server, -$j));
+      $s = implode('.', array_slice($server, -$j));
+      if (isset($sites[$s]) && file_exists("$cmsRoot/sites/" . $sites[$s])) {
+        $s = $sites[$s];
+      }
+      $dirs[] = "$cmsRoot/sites/$s";
     }
     $dirs[] = "$cmsRoot/sites/default";
     return $dirs;
