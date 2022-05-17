@@ -87,6 +87,7 @@ class SiteConfigReader {
       'CIVI_VERSION' => \CRM_Utils_System::version(),
       'CIVI_SETTINGS' => CIVICRM_SETTINGS_PATH,
       'CIVI_TEMPLATEC' => \CRM_Core_Config::singleton()->templateCompileDir,
+      'CIVI_LOG' => \CRM_Core_Error::createDebugLogger()->_filename,
       'CIVI_UF' => \CRM_Core_Config::singleton()->userFramework,
       'IS_INSTALLED' => '1',
       'SITE_TYPE' => 'cv-auto',
