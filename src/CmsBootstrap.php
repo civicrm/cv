@@ -36,6 +36,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *     Boolean TRUE means it should use a default (PWD).
  *     (Default: TRUE aka PWD)
  *   - user: string|NULL. The name of a CMS user to authenticate as.
+ *   - httpHost: string|NULL. For multisite, the HTTP hostname.
  *
  * @package Civi
  */
@@ -113,6 +114,12 @@ class CmsBootstrap {
       if (!isset($this->options['user']) && parse_url($cmsExpr, PHP_URL_USER)) {
         $this->options['user'] = parse_url($cmsExpr, PHP_URL_USER);
       }
+      if (parse_url($cmsExpr, PHP_URL_QUERY)) {
+        parse_str(parse_url($cmsExpr, PHP_URL_QUERY), $query);
+        if (!empty($query['host'])) {
+          $this->options['httpHost'] = $query['host'];
+        }
+      }
     }
     else {
       $this->writeln("Find CMS...", OutputInterface::VERBOSITY_DEBUG);
@@ -121,7 +128,8 @@ class CmsBootstrap {
 
     $this->writeln("CMS: " . json_encode($this->options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
     if (empty($cms['path']) || empty($cms['type']) || !file_exists($cms['path'])) {
-      throw new \Exception("Failed to parse or find a CMS");
+      $cmsJson = json_encode($cms, JSON_UNESCAPED_SLASHES);
+      throw new \Exception("Failed to parse or find a CMS $cmsJson");
     }
 
     if (PHP_SAPI === "cli") {
