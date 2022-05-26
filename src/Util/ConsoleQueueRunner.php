@@ -86,7 +86,10 @@ class ConsoleQueueRunner {
 
       if ($action === 'y' && !$this->dryRun) {
         try {
-          $task->run($taskCtx);
+          $isOK = $task->run($taskCtx);
+          if (!$isOK) {
+            throw new \Exception('Task returned false');
+          }
         }
         catch (\Exception $e) {
           // WISHLIST: For interactive mode, perhaps allow retry/skip?
