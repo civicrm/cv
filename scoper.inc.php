@@ -15,5 +15,5 @@ return [
     ],
 
     // Do not generate wrappers/aliases for `civicrm_api()` etc or various CMS-booting functions.
-    'whitelist-global-functions' => false,
+    'expose-global-functions' => false,
 ];
