@@ -21,7 +21,8 @@ class DebugContainerCommand extends BaseCommand {
       ->setDescription('Dump the container configuration')
       ->addArgument('name', InputArgument::OPTIONAL, 'An service name or regex')
       ->addOption('concrete', 'C', InputOption::VALUE_NONE, 'Display concrete class names. (This requires activating every matching service.)')
-      ->addOption('all', 'a', InputOption::VALUE_NONE, 'Display all services. (Disable container-optimizations which hide internal services.)')
+      ->addOption('all', 'a', InputOption::VALUE_NONE, 'Display all services, including private/internal.')
+      ->addOption('tag', NULL, InputOption::VALUE_REQUIRED, 'Find services by tag, including private/internal.')
       ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table'])
       ->setHelp('
 Dump the container configuration
@@ -50,6 +51,13 @@ Dump the container configuration
     else {
       $filter = function (Definition $definition, string $name) use ($filterPat) {
         return $name === $filterPat;
+      };
+    }
+
+    if ($input->getOption('tag')) {
+      $input->setOption('all', TRUE);
+      $filter = function (Definition $definition, string $name) use ($filter, $input) {
+        return $definition->getTag($input->getOption('tag')) && $filter($definition, $name);
       };
     }
 
