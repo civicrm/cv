@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Definition;
 
 class DebugContainerCommand extends BaseCommand {
 
@@ -19,6 +20,7 @@ class DebugContainerCommand extends BaseCommand {
       ->setDescription('Dump the container configuration')
       ->addArgument('name', InputArgument::OPTIONAL, 'An service name or regex')
       ->addOption('concrete', 'C', InputOption::VALUE_NONE, 'Display concrete class names. (This requires activating every matching service.)')
+      ->addOption('all', 'a', InputOption::VALUE_NONE, 'Display all services. (Disable container-optimizations which hide internal services.)')
       ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table'])
       ->setHelp('
 Dump the container configuration
@@ -31,27 +33,28 @@ Dump the container configuration
     $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
     $this->boot($input, $output);
 
-    // To probe definitions, we need access to the raw ContainerBuilder.
-    $z = new \Civi\Core\Container();
-    $c = $z->createContainer();
-    if (version_compare(\CRM_Utils_System::version(), '4.7.0', '>=')) {
-      $c->compile();
-    }
+    $c = $this->getInspectableContainer($input->getOption('all'));
 
     $filterPat = $input->getArgument('name');
     if (empty($filterPat)) {
-      $filter = function () {
+      $filter = function ($name, $definition) {
         return TRUE;
       };
     }
     elseif ($filterPat[0] === '/') {
-      $filter = function ($n) use ($filterPat) {
-        return (bool) preg_match($filterPat, $n);
+      $filter = function ($name, $definition) use ($filterPat) {
+        return (bool) preg_match($filterPat, $name);
       };
     }
     else {
-      $filter = function ($n) use ($filterPat) {
-        return $n === $filterPat;
+      $filter = function ($name, $definition) use ($filterPat) {
+        return $name === $filterPat;
+      };
+    }
+
+    if (!$input->getOption('all')) {
+      $filter = function ($name, Definition $definition) use ($filter) {
+        return $definition->isPublic() && $filter($name, $definition);
       };
     }
 
@@ -59,7 +62,7 @@ Dump the container configuration
     $definitions = $c->getDefinitions();
     ksort($definitions);
     foreach ($definitions as $name => $definition) {
-      if (!$filter($name)) {
+      if (!$filter($name, $definition)) {
         continue;
       }
 
@@ -81,6 +84,30 @@ Dump the container configuration
     }
 
     $this->sendTable($input, $output, $rows, array('service', 'class', 'extras'));
+  }
+
+  /**
+   * @param bool $isAll
+   * @return \Symfony\Component\DependencyInjection\ContainerBuilder
+   * @throws \CRM_Core_Exception
+   */
+  protected function getInspectableContainer(bool $isAll): \Symfony\Component\DependencyInjection\ContainerBuilder {
+    // To probe definitions, we need access to the raw ContainerBuilder.
+    $container = (new \Civi\Core\Container())->createContainer();
+    if (version_compare(\CRM_Utils_System::version(), '4.7.0', '<')) {
+      throw new \RuntimeException("Container inspection is only supported on 4.7.0+.");
+    }
+
+    if (is_callable([$container, 'getCompilerPassConfig'])) {
+      $passConfig = $container->getCompilerPassConfig();
+      $removingPasses = array_filter($passConfig->getRemovingPasses(), function ($pass) {
+        return !($pass instanceof \Symfony\Component\DependencyInjection\Compiler\InlineServiceDefinitionsPass);
+      });
+      $passConfig->setRemovingPasses($removingPasses);
+    }
+
+    $container->compile();
+    return $container;
   }
 
 }
