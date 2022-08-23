@@ -66,6 +66,16 @@ Dump the container configuration
         continue;
       }
 
+      $events = '?';
+      if (class_exists('Civi\Core\Event\EventScanner')) {
+        if ($definition->getTag('event_subscriber') || $definition->getTag('kernel.event_subscriber')) {
+          $events = \Civi\Core\Event\EventScanner::findListeners($definition->getClass());
+        }
+        else {
+          $events = '';
+        }
+      }
+
       $extras = array();
       foreach (['getFactoryClass', 'getFactoryMethod', 'getFactoryService', 'getFactory'] as $factoryCheck) {
         if (is_callable([$definition, $factoryCheck]) && $definition->$factoryCheck()) {
@@ -75,15 +85,15 @@ Dump the container configuration
       if ($definition->getMethodCalls()) {
         $extras[] = sprintf("calls[%s]", count($definition->getMethodCalls()));
       }
-      if ($definition->getTags()) {
-        $extras[] = sprintf("tags[%s]", count($definition->getTags()));
+      foreach ($definition->getTags() as $tag => $tagData) {
+        $extras[] = sprintf("tag[%s]", $tag);
       }
       $class = $input->getOption('concrete') ? get_class(\Civi::service($name)) : $definition->getClass();
 
-      $rows[] = array('service' => $name, 'class' => $class, 'extras' => implode(' ', $extras));
+      $rows[] = array('service' => $name, 'class' => $class, 'events' => $events ? count($events) : '', 'extras' => implode(' ', $extras));
     }
 
-    $this->sendTable($input, $output, $rows, array('service', 'class', 'extras'));
+    $this->sendTable($input, $output, $rows, array('service', 'class', 'events', 'extras'));
   }
 
   /**
