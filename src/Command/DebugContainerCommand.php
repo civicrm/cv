@@ -17,6 +17,7 @@ class DebugContainerCommand extends BaseCommand {
   protected function configure() {
     $this
       ->setName('debug:container')
+      ->setAliases(['service'])
       ->setDescription('Dump the container configuration')
       ->addArgument('name', InputArgument::OPTIONAL, 'An service name or regex')
       ->addOption('concrete', 'C', InputOption::VALUE_NONE, 'Display concrete class names. (This requires activating every matching service.)')
