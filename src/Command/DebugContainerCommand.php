@@ -22,11 +22,14 @@ class DebugContainerCommand extends BaseCommand {
       ->setDescription('Dump the container configuration')
       ->addArgument('name', InputArgument::OPTIONAL, 'An service name or regex')
       ->addOption('concrete', 'C', InputOption::VALUE_NONE, 'Display concrete class names. (This requires activating every matching service.)')
-      ->addOption('all', 'a', InputOption::VALUE_NONE, 'Display all services, including private/internal.')
-      ->addOption('tag', NULL, InputOption::VALUE_REQUIRED, 'Find services by tag, including private/internal.')
+      ->addOption('internal', 'i', InputOption::VALUE_NONE, 'Include internal services')
+      ->addOption('tag', NULL, InputOption::VALUE_REQUIRED, 'Find services by tag.')
       ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table'])
       ->setHelp('
 Dump the container configuration
+
+NOTE: By default, internal services are not displayed. However, some flags will enable display of
+internal services (eg `--all`, `--tag=XXX`, or `-v`).
 ');
     $this->configureBootOptions();
   }
@@ -36,7 +39,7 @@ Dump the container configuration
     $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
     $this->boot($input, $output);
 
-    $c = $this->getInspectableContainer($input->getOption('all'));
+    $c = $this->getInspectableContainer($input);
 
     $filterPat = $input->getArgument('name');
     if (empty($filterPat)) {
@@ -55,16 +58,22 @@ Dump the container configuration
       };
     }
 
+    if ($output->isVerbose() || $input->getOption('tag')) {
+      $input->setOption('internal', TRUE);
+    }
+
     if ($input->getOption('tag')) {
-      $input->setOption('all', TRUE);
       $filter = function (Definition $definition, string $name) use ($filter, $input) {
         return $definition->getTag($input->getOption('tag')) && $filter($definition, $name);
       };
     }
 
-    if (!$input->getOption('all')) {
+    if (!$input->getOption('internal')) {
       $filter = function (Definition $definition, string $name) use ($filter) {
-        return $definition->isPublic() && $filter($definition, $name);
+        if (!$definition->isPublic() || $definition->getTag('internal')) {
+          return FALSE;
+        }
+        return $filter($definition, $name);
       };
     }
 
@@ -93,8 +102,8 @@ Dump the container configuration
       if ($definition->getMethodCalls()) {
         $extras[] = sprintf("calls[%s]", count($definition->getMethodCalls()));
       }
-      foreach ($definition->getTags() as $tag => $tagData) {
-        $extras[] = sprintf("tag[%s]", $tag);
+      if ($definition->getTags()) {
+        $extras[] = sprintf("tag[%s]", implode(' ', array_keys($definition->getTags())));
       }
       $class = $input->getOption('concrete') ? get_class(\Civi::service($name)) : $definition->getClass();
 
@@ -142,11 +151,11 @@ Dump the container configuration
   }
 
   /**
-   * @param bool $isAll
+   * @parm \Symfony\Component\Console\Input\InputInterface $input
    * @return \Symfony\Component\DependencyInjection\ContainerBuilder
    * @throws \CRM_Core_Exception
    */
-  protected function getInspectableContainer(bool $isAll): \Symfony\Component\DependencyInjection\ContainerBuilder {
+  protected function getInspectableContainer(InputInterface $input): \Symfony\Component\DependencyInjection\ContainerBuilder {
     // To probe definitions, we need access to the raw ContainerBuilder.
     $container = (new \Civi\Core\Container())->createContainer();
     if (version_compare(\CRM_Utils_System::version(), '4.7.0', '<')) {
