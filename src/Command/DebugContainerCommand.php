@@ -2,6 +2,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\BootTrait;
+use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -104,14 +105,28 @@ Dump the container configuration
   }
 
   public function showVerboseReport(InputInterface $input, OutputInterface $output, array $definitions): void {
+    $relativizer = new Relativizer();
     foreach ($definitions as $name => $definition) {
+      /** @var \Symfony\Component\DependencyInjection\Definition $definition */
+      $class = ($input->getOption('concrete') && $definition->isPublic())
+        ? get_class(\Civi::service($name))
+        : $definition->getClass();
+
+      if (class_exists($class)) {
+        $classFile = (new \ReflectionClass($class))->getFileName();
+        $classFile = $input->getOption('concrete') ? $classFile : $relativizer->filter($classFile);
+      }
+      else {
+        $classFile = '?';
+      }
+
       $row = [];
       $row[] = ['key' => 'service', 'value' => $name];
-      $row[] = ['key' => 'class', 'value' => $input->getOption('concrete') ? get_class(\Civi::service($name)) : $definition->getClass()];
+      $row[] = ['key' => 'class', 'value' => $class];
+      $row[] = ['key' => 'class-file', 'value' => $classFile];
       foreach ($definition->getTags() as $tag => $tagData) {
         $row[] = ['key' => "tag[$tag]", 'value' => $tagData];
       }
-
       foreach ($this->getEvents($definition) as $eventName => $eventValue) {
         $row[] = ['key' => "event[$eventName]", 'value' => $eventValue];
       }
