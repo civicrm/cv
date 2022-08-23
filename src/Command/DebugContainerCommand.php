@@ -8,7 +8,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 
 class DebugContainerCommand extends BaseCommand {
 
@@ -137,17 +139,38 @@ internal services (eg `--all`, `--tag=XXX`, or `-v`).
         $row[] = ['key' => "tag[$tag]", 'value' => $tagData];
       }
       foreach ($this->getEvents($definition) as $eventName => $eventValue) {
-        $row[] = ['key' => "event[$eventName]", 'value' => $eventValue];
+        $row[] = ['key' => "event[$eventName]", 'value' => $this->toPrintableData($eventValue)];
       }
       if ($factory = $this->getFactory($definition)) {
-        $row[] = ['key' => 'factory', 'value' => $factory];
+        $row[] = ['key' => 'factory', 'value' => $this->toPrintableData($factory)];
       }
       foreach ($definition->getMethodCalls() as $n => $call) {
-        $row[] = ['key' => "call[$n]", 'value' => $call];
+        $row[] = ['key' => "call[$n]", 'value' => $this->toPrintableData($call)];
       }
 
       $this->sendTable($input, $output, $row);
     }
+  }
+
+  protected function toPrintableData($item) {
+    if ($item instanceof Reference) {
+      return '$(' . $item . ')';
+    }
+    elseif ($item instanceof ServiceClosureArgument) {
+      return $this->toPrintableData($item->getValues());
+    }
+    elseif (is_array($item)) {
+      $r = [];
+      foreach ($item as $key => $value) {
+        $r[$key] = $this->toPrintableData($value);
+      }
+      return $r;
+    }
+    elseif (is_scalar($item) || $item instanceof \stdClass) {
+      return $item;
+    }
+
+    return '(' . gettype($item) . ')';
   }
 
   /**
