@@ -145,7 +145,7 @@ internal services (eg `--all`, `--tag=XXX`, or `-v`).
         $row[] = ['key' => 'factory', 'value' => $this->toPrintableData($factory)];
       }
       foreach ($definition->getMethodCalls() as $n => $call) {
-        $row[] = ['key' => "call[$n]", 'value' => $this->toPrintableData($call)];
+        $row[] = ['key' => "call", 'value' => $this->toPrintableData($call)];
       }
 
       $this->sendTable($input, $output, $row);
