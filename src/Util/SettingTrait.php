@@ -173,4 +173,34 @@ trait SettingTrait {
     }
   }
 
+  /**
+   * @param $names
+   *
+   * @return \Closure
+   */
+  protected function createSettingFilter($names): \Closure {
+    $filterList = [];
+    foreach ($names as $filterPat) {
+      if ($filterPat[0] === '/') {
+        $filterList[] = substr($filterPat, 1, -1);
+      }
+      else {
+        $filterList[] = '^' . preg_quote($filterPat, '/') . '$';
+      }
+    }
+
+    if (empty($filterList)) {
+      $filter = function (string $name) {
+        return TRUE;
+      };
+    }
+    else {
+      $filterExpr = '/' . implode('|', $filterList) . '/i';
+      $filter = function (string $name) use ($filterExpr) {
+        return (bool) preg_match($filterExpr, $name);
+      };
+    }
+    return $filter;
+  }
+
 }

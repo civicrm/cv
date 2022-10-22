@@ -86,6 +86,7 @@ class Application extends \Symfony\Component\Console\Application {
     $commands[] = new \Civi\Cv\Command\PipeCommand();
     $commands[] = new \Civi\Cv\Command\SettingSetCommand();
     $commands[] = new \Civi\Cv\Command\SettingGetCommand();
+    $commands[] = new \Civi\Cv\Command\SettingRevertCommand();
     $commands[] = new \Civi\Cv\Command\SqlCliCommand();
     $commands[] = new \Civi\Cv\Command\ShowCommand();
     // $commands[] = new \Civi\Cv\Command\UpgradeCommand();

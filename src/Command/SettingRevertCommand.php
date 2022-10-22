@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SettingGetCommand extends BaseCommand {
+class SettingRevertCommand extends BaseCommand {
 
   use BootTrait;
   use StructuredOutputTrait;
@@ -22,9 +22,9 @@ class SettingGetCommand extends BaseCommand {
     $_I = '</info>';
 
     $this
-      ->setName('setting:get')
-      ->setAliases(['vget'])
-      ->setDescription('Read CiviCRM settings')
+      ->setName('setting:revert')
+      ->setAliases(['vdel'])
+      ->setDescription('Revert CiviCRM settings')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
       ->configureOutputOptions([
         'tabular' => TRUE,
@@ -33,26 +33,19 @@ class SettingGetCommand extends BaseCommand {
         'availColumns' => 'scope,key,value,default,explicit,mandatory,layer',
         'defaultColumns' => 'scope,key,value,layer',
       ])
+      ->addOption('dry-run', 'N', InputOption::VALUE_NONE, 'Preview the API call. Do not execute.')
       ->addOption('scope', NULL, InputOption::VALUE_REQUIRED, 'Domain to configure', 'domain')
       ->addArgument('name', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, 'An setting name or regex')
-      ->setHelp("Read CiviCRM settings
+      ->setHelp("Revert CiviCRM settings
 
 {$C}Name Filter{$_C}
 
     By default, display all settings. You may optionally lookup specific settings by name
     or by regular expression.
 
-    {$C}cv setting:get {$_C}{$I}mailerJobSize{$_I}                    (specific settings)
-    {$C}cv setting:get {$_C}{$I}mailerJobSize mailerJobsMax{$_I}      (specific settings)
-    {$C}cv setting:get /{$_C}{$I}mail{$_I}{$C}/{$_C}                           (any settings that involve \"mail\")
-
-{$C}Verbosity{$_C}
-
-    By default, display settings and their current values in a summary table.
-    For more detailed information, you may mix {$C}-v{$_C}, {$C}--columns{$_C}, and/or {$C}-out{$_C}.
-
-    {$C}cv setting:get -v{$_C}                               (detailed report, console)
-    {$C}cv setting:get --out={$_C}{$I}json-pretty{$_I}{$C} --columns={$_C}{$I}*{$_I}    (detailed report, json)
+    {$C}cv setting:revert {$_C}{$I}mailerJobSize{$_I}                    (specific settings)
+    {$C}cv setting:revert {$_C}{$I}mailerJobSize mailerJobsMax{$_I}      (specific settings)
+    {$C}cv setting:revert /{$_C}{$I}mail{$_I}{$C}/{$_C}                           (any settings that involve \"mail\")
 
 {$C}Setting Scope{$_C}
 
@@ -60,17 +53,18 @@ class SettingGetCommand extends BaseCommand {
     For most tasks in most deployments, there is only one important scope ({$I}domain #1{$_I}).
     In some edge-cases, you may need to target a specific scope Here are some example scopes:
 
-    {$C}cv setting:get --scope={$_C}{$I}domain{$_I}                   (default domain)
-    {$C}cv setting:get --scope={$_C}{$I}domain:*{$_I}                 (all domains)
-    {$C}cv setting:get --scope={$_C}{$I}domain:12{$_I}                (domain #12)
-    {$C}cv setting:get --scope={$_C}{$I}contact{$_I}{$C} --user={$_C}{$I}admin{$_I}     (admin's contact)
-    {$C}cv setting:get --scope={$_C}{$I}contact:201{$_I}              (contact #201)
+    {$C}cv setting:revert --scope={$_C}{$I}domain{$_I}                   (default domain)
+    {$C}cv setting:revert --scope={$_C}{$I}domain:*{$_I}                 (all domains)
+    {$C}cv setting:revert --scope={$_C}{$I}domain:12{$_I}                (domain #12)
+    {$C}cv setting:revert --scope={$_C}{$I}contact{$_I}{$C} --user={$_C}{$I}admin{$_I}     (admin's contact)
+    {$C}cv setting:revert --scope={$_C}{$I}contact:201{$_I}              (contact #201)
 ");
     $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->boot($input, $output);
+    $errorOutput = is_callable([$output, 'getErrorOutput']) ? $output->getErrorOutput() : $output;
 
     $filter = $this->createSettingFilter($input->getArgument('name'));
 
@@ -83,6 +77,18 @@ class SettingGetCommand extends BaseCommand {
         if (!$filter($settingKey)) {
           continue;
         }
+
+        if (!$settingBag->hasExplict($settingKey)) {
+          $errorOutput->writeln("<comment>Skip \"$settingKey\" (no value found)</comment>");
+        }
+        elseif ($input->getOption('dry-run')) {
+          $errorOutput->writeln("<comment>Revert \"$settingKey\" (dry run)</comment>");
+        }
+        else {
+          $errorOutput->writeln("<comment>Revert \"$settingKey\"</comment>");
+          $settingBag->revert($settingKey);
+        }
+
         [$encode, $decode] = $this->codec($meta, $settingKey);
         $row = [
           'scope' => $settingScope,
