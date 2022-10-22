@@ -195,7 +195,7 @@ trait SettingTrait {
       };
     }
     else {
-      $filterExpr = '/' . implode('|', $filterList) . '/i';
+      $filterExpr = '/' . implode('|', $filterList) . '/';
       $filter = function (string $name) use ($filterExpr) {
         return (bool) preg_match($filterExpr, $name);
       };
