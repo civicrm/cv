@@ -34,7 +34,7 @@ class SettingGetCommand extends BaseCommand {
         'defaultColumns' => 'scope,key,value,layer',
       ])
       ->addOption('scope', NULL, InputOption::VALUE_REQUIRED, 'Domain to configure', 'domain')
-      ->addArgument('name', InputArgument::OPTIONAL, 'An setting name or regex')
+      ->addArgument('name', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, 'An setting name or regex')
       ->setHelp("Read CiviCRM settings
 
 {$C}Name Filter{$_C}
@@ -42,8 +42,17 @@ class SettingGetCommand extends BaseCommand {
     By default, display all settings. You may optionally lookup specific settings by name
     or by regular expression.
 
-    {$C}cv setting:get {$_C}{$I}mailerJobSize{$_I}                 (specific setting)
+    {$C}cv setting:get {$_C}{$I}mailerJobSize{$_I}                 (specific settings)
+    {$C}cv setting:get {$_C}{$I}mailerJobSize mailerJobsMax{$_I}   (specific settings)
     {$C}cv setting:get /{$_C}{$I}mail{$_I}{$C}/{$_C}                        (any settings that involve \"mail\")
+
+{$C}Verbosity{$_C}
+
+    By default, display settings and their current values in a summary table.
+    For more detailed information, you may mix {$C}-v{$_C}, {$C}--columns{$_C}, and/or {$C}-out{$_C}.
+
+     {$C}cv setting:get -v{$_C}
+     {$C}cv setting:get --out={$_C}{$I}json-pretty{$_I}{$C} --columns={$_C}{$I}*{$_I}
 
 {$C}Setting Scope{$_C}
 
@@ -63,20 +72,25 @@ class SettingGetCommand extends BaseCommand {
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->boot($input, $output);
 
-    $filterPat = $input->getArgument('name');
-    if (empty($filterPat)) {
+    $filterList = [];
+    foreach ($input->getArgument('name') as $filterPat) {
+      if ($filterPat[0] === '/') {
+        $filterList[] = substr($filterPat, 1, -1);
+      }
+      else {
+        $filterList[] = '^' . preg_quote($filterPat, '/') . '$';
+      }
+    }
+
+    if (empty($filterList)) {
       $filter = function (string $name) {
         return TRUE;
       };
     }
-    elseif ($filterPat[0] === '/') {
-      $filter = function (string $name) use ($filterPat) {
-        return (bool) preg_match($filterPat, $name);
-      };
-    }
     else {
-      $filter = function (string $name) use ($filterPat) {
-        return $name === $filterPat;
+      $filterExpr = '/' . implode('|', $filterList) . '/i';
+      $filter = function (string $name) use ($filterExpr) {
+        return (bool) preg_match($filterExpr, $name);
       };
     }
 
