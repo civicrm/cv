@@ -182,6 +182,9 @@ trait SettingTrait {
     $filterList = [];
     foreach ($names as $filterPat) {
       if ($filterPat[0] === '/') {
+        if (!\CRM_Utils_String::endsWith($filterPat, '/')) {
+          throw new \RuntimeException('Malformed regular expression. (Modifiers are not supported.)');
+        }
         $filterList[] = substr($filterPat, 1, -1);
       }
       else {
