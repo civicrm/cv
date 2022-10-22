@@ -83,6 +83,8 @@ trait SettingTrait {
   public function sendSettings(InputInterface $input, OutputInterface $output, array $result): void {
     $errorOutput = is_callable([$output, 'getErrorOutput']) ? $output->getErrorOutput() : $output;
 
+    $result = $this->fillMeta($result);
+
     usort($result, function ($a, $b) {
       return strcmp($a['key'], $b['key']);
     });
@@ -151,15 +153,21 @@ trait SettingTrait {
     return [$encode, $decode];
   }
 
+  protected function fillMeta(array $result): array {
+    foreach ($result as &$row) {
+      $meta = $this->getMetadata($row['scope'])[$row['key']] ?? [];
+      foreach ($meta as $key => $value) {
+        $row["meta.$key"] = $value;
+      }
+    }
+    return $result;
+  }
+
   protected function showVerboseReport(InputInterface $input, OutputInterface $output, array $result): void {
     foreach ($result as $row) {
-      $meta = $this->getMetadata($row['scope'])[$row['key']] ?? [];
       $verboseTable = [];
       foreach ($row as $key => $value) {
         $verboseTable[] = ['key' => $key, 'value' => $value];
-      }
-      foreach ($meta as $key => $value) {
-        $verboseTable[] = ['key' => "meta.$key", 'value' => $value];
       }
       $this->sendTable($input, $output, $verboseTable);
     }

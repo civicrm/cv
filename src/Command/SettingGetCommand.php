@@ -42,17 +42,17 @@ class SettingGetCommand extends BaseCommand {
     By default, display all settings. You may optionally lookup specific settings by name
     or by regular expression.
 
-    {$C}cv setting:get {$_C}{$I}mailerJobSize{$_I}                 (specific settings)
-    {$C}cv setting:get {$_C}{$I}mailerJobSize mailerJobsMax{$_I}   (specific settings)
-    {$C}cv setting:get /{$_C}{$I}mail{$_I}{$C}/{$_C}                        (any settings that involve \"mail\")
+    {$C}cv setting:get {$_C}{$I}mailerJobSize{$_I}                    (specific settings)
+    {$C}cv setting:get {$_C}{$I}mailerJobSize mailerJobsMax{$_I}      (specific settings)
+    {$C}cv setting:get /{$_C}{$I}mail{$_I}{$C}/{$_C}                           (any settings that involve \"mail\")
 
 {$C}Verbosity{$_C}
 
     By default, display settings and their current values in a summary table.
     For more detailed information, you may mix {$C}-v{$_C}, {$C}--columns{$_C}, and/or {$C}-out{$_C}.
 
-     {$C}cv setting:get -v{$_C}
-     {$C}cv setting:get --out={$_C}{$I}json-pretty{$_I}{$C} --columns={$_C}{$I}*{$_I}
+    {$C}cv setting:get -v{$_C}                               (detailed report, console)
+    {$C}cv setting:get --out={$_C}{$I}json-pretty{$_I}{$C} --columns={$_C}{$I}*{$_I}    (detailed report, json)
 
 {$C}Setting Scope{$_C}
 
@@ -60,11 +60,11 @@ class SettingGetCommand extends BaseCommand {
     For most tasks in most deployments, there is only one important scope ({$I}domain #1{$_I}).
     In some edge-cases, you may need to target a specific scope Here are some example scopes:
 
-    {$C}cv setting:get --scope={$_C}{$I}domain{$_I}                (default domain)
-    {$C}cv setting:get --scope={$_C}{$I}domain:*{$_I}              (all domains)
-    {$C}cv setting:get --scope={$_C}{$I}domain:12{$_I}             (domain #12)
-    {$C}cv setting:get --scope={$_C}{$I}contact{$_I}{$C} --user={$_C}{$I}admin{$_I}  (admin's contact)
-    {$C}cv setting:get --scope={$_C}{$I}contact:201{$_I}           (contact #201)
+    {$C}cv setting:get --scope={$_C}{$I}domain{$_I}                   (default domain)
+    {$C}cv setting:get --scope={$_C}{$I}domain:*{$_I}                 (all domains)
+    {$C}cv setting:get --scope={$_C}{$I}domain:12{$_I}                (domain #12)
+    {$C}cv setting:get --scope={$_C}{$I}contact{$_I}{$C} --user={$_C}{$I}admin{$_I}     (admin's contact)
+    {$C}cv setting:get --scope={$_C}{$I}contact:201{$_I}              (contact #201)
 ");
     $this->configureBootOptions();
   }
