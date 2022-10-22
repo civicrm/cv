@@ -9,18 +9,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SettingCommand extends BaseCommand {
+class SettingSetCommand extends BaseCommand {
 
   use BootTrait;
   use StructuredOutputTrait;
   use SettingTrait;
-
-  /**
-   * @param string|null $name
-   */
-  public function __construct($name = NULL) {
-    parent::__construct($name);
-  }
 
   protected function configure() {
     $C = '<comment>';
@@ -30,10 +23,16 @@ class SettingCommand extends BaseCommand {
 
     $this
       ->setName('setting:set')
-      ->setAliases(['setting'])
+      ->setAliases(['vset'])
       ->setDescription('Update CiviCRM settings')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
-      ->configureOutputOptions(['tabular' => TRUE, 'shortcuts' => ['table', 'list'], 'fallback' => 'table'])
+      ->configureOutputOptions([
+        'tabular' => TRUE,
+        'shortcuts' => ['table', 'list'],
+        'fallback' => 'table',
+        'availColumns' => 'scope,key,value,default,explicit,mandatory,layer',
+        'defaultColumns' => 'scope,key,value,layer',
+      ])
       ->addOption('dry-run', 'N', InputOption::VALUE_NONE, 'Preview the API call. Do not execute.')
       ->addOption('scope', NULL, InputOption::VALUE_REQUIRED, 'Domain to configure', 'domain')
       ->addArgument('key=value', InputArgument::IS_ARRAY)
@@ -83,28 +82,37 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
       $output->writeln("{$I}Params{$_I}: " . json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 
+    $errorOutput = is_callable([$output, 'getErrorOutput']) ? $output->getErrorOutput() : $output;
+
     $result = [];
-    $useExtraEscape = in_array($input->getOption('out'), ['table']);
     foreach ($this->findSettings($input->getOption('scope')) as $settingScope => $settingBag) {
       /** @var \Civi\Core\SettingsBag $settingBag */
+      $meta = $this->getMetadata($settingScope);
+
       foreach ($params as $settingKey => $settingValue) {
+        [$encode, $decode] = $this->codec($meta, $settingKey);
         if ($settingBag->getMandatory($settingKey) !== NULL) {
-          $output->writeln("<comment>WARNING: \"$settingKey\" has a mandatory override. Stored settings may be inoperative.</comment>");
+          $errorOutput->writeln("<comment>WARNING: \"$settingKey\" has a mandatory override. Stored settings may be inoperative.</comment>");
         }
         if (!$input->getOption('dry-run')) {
-          $settingBag->set($settingKey, $settingValue);
+          $settingBag->set($settingKey, $encode($settingValue));
         }
 
         $row = [
           'scope' => $settingScope,
           'key' => $settingKey,
-          'value' => $useExtraEscape ? json_encode($settingValue, JSON_UNESCAPED_SLASHES) : $settingValue,
+          'value' => $input->getOption('dry-run') ? ($decode($settingBag->getMandatory($settingKey)) ?: $settingValue) : $decode($settingBag->get($settingKey)),
+          'default' => $decode($settingBag->getDefault($settingKey)),
+          'explicit' => $input->getOption('dry-run') ? $settingValue : $decode($settingBag->getExplicit($settingKey)),
+          'mandatory' => $decode($settingBag->getMandatory($settingKey)),
+          'layer' => $settingBag->getMandatory($settingKey) !== NULL ? 'php' : ($settingBag->hasExplict($settingKey) ? 'database' : 'default'),
         ];
         $result[] = $row;
       }
     }
 
-    $this->sendTable($input, $output, (array) $result);
+    $this->sendSettings($input, $output, $result);
+
     return 0;
   }
 

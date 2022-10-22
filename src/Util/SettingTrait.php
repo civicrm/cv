@@ -3,6 +3,7 @@
 namespace Civi\Cv\Util;
 
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 trait SettingTrait {
 
@@ -77,6 +78,91 @@ trait SettingTrait {
     }
 
     throw new \RuntimeException("Malformed scope");
+  }
+
+  public function sendSettings(InputInterface $input, OutputInterface $output, array $result): void {
+    $errorOutput = is_callable([$output, 'getErrorOutput']) ? $output->getErrorOutput() : $output;
+
+    usort($result, function ($a, $b) {
+      return strcmp($a['key'], $b['key']);
+    });
+
+    $maxColWidth = 40;
+    $abridged = FALSE;
+    if (in_array($input->getOption('out'), ['table'])) {
+      if ($output->isVerbose()) {
+        $this->showVerboseReport($input, $output, $result);
+        return;
+      }
+
+      foreach ($result as &$row) {
+        foreach (['value', 'default'] as $field) {
+          $row[$field] = json_encode($row[$field], JSON_UNESCAPED_SLASHES);
+          if (!$output->isVerbose() && mb_strlen($row[$field]) > $maxColWidth) {
+            $abridged = TRUE;
+            $row[$field] = mb_substr($row[$field], 0, $maxColWidth) . '...';
+          }
+        }
+      }
+    }
+
+    $columns = explode(',', $input->getOption('columns'));
+
+    $this->sendTable($input, $output, $result, $columns);
+    if ($abridged) {
+      $errorOutput->writeln('<comment>NOTE: Some values were truncated for readability. To see full data, use "-v" or "--out=json".</comment>');
+    }
+  }
+
+  /**
+   * @param string $scope
+   *  Ex: 'contact', 'domain', 'contact:123', 'domain:123'
+   * @return array
+   */
+  protected function getMetadata(string $scope): array {
+    if (preg_match('/^domain:(.*)$/', $scope, $m)) {
+      return \Civi\Core\SettingsMetadata::getMetadata([], $m[1]);
+    }
+    else {
+      return \Civi\Core\SettingsMetadata::getMetadata();
+    }
+  }
+
+  /**
+   * @param array $meta
+   * @param string $field
+   * @return array
+   *   Pair of callables: [$encode, $decode]
+   */
+  protected function codec(array $meta, string $field) {
+    // There are a handful of  settings with a secondary/nested encoding.
+    $encode = function($value) use ($meta, $field) {
+      if (isset($value) && !empty($meta[$field]['serialize'])) {
+        return \CRM_Core_DAO::serializeField($value, $meta[$field]['serialize']);
+      }
+      return $value;
+    };
+    $decode = function($value) use ($meta, $field) {
+      if (isset($value) && !empty($meta[$field]['serialize'])) {
+        return \CRM_Core_DAO::unSerializeField($value, $meta[$field]['serialize']);
+      }
+      return $value;
+    };
+    return [$encode, $decode];
+  }
+
+  protected function showVerboseReport(InputInterface $input, OutputInterface $output, array $result): void {
+    foreach ($result as $row) {
+      $meta = $this->getMetadata($row['scope'])[$row['key']] ?? [];
+      $verboseTable = [];
+      foreach ($row as $key => $value) {
+        $verboseTable[] = ['key' => $key, 'value' => $value];
+      }
+      foreach ($meta as $key => $value) {
+        $verboseTable[] = ['key' => "meta.$key", 'value' => $value];
+      }
+      $this->sendTable($input, $output, $verboseTable);
+    }
   }
 
 }
