@@ -8,10 +8,32 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Application extends \Symfony\Component\Console\Application {
 
   /**
+   * Determine the version number.
+   *
+   * @return string|null
+   *   Ex: '0.3.4'
+   *   Ex: NULL (if it cannot be determined)
+   */
+  public static function version(): ?string {
+    $marker = '@' . 'package' . '_' . 'version' . '@';
+    $v = '@package_version@';
+    if ($v !== $marker) {
+      return $v;
+    }
+    if (is_callable('\Composer\InstalledVersions::getVersion')) {
+      $v = \Composer\InstalledVersions::getVersion('civicrm/cv');
+      if (preg_match('/^\d+\.\d+/', $v)) {
+        return $v;
+      }
+    }
+    return NULL;
+  }
+
+  /**
    * Primary entry point for execution of the standalone command.
    */
   public static function main($binDir) {
-    $application = new Application('cv', '@package_version@');
+    $application = new Application('cv', static::version() ?? 'UNKNOWN');
 
     $application->setAutoExit(FALSE);
     $running = TRUE;
