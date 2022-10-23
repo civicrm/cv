@@ -18,7 +18,7 @@ class ExtensionEnableCommand extends BaseExtensionCommand {
   protected function configure() {
     $this
       ->setName('ext:enable')
-      ->setAliases(array('en'))
+      ->setAliases(['en', 'ext:install'])
       ->setDescription('Enable an extension')
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the local list of extensions (Default: Only refresh on cache-miss)')
       ->addOption('ignore-missing', NULL, InputOption::VALUE_NONE, 'If a requested extension is missing, skip it')
