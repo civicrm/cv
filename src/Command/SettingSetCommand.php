@@ -58,17 +58,17 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
 
     {$C}cv setting:set {$_C}[{$C}+{$_C}{$I}OP{$_I}{$C} {$_C}{$I}EXPR{$_I}]...
 
-    If you have a setting that includes structured data (e.g. objects and lists),
-    then use a \"+Option\" to manipulate the data within it.
+    If you have a setting that includes structured data (e.g. objects or lists),
+    then you may wish to update individual elements within the setting. Use a \"+Option\".
 
     Option         Examples
-    {$C}+o{$_C}|{$C}+object{$_C}     +o mailing_backend.outBound_option=3     (modify \"outBound_option\")
-                   +o !mailing_backend.outBound_option      (remove \"outBound_option\")
-    {$C}+l{$_C}|{$C}+list{$_C}       +l contact_reference_options[]=3         (append value \"3\")
-                   +l contact_reference_options+=3          (append value \"3\")
-                   +l contact_reference_options-=3          (remove value \"3\")
-                   +l contact_reference_options.0=3         (modify 0th value)
-                   +l !contact_reference_options.0          (remove 0th value)
+    {$C}+o{$_C}|{$C}+object{$_C}     {$C}+o{$_C} {$I}mailing_backend.smtpServer{$_I}{$C}={$_C}{$I}example.com{$_I}  (modify \"smtpServer\")
+                   {$C}+o{$_C} {$C}!{$_C}{$I}mailing_backend.smtpServer{$_I}             (remove \"smtpServer\")
+    {$C}+l{$_C}|{$C}+list{$_C}       {$C}+l{$_C} {$I}contact_reference_options{$_I}{$C}[]={$_C}{$I}3{$_I}           (append value \"3\")
+                   {$C}+l{$_C} {$I}contact_reference_options{$_I}{$C}+={$_C}{$I}3{$_I}            (append value \"3\")
+                   {$C}+l{$_C} {$I}contact_reference_options{$_I}{$C}-={$_C}{$I}3{$_I}            (remove value \"3\")
+                   {$C}+l{$_C} {$I}contact_reference_options.0{$_I}{$C}={$_C}{$I}3{$_I}           (modify 0th value)
+                   {$C}+l{$_C} {$C}!{$_C}{$I}contact_reference_options.0{$_I}            (remove 0th value)
 
 {$C}Setting Scope{$_C}
 
@@ -76,11 +76,11 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
     For most tasks in most deployments, there is only one important scope ({$I}domain #1{$_I}).
     In some edge-cases, you may need to target a specific scope Here are some example scopes:
 
-    {$C}cv setting --scope={$_C}{$I}domain{$_I}                (default domain)
-    {$C}cv setting --scope={$_C}{$I}domain:*{$_I}              (all domains)
-    {$C}cv setting --scope={$_C}{$I}domain:12{$_I}             (domain #12)
-    {$C}cv setting --scope={$_C}{$I}contact{$_I}{$C} --user={$_C}{$I}admin{$_I}  (admin's contact)
-    {$C}cv setting --scope={$_C}{$I}contact:201{$_I}           (contact #201)
+    {$C}cv setting:set --scope={$_C}{$I}domain{$_I}                             (default domain)
+    {$C}cv setting:set --scope={$_C}{$I}domain:*{$_I}                           (all domains)
+    {$C}cv setting:set --scope={$_C}{$I}domain:12{$_I}                          (domain #12)
+    {$C}cv setting:set --scope={$_C}{$I}contact{$_I}{$C} --user={$_C}{$I}admin{$_I}               (admin's contact)
+    {$C}cv setting:set --scope={$_C}{$I}contact:201{$_I}                        (contact #201)
 ");
     $this->configureBootOptions();
   }
