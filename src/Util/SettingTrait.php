@@ -9,16 +9,16 @@ trait SettingTrait {
 
   /**
    * @param \Symfony\Component\Console\Input\InputInterface $input
-   * @param $matches
+   * @param \Civi\Core\SettingsBag $settingsBag
+   * @param array $meta
    * @return array
    */
-  protected function parseSettingParams(InputInterface $input) {
+  protected function parseSettingParams(InputInterface $input, \Civi\Core\SettingsBag $settingsBag, array $meta): array {
     $args = $input->getArgument('key=value');
     switch ($input->getOption('in')) {
       case 'args':
-        $p = new Api4ArgParser();
+        $p = new SettingArgParser($settingsBag, $meta);
         $params = $p->parse($args);
-        $params = $this->castNumbers($params);
         break;
 
       case 'json':
@@ -30,18 +30,6 @@ trait SettingTrait {
         throw new \RuntimeException('Unknown input format');
     }
 
-    return $params;
-  }
-
-  private function castNumbers(array $params): array {
-    foreach ($params as $key => &$value) {
-      if (is_string($value) && preg_match(';^\d+$;', $value)) {
-        $value = (int) $value;
-      }
-      elseif (is_string($value) && preg_match(';^\d+\.\d+$;', $value)) {
-        $value = (float) $value;
-      }
-    }
     return $params;
   }
 

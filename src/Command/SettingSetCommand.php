@@ -42,17 +42,34 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
 
 {$C}Specification: Piped JSON${_C}
 
-    {$C}echo{$_C} {$I}JSON{$_I} | {$C}cv setting${_C} {$C}--in=json${_C}
+    {$C}echo{$_C} {$I}JSON{$_I} | {$C}cv setting:set${_C} {$C}--in=json${_C}
 
 {$C}Specification: JSON-ish Key-Value${_C}
 
-    {$C}cv setting${_C} [{$I}KEY{$_I}={$I}VALUE{$_I}]... [{$I}JSON-OBJECT{$_I}]...
+    {$C}cv setting:set${_C} [{$I}KEY{$_I}={$I}VALUE{$_I}]... [{$I}JSON-OBJECT{$_I}]...
 
     Use ${I}KEY{$_I}={$I}VALUE{$_I} to set an input to a specific value. The value may be a bare string
     or it may be JSON (beginning with '[' or '{' or '\"').
 
     Use {$I}JSON-OBJECT{$_I} if you want to pass several fields as one pure JSON string.
     A parameter which begins with '{' will be interpreted as a JSON expression.
+
+{$C}Specification: +Options${_C}
+
+    {$C}cv setting:set {$_C}[{$C}+{$_C}{$I}OP{$_I}{$C} {$_C}{$I}EXPR{$_I}]...
+
+    Each \"+Option\" is an instruction for how to perform an update.
+    These are useful for manipulating arrays, as in:
+
+    Option         Examples
+    {$C}+d{$_C}|{$C}+delete{$_C}     +d contact_reference_options.0
+    {$C}+m{$_C}|{$C}+merge{$_C}      +m contact_reference_options.0=3
+    {$C}+m{$_C}|{$C}+merge{$_C}      +m contact_reference_options[]=3
+
+    They are also useful for manipulating objects, as in:
+
+    {$C}+d{$_C}|{$C}+delete{$_C}     +d mailing_backend.outBound_option
+    {$C}+m{$_C}|{$C}+merge{$_C}      +m mailing_backend.outBound_option=3
 
 {$C}Setting Scope{$_C}
 
@@ -76,18 +93,17 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
     $_I = '</info>';
 
     $this->boot($input, $output);
-
-    $params = $this->parseSettingParams($input);
-    if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-      $output->writeln("{$I}Params{$_I}: " . json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-    }
-
     $errorOutput = is_callable([$output, 'getErrorOutput']) ? $output->getErrorOutput() : $output;
 
     $result = [];
     foreach ($this->findSettings($input->getOption('scope')) as $settingScope => $settingBag) {
       /** @var \Civi\Core\SettingsBag $settingBag */
       $meta = $this->getMetadata($settingScope);
+
+      $params = $this->parseSettingParams($input, $settingBag, $meta);
+      if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+        $output->writeln("{$I}Params{$_I}: " . json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+      }
 
       foreach ($params as $settingKey => $settingValue) {
         [$encode, $decode] = $this->codec($meta, $settingKey);
