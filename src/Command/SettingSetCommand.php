@@ -105,7 +105,7 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
           'default' => $decode($settingBag->getDefault($settingKey)),
           'explicit' => $input->getOption('dry-run') ? $settingValue : $decode($settingBag->getExplicit($settingKey)),
           'mandatory' => $decode($settingBag->getMandatory($settingKey)),
-          'layer' => $settingBag->getMandatory($settingKey) !== NULL ? 'php' : ($settingBag->hasExplict($settingKey) ? 'database' : 'default'),
+          'layer' => $settingBag->getMandatory($settingKey) !== NULL ? 'mandatory' : ($settingBag->hasExplict($settingKey) ? 'explicit' : 'default'),
         ];
         $result[] = $row;
       }
