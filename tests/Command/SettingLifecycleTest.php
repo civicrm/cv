@@ -10,6 +10,7 @@ class SettingLifecycleTest extends \Civi\Cv\CivilTestCase {
 
   public function setUp(): void {
     parent::setUp();
+    $this->cvOk('vdel /^dummy/');
   }
 
   public function testScalar() {
@@ -29,42 +30,47 @@ class SettingLifecycleTest extends \Civi\Cv\CivilTestCase {
     $this->assertNotRegExp('/dummy_scalar/', $this->cvOk('vget /dummy/'));
   }
 
-  public function testArray() {
-    $vset = $this->cvOk('vset dummy_array=\'[1, 2, 3]\'');
-    $this->assertTableHasRow(['domain', 'dummy_array', '\[1,2,3\]', 'explicit'], $vset);
+  public function testList() {
+    $vset = $this->cvOk('vset dummy_list=\'[1, 2, 3]\'');
+    $this->assertTableHasRow(['domain', 'dummy_list', '\[1,2,3\]', 'explicit'], $vset);
+    $this->assertTableHasRow(['domain', 'dummy_list', '\[1,2,3\]', 'explicit'], $this->cvOk('vget dummy_list'));
+    $this->assertTableHasRow(['domain', 'dummy_list', '\[1,2,3\]', 'explicit'], $this->cvOk('vget /^dummy/'));
 
-    $vget = $this->cvOk('vget dummy_array');
-    $this->assertTableHasRow(['domain', 'dummy_array', '\[1,2,3\]', 'explicit'], $vget);
+    $vsetAppend = $this->cvOk('vset +l dummy_list+=4 +l "dummy_list[]=foo bar"');
+    $this->assertTableHasRow(['domain', 'dummy_list', '\[1,2,3,4,"foo bar"\]', 'explicit'], $vsetAppend);
+    $this->assertTableHasRow(['domain', 'dummy_list', '\[1,2,3,4,"foo bar"\]', 'explicit'], $this->cvOk('vget dummy_list'));
 
-    $vgetRegex = $this->cvOk('vget /^dummy/');
-    $this->assertTableHasRow(['domain', 'dummy_array', '\[1,2,3\]', 'explicit'], $vgetRegex);
+    $vsetDel = $this->cvOk('vset +l !dummy_list.0');
+    $this->assertTableHasRow(['domain', 'dummy_list', '\[2,3,4,"foo bar"\]', 'explicit'], $vsetDel);
+    $this->assertTableHasRow(['domain', 'dummy_list', '\[2,3,4,"foo bar"\]', 'explicit'], $this->cvOk('vget dummy_list'));
 
-    $vsetMerge = $this->cvOk('vset +m dummy_array[]=4 +m "dummy_array[]=foo bar"');
-    $this->assertTableHasRow(['domain', 'dummy_array', '\[1,2,3,4,"foo bar"\]', 'explicit'], $vsetMerge);
+    $vsetDel2 = $this->cvOk('vset +l "dummy_list-=foo bar"');
+    $this->assertTableHasRow(['domain', 'dummy_list', '\[2,3,4\]', 'explicit'], $vsetDel2);
+    $this->assertTableHasRow(['domain', 'dummy_list', '\[2,3,4\]', 'explicit'], $this->cvOk('vget dummy_list'));
 
-    $vgetFinal = $this->cvOk('vget dummy_array');
-    $this->assertTableHasRow(['domain', 'dummy_array', '\[1,2,3,4,"foo bar"\]', 'explicit'], $vgetFinal);
+    Process::runOk($this->cv('vdel dummy_list'));
 
-    Process::runOk($this->cv('vdel dummy_array'));
-
-    $this->assertNotRegExp('/dummy_array/', $this->cvOk('vget /dummy/'));
+    $this->assertNotRegExp('/dummy_list/', $this->cvOk('vget /dummy/'));
   }
 
   public function testObject() {
     $vset = $this->cvOk('vset dummy_obj=\'{"a": 10}\'');
     $this->assertTableHasRow(['domain', 'dummy_obj', '\{"a":10\}', 'explicit'], $vset);
+    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"a":10\}', 'explicit'], $this->cvOk('vget dummy_obj'));
+    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"a":10\}', 'explicit'], $this->cvOk('vget /^dummy/'));
 
-    $vget = $this->cvOk('vget dummy_obj');
-    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"a":10\}', 'explicit'], $vget);
+    $vsetMerge = $this->cvOk('vset +o dummy_obj.b=20 +o dummy_obj.deep.x=30');
+    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"a":10,"b":20,"deep":\{"x":30\}\}', 'explicit'], $vsetMerge);
+    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"a":10,"b":20,"deep":\{"x":30\}\}', 'explicit'], $this->cvOk('vget /^dummy/'));
 
-    $vgetRegex = $this->cvOk('vget /^dummy/');
-    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"a":10\}', 'explicit'], $vgetRegex);
+    $vsetDel = $this->cvOk('vset +o !dummy_obj.a');
+    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"b":20,"deep":\{"x":30\}\}', 'explicit'], $vsetDel);
+    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"b":20,"deep":\{"x":30\}\}', 'explicit'], $this->cvOk('vget /^dummy/'));
 
-    $vsetMerge = $this->cvOk('vset +m dummy_obj.b=20 +m dummy_obj.de.ep=30');
-    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"a":10,"b":20,"de":\{"ep":30\}\}', 'explicit'], $vsetMerge);
-
-    $vgetFinal = $this->cvOk('vget /^dummy/');
-    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"a":10,"b":20,"de":\{"ep":30\}\}', 'explicit'], $vgetFinal);
+    $vsetDel2 = $this->cvOk('vset +o !dummy_obj.deep.x');
+    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"b":20,"deep":\[\]\}', 'explicit'], $vsetDel2);
+    $this->assertTableHasRow(['domain', 'dummy_obj', '\{"b":20,"deep":\[\]\}', 'explicit'], $this->cvOk('vget /^dummy/'));
+    // We leave an empty object. For PHP-JSON, there's an ambiguity between `[]` and `{}`.
 
     Process::runOk($this->cv('vdel dummy_obj'));
     $this->assertNotRegExp('/dummy_obj/', $this->cvOk('vget /dummy/'));

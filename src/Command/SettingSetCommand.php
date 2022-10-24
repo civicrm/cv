@@ -58,18 +58,17 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
 
     {$C}cv setting:set {$_C}[{$C}+{$_C}{$I}OP{$_I}{$C} {$_C}{$I}EXPR{$_I}]...
 
-    Each \"+Option\" is an instruction for how to perform an update.
-    These are useful for manipulating arrays, as in:
+    If you have a setting that includes structured data (e.g. objects and lists),
+    then use a \"+Option\" to manipulate the data within it.
 
     Option         Examples
-    {$C}+d{$_C}|{$C}+delete{$_C}     +d contact_reference_options.0
-    {$C}+m{$_C}|{$C}+merge{$_C}      +m contact_reference_options.0=3
-    {$C}+m{$_C}|{$C}+merge{$_C}      +m contact_reference_options[]=3
-
-    They are also useful for manipulating objects, as in:
-
-    {$C}+d{$_C}|{$C}+delete{$_C}     +d mailing_backend.outBound_option
-    {$C}+m{$_C}|{$C}+merge{$_C}      +m mailing_backend.outBound_option=3
+    {$C}+o{$_C}|{$C}+object{$_C}     +o mailing_backend.outBound_option=3     (modify \"outBound_option\")
+                   +o !mailing_backend.outBound_option      (remove \"outBound_option\")
+    {$C}+l{$_C}|{$C}+list{$_C}       +l contact_reference_options[]=3         (append value \"3\")
+                   +l contact_reference_options+=3          (append value \"3\")
+                   +l contact_reference_options-=3          (remove value \"3\")
+                   +l contact_reference_options.0=3         (modify 0th value)
+                   +l !contact_reference_options.0          (remove 0th value)
 
 {$C}Setting Scope{$_C}
 

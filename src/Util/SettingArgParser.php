@@ -35,67 +35,65 @@ class SettingArgParser extends AbstractPlusParser {
    */
   protected function applyOption(array &$params, string $type, string $expr): void {
     $aliases = [
-      // 'a' => 'append',
-      // 'm' => 'update',
-      'm' => 'merge',
-      'd' => 'delete',
+      'o' => 'object',
+      'l' => 'list',
     ];
     $type = $aliases[$type] ?? $type;
 
-    switch ($type) {
-      // // +a some_rows={"new":"row"}
-      // case 'append':
-      //   [$key, $value] = $this->parseAssignment($expr);
-      //   $keyParts = explode($this->pathDelimiter, $key);
-      //   $this->includeBaseSetting($params, $keyParts[0]);
-      //
-      //   $fullValue = \CRM_Utils_Array::pathGet($params, $keyParts, []);
-      //   if (!in_array($value, $fullValue)) {
-      //     $fullValue[] = $value;
-      //   }
-      //   ArrayUtil::pathSet($params, $keyParts, $fullValue);
-      //   break;
+    [$key, $op, $value] = $this->parseRichOp($expr);
+    $keyParts = explode($this->pathDelimiter, $key);
+    $this->includeBaseSetting($params, $keyParts[0]);
 
-      // // +u mailing_backend.outBoundOption=2
-      // case 'update':
-      //   [$key, $value] = $this->parseAssignment($expr);
-      //   $keyParts = explode($this->pathDelimiter, $key);
-      //   $this->includeBaseSetting($params, $keyParts[0]);
-      //
-      //   ArrayUtil::pathSet($params, $keyParts, $value);
-      //   break;
-
-      // +m mailing_backend.outBoundOption=2
-      // +m some_list[]=100
-      // +m some_rows[]={"field1":"value1","field2":"value2"}
-      case 'merge':
-        [$key, $op, $value] = $this->parseValueUpdate($expr);
-        $keyParts = explode($this->pathDelimiter, $key);
-        $this->includeBaseSetting($params, $keyParts[0]);
-
-        if ($op === '=') {
-          \CRM_Utils_Array::pathSet($params, $keyParts, $value);
-        }
-        elseif ($op === '[]=') {
-          $fullValue = \CRM_Utils_Array::pathGet($params, $keyParts, []);
-          $fullValue[] = $value;
-          \CRM_Utils_Array::pathSet($params, $keyParts, $fullValue);
-        }
-        else {
-          throw new \RuntimeException("Unrecognized value operator: $op");
-        }
+    switch ("$type $op") {
+      // Assign value at specific location, eg
+      // +object mailing_backend.outBoundOption=2
+      // +list contact_reference_options.0=3
+      case 'list =':
+      case 'object =':
+        ArrayUtil::pathSet($params, $keyParts, $value);
         break;
 
-      // +d mailing_backend
-      // +d mailing_backend.outBound_option
-      case 'delete':
-        $keyParts = explode($this->pathDelimiter, $expr);
-        if (count($keyParts) === 1) {
-          $params[$expr] = NULL;
+      // Add value to a list, eg
+      // +list contact_reference_options[]=3
+      // +list contact_reference_options+=3
+      case 'list +=':
+      case 'list []=':
+        $fullValue = \CRM_Utils_Array::pathGet($params, $keyParts, []);
+        if (!in_array($value, $fullValue)) {
+          $fullValue[] = $value;
         }
-        else {
-          \CRM_Utils_Array::pathUnset($params, $keyParts);
+        ArrayUtil::pathSet($params, $keyParts, $fullValue);
+        break;
+
+      // Remove value from a list, eg
+      // +list contact_reference_options-=3
+      case 'list -=':
+        $fullValue = \CRM_Utils_Array::pathGet($params, $keyParts, []);
+        $fullValue = array_diff($fullValue, [$value]);
+        ArrayUtil::pathSet($params, $keyParts, $fullValue);
+        break;
+
+      // Remove offset from a list
+      // +list !contact_reference_options.0
+      case 'list !':
+        if (count($keyParts) <= 1) {
+          throw new \RuntimeException("Expression \"$expr\" should specify which item to remove.");
         }
+        $parent = $keyParts;
+        $offset = array_pop($parent);
+        $arrayValue = \CRM_Utils_Array::pathGet($params, $parent);
+        unset($arrayValue[$offset]);
+        $arrayValue = array_values($arrayValue);
+        \CRM_Utils_Array::pathSet($params, $parent, $arrayValue);
+        break;
+
+      // Remove key from object, eg
+      // +object !mailing_backend.outBoundOption
+      case 'object !':
+        if (count($keyParts) <= 1) {
+          throw new \RuntimeException("Expression \"$expr\" should specify which property to remove.");
+        }
+        \CRM_Utils_Array::pathUnset($params, $keyParts);
         break;
 
       default:
@@ -107,23 +105,6 @@ class SettingArgParser extends AbstractPlusParser {
     [$encode, $decode] = SettingCodec::codec($this->settingsMeta, $settingKey);
     if (!isset($params[$settingKey])) {
       $params[$settingKey] = $decode($this->settingsBag->get($settingKey));
-    }
-  }
-
-  /**
-   * @param string $expr
-   *   Ex: a=b
-   *   Ex: a[]=b
-   * @return array
-   *   Ex: ['a', '=', 'b']
-   *   Ex: ['a', '[]=', 'b']
-   */
-  public function parseValueUpdate($expr) {
-    if (preg_match('/^([a-zA-Z0-9_:\.]+)\s*(=|\[\]=)\s*(.*)$/', $expr, $matches)) {
-      return [$matches[1], $matches[2], $this->parseValueExpr($matches[3])];
-    }
-    else {
-      throw new \RuntimeException("Error parsing \"value\": $expr");
     }
   }
 
@@ -144,6 +125,31 @@ class SettingArgParser extends AbstractPlusParser {
       return (float) $value;
     }
     return $value;
+  }
+
+  /**
+   * @param $expr
+   *   Ex: 'a+=z'
+   *   Ex: 'a.b.c={"z":1}'
+   * @return array
+   *   Ex: ['a', '+=', 'z']
+   *   Ex: ['a.b.c', '=', [z => 1]]
+   */
+  public function parseRichOp($expr) {
+    if (preg_match('/^!([a-zA-Z0-9_:\.]+)\s*$/i', $expr, $matches)) {
+      return [$matches[1], '!'];
+    }
+    elseif (preg_match('/^([a-zA-Z0-9_:\.]+)\s*(=|\[\]=|\+=|-=)\s*(.*)$/i', $expr, $matches)) {
+      if (!empty($matches[3])) {
+        return [$matches[1], strtoupper(trim($matches[2])), $this->parseValueExpr(trim($matches[3]))];
+      }
+      else {
+        return [$matches[1], strtoupper($matches[2])];
+      }
+    }
+    else {
+      throw new \RuntimeException("Error parsing expression: $expr");
+    }
   }
 
 }
