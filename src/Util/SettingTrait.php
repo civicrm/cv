@@ -137,20 +137,7 @@ trait SettingTrait {
    *   Pair of callables: [$encode, $decode]
    */
   protected function codec(array $meta, string $field) {
-    // There are a handful of  settings with a secondary/nested encoding.
-    $encode = function($value) use ($meta, $field) {
-      if (isset($value) && !empty($meta[$field]['serialize'])) {
-        return \CRM_Core_DAO::serializeField($value, $meta[$field]['serialize']);
-      }
-      return $value;
-    };
-    $decode = function($value) use ($meta, $field) {
-      if (isset($value) && !empty($meta[$field]['serialize'])) {
-        return \CRM_Core_DAO::unSerializeField($value, $meta[$field]['serialize']);
-      }
-      return $value;
-    };
-    return [$encode, $decode];
+    return SettingCodec::codec($meta, $field);
   }
 
   protected function fillMeta(array $result): array {
