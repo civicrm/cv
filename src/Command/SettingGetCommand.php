@@ -32,6 +32,7 @@ class SettingGetCommand extends BaseCommand {
         'fallback' => 'table',
         'availColumns' => 'scope,key,value,default,explicit,mandatory,layer',
         'defaultColumns' => 'scope,key,value,layer',
+        'specialFormats' => ['civicrm.settings.php'],
       ])
       ->addOption('scope', NULL, InputOption::VALUE_REQUIRED, 'Domain to configure', 'domain')
       ->addArgument('name', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, 'An setting name or regex')
@@ -46,13 +47,14 @@ class SettingGetCommand extends BaseCommand {
     {$C}cv setting:get {$_C}{$I}mailerJobSize mailerJobsMax{$_I}      (specific settings)
     {$C}cv setting:get /{$_C}{$I}mail{$_I}{$C}/{$_C}                           (any settings that involve \"mail\")
 
-{$C}Verbosity{$_C}
+{$C}Output Modes{$_C}
 
     By default, display settings and their current values in a summary table.
     For more detailed information, you may mix {$C}-v{$_C}, {$C}--columns{$_C}, and/or {$C}-out{$_C}.
 
     {$C}cv setting:get -v{$_C}                               (detailed report, console)
     {$C}cv setting:get --out={$_C}{$I}json-pretty{$_I}{$C} --columns={$_C}{$I}*{$_I}    (detailed report, json)
+    {$C}cv setting:get --out={$_C}{$I}civicrm.settings.php{$_I}       (export for use in civicrm.settings.php)
 
 {$C}Setting Scope{$_C}
 
