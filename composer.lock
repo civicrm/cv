@@ -4,62 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b40d77203055b1e4acd0dcf4bcd48fea",
+    "content-hash": "6d0a6110756fd533477ba3f2d2c56e87",
     "packages": [
-        {
-            "name": "civicrm/composer-downloads-plugin",
-            "version": "v3.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/civicrm/composer-downloads-plugin.git",
-                "reference": "3aabb6d259a86158d01829fc2c62a2afb9618877"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/civicrm/composer-downloads-plugin/zipball/3aabb6d259a86158d01829fc2c62a2afb9618877",
-                "reference": "3aabb6d259a86158d01829fc2c62a2afb9618877",
-                "shasum": ""
-            },
-            "require": {
-                "composer-plugin-api": "^1.1 || ^2.0",
-                "php": ">=5.6",
-                "togos/gitignore": "~1.1.1"
-            },
-            "require-dev": {
-                "composer/composer": "~1.0 || ~2.0",
-                "friendsofphp/php-cs-fixer": "^2.3",
-                "phpunit/phpunit": "^5.7",
-                "totten/process-helper": "^1.0.1"
-            },
-            "type": "composer-plugin",
-            "extra": {
-                "class": "LastCall\\DownloadsPlugin\\Plugin"
-            },
-            "autoload": {
-                "psr-4": {
-                    "LastCall\\DownloadsPlugin\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Rob Bayliss",
-                    "email": "rob@lastcallmedia.com"
-                },
-                {
-                    "name": "Tim Otten",
-                    "email": "totten@civicrm.org"
-                }
-            ],
-            "description": "Composer plugin for downloading additional files within any composer package.",
-            "support": {
-                "source": "https://github.com/civicrm/composer-downloads-plugin/tree/v3.0.1"
-            },
-            "time": "2020-11-02T05:26:23+00:00"
-        },
         {
             "name": "dnoegel/php-xdg-base-dir",
             "version": "v0.1.1",
@@ -91,6 +37,10 @@
                 "MIT"
             ],
             "description": "implementation of xdg base directory specification for php",
+            "support": {
+                "issues": "https://github.com/dnoegel/php-xdg-base-dir/issues",
+                "source": "https://github.com/dnoegel/php-xdg-base-dir/tree/v0.1.1"
+            },
             "time": "2019-12-04T15:06:13+00:00"
         },
         {
@@ -133,6 +83,10 @@
                     "email": "jakub.onderka@gmail.com"
                 }
             ],
+            "support": {
+                "issues": "https://github.com/JakubOnderka/PHP-Console-Color/issues",
+                "source": "https://github.com/JakubOnderka/PHP-Console-Color/tree/master"
+            },
             "abandoned": "php-parallel-lint/php-console-color",
             "time": "2018-09-29T17:23:10+00:00"
         },
@@ -180,6 +134,10 @@
                 }
             ],
             "description": "Highlight PHP code in terminal",
+            "support": {
+                "issues": "https://github.com/JakubOnderka/PHP-Console-Highlighter/issues",
+                "source": "https://github.com/JakubOnderka/PHP-Console-Highlighter/tree/master"
+            },
             "abandoned": "php-parallel-lint/php-console-highlighter",
             "time": "2018-09-29T18:48:56+00:00"
         },
@@ -232,6 +190,10 @@
                 "parser",
                 "php"
             ],
+            "support": {
+                "issues": "https://github.com/nikic/PHP-Parser/issues",
+                "source": "https://github.com/nikic/PHP-Parser/tree/v3.1.5"
+            },
             "time": "2018-02-28T20:30:58+00:00"
         },
         {
@@ -281,6 +243,10 @@
                 "container-interop",
                 "psr"
             ],
+            "support": {
+                "issues": "https://github.com/php-fig/container/issues",
+                "source": "https://github.com/php-fig/container/tree/master"
+            },
             "time": "2017-02-14T16:28:37+00:00"
         },
         {
@@ -354,6 +320,10 @@
                 "interactive",
                 "shell"
             ],
+            "support": {
+                "issues": "https://github.com/bobthecow/psysh/issues",
+                "source": "https://github.com/bobthecow/psysh/tree/v0.10.2"
+            },
             "time": "2020-03-21T06:55:27+00:00"
         },
         {
@@ -427,6 +397,9 @@
             ],
             "description": "Eases the creation of beautiful and testable command line interfaces",
             "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/console/tree/v4.4.34"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -487,6 +460,9 @@
             ],
             "description": "Provides basic utilities for the filesystem",
             "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/filesystem/tree/v4.4.27"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -530,12 +506,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Ctype\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Ctype\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -559,6 +535,9 @@
                 "polyfill",
                 "portable"
             ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.15.0"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -602,12 +581,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Mbstring\\": ""
-                },
                 "files": [
                     "bootstrap.php"
-                ]
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Mbstring\\": ""
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -632,6 +611,9 @@
                 "portable",
                 "shim"
             ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.15.0"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -676,12 +658,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php73\\": ""
-                },
                 "files": [
                     "bootstrap.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php73\\": ""
+                },
                 "classmap": [
                     "Resources/stubs"
                 ]
@@ -708,6 +690,9 @@
                 "portable",
                 "shim"
             ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php73/tree/v1.23.0"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -752,12 +737,12 @@
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php80\\": ""
-                },
                 "files": [
                     "bootstrap.php"
                 ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php80\\": ""
+                },
                 "classmap": [
                     "Resources/stubs"
                 ]
@@ -788,6 +773,9 @@
                 "portable",
                 "shim"
             ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.23.1"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -847,6 +835,9 @@
             ],
             "description": "Executes commands in sub-processes",
             "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/process/tree/v4.4.35"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -923,6 +914,9 @@
                 "interoperability",
                 "standards"
             ],
+            "support": {
+                "source": "https://github.com/symfony/service-contracts/tree/v1.1.11"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -1006,6 +1000,9 @@
                 "debug",
                 "dump"
             ],
+            "support": {
+                "source": "https://github.com/symfony/var-dumper/tree/v3.4.38"
+            },
             "funding": [
                 {
                     "url": "https://symfony.com/sponsor",
@@ -1021,39 +1018,6 @@
                 }
             ],
             "time": "2020-02-14T12:39:29+00:00"
-        },
-        {
-            "name": "togos/gitignore",
-            "version": "1.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/TOGoS/PHPGitIgnore.git",
-                "reference": "32bc0830e4123f670adcbf5ddda5bef362f4f4d4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/TOGoS/PHPGitIgnore/zipball/32bc0830e4123f670adcbf5ddda5bef362f4f4d4",
-                "reference": "32bc0830e4123f670adcbf5ddda5bef362f4f4d4",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.2"
-            },
-            "require-dev": {
-                "togos/simpler-test": "1.1.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "TOGoS_GitIgnore_": "src/main/php/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Parser for .gitignore (and sparse-checkout, and anything else using the same format) files",
-            "time": "2019-04-19T19:16:58+00:00"
         }
     ],
     "packages-dev": [],
