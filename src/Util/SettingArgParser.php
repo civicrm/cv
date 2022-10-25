@@ -69,7 +69,7 @@ class SettingArgParser extends AbstractPlusParser {
       // +list contact_reference_options-=3
       case 'list -=':
         $fullValue = \CRM_Utils_Array::pathGet($params, $keyParts, []);
-        $fullValue = array_diff($fullValue, [$value]);
+        $fullValue = array_values(array_diff($fullValue, [$value]));
         ArrayUtil::pathSet($params, $keyParts, $fullValue);
         break;
 
