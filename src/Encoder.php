@@ -89,6 +89,22 @@ class Encoder {
           return gettype($data);
         }
 
+      case 'civicrm.settings.php':
+        // SpecialFormat: Blurbs for civicrm.settings.php. Used by `setting:get` command.
+        $buf = '';
+        foreach ($data as $row) {
+          if (!isset($row['scope']) || !isset($row['key']) || !isset($row['value'])) {
+            throw new \RuntimeException("Cannot format result for civicrm.settings.php. Must have columns: scope,key,value");
+          }
+          $scope = strpos($row['scope'], 'contact') !== FALSE ? 'contact' : 'domain';
+          $buf .= sprintf("\$civicrm_setting[%s][%s] = %s;\n",
+            var_export($scope, TRUE),
+            var_export($row['key'], TRUE),
+            var_export($row['value'], TRUE)
+          );
+        }
+        return $buf;
+
       default:
         throw new \RuntimeException('Unknown output format');
     }

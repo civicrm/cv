@@ -48,6 +48,7 @@ trait StructuredOutputTrait {
    *     specify a format. (Default: json-pretty)
    *   - defaultColumns: string|NULL, a comma-separated list of default columns to display
    *   - availColumns: string|NULL, a comma-separated list of columns which may be displayed
+   *   - specialFormats: array, list of specialized output formats to enable. (By default, hese are not available on most commands.)
    *
    * NOTE: The --columns option will only defined if 'defaultColumns' or/and 'availColumns'
    * is passed.
@@ -58,6 +59,9 @@ trait StructuredOutputTrait {
     $fallback = !empty($config['fallback']) ? $config['fallback'] : 'json-pretty';
 
     $formats = !empty($config['tabular']) ? Encoder::getTabularFormats() : Encoder::getFormats();
+    if (!empty($config['specialFormats'])) {
+      $formats = array_unique(array_merge($formats, $config['specialFormats']));
+    }
     sort($formats);
 
     $this->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', $formats) . ')', Encoder::getDefaultFormat($fallback));
