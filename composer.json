@@ -9,12 +9,11 @@
         }
     ],
     "require": {
-        "php": ">=7.1.3",
+        "php": ">=7.2.0",
         "symfony/console": "^4",
         "symfony/process": "^4",
         "symfony/filesystem": "^4",
-        "psy/psysh": "@stable",
-        "civicrm/composer-downloads-plugin": "~2.1|^3"
+        "psy/psysh": "@stable"
     },
     "autoload": {
         "psr-4": {
@@ -26,20 +25,8 @@
     ],
     "config": {
         "platform": {
-            "php": "7.1.3"
+            "php": "7.2.0"
         },
-        "bin-dir": "bin",
-        "allow-plugins": {
-            "civicrm/composer-downloads-plugin": true
-        }
-    },
-    "extra": {
-        "downloads": {
-            "box": {
-                "url": "https://github.com/humbug/box/releases/download/3.16.0/box.phar",
-                "path": "bin/box",
-                "type": "phar"
-            }
-        }
+        "bin-dir": "bin"
     }
 }

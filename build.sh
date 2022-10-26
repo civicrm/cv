@@ -9,13 +9,17 @@ function absdirname() {
 }
 
 PRJDIR=$(absdirname "$0")
-export PATH="$PRJDIR/bin:$PATH"
-
 set -ex
+
+BOX_VERSION=3.16.0
+BOX_URL="https://github.com/box-project/box/releases/download/${BOX_VERSION}/box.phar"
+BOX_DIR="$PRJDIR/extern/box-$BOX_VERSION"
+BOX_BIN="$BOX_DIR/box"
+[ ! -f "$BOX_BIN" ] && ( mkdir -p "$BOX_DIR" ; curl -L "$BOX_URL" -o "$BOX_BIN" )
 
 pushd "$PRJDIR" >> /dev/null
   composer install --prefer-dist --no-progress --no-suggest --no-dev
-  BOX_ALLOW_XDEBUG=1 php -d phar.readonly=0 ./bin/box compile -v
+  BOX_ALLOW_XDEBUG=1 php -d phar.readonly=0 "$BOX_BIN" compile -v
 
   ## Box needs the PHP INI to specify `phar.readonly=0`. We've being doing this with `php -d` since forever.
   ## It appears that newer versions of Box try to do this automatically (yah!), but the implementation is buggy (arg!).
