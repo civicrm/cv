@@ -40,21 +40,21 @@ class SettingSetCommand extends BaseCommand {
 
 If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_I} ({$I}-N{$_I}).
 
-{$C}Specification: Piped JSON${_C}
+{$C}Specification: Piped JSON{$_C}
 
-    {$C}echo{$_C} {$I}JSON{$_I} | {$C}cv setting:set${_C} {$C}--in=json${_C}
+    {$C}echo{$_C} {$I}JSON{$_I} | {$C}cv setting:set{$_C} {$C}--in=json{$_C}
 
-{$C}Specification: JSON-ish Key-Value${_C}
+{$C}Specification: JSON-ish Key-Value{$_C}
 
-    {$C}cv setting:set${_C} [{$I}KEY{$_I}={$I}VALUE{$_I}]... [{$I}JSON-OBJECT{$_I}]...
+    {$C}cv setting:set{$_C} [{$I}KEY{$_I}={$I}VALUE{$_I}]... [{$I}JSON-OBJECT{$_I}]...
 
-    Use ${I}KEY{$_I}={$I}VALUE{$_I} to set an input to a specific value. The value may be a bare string
+    Use {$I}KEY{$_I}={$I}VALUE{$_I} to set an input to a specific value. The value may be a bare string
     or it may be JSON (beginning with '[' or '{' or '\"').
 
     Use {$I}JSON-OBJECT{$_I} if you want to pass several fields as one pure JSON string.
     A parameter which begins with '{' will be interpreted as a JSON expression.
 
-{$C}Specification: +Options${_C}
+{$C}Specification: +Options{$_C}
 
     {$C}cv setting:set {$_C}[{$C}+{$_C}{$I}OP{$_I}{$C} {$_C}{$I}EXPR{$_I}]...
 

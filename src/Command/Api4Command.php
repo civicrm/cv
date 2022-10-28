@@ -59,13 +59,13 @@ Below, we consider a specification for each format and a set of examples.
 
 If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_I} ({$I}-N{$_I}).
 
-{$C}Specification: Piped JSON${_C}
+{$C}Specification: Piped JSON{$_C}
 
-    {$C}echo{$_C} {$I}JSON{$_I} | {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} {$C}--in=json${_C}
+    {$C}echo{$_C} {$I}JSON{$_I} | {$C}cv api4{$_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} {$C}--in=json{$_C}
 
-{$C}Specification: +Options${_C}
+{$C}Specification: +Options{$_C}
 
-    {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} [{$C}+{$_C}{$I}OP{$_I}{$C} {$_C}{$I}EXPR{$_I}]...
+    {$C}cv api4{$_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} [{$C}+{$_C}{$I}OP{$_I}{$C} {$_C}{$I}EXPR{$_I}]...
 
     Each \"+Option\" allows you to specify a common APIv4 parameter using a
     pithy, purpose-built notation. For example:
@@ -87,11 +87,11 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
     NOTE: The +{$I}OP{$_I} may be written long ({$C}+where{$_C}) or short ({$C}+w{$_C}). It is
     valid to separate the +{$I}OP{$_I} and {$I}EXPR{$_I} using a space, colon, or equals sign.
 
-{$C}Specification: JSON-ish Key-Value${_C}
+{$C}Specification: JSON-ish Key-Value{$_C}
 
-    {$C}cv api4${_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} [{$I}KEY{$_I}={$I}VALUE{$_I}]... [{$I}JSON-OBJECT{$_I}]...
+    {$C}cv api4{$_C} {$I}ENTITY{$_I}.{$I}ACTION{$_I} [{$I}KEY{$_I}={$I}VALUE{$_I}]... [{$I}JSON-OBJECT{$_I}]...
 
-    Use ${I}KEY{$_I}={$I}VALUE{$_I} to set an input to a specific value. The value may be a bare string
+    Use {$I}KEY{$_I}={$I}VALUE{$_I} to set an input to a specific value. The value may be a bare string
     or it may be JSON (beginning with '[' or '{' or '\"').
 
     Use {$I}JSON-OBJECT{$_I} if you want to pass several fields as one pure JSON string.

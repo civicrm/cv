@@ -15,6 +15,11 @@ class FillCommand extends BaseCommand {
 
   protected $fields;
 
+  /**
+   * @var array
+   */
+  protected $defaults;
+
   protected function configure() {
     $this
       ->setName('vars:fill')
