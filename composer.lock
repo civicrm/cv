@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee32fc53fbf914355ac0e13741212dc6",
+    "content-hash": "2bd12e959edf0f66e93f6c20c9180d6f",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -140,6 +140,42 @@
             },
             "abandoned": "php-parallel-lint/php-console-highlighter",
             "time": "2018-09-29T18:48:56+00:00"
+        },
+        {
+            "name": "lesser-evil/shell-verbosity-is-evil",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/totten/shell-verbosity-is-evil.git",
+                "reference": "4195bce7e3adaeda6d4747a1f3ec3c39b124f169"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/totten/shell-verbosity-is-evil/zipball/4195bce7e3adaeda6d4747a1f3ec3c39b124f169",
+                "reference": "4195bce7e3adaeda6d4747a1f3ec3c39b124f169",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "LesserEvil\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tim Otten",
+                    "email": "totten@civicrm.org"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/totten/shell-verbosity-is-evil/issues",
+                "source": "https://github.com/totten/shell-verbosity-is-evil/tree/v1.0.0"
+            },
+            "time": "2022-11-02T23:02:43+00:00"
         },
         {
             "name": "nikic/php-parser",
