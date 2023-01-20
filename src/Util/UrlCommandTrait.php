@@ -24,7 +24,8 @@ trait UrlCommandTrait {
     $this
       ->addArgument('path', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, 'Relative path to a CiviCRM page, such as "civicrm/contact/view?reset=1&cid=1"')
       ->addOption('relative', 'r', InputOption::VALUE_NONE, 'Prefer relative URL format. (Default: absolute)')
-      ->addOption('frontend', 'f', InputOption::VALUE_NONE, 'Generate a frontend URL (Default: backend)')
+      ->addOption('frontend', 'f', InputOption::VALUE_NONE, 'Equivalent to --entry=frontend')
+      ->addOption('entry', NULL, InputOption::VALUE_REQUIRED, 'Request frontend or backend style URLs', 'default')
       ->addOption('login', 'L', InputOption::VALUE_NONE, 'Add an authentication code (based on current user; uses authx; expires=' . $this->defaultJwtTimeout . 's)')
       ->addOption('ext', 'x', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'An extension name. Identify the extension by full key ("org.example.foobar") or short name ("foobar"). Use "." for the default extension dir.')
       ->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'A config property. (Ex: "templateCompileDir/en_US")')
@@ -246,8 +247,9 @@ trait UrlCommandTrait {
     $path = parse_url($pathExpr, PHP_URL_PATH);
     $query = parse_url($pathExpr, PHP_URL_QUERY);
     $fragment = parse_url($pathExpr, PHP_URL_FRAGMENT);
+    $entry = $input->getOption('frontend') ? 'frontend' : $input->getOption('entry');
 
-    return array(
+    return [
       'type' => 'router',
       'expr' => $pathExpr,
       'value' => \CRM_Utils_System::url(
@@ -256,10 +258,10 @@ trait UrlCommandTrait {
         !$input->getOption('relative'),
         $fragment,
         FALSE,
-        (bool) $input->getOption('frontend'),
-        (bool) !$input->getOption('frontend')
+        ($entry === 'frontend'),
+        ($entry === 'backend')
       ),
-    );
+    ];
   }
 
 }
