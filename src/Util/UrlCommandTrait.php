@@ -36,11 +36,11 @@ trait UrlCommandTrait {
   /**
    * @param \Symfony\Component\Console\Input\InputInterface $input
    * @param \Symfony\Component\Console\Output\OutputInterface $output
-   *
+   * @param bool $useDefault
    * @return array
    * @throws \CRM_Core_Exception
    */
-  protected function createUrls(InputInterface $input, OutputInterface $output): array {
+  protected function createUrls(InputInterface $input, OutputInterface $output, bool $useDefault = TRUE): array {
     $rows = [];
     if ($input->getOption('ext')) {
       foreach ($input->getOption('ext') as $extExpr) {
@@ -63,7 +63,12 @@ trait UrlCommandTrait {
       }
     }
     if (count($rows) === 0) {
-      $rows[] = $this->resolveRoute('', $input);
+      if ($useDefault) {
+        $rows[] = $this->resolveRoute('', $input);
+      }
+      else {
+        throw new \RuntimeException("No paths specified");
+      }
     }
 
     if ($input->getOption('login')) {
