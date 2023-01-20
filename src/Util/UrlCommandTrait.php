@@ -82,6 +82,9 @@ trait UrlCommandTrait {
           throw new \RuntimeException('Missing required extension: authx');
         }
       }
+
+      $authxFlow = $input->hasOption('authx-flow') ? $input->getOption('authx-flow') : 'login';
+
       $cid = \CRM_Core_Session::getLoggedInContactID();
       if (!$cid) {
         throw new \RuntimeException('The "--login" option requires specifying an active user/contact ("--user=X").');
@@ -92,9 +95,26 @@ trait UrlCommandTrait {
         'scope' => 'authx',
       ]);
       $rows = array_map(
-        function ($row) use ($token) {
-          $delim = strpos($row['value'], '?') === FALSE ? '?' : '&';
-          $row['value'] .= $delim . '_authxSes=1&_authx=Bearer+' . urlencode($token);
+        function ($row) use ($token, $authxFlow) {
+          switch ($authxFlow) {
+            case 'login':
+              $delim = strpos($row['value'], '?') === FALSE ? '?' : '&';
+              $row['value'] .= $delim . '_authxSes=1&_authx=Bearer+' . urlencode($token);
+              break;
+
+            case 'param':
+              $delim = strpos($row['value'], '?') === FALSE ? '?' : '&';
+              $row['value'] .= $delim . '_authx=Bearer+' . urlencode($token);
+              break;
+
+            case 'xheader':
+              $row['headers']['X-Civi-Auth'] = 'Bearer ' . $token;
+              break;
+
+            case 'header':
+              $row['headers']['Authorization'] = 'Bearer ' . $token;
+              break;
+          }
           return $row;
         },
         $rows
