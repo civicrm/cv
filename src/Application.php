@@ -117,6 +117,7 @@ class Application extends \Symfony\Component\Console\Application {
     // $commands[] = new \Civi\Cv\Command\UpgradeDlCommand();
     // $commands[] = new \Civi\Cv\Command\UpgradeGetCommand(); // FIXME: Revalidate and add UpgradeGetCommandTest to the group "std".
     // $commands[] = new \Civi\Cv\Command\UpgradeReportCommand(); // FIXME: Revalidate and add UpgradeReportCommandTest to the group "std".
+    $commands[] = new \Civi\Cv\Command\HttpCommand();
     $commands[] = new \Civi\Cv\Command\UrlCommand();
     if ($context !== 'repl') {
       $commands[] = new \Civi\Cv\Command\BootCommand();
