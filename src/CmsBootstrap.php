@@ -329,6 +329,22 @@ class CmsBootstrap {
   }
 
   /**
+   * @param string $cmsRootPath
+   * @param string $cmsUser
+   * @return $this
+   */
+  public function bootStandalone($cmsPath, $cmsUser) {
+    // Load the composer libs.
+    require_once $cmsPath . '/vendor/autoload.php'; /* @todo clarify: assumes $cmsPath is to the project root, not the webroot */
+
+    if ($cmsUser) {
+      // @todo
+    }
+
+    return $this;
+  }
+
+  /**
    * @return array
    *   See options in class doc.
    */
@@ -378,6 +394,9 @@ class CmsBootstrap {
       'Backdrop' => array(
         'core/modules/layout/layout.module',
       ),
+      'Standalone' => array(
+        'data/civicrm.settings.php',
+      )
     );
 
     $parts = explode('/', str_replace('\\', '/', $searchDir));
