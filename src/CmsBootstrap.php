@@ -341,6 +341,8 @@ class CmsBootstrap {
       // @todo
     }
 
+    // @artfulrobot wonders: shouldn't this logic be in a core class somewhere? Feels like duplication.
+
     return $this;
   }
 
