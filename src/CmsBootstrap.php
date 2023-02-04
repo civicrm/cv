@@ -334,14 +334,27 @@ class CmsBootstrap {
    * @return $this
    */
   public function bootStandalone($cmsPath, $cmsUser) {
+    global $loggedInUserId;
     // Load the composer libs.
     require_once $cmsPath . '/vendor/autoload.php'; /* @todo clarify: assumes $cmsPath is to the project root, not the webroot */
 
     if ($cmsUser) {
-      // @todo
-    }
+      if (function_exists('civicrm_initialize')) {
+        civicrm_initialize();
 
-    // @artfulrobot wonders: shouldn't this logic be in a core class somewhere? Feels like duplication.
+        if (class_exists(\Civi\Api4\User::class)) {
+          $userID = \Civi\Api4\User::get(FALSE)
+          ->addWhere('username', '=', $cmsUser)
+          ->addWhere('is_active', '=', 1)
+          ->execute()->single();
+          \CRM_Core_Session::singleton()->set('ufId', $userID);
+          $loggedInUserId = $userID['contact_id'];
+        }
+      }
+      if (empty($loggedInUserId)) {
+        throw new \RuntimeException("Unable to login as '$cmsUser'");
+      }
+    }
 
     return $this;
   }
