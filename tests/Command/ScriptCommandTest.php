@@ -25,4 +25,16 @@ class ScriptCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertRegExp('/^version [0-9a-z\.]+$/', $p->getOutput());
   }
 
+  public function testScrNoArg() {
+    $helloPhp = escapeshellarg(__DIR__ . '/hello-args.php');
+    $p = Process::runOk($this->cv("scr $helloPhp"));
+    $this->assertEquals("No arguments passed.\n", $p->getOutput());
+  }
+
+  public function testScrArgs() {
+    $helloPhp = escapeshellarg(__DIR__ . '/hello-args.php');
+    $p = Process::runOk($this->cv("scr $helloPhp one 'two and' three"));
+    $this->assertEquals("0: one\n1: two and\n2: three\n", $p->getOutput());
+  }
+
 }
