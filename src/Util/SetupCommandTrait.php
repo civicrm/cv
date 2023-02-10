@@ -136,7 +136,10 @@ trait SetupCommandTrait {
       $setup->getModel()->cmsBaseUrl,
     ]);
     if ($input->getOption('db')) {
-      $setup->getModel()->db = DbUtil::parseDsn($input->getOption('db'));
+      // Set db and also set cmsDb to the same db.
+      $setup->getModel()->cmsDb = $setup->getModel()->db = DbUtil::parseDsn($input->getOption('db'));
+      // artfulrobot should remove this line:
+      // print "\n=========db:\n" . json_encode(['raw' => $input->getOption('db'), 'cooked' => $setup->getModel()->db], JSON_PRETTY_PRINT) . "\n------------------\n";
     }
     if ($input->getOption('lang')) {
       $setup->getModel()->lang = $input->getOption('lang');
