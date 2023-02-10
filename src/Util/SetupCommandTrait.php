@@ -140,6 +140,8 @@ trait SetupCommandTrait {
       // Set db and also set cmsDb to the same db if standalone
       $model->db = DbUtil::parseDsn($input->getOption('db'));
 
+      error_log("artfulrobot: " . __FILE__ . " " . __METHOD__);
+
       // todo: artfulrobot: we should only do this for standalone
       if ('standalone fixme' && empty($model->cmsDb)) {
         $model->cmsDb = $setup->getModel()->db;
