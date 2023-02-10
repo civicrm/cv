@@ -235,10 +235,6 @@ class CmsBootstrap {
       }
     }
   }
-}
-
-
-
 
   public function bootBackdrop($cmsPath, $cmsUser) {
     if (!file_exists("$cmsPath/core/includes/bootstrap.inc")) {
