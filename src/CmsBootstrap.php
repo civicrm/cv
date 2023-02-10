@@ -437,17 +437,14 @@ class CmsBootstrap {
 
       foreach ($cmsPatterns as $cmsType => $relPaths) {
         if (!empty($this->options['cmsType']) && $this->options['cmsType'] != $cmsType) {
-          $this->writeln("Skipping $cmsType");
           continue;
         }
         foreach ($relPaths as $relPath) {
           $matches = glob("$basePath/$relPath");
-          $this->writeln("Checking $basePath/$relPath");
           if (!empty($matches)) {
             return array('path' => $basePath, 'type' => $cmsType);
           }
           $matches = glob("$basePath/web/$relPath");
-          $this->writeln("Checking ($cmsType) $basePath/web/$relPath");
           if (!empty($matches)) {
             return array('path' => "$basePath/web", 'type' => $cmsType);
           }

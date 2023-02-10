@@ -136,8 +136,14 @@ trait SetupCommandTrait {
       $setup->getModel()->cmsBaseUrl,
     ]);
     if ($input->getOption('db')) {
-      // Set db and also set cmsDb to the same db.
-      $setup->getModel()->cmsDb = $setup->getModel()->db = DbUtil::parseDsn($input->getOption('db'));
+      $model = $setup->getModel();
+      // Set db and also set cmsDb to the same db if standalone
+      $model->db = DbUtil::parseDsn($input->getOption('db'));
+
+      // todo: artfulrobot: we should only do this for standalone
+      if ('standalone fixme' && empty($model->cmsDb)) {
+        $model->cmsDb = $setup->getModel()->db;
+      }
     }
     if ($input->getOption('lang')) {
       $setup->getModel()->lang = $input->getOption('lang');
