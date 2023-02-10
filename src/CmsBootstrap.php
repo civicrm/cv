@@ -410,7 +410,7 @@ class CmsBootstrap {
         'core/modules/layout/layout.module',
       ),
       'Standalone' => array(
-        'civicrm.settings.config.php.standalone',
+        'civicrm.config.php.standalone',
         // or?
         // 'data/civicrm.settings.php',
       )
