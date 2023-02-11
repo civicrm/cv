@@ -196,7 +196,6 @@ class CmsBootstrap {
       \Drupal::service('civicrm')->initialize();
     }
     elseif ($this->bootedCms['type'] === 'Standalone') {
-      error_log("artfulrobot: " . __FILE__ . ' ' .__METHOD__);
       $this->writeln("Hello there Standalone, come join us!", OutputInterface::VERBOSITY_DEBUG);
       \Civi\Cv\Bootstrap::singleton()->boot();
       $this->loginStandaloneUser();
@@ -431,7 +430,6 @@ class CmsBootstrap {
         // 'data/civicrm.settings.php',
       )
     );
-      error_log("artfulrobot: " . __FILE__ . ' ' .__METHOD__);
 
     $parts = explode('/', str_replace('\\', '/', $searchDir));
     while (!empty($parts)) {
