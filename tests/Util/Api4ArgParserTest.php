@@ -106,6 +106,10 @@ class Api4ArgParserTest extends \PHPUnit\Framework\TestCase {
       ['version=4', 'limit=10', '{"version":44,"select":["foo"]}'],
       ['version' => 44, 'limit' => 10, 'select' => ['foo']],
     ];
+    $exs[] = [
+      ['+v:blank=', '+v:zero=0'],
+      ['values' => ['blank' => '', 'zero' => '0']],
+    ];
     return $exs;
   }
 
