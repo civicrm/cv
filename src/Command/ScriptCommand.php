@@ -52,10 +52,10 @@ class ScriptCommand extends BaseCommand {
 
   /**
    * @param \Symfony\Component\Console\Output\OutputInterface $output
-   * @param $script
-   * @param array
+   * @param string $script
+   * @param array $scriptArguments
    */
-  protected function runScript(OutputInterface $output, $script, $scriptArguments) {
+  protected function runScript(OutputInterface $output, string $script, array $scriptArguments = []) {
     $output->writeln("<info>[ScriptCommand]</info> Start \"$script\"", OutputInterface::VERBOSITY_DEBUG);
     // This puts the script arguments in the same variable scope as the script
     // so scripts can access arguments using $argv $argc
