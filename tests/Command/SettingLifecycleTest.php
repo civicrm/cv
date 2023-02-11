@@ -14,9 +14,11 @@ class SettingLifecycleTest extends \Civi\Cv\CivilTestCase {
   }
 
   public function testScalar() {
-    $vset = $this->cvOk('vset dummy_scalar_1=100 dummy_scalar_2="More text"');
+    $vset = $this->cvOk('vset dummy_scalar_1=100 dummy_scalar_2="More text" dummy_blank= dummy_zero=0');
     $this->assertTableHasRow(['domain', 'dummy_scalar_1', 100, 'explicit'], $vset);
     $this->assertTableHasRow(['domain', 'dummy_scalar_2', '"More text"', 'explicit'], $vset);
+    $this->assertTableHasRow(['domain', 'dummy_blank', '""', 'explicit'], $vset);
+    $this->assertTableHasRow(['domain', 'dummy_zero', 0, 'explicit'], $vset);
 
     $vget = $this->cvOk('vget dummy_scalar_1 dummy_scalar_2');
     $this->assertTableHasRow(['domain', 'dummy_scalar_1', 100, 'explicit'], $vget);
