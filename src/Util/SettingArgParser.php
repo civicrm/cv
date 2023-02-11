@@ -109,7 +109,7 @@ class SettingArgParser extends AbstractPlusParser {
   }
 
   protected function parseValueExpr($expr) {
-    if (strpos('{["\'', $expr[0]) !== FALSE) {
+    if ($expr !== '' && strpos('{["\'', $expr[0]) !== FALSE) {
       return $this->parseJsonNoisily($expr);
     }
     else {
