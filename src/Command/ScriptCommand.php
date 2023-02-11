@@ -62,7 +62,11 @@ class ScriptCommand extends BaseCommand {
     $argv = $scriptArguments;
     array_unshift($argv, $script);
     $argc = count($argv);
-    require $script;
+    // This prevents the script stomping on any variables it shouldn't - like $output
+    $run = function () use ($argv, $argc, $script) {
+      require $script;
+    };
+    $run();
     $output->writeln("<info>[ScriptCommand]</info> Finish \"$script\"", OutputInterface::VERBOSITY_DEBUG);
   }
 
