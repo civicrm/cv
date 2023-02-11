@@ -16,13 +16,15 @@ class ScriptCommand extends BaseCommand {
       ->setName('php:script')
       ->setAliases(array('scr'))
       ->setDescription('Execute a PHP script')
-      ->addArgument('script', InputArgument::REQUIRED);
+      ->addArgument('script', InputArgument::REQUIRED)
+      ->addArgument('scriptArguments', InputArgument::IS_ARRAY, 'Optional arguments to pass to the script as $argv');
     $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
     $fs = new Filesystem();
     $origScript = $fs->toAbsolutePath($input->getArgument('script'));
+    $scriptArguments = $input->getArgument('scriptArguments');
 
     $origCwd = getcwd();
     $this->boot($input, $output);
@@ -31,7 +33,7 @@ class ScriptCommand extends BaseCommand {
     // Normal operation: Use the script path provided at input.
     if (file_exists($origScript)) {
       chdir($origCwd);
-      $this->runScript($output, $origScript);
+      $this->runScript($output, $origScript, $scriptArguments);
       return 0;
     }
 
@@ -40,7 +42,7 @@ class ScriptCommand extends BaseCommand {
     if (file_exists($postScript)) {
       $output->getErrorOutput()->writeln("<comment>WARNING: Loaded script relative to CMS root -- which is deprecated. Script path should be (a) absolute or (b) relative to CWD.</comment>");
       chdir($postCwd);
-      $this->runScript($output, $postScript);
+      $this->runScript($output, $postScript, $scriptArguments);
       return 0;
     }
 
@@ -50,11 +52,21 @@ class ScriptCommand extends BaseCommand {
 
   /**
    * @param \Symfony\Component\Console\Output\OutputInterface $output
-   * @param $script
+   * @param string $script
+   * @param array $scriptArguments
    */
-  protected function runScript(OutputInterface $output, $script) {
+  protected function runScript(OutputInterface $output, string $script, array $scriptArguments = []) {
     $output->writeln("<info>[ScriptCommand]</info> Start \"$script\"", OutputInterface::VERBOSITY_DEBUG);
-    require $script;
+    // This puts the script arguments in the same variable scope as the script
+    // so scripts can access arguments using $argv $argc
+    $argv = $scriptArguments;
+    array_unshift($argv, $script);
+    $argc = count($argv);
+    // This prevents the script stomping on any variables it shouldn't - like $output
+    $run = function () use ($argv, $argc, $script) {
+      require $script;
+    };
+    $run();
     $output->writeln("<info>[ScriptCommand]</info> Finish \"$script\"", OutputInterface::VERBOSITY_DEBUG);
   }
 
