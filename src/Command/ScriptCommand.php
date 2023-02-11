@@ -60,6 +60,7 @@ class ScriptCommand extends BaseCommand {
     // This puts the script arguments in the same variable scope as the script
     // so scripts can access arguments using $argv $argc
     $argv = $scriptArguments;
+    array_unshift($argv, $script);
     $argc = count($argv);
     require $script;
     $output->writeln("<info>[ScriptCommand]</info> Finish \"$script\"", OutputInterface::VERBOSITY_DEBUG);

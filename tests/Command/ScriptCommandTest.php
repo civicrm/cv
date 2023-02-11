@@ -26,15 +26,17 @@ class ScriptCommandTest extends \Civi\Cv\CivilTestCase {
   }
 
   public function testScrNoArg() {
-    $helloPhp = escapeshellarg(__DIR__ . '/hello-args.php');
-    $p = Process::runOk($this->cv("scr $helloPhp"));
-    $this->assertEquals("No arguments passed.\n", $p->getOutput());
+    $helloPhpFile = __DIR__ . '/hello-args.php';
+    $helloPhpEsc = escapeshellarg(__DIR__ . '/hello-args.php');
+    $p = Process::runOk($this->cv("scr $helloPhpEsc"));
+    $this->assertEquals("Count: 1\n0: $helloPhpFile\n", $p->getOutput());
   }
 
   public function testScrArgs() {
-    $helloPhp = escapeshellarg(__DIR__ . '/hello-args.php');
-    $p = Process::runOk($this->cv("scr $helloPhp one 'two and' three"));
-    $this->assertEquals("0: one\n1: two and\n2: three\n", $p->getOutput());
+    $helloPhpFile = __DIR__ . '/hello-args.php';
+    $helloPhpEsc = escapeshellarg(__DIR__ . '/hello-args.php');
+    $p = Process::runOk($this->cv("scr $helloPhpEsc one 'two and' three"));
+    $this->assertEquals("Count: 4\n0: $helloPhpFile\n1: one\n2: two and\n3: three\n", $p->getOutput());
   }
 
 }

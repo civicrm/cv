@@ -1,4 +1,5 @@
 <?php
+print "Count: $argc\n";
 if (!$argc) {
   print "No arguments passed.\n";
 }
