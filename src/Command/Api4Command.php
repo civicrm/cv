@@ -93,12 +93,17 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
 
     Use {$I}KEY{$_I}={$I}VALUE{$_I} to set an input to a specific value. The value may be a bare string
     or it may be JSON (beginning with '[' or '{' or '\"').
+    
+    For parameters which expect boolean values, use {$I}1{$_I} for true and {$I}0{$_I} for false.
 
     Use {$I}JSON-OBJECT{$_I} if you want to pass several fields as one pure JSON string.
     A parameter which begins with '{' will be interpreted as a JSON expression.
 
 {$C}Example: Get all contacts{$_C}
     cv api4 Contact.get
+
+{$C}Example: Get all email addresses for contact 33, bypassing the permissions check{$_C}
+    cv api4 Email.get +w 'contact_id = 33' checkPermissions=0
 
 {$C}Example: Get ten contacts{$_C} (All examples are equivalent.)
     cv api4 Contact.get +s id,display_name +l 10
