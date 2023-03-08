@@ -111,6 +111,10 @@ class CmsBootstrap {
         'path' => '/' . parse_url($cmsExpr, PHP_URL_HOST) . parse_url($cmsExpr, PHP_URL_PATH),
       );
       $cms['path'] = preg_replace(';^//+;', '/', $cms['path']);
+      if ($cms['type'] === 'Auto') {
+        $isAutoPath = (trim($cms['path'], '/') === '.');
+        $cms = $this->findCmsRoot($isAutoPath ? $this->getSearchDir() : $cms['path']);
+      }
       if (!isset($this->options['user']) && parse_url($cmsExpr, PHP_URL_USER)) {
         $this->options['user'] = parse_url($cmsExpr, PHP_URL_USER);
       }
