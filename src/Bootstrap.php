@@ -61,7 +61,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *     type of CMS is being used.
  *     (Default: NULL)
  *   - env: string|NULL. The environment variable which may contain the path to
- *     civicrm.settings.php. Set NULL to disable.
+ *     civicrm.settings.php (or the token "Auto"). Set NULL to disable environment-checking.
  *     (Default: CIVICRM_SETTINGS)
  *   - httpHost: string|NULL. For multisite, the HTTP hostname.
  *   - prefetch: bool. Whether to load various caches.
@@ -324,7 +324,7 @@ class Bootstrap {
     if (defined('CIVICRM_CONFDIR') && file_exists(CIVICRM_CONFDIR . '/civicrm.settings.php')) {
       $settings = CIVICRM_CONFDIR . '/civicrm.settings.php';
     }
-    elseif (!empty($options['env']) && getenv($options['env']) && file_exists(getenv($options['env']))) {
+    elseif (!empty($options['env']) && getenv($options['env']) && getenv($options['env']) !== 'Auto' && file_exists(getenv($options['env']))) {
       $settings = getenv($options['env']);
     }
     elseif (!empty($options['settingsFile']) && file_exists($options['settingsFile'])) {
