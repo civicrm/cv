@@ -456,7 +456,8 @@ class CmsBootstrap {
         break;
 
       case 'Drupal8':
-        \CRM_Core_BAO_UFMatch::synchronize(\Drupal::currentUser(), TRUE, CIVICRM_UF, 'Individual');
+        $user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
+        \CRM_Core_BAO_UFMatch::synchronize($user, TRUE, CIVICRM_UF, 'Individual');
         break;
 
       case 'Joomla':
