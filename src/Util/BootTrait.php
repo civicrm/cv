@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Util;
 
+use Civi\Cv\ErrorHandler;
 use Civi\Cv\PharOut\PharOut;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -47,6 +48,9 @@ trait BootTrait {
     else {
       throw new \Exception("Unrecognized bootstrap level");
     }
+
+    // CMS may have installed wonky error-handling. Add our own.
+    ErrorHandler::pushHandler();
 
     $output->writeln('<info>[BootTrait]</info> Finished', OutputInterface::VERBOSITY_DEBUG);
   }

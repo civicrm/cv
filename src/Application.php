@@ -4,6 +4,7 @@ namespace Civi\Cv;
 use LesserEvil\ShellVerbosityIsEvil;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Application extends \Symfony\Component\Console\Application {
@@ -37,17 +38,9 @@ class Application extends \Symfony\Component\Console\Application {
     $application = new Application('cv', static::version() ?? 'UNKNOWN');
 
     $application->setAutoExit(FALSE);
-    $running = TRUE;
-    register_shutdown_function(function () use (&$running) {
-      $error = error_get_last();
-      if ($running && $error) {
-        // Something - like a bad eval() - interrupted normal execution.
-        // Make sure the status code reflects that.
-        exit(255);
-      }
-    });
+    ErrorHandler::pushHandler();
     $result = $application->run();
-    $running = FALSE;
+    ErrorHandler::popHandler();
     exit($result);
   }
 
@@ -70,6 +63,15 @@ class Application extends \Symfony\Component\Console\Application {
    * {@inheritdoc}
    */
   public function doRun(InputInterface $input, OutputInterface $output) {
+    ErrorHandler::setRenderer(function($e) use ($output) {
+      if ($output instanceof ConsoleOutputInterface) {
+        $this->renderThrowable($e, $output->getErrorOutput());
+      }
+      else {
+        $this->renderThrowable($e, $output);
+      }
+    });
+
     $workingDir = $input->getParameterOption(array('--cwd'));
     if (FALSE !== $workingDir && '' !== $workingDir) {
       if (!is_dir($workingDir)) {
