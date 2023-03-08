@@ -33,7 +33,19 @@ trait BootTrait {
     }
 
     if ($input->getOption('level') === 'full|cms-full') {
-      $input->setOption('level', getenv('CIVICRM_BOOT') ? 'cms-full' : 'full');
+      if (getenv('CIVICRM_UF') === 'UnitTests') {
+        $input->setOption('level', 'full');
+      }
+      elseif (getenv('CIVICRM_BOOT')) {
+        $input->setOption('level', 'cms-full');
+      }
+      elseif (getenv('CIVICRM_SETTINGS')) {
+        $input->setOption('level', 'full');
+      }
+      else {
+        $input->setOption('level', 'full');
+        // TODO (when tests pass, for v0.4): $input->setOption('level', 'cms-full');
+      }
     }
 
     if (getenv('CIVICRM_UF') === 'UnitTests' && preg_match('/^cms-/', $input->getOption('level'))) {
