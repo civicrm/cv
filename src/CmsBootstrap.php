@@ -130,7 +130,7 @@ class CmsBootstrap {
       $cms = $this->findCmsRoot($this->getSearchDir());
     }
 
-    $this->writeln("CMS: " . json_encode($this->options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
+    $this->writeln("CMS: " . json_encode($cms, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
     if (empty($cms['path']) || empty($cms['type']) || !file_exists($cms['path'])) {
       $cmsJson = json_encode($cms, JSON_UNESCAPED_SLASHES);
       throw new \Exception("Failed to parse or find a CMS $cmsJson");
