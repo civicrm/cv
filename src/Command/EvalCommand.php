@@ -51,6 +51,7 @@ NOTE: To change the default output format, set CV_OUTPUT.
 
     $value = eval($input->getArgument('code') . ';');
     $this->sendResult($input, $output, $value);
+    return 0;
   }
 
 }
