@@ -48,7 +48,7 @@ class HttpCommandTest extends \Civi\Cv\CivilTestCase {
 
     $parsed = json_decode($p->getOutput(), TRUE);
     $this->assertTrue(!empty($parsed['values'][0]['title']) && is_string($parsed['values'][0]['title']),
-      'Response should include a title. Received: ' . $body);
+      'Response should include a title. Received: ' . $p->getOutput());
     $this->assertEquals(1, count($parsed['values']), "Response should have been limited to 1 record.");
 
     $error = $p->getErrorOutput();
