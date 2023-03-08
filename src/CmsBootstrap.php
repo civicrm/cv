@@ -104,6 +104,26 @@ class CmsBootstrap {
   }
 
   /**
+   * Export bootstrap logic.
+   *
+   * @param array $actions
+   *   List of bootstrap actions to include.
+   *   Ex: ['bootCms', 'bootCivi']
+   * @return string
+   *   PHP code to `CmsBootstrap` in a new process
+   */
+  public function generate(array $actions = []): string {
+    $instanceExpr = '\\' . get_class($this) . '::singleton()';
+    $code = '';
+    $code .= sprintf("require_once %s;\n", var_export(CV_AUTOLOAD, TRUE));
+    $code .= sprintf("%s->addOptions(%s);\n", $instanceExpr, var_export($this->getOptions(), TRUE));
+    foreach ($actions as $action) {
+      $code .= sprintf("%s->%s()->bootCivi();\n", $instanceExpr, $action);
+    }
+    return $code;
+  }
+
+  /**
    * Bootstrap the CiviCRM runtime.
    *
    * @return CmsBootstrap

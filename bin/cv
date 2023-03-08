@@ -18,6 +18,7 @@ $autoloaders = array(
 foreach ($autoloaders as $autoloader) {
   if (file_exists($autoloader)) {
     require_once $autoloader;
+    define('CV_AUTOLOAD', $autoloader);
     $found = 1;
     break;
   }

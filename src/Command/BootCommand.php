@@ -36,6 +36,10 @@ class BootCommand extends BaseCommand {
           . '\CRM_Utils_System::loadBootStrap(array(), FALSE);';
         break;
 
+      case 'cms-full':
+        $code = \Civi\Cv\CmsBootstrap::singleton()->generate(['bootCms', 'bootCivi']);
+        break;
+
       case 'none':
         break;
 
