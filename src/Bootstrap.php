@@ -406,7 +406,7 @@ class Bootstrap {
 
     $sites = array();
     if (file_exists("$cmsRoot/sites/sites.php")) {
-      include("$cmsRoot/sites/sites.php");
+      include "$cmsRoot/sites/sites.php";
     }
     $dirs = array();
     $server = explode('.', implode('.', array_reverse(explode(':', rtrim($this->options['httpHost'], '.')))));
