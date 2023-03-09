@@ -111,6 +111,10 @@ class CmsBootstrap {
         'path' => '/' . parse_url($cmsExpr, PHP_URL_HOST) . parse_url($cmsExpr, PHP_URL_PATH),
       );
       $cms['path'] = preg_replace(';^//+;', '/', $cms['path']);
+      if ($cms['type'] === 'Auto') {
+        $isAutoPath = (trim($cms['path'], '/') === '.');
+        $cms = $this->findCmsRoot($isAutoPath ? $this->getSearchDir() : $cms['path']);
+      }
       if (!isset($this->options['user']) && parse_url($cmsExpr, PHP_URL_USER)) {
         $this->options['user'] = parse_url($cmsExpr, PHP_URL_USER);
       }
@@ -126,7 +130,7 @@ class CmsBootstrap {
       $cms = $this->findCmsRoot($this->getSearchDir());
     }
 
-    $this->writeln("CMS: " . json_encode($this->options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
+    $this->writeln("CMS: " . json_encode($cms, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
     if (empty($cms['path']) || empty($cms['type']) || !file_exists($cms['path'])) {
       $cmsJson = json_encode($cms, JSON_UNESCAPED_SLASHES);
       throw new \Exception("Failed to parse or find a CMS $cmsJson");
