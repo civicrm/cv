@@ -2,7 +2,6 @@
 namespace Civi\Cv\Util;
 
 use Civi\Setup\DbUtil;
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Logger\ConsoleLogger;
