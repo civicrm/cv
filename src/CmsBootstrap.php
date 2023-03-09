@@ -60,6 +60,15 @@ class CmsBootstrap {
   protected $bootedCms = NULL;
 
   /**
+   * Holds the requested user to login as for Standalone.
+   * Normally the user is loaded in bootCms but since Civi is our CMS,
+   * we have to wait for bootCivi().
+   *
+   * @var ?string
+   */
+  protected $deferredUserToLogin = NULL;
+
+  /**
    * Wrapper around OutputInterface::writeln()
    *
    * @param string $text
@@ -190,6 +199,11 @@ class CmsBootstrap {
       //Drupal 8 / 9
       \Drupal::service('civicrm')->initialize();
     }
+    elseif ($this->bootedCms['type'] === 'Standalone') {
+      $this->writeln("Hello there Standalone, come join us!", OutputInterface::VERBOSITY_DEBUG);
+      \Civi\Cv\Bootstrap::singleton()->boot();
+      $this->loginStandaloneUser();
+    }
     // else if Joomla weirdness, do that
     else {
       throw new \Exception("This system does not appear to have CiviCRM");
@@ -205,6 +219,25 @@ class CmsBootstrap {
     }
 
     return $this;
+  }
+
+  /**
+   */
+  protected function loginStandaloneUser() {
+    if (!empty($this->deferredUserToLogin)) {
+      global $loggedInUserId;
+      if (class_exists(\Civi\Api4\User::class)) {
+        $userID = \Civi\Api4\User::get(FALSE)
+        ->addWhere('username', '=', $this->deferredUserToLogin)
+        ->addWhere('is_active', '=', 1)
+        ->execute()->single();
+        \CRM_Core_Session::singleton()->set('ufId', $userID);
+        $loggedInUserId = $userID['contact_id'];
+      }
+      if (empty($loggedInUserId)) {
+        throw new \RuntimeException("Unable to login as '$this->deferredUserToLogin'");
+      }
+    }
   }
 
   public function bootBackdrop($cmsPath, $cmsUser) {
@@ -333,6 +366,19 @@ class CmsBootstrap {
   }
 
   /**
+   * @param string $cmsRootPath
+   * @param string $cmsUser
+   * @return $this
+   */
+  public function bootStandalone($cmsPath, $cmsUser) {
+    // Load the composer libs.
+    require_once $cmsPath . '/vendor/autoload.php'; /* @todo clarify: assumes $cmsPath is to the project root, not the webroot */
+
+    $this->deferredUserToLogin = $cmsUser ?? NULL;
+    return $this;
+  }
+
+  /**
    * @return array
    *   See options in class doc.
    */
@@ -382,6 +428,11 @@ class CmsBootstrap {
       'Backdrop' => array(
         'core/modules/layout/layout.module',
       ),
+      'Standalone' => array(
+        'civicrm.config.php.standalone',
+        // or?
+        // 'data/civicrm.settings.php',
+      )
     );
 
     $parts = explode('/', str_replace('\\', '/', $searchDir));
