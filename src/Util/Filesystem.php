@@ -1,7 +1,13 @@
 <?php
 namespace Civi\Cv\Util;
 
-class Filesystem extends \Symfony\Component\Filesystem\Filesystem {
+class Filesystem {
+
+  use FilesystemTrait;
+
+  public static function exists(?string $path): bool {
+    return $path !== NULL && file_exists($path);
+  }
 
   /**
    * @param string $path
