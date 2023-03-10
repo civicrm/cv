@@ -40,6 +40,18 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertEquals(255, $p->getExitCode());
   }
 
+  public function testPhpEval_CvVar_Full() {
+    $helloPhp = escapeshellarg('printf("my admin is %s\n", $GLOBALS["_CV"]["ADMIN_USER"]);');
+    $p = Process::runOk($this->cv("ev --level=full $helloPhp"));
+    $this->assertRegExp('/^my admin is \w+\s*$/', $p->getOutput());
+  }
+
+  public function testPhpEval_CvVar_CmsFull() {
+    $helloPhp = escapeshellarg('printf("my admin is %s\n", $GLOBALS["_CV"]["ADMIN_USER"]);');
+    $p = Process::runOk($this->cv("ev --level=cms-full $helloPhp"));
+    $this->assertRegExp('/^my admin is \w+\s*$/', $p->getOutput());
+  }
+
   public function testBoot() {
     $checkBoot = escapeshellarg('echo (function_exists("drupal_add_js") || function_exists("wp_redirect") || class_exists("JFactory") || class_exists("Drupal")) ? "found" : "not-found";');
 
