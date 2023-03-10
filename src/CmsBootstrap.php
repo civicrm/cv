@@ -64,7 +64,7 @@ class CmsBootstrap {
    * Normally the user is loaded in bootCms but since Civi is our CMS,
    * we have to wait for bootCivi().
    *
-   * @var ?string
+   * @var string|null
    */
   protected $deferredUserToLogin = NULL;
 
@@ -228,9 +228,9 @@ class CmsBootstrap {
       global $loggedInUserId;
       if (class_exists(\Civi\Api4\User::class)) {
         $userID = \Civi\Api4\User::get(FALSE)
-        ->addWhere('username', '=', $this->deferredUserToLogin)
-        ->addWhere('is_active', '=', 1)
-        ->execute()->single();
+          ->addWhere('username', '=', $this->deferredUserToLogin)
+          ->addWhere('is_active', '=', 1)
+          ->execute()->single();
         \CRM_Core_Session::singleton()->set('ufId', $userID);
         $loggedInUserId = $userID['contact_id'];
       }
@@ -316,7 +316,8 @@ class CmsBootstrap {
           ->loadByProperties(array(
             'name' => $cmsUser,
           ));
-      } else {
+      }
+      else {
         // Drupal 9
         $entity_manager = \Drupal::entityTypeManager();
         $users = $entity_manager->getStorage(\Drupal::service('entity_type.repository')->getEntityTypeFromClass('Drupal\user\Entity\User'))
@@ -366,7 +367,7 @@ class CmsBootstrap {
   }
 
   /**
-   * @param string $cmsRootPath
+   * @param string $cmsPath
    * @param string $cmsUser
    * @return $this
    */
@@ -432,7 +433,7 @@ class CmsBootstrap {
         'civicrm.config.php.standalone',
         // or?
         // 'data/civicrm.settings.php',
-      )
+      ),
     );
 
     $parts = explode('/', str_replace('\\', '/', $searchDir));
