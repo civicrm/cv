@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Util;
 
+use Civi\Cv\CmsBootstrap;
 use Civi\Setup\DbUtil;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -100,15 +101,24 @@ trait SetupCommandTrait {
       $setupOptions['cmsBaseUrl'] = $input->getOption('cms-base-url');
     }
 
-    $pluginCallback = function($pluginFiles) use ($input) {
-      foreach ($input->getOption('plugin-path') as $pluginDir) {
-        foreach (['*.civi-setup.php'] as $pattern) {
+    $pluginPaths = $this->buildPluginPaths($b, $input->getOption('plugin-path'));
+    $pluginCallback = function($pluginFiles) use ($input, $output, $pluginPaths) {
+      $pluginUpdates = [];
+      foreach ($pluginPaths as $pluginDir) {
+        foreach (['*.civi-setup.php', '*/*.civi-setup.php'] as $pattern) {
           foreach ((array) glob("$pluginDir/$pattern") as $file) {
             $key = substr($file, strlen($pluginDir) + 1);
             $key = preg_replace('/\.civi-setup\.php$/', '', $key);
-            $pluginFiles[$key] = $file;
+            $pluginUpdates[$key] = $file;
           }
         }
+      }
+      if (!empty($pluginUpdates)) {
+        $output->writeln(sprintf('<info>Found extra plugin(s) <comment>%s</comment> in <comment>%s</comment></info>',
+          implode(' ', array_keys($pluginUpdates)),
+          implode(' ', $pluginPaths)
+        ));
+        $pluginFiles = array_merge($pluginFiles, $pluginUpdates);
       }
       ksort($pluginFiles);
       return $pluginFiles;
@@ -213,6 +223,28 @@ trait SetupCommandTrait {
         $output->writeln(sprintf('<info> * <comment>%s</comment></info>', $path));
       }
     }
+  }
+
+  /**
+   * Build a list of locations for supplemental install plugins.
+   *
+   * @param \Civi\Cv\CmsBootstrap $b
+   * @param string[] $requestedPaths
+   *   List of plugin folders requested by the caller (`--plugin-path=$HOME/foo`).
+   * @return string[]
+   *   List of all supplemental plugin folders.
+   *   Folder names are normalized (no trailin slash).
+   */
+  protected function buildPluginPaths(CmsBootstrap $b, array $requestedPaths): array {
+    // Find/register any well-known folders.
+    if ($b->getBootedCmsType() === 'Standalone') {
+      $requestedPaths[] = $b->getBootedCmsPath() . '/setup/plugins';
+    }
+
+    // Final cleanup and return.
+    return array_map(function(string $pluginDir) {
+      return rtrim($pluginDir, '/' . DIRECTORY_SEPARATOR);
+    }, $requestedPaths);
   }
 
 }
