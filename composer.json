@@ -10,10 +10,10 @@
     ],
     "require": {
         "php": ">=7.3.0",
+        "ext-json": "*",
         "lesser-evil/shell-verbosity-is-evil": "~1.0",
         "symfony/console": "^4",
         "symfony/process": "^4",
-        "symfony/filesystem": "^4",
         "psy/psysh": "@stable"
     },
     "autoload": {

@@ -44,25 +44,4 @@ class FilesystemTest extends \PHPUnit\Framework\TestCase {
     $this->assertEquals($expected, $fs->isDescendent($child, $parent));
   }
 
-  public function dataFormatPrettyPath() {
-    return array(
-      array('/var/www', array('/var/www'), 'www'),
-      array('/var/www/drupal', array('/var/www'), 'www/drupal'),
-      array('/var/www/drupal', array('/extra', '/var/www'), 'www/drupal'),
-      array('/var/www/drupal', array('/var/www', '/extra'), 'www/drupal'),
-      array('/opt/other', array('/var/www'), '/opt/other'),
-    );
-  }
-
-  /**
-   * @param string $path
-   * @param array $basePaths
-   * @param string $expected
-   * @dataProvider dataFormatPrettyPath
-   */
-  public function testFormatPrettyPath($path, $basePaths, $expected) {
-    $fs = new Filesystem();
-    $this->assertEquals($expected, $fs->formatPrettyPath($path, $basePaths));
-  }
-
 }
