@@ -92,13 +92,19 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
    * Download an extension using an explicit URL.
    */
   public function testDownloadWithExplicitUrl() {
+    $p = Process::runOk($this->cv("ev 'return [CIVICRM_UF, CRM_Utils_System::version()];'"));
+    $envCheck = json_decode($p->getOutput(), 1);
+    if ($envCheck[0] === 'WordPress' && version_compare($envCheck[1], '5.52.alpha1', '<')) {
+      // The test passes on wp-demo@5.52 but fails @5.51. The difference is probably #23768.
+      $this->markTestSkipped('Not supported on wp-demo with v5.51');
+    }
     // Make sure we start in a clean environment without the extension
     $this->assertEquals(NULL, $this->getCvTestPath(), 'org.example.cvtest should not yet exist in the test build');
     Process::runFail($this->cvTestEnabled());
 
     // Activate and use the extension
     $extSpec = escapeshellarg("org.example.cvtest@" . self::EXAMPLE_DOWNLOAD_URL);
-    Process::runOk($this->cv("ext:download $extSpec"));
+    Process::runOk($this->cv("ext:download -f $extSpec"));
 
     $p = Process::runOk($this->cvTestEnabled());
     $result = json_decode($p->getOutput(), 1);
