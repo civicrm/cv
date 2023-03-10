@@ -214,24 +214,20 @@ trait BootTrait {
       case 'Drupal':
       case 'Drupal6':
       case 'Backdrop':
-        \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['user'], TRUE,
-          CIVICRM_UF, 'Individual');
+        \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['user'], TRUE, CIVICRM_UF, 'Individual');
         break;
 
       case 'Drupal8':
         $user = \Drupal\user\Entity\User::load(\Drupal::currentUser()->id());
-        \CRM_Core_BAO_UFMatch::synchronize($user, TRUE,
-          CIVICRM_UF, 'Individual');
+        \CRM_Core_BAO_UFMatch::synchronize($user, TRUE, CIVICRM_UF, 'Individual');
         break;
 
       case 'Joomla':
-        \CRM_Core_BAO_UFMatch::synchronize(\JFactory::getUser(), TRUE,
-          CIVICRM_UF, 'Individual');
+        \CRM_Core_BAO_UFMatch::synchronize(\JFactory::getUser(), TRUE, CIVICRM_UF, 'Individual');
         break;
 
       case 'WordPress':
-        \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['current_user'], TRUE,
-          CIVICRM_UF, 'Individual');
+        \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['current_user'], TRUE, CIVICRM_UF, 'Individual');
         break;
 
       default:
