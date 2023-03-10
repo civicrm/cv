@@ -33,7 +33,19 @@ trait BootTrait {
     }
 
     if ($input->getOption('level') === 'full|cms-full') {
-      $input->setOption('level', getenv('CIVICRM_BOOT') ? 'cms-full' : 'full');
+      if (getenv('CIVICRM_UF') === 'UnitTests') {
+        $input->setOption('level', 'full');
+      }
+      elseif (getenv('CIVICRM_BOOT')) {
+        $input->setOption('level', 'cms-full');
+      }
+      elseif (getenv('CIVICRM_SETTINGS')) {
+        $input->setOption('level', 'full');
+      }
+      else {
+        $input->setOption('level', 'full');
+        // TODO (when tests pass, for v0.4): $input->setOption('level', 'cms-full');
+      }
     }
 
     if (getenv('CIVICRM_UF') === 'UnitTests' && preg_match('/^cms-/', $input->getOption('level'))) {
@@ -238,11 +250,12 @@ trait BootTrait {
   }
 
   /**
+   * @param \Symfony\Component\Console\Input\InputInterface $input
    * @param \Symfony\Component\Console\Output\OutputInterface $output
    * @return array
    */
   protected function createBootParams(InputInterface $input, OutputInterface $output) {
-    $boot_params = [] ;
+    $boot_params = [];
     if ($output->isDebug()) {
       $boot_params['output'] = $output;
     }

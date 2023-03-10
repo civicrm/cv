@@ -6,15 +6,9 @@ The `cv` command is a utility for interacting with a CiviCRM installation. It pe
 Requirements
 ============
 
-A local CiviCRM installation.
-
-PHP v5.6+.
-
-Support may vary depending on the host environment (CMS type, file-structure, symlinks, etc).
- * *Tested heavily*: Drupal 7/8 single-site, WordPress single-site, UnitTests
- * *Tested lightly*: Drupal 9 single-site, Backdrop single-site, WordPress (alternate content root)
- * *Untested*: Drupal 7 multi-site, WordPress multi-site, Joomla, Drupal 6; any heavy symlinking
-   * *Tip*: If you use an untested or incompatible host environment, then you may see the error `Failed to locate civicrm.settings.php`. See [StackExchange](http://civicrm.stackexchange.com/questions/12732/civix-reports-failed-to-locate-civicrm-settings-php) to discuss work-arounds.
+* PHP v7.3+.
+* A local CiviCRM installation.
+* Systems with special file-layouts may need to [configure bootstrap](#bootstrap).
 
 Download
 ========
@@ -141,6 +135,44 @@ Example: NodeJS
 ===============
 
 See https://github.com/civicrm/cv-nodejs
+
+Bootstrap
+=========
+
+`cv` must find and bootstrap the local instance of CiviCRM, Drupal, WordPress, or similar.  This may work a few ways:
+
+* __Automatic__: By default, `cv` checks the current directory and each parent directory for evidence of well-known environment (such as Drupal or WordPress).
+
+    The automatic search is designed to work with a default site-layout -- as seen in a typical "zip" or "tar" file
+    from `drupal.org`, `wordpress.org`, or similar.  Some deployments add more advanced options -- such as
+    configuring "multi-site", adding bespoke "symlinks", or moving the `wp-admin` folder.  For advanced layouts, you
+    may need to set an environment variable.
+
+* __`CIVICRM_BOOT`__: To enable the _standard boot protocol_, set this environment variable. Specify the CMS type and base-directory. Examples:
+
+    ```bash
+    export CIVICRM_BOOT="Drupal://var/www/public"
+    export CIVICRM_BOOT="Drupal8://admin@/var/www/public"
+    export CIVICRM_BOOT="WordPress:/$HOME/sites/my-wp-site/web/"
+    export CIVICRM_BOOT="Auto://."
+    ```
+
+    (Note: In the standard protocol, `cv` loads a CMS first and then asks it to bootstrap CiviCRM. This is more representative of
+    a typical HTTP page-view, and it is compatible with commands like `core:install`. However, it has not been used for as long.)
+
+* __`CIVICRM_SETTINGS`__: To enable the _legacy boot protocol_, set this environment variable. Specify the `civicrm.settings.php` location. Examples:
+
+    ```bash
+    export CIVICRM_SETTINGS="/var/www/sites/default/files/civicrm.settings.php"
+    export CIVICRM_SETTINGS="Auto"
+    ```
+
+    (Note: In the legacy protocol, `cv` loads CiviCRM and then asks CiviCRM to boostrap the CMS.  However, it is
+    less representative of a typical HTTP page-view, and it is incompatible with commands like `core:install`. You might use it
+    for headless testing or as fallback/work-around if any bugs are discovered in the standard protocol.)
+
+> ___NOTE___: In absence of a configuration variable, the __Automatic__ mode will behave like `CIVICRM_SETTINGS="Auto"` (in v0.3.x).
+  This is tentatively planned to change in v0.4.x, where it will behave like `CIVICRM_BOOT="Auto://."`
 
 Build
 =====
