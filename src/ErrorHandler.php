@@ -32,7 +32,7 @@ class ErrorHandler {
   public static function onShutdown() {
     if (static::$count > 0) {
       $error = error_get_last();
-      if (($error['type'] & (E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR))) {
+      if (isset($error['type']) && ($error['type'] & (E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR | E_RECOVERABLE_ERROR))) {
         // Something - like a bad eval() - interrupted normal execution.
         // Make sure the status code reflects that.
         exit(255);
