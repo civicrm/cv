@@ -46,41 +46,6 @@ class Filesystem extends \Symfony\Component\Filesystem\Filesystem {
     return ($parent == substr($child, 0, strlen($parent)));
   }
 
-  public function formatPrettyPath($path, $basePaths) {
-    foreach ($basePaths as $basePath) {
-      if ($path == $basePath || $this->isDescendent($path, $basePath)) {
-        return rtrim($this->makePathRelative($path, dirname($basePath)), '/');
-      }
-    }
-    return $path;
-  }
-
-  public function findFirstParent($path, $basePaths) {
-    foreach ($basePaths as $basePath) {
-      if ($path == $basePath || $this->isDescendent($path, $basePath)) {
-        return $basePath;
-      }
-    }
-    return NULL;
-  }
-
-  /**
-   * @param string|array|Traversable $files
-   * @throws \RuntimeException
-   */
-  public function validateExists($files) {
-    if (!$files instanceof \Traversable) {
-      $files = new \ArrayObject(is_array($files) ? $files : array($files));
-    }
-
-    //foreach ($this->toIterator($files) as $file) {
-    foreach ($files as $file) {
-      if (!file_exists($file)) {
-        throw new \RuntimeException("File not found: $file");
-      }
-    }
-  }
-
   /**
    * Atomically read, filter, and write a file.
    *
