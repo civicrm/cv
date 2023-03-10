@@ -1,6 +1,8 @@
 <?php
 namespace Civi\Cv;
 
+use Civi\Cv\Util\Filesystem;
+
 class BuildkitReader {
 
   /**
@@ -10,6 +12,8 @@ class BuildkitReader {
    * @return null|string
    */
   public static function findShFile($settingsFile) {
+    $fs = new Filesystem();
+    $settingsFile = $fs->toAbsolutePath($settingsFile);
     $parts = explode('/', str_replace('\\', '/', $settingsFile));
     while (!empty($parts)) {
       $last = array_pop($parts);
