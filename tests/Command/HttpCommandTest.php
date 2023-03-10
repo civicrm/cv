@@ -19,18 +19,27 @@ class HttpCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function setUp(): void {
     parent::setUp();
+    $this->cvOk('en authx');
   }
 
   public function testAuthorizedGet() {
-    $body = $this->cvOk("http {$this->login} civicrm/admin");
+    $body = $this->cvOk("http {$this->login} civicrm/authx/id");
+    $data = json_decode($body, TRUE);
+    $this->assertTrue(is_numeric($data['contact_id']), "civicrm/authx/id should return current contact. Received: $body");
+
+    $body = $this->cvOk("http {$this->login} 'civicrm/user?reset=1'");
     $this->assertRegExp(':<html:', $body);
-    $this->assertRegExp(':Create and edit available tags here:', $body);
+    $this->assertRegExp(';Your Group;', $body);
   }
 
   public function testUnauthorizedGet() {
-    $body = $this->cvFail("http civicrm/admin");
+    $body = $this->cvOk("http civicrm/authx/id");
+    $data = json_decode($body, TRUE);
+    $this->assertTrue(empty($data['contact_id']), "civicrm/authx/id should return anonymous. Received: $body");
+
+    $body = $this->cvFail("http 'civicrm/user?reset=1'");
     $this->assertRegExp(':<html:', $body);
-    $this->assertNotRegExp(':Create and edit available tags here:', $body);
+    $this->assertNotRegExp(';Your Group;', $body);
   }
 
   public function testGetWebService() {
