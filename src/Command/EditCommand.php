@@ -9,7 +9,6 @@ namespace Civi\Cv\Command;
 use Civi\Cv\Config;
 use Civi\Cv\Encoder;
 use Civi\Cv\Util\CliEditor;
-use Civi\Cv\Util\Filesystem;
 use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -32,7 +31,6 @@ class EditCommand extends BaseCommand {
 
   public function __construct($name = NULL) {
     parent::__construct($name);
-    $this->fs = new Filesystem();
     $this->editor = new CliEditor();
     $this->editor->setValidator(function ($file) {
       $data = json_decode(file_get_contents($file));
