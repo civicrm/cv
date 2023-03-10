@@ -238,11 +238,12 @@ trait BootTrait {
   }
 
   /**
+   * @param \Symfony\Component\Console\Input\InputInterface $input
    * @param \Symfony\Component\Console\Output\OutputInterface $output
    * @return array
    */
   protected function createBootParams(InputInterface $input, OutputInterface $output) {
-    $boot_params = [] ;
+    $boot_params = [];
     if ($output->isDebug()) {
       $boot_params['output'] = $output;
     }
