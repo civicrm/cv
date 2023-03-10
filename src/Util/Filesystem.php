@@ -10,18 +10,33 @@ class Filesystem {
   }
 
   /**
+   * @return false|string
+   */
+  public function pwd() {
+    // exec(pwd) works better with symlinked source trees, but it's
+    // probably not portable to Windows.
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+      return getcwd();
+    }
+    else {
+      exec('pwd', $output);
+      return trim(implode("\n", $output));
+    }
+  }
+
+  /**
    * @param string $path
    * @return string updated $path
    */
   public function toAbsolutePath($path) {
     if (empty($path)) {
-      $res = getcwd();
+      $res = $this->pwd();
     }
     elseif ($this->isAbsolutePath($path)) {
       $res = $path;
     }
     else {
-      $res = getcwd() . DIRECTORY_SEPARATOR . $path;
+      $res = $this->pwd() . DIRECTORY_SEPARATOR . $path;
     }
     if (is_dir($res)) {
       return realpath($res);

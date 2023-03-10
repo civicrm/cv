@@ -13,15 +13,31 @@ class BootCommandTest extends \Civi\Cv\CivilTestCase {
     parent::setUp();
   }
 
-  public function testBootDefault() {
-    $phpBoot = Process::runOk($this->cv("php:boot"));
+  public function testBootFull() {
+    $phpBoot = Process::runOk($this->cv("php:boot --level=full"));
     $this->assertRegExp(';CIVICRM_SETTINGS_PATH;', $phpBoot->getOutput());
 
     $helloPhp = escapeshellarg($phpBoot->getOutput()
       . 'printf("count is %s\n", CRM_Core_DAO::singleValueQuery("select count(*) from civicrm_contact"));'
+      . 'printf("my admin is %s\n", $GLOBALS["_CV"]["ADMIN_USER"]);'
     );
     $phpRun = Process::runOk(new \Symfony\Component\Process\Process("php -r $helloPhp"));
-    $this->assertRegExp('/^count is [0-9]+$/', $phpRun->getOutput());
+    $this->assertRegExp('/^count is [0-9]+\n/', $phpRun->getOutput());
+    $this->assertRegExp('/my admin is \w+\n/', $phpRun->getOutput());
+  }
+
+  public function testBootCmsFull() {
+    $phpBoot = Process::runOk($this->cv("php:boot --level=cms-full"));
+    $this->assertRegExp(';BEGINPHP;', $phpBoot->getOutput());
+    $this->assertRegExp(';ENDPHP;', $phpBoot->getOutput());
+
+    $helloPhp = escapeshellarg($phpBoot->getOutput()
+      . 'printf("count is %s\n", CRM_Core_DAO::singleValueQuery("select count(*) from civicrm_contact"));'
+      . 'printf("my admin is %s\n", $GLOBALS["_CV"]["ADMIN_USER"]);'
+    );
+    $phpRun = Process::runOk(new \Symfony\Component\Process\Process("php -r $helloPhp"));
+    $this->assertRegExp('/^count is [0-9]+\n/', $phpRun->getOutput());
+    $this->assertRegExp('/my admin is \w+\n/', $phpRun->getOutput());
   }
 
   public function testBootClassLoader() {
