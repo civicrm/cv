@@ -12,7 +12,7 @@ PRJDIR=$(absdirname "$0")
 OUTFILE="$PRJDIR/bin/cv.phar"
 set -e
 
-BOX_VERSION=3.16.0
+BOX_VERSION=4.3.7
 BOX_URL="https://github.com/box-project/box/releases/download/${BOX_VERSION}/box.phar"
 BOX_DIR="$PRJDIR/extern/box-$BOX_VERSION"
 BOX_BIN="$BOX_DIR/box"
