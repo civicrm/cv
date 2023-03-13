@@ -9,7 +9,8 @@ function absdirname() {
 }
 
 PRJDIR=$(absdirname "$0")
-set -ex
+OUTFILE="$PRJDIR/bin/cv.phar"
+set -e
 
 BOX_VERSION=3.16.0
 BOX_URL="https://github.com/box-project/box/releases/download/${BOX_VERSION}/box.phar"
@@ -34,5 +35,7 @@ pushd "$PRJDIR" >> /dev/null
   ## `composer/xdebug-handler`.  (Both have a need to manipulate PHP INI.) The flag `BOX_ALLOW_XDEBUG` is defined by their
   ## upstream.  Setting the flag doesn't actually configure xdebug -- rather, it disables PHP INI automanipulations, so that you
   ## are _allowed_ to set PHP INI options (`xdebug.*`, `phar.*`, etc) on your own.
+
+  php scripts/check-phar.php "$OUTFILE"
 
 popd >> /dev/null
