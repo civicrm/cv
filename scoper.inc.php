@@ -16,7 +16,8 @@ return [
     'TYPO3\\PharStreamWrapper',
   ],
   'exclude-classes' => [
-    '/^(CRM_|HTML_|DB_)/',
+    '/^(CRM_|HTML_|DB_|Log_)/',
+    'Log',
     'JFactory',
     'Civi',
     'Drupal',
