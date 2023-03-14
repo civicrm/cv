@@ -41,6 +41,7 @@ foreach (['src/Bootstrap.php', 'src/CmsBootstrap.php'] as $file) {
 }
 assertNotMatch('src/CmsBootstrap.php', ';Cvphar.JFactory;');
 assertNotMatch('src/CmsBootstrap.php', ';Cvphar.Drupal;');
+assertNotMatch('src/CmsBootstrap.php', ';Cvphar..?Symfony..?Component..?HttpFoundation;');
 
 if (empty($errors)) {
   echo "OK $pharFile\n";
