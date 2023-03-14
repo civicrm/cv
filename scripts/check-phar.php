@@ -28,6 +28,17 @@ assertNotMatch('src/Command/ApiCommand.php', ';Cvphar.civicrm_api;');
 
 assertMatch('src/CmsBootstrap.php', ';JFactory::;');
 assertMatch('src/CmsBootstrap.php', ';Drupal::;');
+assertMatch('src/CmsBootstrap.php', ';drupal_bootstrap;');
+assertMatch('src/CmsBootstrap.php', ';user_load;');
+assertMatch('src/CmsBootstrap.php', ';wp_set_current_user;');
+foreach (['src/Bootstrap.php', 'src/CmsBootstrap.php'] as $file) {
+  // These two files have lots of CMS symbols. The only thing that should be prefixed is Symfony stuff.
+  $allPrefixed = grepFile($file, ';Cvphar;');
+  $symfonyPrefixed = grepFile($file, ';Cvphar.*Symfony;');
+  if ($allPrefixed !== $symfonyPrefixed) {
+    $errors[] = "File $file has lines with unexpected prefixing:\n  " . implode("\n  ", array_diff($allPrefixed, $symfonyPrefixed)) . "\n";
+  }
+}
 assertNotMatch('src/CmsBootstrap.php', ';Cvphar.JFactory;');
 assertNotMatch('src/CmsBootstrap.php', ';Cvphar.Drupal;');
 
@@ -37,7 +48,7 @@ if (empty($errors)) {
 else {
   echo "ERROR $pharFile\n";
   echo implode("", $errors);
-  exit(empty($errors) ? 0 : 1);
+  exit(1);
 }
 
 ########################################################################################
@@ -68,4 +79,9 @@ function assertNotMatch(string $relpath, string $regex) {
   if (!empty($x = preg_grep($regex, $content))) {
     $errors[] = sprintf("Failed: assertNotMatch(%s, %s)\n", var_export($relpath, 1), var_export($regex, 1));
   }
+}
+
+function grepFile(string $relpath, string $regex): array {
+  $content = explode("\n", file_get_contents(getFilename($relpath)));
+  return preg_grep($regex, $content);
 }
