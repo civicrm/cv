@@ -3,13 +3,17 @@
 return [
   'prefix' => 'Cvphar',
   'exclude-namespaces' => [
+    // Provided by civicrm
     'Civi',
     'Guzzle',
-    'Drupal',
 
-    // we don't really use these, but CmsBootstrap needs to apply D8+ bootstrap protocol
+    // Drupal8+ bootstrap
+    'Drupal',
     'Symfony\\Component\\HttpFoundation',
     'Symfony\\Component\\Routing',
+
+    // Joomla bootstrap
+    'TYPO3\\PharStreamWrapper',
   ],
   'exclude-classes' => [
     '/^(CRM_|HTML_|DB_)/',
