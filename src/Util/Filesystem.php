@@ -103,14 +103,14 @@ class Filesystem {
     $rawOut = call_user_func($filter, $buf);
 
     if (!rewind($fh)) {
-      throw \RuntimeException('Bad rewind');
+      throw new \RuntimeException('Bad rewind');
     }
     if (!ftruncate($fh, 0)) {
-      throw \RuntimeException('Bad truncate');
+      throw new \RuntimeException('Bad truncate');
     }
 
     if (!fwrite($fh, $rawOut)) {
-      throw \RuntimeException('Bad write');
+      throw new \RuntimeException('Bad write');
     };
     flock($fh, LOCK_UN);
 
