@@ -17,6 +17,7 @@ return [
   ],
   'exclude-classes' => [
     '/^(CRM_|HTML_|DB_|Log_)/',
+    'DB',
     'Log',
     'JFactory',
     'Civi',
