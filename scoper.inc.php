@@ -6,6 +6,7 @@ return [
     // Provided by civicrm
     'Civi',
     'Guzzle',
+    'Symfony\Component\DependencyInjection',
 
     // Drupal8+ bootstrap
     'Drupal',
