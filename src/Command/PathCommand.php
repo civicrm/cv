@@ -71,7 +71,7 @@ Example: Lookup multiple items
 
     $mapper = \CRM_Extension_System::singleton()->getMapper();
     foreach ($input->getOption('ext') as $extExpr) {
-      list ($keyOrName, $file) = explode('/', $extExpr, 2);
+      [$keyOrName, $file] = $this->pathSplit($extExpr);
       if ($keyOrName === '.') {
         $results[] = array(
           'type' => 'ext',
@@ -102,7 +102,7 @@ Example: Lookup multiple items
     }
 
     foreach ($input->getOption('config') as $configExpr) {
-      list ($configProperty, $file) = explode('/', $configExpr, 2);
+      [$configProperty, $file] = $this->pathSplit($configExpr);
       $dir = \CRM_Core_Config::singleton()->{$configProperty};
       if (version_compare(\CRM_Utils_System::version(), '4.7', '<') && $configProperty === 'templateCompileDir') {
         // Compatibility: 4.6 has weird notion of templates_c.
@@ -157,6 +157,12 @@ Example: Lookup multiple items
 
     $this->sendTable($input, $output, $results, $columns);
     return $returnValue;
+  }
+
+  protected function pathSplit(string $expr): array {
+    $parts = explode('/', $expr);
+    $first = array_shift($parts);
+    return [$first, count($parts) ? implode('/', $parts) : NULL];
   }
 
   protected function pathJoin($folder, $file) {
