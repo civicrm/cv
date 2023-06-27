@@ -226,6 +226,10 @@ trait BootTrait {
         \CRM_Core_BAO_UFMatch::synchronize(\JFactory::getUser(), TRUE, CIVICRM_UF, 'Individual');
         break;
 
+      case 'Standalone':
+        \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['loggedInUser'], TRUE, CIVICRM_UF, 'Individual');
+        break;
+
       case 'WordPress':
         \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['current_user'], TRUE, CIVICRM_UF, 'Individual');
         break;
