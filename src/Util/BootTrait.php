@@ -226,6 +226,16 @@ trait BootTrait {
         \CRM_Core_BAO_UFMatch::synchronize(\JFactory::getUser(), TRUE, CIVICRM_UF, 'Individual');
         break;
 
+      case 'Standalone':
+        // At time of writing, support for 'loggedInUser' is in a PR. Once the functionality is merged, we can update/simplify this.
+        if (empty($GLOBALS['loggedInUser'])) {
+          $output->writeln("<error>Failed to sync user/contact. You may be running a pre-release of civicrm-standalone.</error>");
+        }
+        else {
+          \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['loggedInUser'], TRUE, CIVICRM_UF, 'Individual');
+        }
+        break;
+
       case 'WordPress':
         \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['current_user'], TRUE, CIVICRM_UF, 'Individual');
         break;
