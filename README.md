@@ -174,6 +174,23 @@ Bootstrap
 > ___NOTE___: In absence of a configuration variable, the __Automatic__ mode will behave like `CIVICRM_SETTINGS="Auto"` (in v0.3.x).
   This is tentatively planned to change in v0.4.x, where it will behave like `CIVICRM_BOOT="Auto://."`
 
+Autocomplete
+============
+
+There is limited/experimental support for shell autocompletion based on [stecman/symfony-console-completion](https://github.com/stecman/symfony-console-completion).
+To enable it:
+
+```sh
+# BASH ~4.x, ZSH
+source <(cv _completion --generate-hook)
+
+# BASH ~3.x, ZSH
+cv _completion --generate-hook | source /dev/stdin
+
+# BASH (any version)
+eval $(cv _completion --generate-hook)
+```
+
 Build
 =====
 

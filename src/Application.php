@@ -129,6 +129,7 @@ class Application extends \Symfony\Component\Console\Application {
       $commands[] = new \Civi\Cv\Command\CoreCheckReqCommand();
       $commands[] = new \Civi\Cv\Command\CoreInstallCommand();
       $commands[] = new \Civi\Cv\Command\CoreUninstallCommand();
+      $commands[] = new \Stecman\Component\Symfony\Console\BashCompletion\CompletionCommand();
     }
     return $commands;
   }
