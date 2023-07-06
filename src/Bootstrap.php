@@ -232,6 +232,15 @@ class Bootstrap {
     require_once $civicrm_root . '/CRM/Core/ClassLoader.php';
     \CRM_Core_ClassLoader::singleton()->register();
 
+    // Include the project autoloader.
+    if (!isset($cmsBasePath)) {
+      list (, $cmsBasePath) = $this->findCmsRoot($this->getSearchDir());
+    }
+    $project_autoloader = dirname($cmsBasePath) . DIRECTORY_SEPARATOR . 'vendor/autoload.php';
+    if (file_exists($project_autoloader)) {
+      require_once($project_autoloader);
+    }
+
     if (!empty($options['prefetch'])) {
       $this->writeln("Call core bootstrap", OutputInterface::VERBOSITY_VERBOSE);
       // I'm not sure why this is called explicitly during bootstrap
