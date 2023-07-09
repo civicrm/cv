@@ -407,8 +407,24 @@ class CmsBootstrap {
    * @return $this
    */
   public function bootStandalone($cmsPath, $cmsUser) {
-    // Load the composer libs.
-    require_once $cmsPath . '/vendor/autoload.php'; /* @todo clarify: assumes $cmsPath is to the project root, not the webroot */
+    /* @todo clarify: assumes $cmsPath is to the project root, not the webroot */
+    $candidates = [
+      $cmsPath . '/vendor/autoload.php',
+      $cmsPath . '/web/core/vendor/autoload.php',
+      dirname($cmsPath) . '/vendor/autoload.php',
+    ];
+    $autoloader = NULL;
+    foreach ($candidates as $candidate) {
+      if (file_exists($candidate)) {
+        $autoloader = $candidate;
+        break;
+      }
+    }
+
+    if (!$autoloader) {
+      throw new \RuntimeException("Failed to find autoloader. Possibilities: " . implode(', ', $candidates));
+    }
+    require_once $autoloader;
 
     $this->deferredUserToLogin = $cmsUser ?? NULL;
     return $this;
@@ -487,6 +503,12 @@ class CmsBootstrap {
           $matches = glob("$basePath/web/$relPath");
           if (!empty($matches)) {
             return array('path' => "$basePath/web", 'type' => $cmsType);
+          }
+          if ($cmsType === 'Standalone') {
+            $matches = glob("$basePath/srv/$relPath");
+            if (!empty($matches)) {
+              return array('path' => "$basePath/srv", 'type' => $cmsType);
+            }
           }
         }
       }
