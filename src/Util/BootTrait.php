@@ -43,8 +43,7 @@ trait BootTrait {
         $input->setOption('level', 'full');
       }
       else {
-        $input->setOption('level', 'full');
-        // TODO (when tests pass, for v0.4): $input->setOption('level', 'cms-full');
+        $input->setOption('level', 'cms-full');
       }
     }
 

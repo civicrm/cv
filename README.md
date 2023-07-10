@@ -171,8 +171,8 @@ Bootstrap
     less representative of a typical HTTP page-view, and it is incompatible with commands like `core:install`. You might use it
     for headless testing or as fallback/work-around if any bugs are discovered in the standard protocol.)
 
-> ___NOTE___: In absence of a configuration variable, the __Automatic__ mode will behave like `CIVICRM_SETTINGS="Auto"` (in v0.3.x).
-  This is tentatively planned to change in v0.4.x, where it will behave like `CIVICRM_BOOT="Auto://."`
+> ___NOTE___: In absence of a configuration variable, the __Automatic__ mode specifically behaves like `CIVICRM_BOOT="Auto://."` (in v0.4.x
+> and later).  This is a change from v0.3.x, where the default behaved like `CIVICRM_SETTINGS="Auto"`.
 
 Build
 =====
