@@ -232,13 +232,13 @@ class Bootstrap {
     require_once $civicrm_root . '/CRM/Core/ClassLoader.php';
     \CRM_Core_ClassLoader::singleton()->register();
 
-    // Include the project autoloader.
+    // Include the UF's autoloader. Should this be tuned based on UF type?
     if (!isset($cmsBasePath)) {
       list (, $cmsBasePath) = $this->findCmsRoot($this->getSearchDir());
     }
-    $project_autoloader = dirname($cmsBasePath) . DIRECTORY_SEPARATOR . 'vendor/autoload.php';
-    if (file_exists($project_autoloader)) {
-      require_once($project_autoloader);
+    $cmsAutoloader = dirname($cmsBasePath) . DIRECTORY_SEPARATOR . 'vendor/autoload.php';
+    if (file_exists($cmsAutoloader)) {
+      require_once $cmsAutoloader;
     }
 
     if (!empty($options['prefetch'])) {
@@ -294,6 +294,13 @@ class Bootstrap {
 
     $code[] = 'require_once $GLOBALS["civicrm_root"] . "/CRM/Core/ClassLoader.php";';
     $code[] = '\CRM_Core_ClassLoader::singleton()->register();';
+
+    // Include the UF's autoloader. Should this be tuned based on UF type?
+    list (, $cmsBasePath) = $this->findCmsRoot($this->getSearchDir());
+    $cmsAutoloader = dirname($cmsBasePath) . DIRECTORY_SEPARATOR . 'vendor/autoload.php';
+    if (file_exists($cmsAutoloader)) {
+      $code[] = sprintf('require_once %s;', var_export($cmsAutoloader, 1));
+    }
 
     return implode("\n", $code);
   }
