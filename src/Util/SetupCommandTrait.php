@@ -66,6 +66,10 @@ trait SetupCommandTrait {
       implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'vendor', 'civicrm', 'civicrm-core']),
       implode(DIRECTORY_SEPARATOR, [dirname($b->getBootedCmsPath()), 'vendor', 'civicrm', 'civicrm-core']),
     ];
+    if ($b->getBootedCmsType() === 'Standalone') {
+      $possibleSrcPaths[] = implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'web', 'core']);
+      $possibleSrcPaths[] = dirname($b->getBootedCmsPath());
+    }
     $setupOptions['srcPath'] = ArrayUtil::pickFirst($possibleSrcPaths, 'file_exists');
     if ($setupOptions['srcPath']) {
       $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-core', $setupOptions['srcPath']), $defaultOutputOptions);

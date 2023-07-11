@@ -477,6 +477,12 @@ class Bootstrap {
           if (!empty($matches)) {
             return array($cmsType, "$basePath/web");
           }
+          if ($cmsType === 'standalone') {
+            $matches = glob("$basePath/srv/$relPath");
+            if (!empty($matches)) {
+              return array($cmsType, "$basePath/srv");
+            }
+          }
         }
       }
       array_pop($parts);
