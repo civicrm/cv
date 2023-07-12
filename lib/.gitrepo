@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:civicrm/cv-lib.git
 	branch = master
-	commit = 9f3f76304308ea7ba9a2fb9888570949d6ee31b3
+	commit = 34cd212d371d541c53f180e7382880dcaeb01d37
 	method = merge
 	cmdver = 0.4.1
-	parent = ea0139a7be3f4aaac4b4bec110045ec4d86b3d82
+	parent = 15c6b262bb1bf4b160aa2753f1dadae500c67247
