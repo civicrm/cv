@@ -20,7 +20,7 @@ in
 
   pkgs.mkShell {
     # nativeBuildInputs is usually what you want -- tools you need to run
-    nativeBuildInputs = [ myphp pkgs.php81Packages.composer pkgs.bash-completion ];
+    nativeBuildInputs = [ myphp pkgs.php81Packages.composer pkgs.bash-completion pkgs.git-subrepo ];
     shellHook = ''
       source ${pkgs.bash-completion}/etc/profile.d/bash_completion.sh
     '';
