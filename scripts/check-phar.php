@@ -34,9 +34,9 @@ assertMatch('lib/src/CmsBootstrap.php', ';wp_set_current_user;');
 foreach (['lib/src/Bootstrap.php', 'lib/src/CmsBootstrap.php'] as $file) {
   // These two files have lots of CMS symbols. The only thing that should be prefixed is Symfony stuff.
   $allPrefixed = grepFile($file, ';Cvphar;');
-  $symfonyPrefixed = grepFile($file, ';Cvphar.*Symfony;');
-  if ($allPrefixed !== $symfonyPrefixed) {
-    $errors[] = "File $file has lines with unexpected prefixing:\n  " . implode("\n  ", array_diff($allPrefixed, $symfonyPrefixed)) . "\n";
+  $expectPrefixed = grepFile($file, ';Cvphar.*(Symfony|Psr.*Log);');
+  if ($allPrefixed !== $expectPrefixed) {
+    $errors[] = "File $file has lines with unexpected prefixing:\n  " . implode("\n  ", array_diff($allPrefixed, $expectPrefixed)) . "\n";
   }
 }
 assertNotMatch('lib/src/CmsBootstrap.php', ';Cvphar.JFactory;');

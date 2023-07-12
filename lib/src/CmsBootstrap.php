@@ -1,8 +1,6 @@
 <?php
 namespace Civi\Cv;
 
-use Symfony\Component\Console\Output\OutputInterface;
-
 /**
  * Bootstrap the CMS runtime.
  *
@@ -37,6 +35,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  *     (Default: TRUE aka PWD)
  *   - user: string|NULL. The name of a CMS user to authenticate as.
  *   - httpHost: string|NULL. For multisite, the HTTP hostname.
+ *   - log: \Psr\Log\LoggerInterface (If given, send log messages here)
+ *   - output: Symfony OutputInterface. (Fallback for handling logs - in absence of 'log')
  *
  * @package Civi
  */
@@ -47,12 +47,9 @@ class CmsBootstrap {
   protected $options = array();
 
   /**
-   * Symphony OutputInterface provide during booting to enable the command-line
-   * 'v', 'vv' and 'vvv' options
-   * @var \Symfony\Component\Console\Output\OutputInterface
-   * @see http://symfony.com/doc/current/console/verbosity.html
+   * @var \Psr\Log\LoggerInterface
    */
-  protected $output = FALSE;
+  protected $log = NULL;
 
   /**
    * @var array|null
@@ -69,15 +66,12 @@ class CmsBootstrap {
   protected $deferredUserToLogin = NULL;
 
   /**
-   * Wrapper around OutputInterface::writeln()
-   *
    * @param string $text
    * @param int $level
+   * @deprecated
    */
-  public function writeln($text, $level = OutputInterface::VERBOSITY_NORMAL) {
-    if ($this->output) {
-      $this->output->writeln("<info>[CmsBootstrap]</info> $text", $level);
-    }
+  public function writeln($text, $level = 32) {
+    $this->log->info($text);
   }
 
   /**
@@ -130,11 +124,11 @@ class CmsBootstrap {
    * @throws \Exception
    */
   public function bootCms() {
-    $this->writeln("Options: " . json_encode($this->options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
+    $this->log->debug("Options: " . json_encode($this->options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
     if ($this->options['env'] && getenv($this->options['env'])) {
       $cmsExpr = getenv($this->options['env']);
-      $this->writeln("Parse CMS options ($cmsExpr)", OutputInterface::VERBOSITY_DEBUG);
+      $this->log->debug("Parse CMS options ($cmsExpr)");
       $cms = array(
         'type' => parse_url($cmsExpr, PHP_URL_SCHEME),
         'path' => '/' . parse_url($cmsExpr, PHP_URL_HOST) . parse_url($cmsExpr, PHP_URL_PATH),
@@ -155,18 +149,18 @@ class CmsBootstrap {
       }
     }
     else {
-      $this->writeln("Find CMS...", OutputInterface::VERBOSITY_DEBUG);
+      $this->log->debug("Find CMS...");
       $cms = $this->findCmsRoot($this->getSearchDir());
     }
 
-    $this->writeln("CMS: " . json_encode($cms, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
+    $this->log->debug("CMS: " . json_encode($cms, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     if (empty($cms['path']) || empty($cms['type']) || !file_exists($cms['path'])) {
       $cmsJson = json_encode($cms, JSON_UNESCAPED_SLASHES);
       throw new \Exception("Failed to parse or find a CMS $cmsJson");
     }
 
     if (PHP_SAPI === "cli") {
-      $this->writeln("Simulate web environment in CLI", OutputInterface::VERBOSITY_DEBUG);
+      $this->log->debug("Simulate web environment in CLI");
       $this->simulateWebEnv($this->options['httpHost'], $cms['path'] . '/index.php');
     }
     $func = 'boot' . $cms['type'];
@@ -181,7 +175,7 @@ class CmsBootstrap {
       error_reporting(1);
     }
 
-    $this->writeln("Finished", OutputInterface::VERBOSITY_DEBUG);
+    $this->log->debug("Finished");
     $this->bootedCms = $cms;
     return $this;
   }
@@ -220,7 +214,7 @@ class CmsBootstrap {
       \Drupal::service('civicrm')->initialize();
     }
     elseif ($this->bootedCms['type'] === 'Standalone') {
-      $this->writeln("Hello there Standalone, come join us!", OutputInterface::VERBOSITY_DEBUG);
+      $this->log->debug("Hello there Standalone, come join us!");
       \Civi\Cv\Bootstrap::singleton()->boot();
       $this->loginStandaloneUser();
     }
@@ -246,12 +240,12 @@ class CmsBootstrap {
   protected function buildCv(): array {
     $settings = constant('CIVICRM_SETTINGS_PATH');
     if ($settings && class_exists('Civi\Cv\SiteConfigReader')) {
-      $this->writeln("Load supplemental configuration for \"$settings\"", OutputInterface::VERBOSITY_DEBUG);
+      $this->log->debug("Load supplemental configuration for \"$settings\"");
       $reader = new SiteConfigReader($settings);
       return $reader->compile(array('buildkit', 'home'));
     }
     else {
-      $this->writeln("Warning: Not loading supplemental configuration for \"$settings\". SiteConfigReader is missing.", OutputInterface::VERBOSITY_DEBUG);
+      $this->log->debug("Warning: Not loading supplemental configuration for \"$settings\". SiteConfigReader is missing.");
       return [];
     }
   }
@@ -445,11 +439,7 @@ class CmsBootstrap {
    */
   public function addOptions($options) {
     $this->options = array_merge($this->options, $options);
-
-    if (!empty($options['output'])) {
-      $this->output = $options['output'];
-    }
-
+    $this->log = Util\Logger::resolve($options, 'CmsBootstrap');
     return $this;
   }
 
@@ -582,7 +572,7 @@ class CmsBootstrap {
         break;
 
       default:
-        $this->output->writeln("<error>Unrecognized UF: " . CIVICRM_UF . "</error>");
+        $this->log->error("Unrecognized UF: " . CIVICRM_UF);
     }
 
     return \CRM_Core_Session::getLoggedInContactID();
