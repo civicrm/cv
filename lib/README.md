@@ -2,8 +2,8 @@
 
 `cv-lib` is a subpackage provided by `cv`. It defines the essential core of `cv` -- locating and booting CiviCRM.
 
-The canonical home for developing this code is in `cv.git:lib/`. It will be periodically published to the read-only
-mirror `cv-lib.git` to facilitate usage by other projects.
+The canonical home for developing this code is in [civicrm/cv](https://github.com/civicrm/cv). It will be periodically published to the read-only
+mirror [civicrm/cv-lib](https://github.com/civicrm/cv-lib) to facilitate usage by other projects.
 
 ## Installation
 
