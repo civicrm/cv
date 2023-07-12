@@ -26,22 +26,22 @@ assertNotMatch('src/Util/UrlCommandTrait.php', ';Cvphar.CRM_Utils_System;');
 assertMatch('src/Command/ApiCommand.php', ';civicrm_api;');
 assertNotMatch('src/Command/ApiCommand.php', ';Cvphar.civicrm_api;');
 
-assertMatch('src/CmsBootstrap.php', ';JFactory::;');
-assertMatch('src/CmsBootstrap.php', ';Drupal::;');
-assertMatch('src/CmsBootstrap.php', ';drupal_bootstrap;');
-assertMatch('src/CmsBootstrap.php', ';user_load;');
-assertMatch('src/CmsBootstrap.php', ';wp_set_current_user;');
-foreach (['src/Bootstrap.php', 'src/CmsBootstrap.php'] as $file) {
+assertMatch('lib/src/CmsBootstrap.php', ';JFactory::;');
+assertMatch('lib/src/CmsBootstrap.php', ';Drupal::;');
+assertMatch('lib/src/CmsBootstrap.php', ';drupal_bootstrap;');
+assertMatch('lib/src/CmsBootstrap.php', ';user_load;');
+assertMatch('lib/src/CmsBootstrap.php', ';wp_set_current_user;');
+foreach (['lib/src/Bootstrap.php', 'lib/src/CmsBootstrap.php'] as $file) {
   // These two files have lots of CMS symbols. The only thing that should be prefixed is Symfony stuff.
   $allPrefixed = grepFile($file, ';Cvphar;');
-  $symfonyPrefixed = grepFile($file, ';Cvphar.*Symfony;');
-  if ($allPrefixed !== $symfonyPrefixed) {
-    $errors[] = "File $file has lines with unexpected prefixing:\n  " . implode("\n  ", array_diff($allPrefixed, $symfonyPrefixed)) . "\n";
+  $expectPrefixed = grepFile($file, ';Cvphar.*(Symfony|Psr.*Log);');
+  if ($allPrefixed !== $expectPrefixed) {
+    $errors[] = "File $file has lines with unexpected prefixing:\n  " . implode("\n  ", array_diff($allPrefixed, $expectPrefixed)) . "\n";
   }
 }
-assertNotMatch('src/CmsBootstrap.php', ';Cvphar.JFactory;');
-assertNotMatch('src/CmsBootstrap.php', ';Cvphar.Drupal;');
-assertNotMatch('src/CmsBootstrap.php', ';Cvphar..?Symfony..?Component..?HttpFoundation;');
+assertNotMatch('lib/src/CmsBootstrap.php', ';Cvphar.JFactory;');
+assertNotMatch('lib/src/CmsBootstrap.php', ';Cvphar.Drupal;');
+assertNotMatch('lib/src/CmsBootstrap.php', ';Cvphar..?Symfony..?Component..?HttpFoundation;');
 
 if (empty($errors)) {
   echo "OK $pharFile\n";

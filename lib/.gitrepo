@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:civicrm/cv-lib.git
+	branch = master
+	commit = 34cd212d371d541c53f180e7382880dcaeb01d37
+	method = merge
+	cmdver = 0.4.1
+	parent = 15c6b262bb1bf4b160aa2753f1dadae500c67247

@@ -1,0 +1,26 @@
+{
+    "name": "civicrm/cv-lib",
+    "description": "Bootstrap library for CiviCRM CLI tools",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tim Otten",
+            "email": "totten@civicrm.org"
+        }
+    ],
+    "require": {
+        "php": ">=7.3.0",
+        "psr/log": "~1.1 || ~2.0 || ~3.0",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Civi\\Cv\\": ["src/"]
+         }
+    },
+    "config": {
+        "platform": {
+            "php": "7.3.0"
+        }
+    }
+}
