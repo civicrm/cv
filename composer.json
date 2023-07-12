@@ -20,8 +20,11 @@
     },
     "autoload": {
         "psr-4": {
-            "Civi\\Cv\\": "src/"
+            "Civi\\Cv\\": ["lib/src/", "src/"]
          }
+    },
+    "replace": {
+        "civicrm/cv-lib": "self.version"
     },
     "bin": [
         "bin/cv"
