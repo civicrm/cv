@@ -1,8 +1,6 @@
 <?php
 namespace Civi\Cv;
 
-use Symfony\Component\Console\Output\OutputInterface;
-
 /**
  * Bootstrap the CiviCRM runtime.
  *
@@ -64,6 +62,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  *     civicrm.settings.php (or the token "Auto"). Set NULL to disable environment-checking.
  *     (Default: CIVICRM_SETTINGS)
  *   - httpHost: string|NULL. For multisite, the HTTP hostname.
+ *   - log: \Psr\Log\LoggerInterface (If given, send log messages here)
+ *   - output: Symfony OutputInterface. (Fallback for handling logs - in absence of 'log')
  *   - prefetch: bool. Whether to load various caches.
  *     (Default: TRUE)
  *   - settingsFile: string|NULL. The full path to the civicrm.settings.php
@@ -86,22 +86,17 @@ class Bootstrap {
   protected $options = array();
 
   /**
-   * @var \Symfony\Component\Console\Output\OutputInterface
-   *   Output mechanism for verbose boot messages.
-   * @see http://symfony.com/doc/current/console/verbosity.html
+   * @var \Psr\Log\LoggerInterface
    */
-  protected $output = FALSE;
+  protected $log = NULL;
 
   /**
-   * Wrapper around OutputInterface::writeln()
-   *
    * @param string $text
    * @param int $level
+   * @deprecated
    */
-  public function writeln($text, $level = OutputInterface::VERBOSITY_NORMAL) {
-    if ($this->output) {
-      $this->output->writeln("<info>[Bootstrap]</info> $text", $level);
-    }
+  public function writeln($text, $level = 32) {
+    $this->log->info($text);
   }
 
   /**
@@ -138,9 +133,7 @@ class Bootstrap {
    * @throws \Exception
    */
   public function boot($options = array()) {
-    if (!empty($options['output'])) {
-      $this->output = $options['output'];
-    }
+    $this->log = Util\Logger::resolve($options, 'Bootstrap');
 
     $isBooting = TRUE;
     register_shutdown_function(function() use (&$isBooting) {
@@ -160,11 +153,8 @@ class Bootstrap {
             $errMsg .= sprintf("\n\nWARNING: cv recommends PHP %s+ for use with current CiviCRM versions. This command is running PHP %s.", self::PHP_RECOMMENDED_MIN, PHP_VERSION);
           }
 
-          if ($this->output && is_callable([$this->output, 'getErrorOutput'])) {
-            $this->output->getErrorOutput()->writeln("<error>$errMsg</error>");
-          }
-          elseif ($this->output) {
-            $this->output->writeln("<error>$errMsg</error>");
+          if ($this->log) {
+            $this->log->error($errMsg);
           }
           else {
             fwrite(STDERR, "$errMsg\n");
@@ -176,9 +166,9 @@ class Bootstrap {
     if (!defined('CIVICRM_SETTINGS_PATH')) {
 
       $this->options = $options = array_merge($this->options, $options);
-      $this->writeln("Options: " . json_encode($options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), OutputInterface::VERBOSITY_DEBUG);
+      $this->log->debug("Options: " . json_encode($options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-      $this->writeln("Find settings file", OutputInterface::VERBOSITY_DEBUG);
+      $this->log->debug("Find settings file");
       $settings = $this->getCivicrmSettingsPhp($options);
       if (empty($settings) || !file_exists($settings)) {
         throw new \Exception("Failed to locate civicrm.settings.php."
@@ -188,21 +178,22 @@ class Bootstrap {
       }
 
       if (class_exists('Civi\Cv\SiteConfigReader')) {
-        $this->writeln("Load supplemental configuration for \"$settings\"", OutputInterface::VERBOSITY_DEBUG);
+        $this->log->debug("Load supplemental configuration for \"$settings\"");
         $reader = new SiteConfigReader($settings);
         $GLOBALS['_CV'] = $reader->compile(array('buildkit', 'home'));
       }
       else {
-        $this->writeln("Warning: Not loading supplemental configuration for \"$settings\". SiteConfigReader is missing.", OutputInterface::VERBOSITY_DEBUG);
+        $this->log->debug("Warning: Not loading supplemental configuration for \"$settings\". SiteConfigReader is missing.");
         $GLOBALS['_CV'] = [];
       }
 
-      $this->writeln("Find CMS root for \"" . $this->getSearchDir() . "\"", OutputInterface::VERBOSITY_VERBOSE);
+      $this->log->notice("Find CMS root for \"" . $this->getSearchDir() . "\"");
       list ($cmsType, $cmsBasePath) = $this->findCmsRoot($this->getSearchDir());
-      $this->writeln("Found \"$cmsType\" in \"$cmsBasePath\"", OutputInterface::VERBOSITY_VERBOSE);
+      $this->log->notice("Found \"$cmsType\" in \"$cmsBasePath\"");
 
       if (PHP_SAPI === "cli") {
-        $this->writeln("Simulate web environment in CLI", OutputInterface::VERBOSITY_VERBOSE);
+        $this->log->notice("Simulate web environment in CLI");
+
         $_SERVER['SCRIPT_FILENAME'] = $cmsBasePath . '/index.php';
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['SERVER_SOFTWARE'] = NULL;
@@ -216,31 +207,31 @@ class Bootstrap {
         }
       }
 
-      $this->writeln("Load settings file \"" . $settings . "\"", OutputInterface::VERBOSITY_DEBUG);
+      $this->log->debug("Load settings file \"" . $settings . "\"");
       define('CIVICRM_SETTINGS_PATH', $settings);
       $error = @include_once $settings;
       if ($error == FALSE) {
-        $this->writeln("Failed to load settings file", OutputInterface::VERBOSITY_VERBOSE);
+        $this->log->notice("Failed to load settings file");
         throw new \Exception("Could not load the CiviCRM settings file: {$settings}");
       }
     }
 
     // Backward compatibility - New civicrm.settings.php files include
     // the classloader, but old ones don't.
-    $this->writeln("Initialize class loader", OutputInterface::VERBOSITY_VERBOSE);
+    $this->log->notice("Initialize class loader");
     global $civicrm_root;
     require_once $civicrm_root . '/CRM/Core/ClassLoader.php';
     \CRM_Core_ClassLoader::singleton()->register();
 
     if (!empty($options['prefetch'])) {
-      $this->writeln("Call core bootstrap", OutputInterface::VERBOSITY_VERBOSE);
+      $this->log->notice("Call core bootstrap");
       // I'm not sure why this is called explicitly during bootstrap
       // rather than lazily. However, it seems to be done by all
       // the existing bootstrap code. Perhaps initializing Config
       // has a side-effect of initializing other things?
       \CRM_Core_Config::singleton();
     }
-    $this->writeln("Finished", OutputInterface::VERBOSITY_DEBUG);
+    $this->log->debug("Finished");
     $isBooting = FALSE;
   }
 
