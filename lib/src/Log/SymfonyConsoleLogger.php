@@ -39,10 +39,11 @@ class SymfonyConsoleLogger extends InternalLogger {
   public function log($level, $message, array $context = []) {
     $output = $this->output;
 
+    if ($output instanceof ConsoleOutputInterface) {
+      $output = $output->getErrorOutput();
+    }
+
     if ($this->isAnomolous($level)) {
-      if ($output instanceof ConsoleOutputInterface) {
-        $output = $output->getErrorOutput();
-      }
       $template = '<error>[%s:%s]</error> %s';
     }
     else {

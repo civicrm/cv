@@ -15,13 +15,9 @@ class StdioLogger extends InternalLogger {
   }
 
   public function log($level, $message, array $context = []) {
-    $template = "[%s:%s] %s\n";
-
-    if ($this->isAnomolous($level)) {
+    if ($this->isAnomolous($level) || $this->verbose) {
+      $template = "[%s:%s] %s\n";
       fprintf(STDERR, $template, $this->topic, $level, $this->interpolate($message, $context));
-    }
-    elseif ($level === 'notice' || $this->verbose) {
-      fprintf(STDOUT, $template, $this->topic, $level, $this->interpolate($message, $context));
     }
   }
 
