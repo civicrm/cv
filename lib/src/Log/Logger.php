@@ -22,7 +22,7 @@ class Logger {
       return new SymfonyConsoleLogger($topic, $options['output']);
     }
     else {
-      return new StdioLogger($topic);
+      return new StderrLogger($topic);
     }
   }
 

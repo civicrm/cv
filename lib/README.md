@@ -61,7 +61,7 @@ handling of messages:
 $options['log'] = new \Psr\Log\NullLogger();
 
 // Enable verbose logging to STDOUT/STDERR
-$options['log'] = new \Civi\Cv\Log\StdioLogger('Bootstrap', TRUE);
+$options['log'] = new \Civi\Cv\Log\StderrLogger('Bootstrap', TRUE);
 
 // Use bridge between psr/log and symfony/console
 $options['log'] = new \Symfony\Component\Console\Logger\ConsoleLogger($output);

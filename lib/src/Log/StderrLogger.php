@@ -3,9 +3,11 @@
 namespace Civi\Cv\Log;
 
 /**
- * @internal
+ * Send anomolous logs (errors, warnings, etc) to STDERR.
+ *
+ * Informational logs will be discarded (unless you enable the $verbose flag).
  */
-class StdioLogger extends InternalLogger {
+class StderrLogger extends InternalLogger {
 
   protected $verbose;
 
