@@ -35,7 +35,7 @@ namespace Civi\Cv;
  *     (Default: TRUE aka PWD)
  *   - user: string|NULL. The name of a CMS user to authenticate as.
  *   - httpHost: string|NULL. For multisite, the HTTP hostname.
- *   - log: \Psr\Log\LoggerInterface (If given, send log messages here)
+ *   - log: \Psr\Log\LoggerInterface|\Civi\Cv\Log\InternalLogger (If given, send log messages here)
  *   - output: Symfony OutputInterface. (Fallback for handling logs - in absence of 'log')
  *
  * @package Civi
@@ -47,7 +47,7 @@ class CmsBootstrap {
   protected $options = array();
 
   /**
-   * @var \Psr\Log\LoggerInterface
+   * @var \Psr\Log\LoggerInterface|\Civi\Cv\Log\InternalLogger
    */
   protected $log = NULL;
 
@@ -439,7 +439,7 @@ class CmsBootstrap {
    */
   public function addOptions($options) {
     $this->options = array_merge($this->options, $options);
-    $this->log = Util\Logger::resolve($options, 'CmsBootstrap');
+    $this->log = Log\Logger::resolve($options, 'CmsBootstrap');
     return $this;
   }
 

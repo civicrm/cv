@@ -2,10 +2,10 @@
 namespace Civi\Cv\Util;
 
 use Civi\Cv\CmsBootstrap;
+use Civi\Cv\Log\SymfonyConsoleLogger;
 use Civi\Setup\DbUtil;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 
 define('CV_SETUP_PROTOCOL_VER', '1.0');
@@ -136,7 +136,7 @@ trait SetupCommandTrait {
     }
 
     \Civi\Setup::assertProtocolCompatibility(CV_SETUP_PROTOCOL_VER);
-    \Civi\Setup::init($setupOptions, $pluginCallback, new ConsoleLogger($output));
+    \Civi\Setup::init($setupOptions, $pluginCallback, new PsrLogger(new SymfonyConsoleLogger('Setup', $output)));
     $setup = \Civi\Setup::instance();
 
     // Override defaults detected by setup initialization.

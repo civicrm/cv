@@ -2,6 +2,8 @@
 namespace Civi\Cv\Util;
 
 use Civi\Cv\ErrorHandler;
+use Civi\Cv\Log\InternalLogger;
+use Civi\Cv\Log\SymfonyConsoleLogger;
 use Civi\Cv\PharOut\PharOut;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -22,12 +24,13 @@ trait BootTrait {
   }
 
   public function boot(InputInterface $input, OutputInterface $output) {
-    $output->writeln('<info>[BootTrait]</info> Start', OutputInterface::VERBOSITY_DEBUG);
+    $logger = $this->bootLogger($output);
+    $logger->debug('Start');
 
     $this->setupErrorHandling($output);
 
     if ($input->hasOption('test') && $input->getOption('test')) {
-      $output->writeln('<info>[BootTrait]</info> Use test mode', OutputInterface::VERBOSITY_DEBUG);
+      $logger->debug('Use test mode');
       putenv('CIVICRM_UF=UnitTests');
       $_ENV['CIVICRM_UF'] = 'UnitTests';
     }
@@ -64,7 +67,7 @@ trait BootTrait {
     // CMS may have installed wonky error-handling. Add our own.
     ErrorHandler::pushHandler();
 
-    $output->writeln('<info>[BootTrait]</info> Finished', OutputInterface::VERBOSITY_DEBUG);
+    $logger->debug('Finished');
   }
 
   /**
@@ -74,7 +77,7 @@ trait BootTrait {
    * @param \Symfony\Component\Console\Output\OutputInterface $output
    */
   public function _boot_none(InputInterface $input, OutputInterface $output) {
-    $output->writeln('<info>[BootTrait]</info> Skip', OutputInterface::VERBOSITY_DEBUG);
+    $this->bootLogger($output)->debug('Skip');
   }
 
   /**
@@ -84,7 +87,7 @@ trait BootTrait {
    * @param \Symfony\Component\Console\Output\OutputInterface $output
    */
   public function _boot_classloader(InputInterface $input, OutputInterface $output) {
-    $output->writeln('<info>[BootTrait]</info> Call basic cv bootstrap (' . $input->getOption('level') . ')', OutputInterface::VERBOSITY_DEBUG);
+    $this->bootLogger($output)->debug('Call basic cv bootstrap (' . $input->getOption('level') . ')');
     \Civi\Cv\Bootstrap::singleton()->boot($this->createBootParams($input, $output) + array(
       'prefetch' => FALSE,
     ));
@@ -97,7 +100,8 @@ trait BootTrait {
    * @param \Symfony\Component\Console\Output\OutputInterface $output
    */
   public function _boot_settings(InputInterface $input, OutputInterface $output) {
-    $output->writeln('<info>[BootTrait]</info> Call basic cv bootstrap (' . $input->getOption('level') . ')', OutputInterface::VERBOSITY_DEBUG);
+    $this->bootLogger($output)->debug('Call basic cv bootstrap (' . $input->getOption('level') . ')');
+
     \Civi\Cv\Bootstrap::singleton()->boot($this->createBootParams($input, $output) + array(
       'prefetch' => FALSE,
     ));
@@ -113,17 +117,22 @@ trait BootTrait {
   public function _boot_full(InputInterface $input, OutputInterface $output) {
     PharOut::prepare();
 
-    $output->writeln('<info>[BootTrait]</info> Call standard cv bootstrap', OutputInterface::VERBOSITY_DEBUG);
+    $logger = $this->bootLogger($output);
+    $logger->debug('Call standard cv bootstrap');
+
     \Civi\Cv\Bootstrap::singleton()->boot($this->createBootParams($input, $output));
 
-    $output->writeln('<info>[BootTrait]</info> Call core bootstrap', OutputInterface::VERBOSITY_DEBUG);
+    $logger->debug('Call core bootstrap');
+
     \CRM_Core_Config::singleton();
 
-    $output->writeln('<info>[BootTrait]</info> Call CMS bootstrap', OutputInterface::VERBOSITY_DEBUG);
+    $logger->debug('Call CMS bootstrap');
+
     \CRM_Utils_System::loadBootStrap(array(), FALSE);
 
     if ($input->getOption('user')) {
-      $output->writeln('<info>[BootTrait]</info> Set system user', OutputInterface::VERBOSITY_DEBUG);
+      $logger->debug('Set system user');
+
       if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
         if (!\CRM_Core_Config::singleton()->userSystem->loadUser($input->getOption('user')) || !$this->ensureUserContact($output)) {
           throw new \Exception("Failed to determine contactID for user=" . $input->getOption('user'));
@@ -135,7 +144,8 @@ trait BootTrait {
     }
 
     if (is_callable([\CRM_Core_Config::singleton()->userSystem, 'setMySQLTimeZone'])) {
-      $output->writeln('<info>[BootTrait]</info> Set active MySQL timezone', OutputInterface::VERBOSITY_DEBUG);
+      $logger->debug('Set active MySQL timezone');
+
       \CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
     }
 
@@ -153,7 +163,8 @@ trait BootTrait {
    */
   public function _boot_cms_only(InputInterface $input, OutputInterface $output) {
     $bootstrap = $this->createCmsBootstrap($input, $output);
-    $output->writeln('<info>[BootTrait]</info> Call CMS bootstrap', OutputInterface::VERBOSITY_DEBUG);
+    $this->bootLogger($output)->debug('Call CMS bootstrap');
+
     $bootstrap->bootCms();
     return $bootstrap;
   }
@@ -167,7 +178,8 @@ trait BootTrait {
    */
   public function _boot_cms_full(InputInterface $input, OutputInterface $output) {
     $bootstrap = $this->_boot_cms_only($input, $output);
-    $output->writeln('<info>[BootTrait]</info> Call Civi bootstrap', OutputInterface::VERBOSITY_DEBUG);
+    $this->bootLogger($output)->debug('Call Civi bootstrap');
+
     $bootstrap->bootCivi();
     return $bootstrap;
   }
@@ -229,7 +241,8 @@ trait BootTrait {
       case 'Standalone':
         // At time of writing, support for 'loggedInUser' is in a PR. Once the functionality is merged, we can update/simplify this.
         if (empty($GLOBALS['loggedInUser'])) {
-          $output->writeln("<error>Failed to sync user/contact. You may be running a pre-release of civicrm-standalone.</error>");
+          $this->bootLogger($output)->error('Failed to sync user/contact. You may be running a pre-release of civicrm-standalone.');
+
         }
         else {
           \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['loggedInUser'], TRUE, CIVICRM_UF, 'Individual');
@@ -241,14 +254,16 @@ trait BootTrait {
         break;
 
       default:
-        $output->writeln("<error>Unrecognized UF: " . CIVICRM_UF . "</error>");
+        $this->bootLogger($output)->error("Unrecognized UF: " . CIVICRM_UF);
+
     }
 
     return \CRM_Core_Session::getLoggedInContactID();
   }
 
   protected function setupErrorHandling(OutputInterface $output) {
-    $output->writeln('[BootTrait] Attempting to set verbose error reporting', OutputInterface::VERBOSITY_DEBUG);
+    $this->bootLogger($output)->debug('Attempting to set verbose error reporting');
+
     // standard php debug chat settings
     error_reporting(E_ALL | E_STRICT);
     ini_set('display_errors', 'stderr');
@@ -269,6 +284,10 @@ trait BootTrait {
       $boot_params['httpHost'] = $input->getOption('hostname');
     }
     return $boot_params;
+  }
+
+  private function bootLogger(OutputInterface $output): InternalLogger {
+    return new SymfonyConsoleLogger('BootTrait', $output);
   }
 
 }

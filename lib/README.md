@@ -25,10 +25,17 @@ The library provides a handful of supported classes:
     Civi\Cv\CmsBootstrap::singleton()->bootCms()->bootCivi();
     ```
 
-    End-users may fine-tune the behavior by setting `CIVICRM_BOOT` (as documented in `cv`).
+    Or you can pass in options:
 
-    As a developer, you may give additional options and hints -- for example, directing the boot log to a custom logger.
-    For all options, see the docblocks.
+    ```php
+    $options = [...];
+    Civi\Cv\CmsBootstrap::singleton()
+      ->addOptions($options)
+      ->bootCms()
+      ->bootCivi();
+    ```
+
+    End-users may fine-tune the behavior by setting `CIVICRM_BOOT` (as documented in `cv`).
 
 * `Civi\Cv\Bootstrap` supports the legacy boot protocol. In this protocol, we search for `civicrm.settings.php` and
   start CiviCRM. Finally, we use `civicrm-core` API's to start the associated UF/CMS.
@@ -36,15 +43,38 @@ The library provides a handful of supported classes:
     Basic usage:
 
     ```php
-    \Civi\Cv\Bootstrap::singleton()->boot();
+    $options = [...];
+    \Civi\Cv\Bootstrap::singleton()->boot($options);
     \CRM_Core_Config::singleton();
     \CRM_Utils_System::loadBootStrap([], FALSE);
     ```
 
     End-users may fine-tune the behavior by setting `CIVICRM_SETTING` (as documented in `cv`).
 
-    As a developer, you may give additional options and hints -- for example, directing the boot log to a custom logger.
-    For all options, see the docblocks.
+Both bootstrap mechanisms accept an optional set of hints and overrides.
+
+For example, by default, `cv-lib` will print errors to STDERR, but you can override the
+handling of messages:
+
+```php
+// Disable all output
+$options['log'] = new \Psr\Log\NullLogger();
+
+// Enable verbose logging to STDOUT/STDERR
+$options['log'] = new \Civi\Cv\Log\StderrLogger('Bootstrap', TRUE);
+
+// Use bridge between psr/log and symfony/console
+$options['log'] = new \Symfony\Component\Console\Logger\ConsoleLogger($output);
+
+// Use the console logger from cv cli. (Requires symfony/console. Looks a bit prettier.)
+public function execute(InputInterface $input, OutputInterface $output) {
+  ...
+  $options['output'] = $output;
+  ...
+}
+```
+
+For more info about `$options`, see the docblocks.
 
 ## Experimental API
 

@@ -62,7 +62,7 @@ namespace Civi\Cv;
  *     civicrm.settings.php (or the token "Auto"). Set NULL to disable environment-checking.
  *     (Default: CIVICRM_SETTINGS)
  *   - httpHost: string|NULL. For multisite, the HTTP hostname.
- *   - log: \Psr\Log\LoggerInterface (If given, send log messages here)
+ *   - log: \Psr\Log\LoggerInterface|\Civi\Cv\Log\InternalLogger (If given, send log messages here)
  *   - output: Symfony OutputInterface. (Fallback for handling logs - in absence of 'log')
  *   - prefetch: bool. Whether to load various caches.
  *     (Default: TRUE)
@@ -86,7 +86,7 @@ class Bootstrap {
   protected $options = array();
 
   /**
-   * @var \Psr\Log\LoggerInterface
+   * @var \Psr\Log\LoggerInterface|\Civi\Cv\Log\InternalLogger
    */
   protected $log = NULL;
 
@@ -133,7 +133,7 @@ class Bootstrap {
    * @throws \Exception
    */
   public function boot($options = array()) {
-    $this->log = Util\Logger::resolve($options, 'Bootstrap');
+    $this->log = Log\Logger::resolve($options, 'Bootstrap');
 
     $isBooting = TRUE;
     register_shutdown_function(function() use (&$isBooting) {
