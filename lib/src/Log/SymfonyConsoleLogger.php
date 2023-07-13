@@ -6,7 +6,7 @@ use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @internal
+ * Send log messages to the console with Symfony formatting codes.
  */
 class SymfonyConsoleLogger extends InternalLogger {
 
