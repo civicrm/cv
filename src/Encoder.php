@@ -41,6 +41,7 @@ class Encoder {
       'none',
       'pretty',
       'php',
+      'php-data',
       'json-pretty',
       'json-strict',
       'serialize',
@@ -59,6 +60,9 @@ class Encoder {
       case 'php':
         return var_export($data, 1);
 
+      case 'php-data':
+        return var_export(static::preferArray($data), 1);
+
       case 'json-pretty':
         $jsonOptions = (defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0)
           |
@@ -73,6 +77,8 @@ class Encoder {
         return serialize($data);
 
       case 'shell':
+        $data = static::preferArray($data);
+
         if (is_scalar($data)) {
           return escapeshellarg($data);
         }
@@ -108,6 +114,15 @@ class Encoder {
       default:
         throw new \RuntimeException('Unknown output format');
     }
+  }
+
+  private static function preferArray($data) {
+    if (is_object($data)) {
+      if ($data instanceof \JsonSerializable || $data instanceof \stdClass) {
+        $data = json_decode(json_encode($data), TRUE);
+      }
+    }
+    return $data;
   }
 
 }
