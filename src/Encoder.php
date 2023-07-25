@@ -73,6 +73,8 @@ class Encoder {
         return serialize($data);
 
       case 'shell':
+        $data = static::preferArray($data);
+
         if (is_scalar($data)) {
           return escapeshellarg($data);
         }
@@ -108,6 +110,15 @@ class Encoder {
       default:
         throw new \RuntimeException('Unknown output format');
     }
+  }
+
+  private static function preferArray($data) {
+    if (is_object($data)) {
+      if ($data instanceof \JsonSerializable || $data instanceof \stdClass) {
+        $data = json_decode(json_encode($data), TRUE);
+      }
+    }
+    return $data;
   }
 
 }
