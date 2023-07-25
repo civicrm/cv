@@ -19,6 +19,13 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertRegExp('/^eval says version is [0-9a-z\.]+\s*$/', $p->getOutput());
   }
 
+  public function testPhpEval_ReturnObj() {
+    $phpCode = escapeshellarg('return (object)["ab"=>"cd"];');
+    $p = Process::runOk($this->cv("ev $phpCode --out=json"));
+    $this->assertEquals(0, $p->getExitCode());
+    $this->assertRegExp(';"ab":\w*"cd\";', $p->getOutput());
+  }
+
   public function testPhpEval() {
     $helloPhp = escapeshellarg('printf("eval says version is %s\n", CRM_Utils_System::version());');
     $p = Process::runOk($this->cv("ev $helloPhp"));

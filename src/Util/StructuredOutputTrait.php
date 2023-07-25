@@ -104,9 +104,14 @@ trait StructuredOutputTrait {
       $result = ArrayUtil::implodeTree($flat, $result);
     }
     $buf = Encoder::encode($result, $input->getOption('out'));
-    $options = empty($result['is_error'])
-      ? (OutputInterface::OUTPUT_RAW | OutputInterface::VERBOSITY_NORMAL)
-      : (OutputInterface::OUTPUT_RAW | OutputInterface::VERBOSITY_QUIET);
+    $options = OutputInterface::OUTPUT_RAW;
+    if (!is_array($result)) {
+      $options |= OutputInterface::VERBOSITY_NORMAL;
+    }
+    else {
+      $options |= empty($result['is_error']) ? OutputInterface::VERBOSITY_NORMAL : OutputInterface::VERBOSITY_QUIET;
+      // Why...? Feels weird for `cv php:eval`, but maybe it makes sense in some other commands?
+    }
     $output->writeln($buf, $options);
   }
 
