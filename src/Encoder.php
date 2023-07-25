@@ -41,6 +41,7 @@ class Encoder {
       'none',
       'pretty',
       'php',
+      'php-data',
       'json-pretty',
       'json-strict',
       'serialize',
@@ -58,6 +59,9 @@ class Encoder {
 
       case 'php':
         return var_export($data, 1);
+
+      case 'php-data':
+        return var_export(static::preferArray($data), 1);
 
       case 'json-pretty':
         $jsonOptions = (defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0)
