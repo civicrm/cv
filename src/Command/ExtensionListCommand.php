@@ -21,7 +21,7 @@ class ExtensionListCommand extends BaseExtensionCommand {
   protected function configure() {
     $this
       ->setName('ext:list')
-      ->setAliases(array())
+      ->setAliases(['ext'])
       ->setDescription('List extensions')
       ->addOption('local', 'L', InputOption::VALUE_NONE, 'Filter extensions by location (local)')
       ->addOption('remote', 'R', InputOption::VALUE_NONE, 'Filter extensions by location (remote)')
