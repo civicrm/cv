@@ -29,8 +29,8 @@ class ApiCommand extends BaseCommand {
 
   protected function configure() {
     $this
-      ->setName('api')
-      ->setAliases(['api3'])
+      ->setName('api3')
+      ->setAliases(['api'])
       ->setDescription('Call APIv3')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
       ->configureOutputOptions(['tabular' => TRUE, 'shortcuts' => ['table', 'list']])
