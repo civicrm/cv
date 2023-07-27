@@ -9,6 +9,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class Application extends \Symfony\Component\Console\Application {
 
+  protected $deprecatedAliases = [
+    'debug:container' => 'service',
+    'debug:event-dispatcher' => 'event',
+  ];
+
   /**
    * Determine the version number.
    *
@@ -138,6 +143,14 @@ class Application extends \Symfony\Component\Console\Application {
     ShellVerbosityIsEvil::doWithoutEvil(function() use ($input, $output) {
       parent::configureIO($input, $output);
     });
+  }
+
+  public function find($name) {
+    if (isset($this->deprecatedAliases[$name])) {
+      fprintf(STDERR, "WARNING: Subcommand \"%s\" has been renamed to \"%s\". In the future, the old name may stop working.\n\n", $name, $this->deprecatedAliases[$name]);
+      $name = $this->deprecatedAliases[$name];
+    }
+    return parent::find($name);
   }
 
 }
