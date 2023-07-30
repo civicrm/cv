@@ -16,11 +16,21 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 assertThat(PHP_SAPI === 'cli', "Releaser may only run via CLI");
 $c = clippy()->register(plugins());
 
+###############################################################################
+## Configuration
+
+$c['srcDir'] = fn() => realpath(dirname(pogo_script_dir()));
+$c['buildDir'] = fn($srcDir) => autodir("$srcDir/build");
+$c['distDir'] = fn($buildDir) => autodir("$buildDir/dist");
+$c['cvlibUpstream'] = fn() => 'file:///tmp/cv-lib-upstream';
+// FIXME // $c['cvlibUpstream'] = fn() => 'git@github.com:civicrm/cv-lib.git';
+$c['cvlibWorkDir'] = fn($buildDir) => $buildDir . '/cv-lib';
+
 // ###############################################################################
 // ## Services / computed data
 //
 // /**
-//  * Create a client for communicating with Gitlab API.
+//  * Create a client for communicating with Github API.
 //  *
 //  * @param string $userRepo
 //  * @return \GuzzleHttp\Client
@@ -45,23 +55,23 @@ $c = clippy()->register(plugins());
 // };
 //
 // /**
-//  * Upload a list of files to Gitlab. Attach them to a specific release.
+//  * Upload a list of files to Github. Attach them to a specific release.
 //  * @param string $projectUrl
-//  *   Base URL for Gitlab project (https:///DOMAIN/OWNER/REPO).
+//  *   Base URL for Github project (https:///DOMAIN/OWNER/REPO).
 //  * @param string $verNum
 //  * @param string[] $assets
 //  *   List of local files to upload. The remote file will have a matching name.
 //  */
-// $c['gitlabUpload()'] = function (string $projectUrl, string $verNum, array $assets, SymfonyStyle $io, $gitlabClient, $input, $gitlabRelease) {
+// $c['githubUpload()'] = function (string $projectUrl, string $verNum, array $assets, SymfonyStyle $io, $githubClient, $input, $githubRelease) {
 //   $verbose = function($data) use ($io) {
 //     return $io->isVerbose() ? toJSON($data) : '';
 //   };
 //
-//   $client = $gitlabClient($projectUrl);
+//   $client = $githubClient($projectUrl);
 //   assertThat(preg_match('/^\d[0-9a-z\.\-\+]*$/', $verNum));
 //   $io->writeln(sprintf("<info>Upload to project <comment>%s</comment> for version <comment>%s</comment> with files:\n<comment>  * %s</comment></info>", $projectUrl, $verNum, implode("\n  * ", $assets)));
 //
-//   $gitlabRelease($client, $verNum);
+//   $githubRelease($client, $verNum);
 //
 //   try {
 //     $existingAssets = fromJSON($client->get('releases/' . urlencode($verNum) . '/assets/links'));
@@ -99,31 +109,6 @@ $c = clippy()->register(plugins());
 //     $io->writeln("<info>Updated release</info> " . $verbose($release));
 //   }
 // };
-
-
-###############################################################################
-## Configuration
-
-$c['cvlibUpstream'] = function () {
-  // return 'git@github.com:civicrm/cv-lib.git'
-  return 'file:///tmp/cv-lib-upstream';
-};
-
-$c['cvlibWorkDir'] = function ($buildDir) {
-  return $buildDir . '/cv-lib';
-};
-
-$c['srcDir'] = function() {
-  return realpath(dirname(pogo_script_dir()));
-};
-
-$c['buildDir'] = function($srcDir) {
-  return autodir("$srcDir/build");
-};
-
-$c['distDir'] = function($buildDir) {
-  return autodir("$buildDir/dist");
-};
 
 ###############################################################################
 ## Services and other helpers
@@ -207,14 +192,14 @@ $c['app']->command("build $globalOptions", function (SymfonyStyle $io, Taskr $ta
 });
 
 $c['app']->command("clean $globalOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
-  [$c['srcDir'], $c['buildDir']];
+  ['Init', $c['srcDir'], $c['buildDir']];
   chdir($c['srcDir']);
   $io->title('Cleanup');
   $taskr->passthru('rm -rf {{0|s}}', [$c['buildDir']]);
 });
 
 $c['app']->command("sign $globalOptions newVersion", function ($newVersion, SymfonyStyle $io, Taskr $taskr, \Crypt_GPG $gpg, $input) use ($c) {
-  [$c['srcDir'], $c['distDir']];
+  ['Init', $c['srcDir'], $c['distDir']];
   chdir($c['distDir']);
   $io->title('Generate checksum and GPG signature');
 
@@ -238,7 +223,7 @@ $c['app']->command("sign $globalOptions newVersion", function ($newVersion, Symf
 });
 
 $c['app']->command("tag $globalOptions new-version", function ($newVersion, SymfonyStyle $io, Taskr $taskr, Cmdr $cmdr, $git) use ($c) {
-  [$c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream']];
+  ['Init', $c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream']];
   chdir($c['srcDir']);
   $io->title("Create tags ($newVersion)");
 
@@ -282,7 +267,7 @@ $c['app']->command("tag $globalOptions new-version", function ($newVersion, Symf
 });
 
 $c['app']->command("push $globalOptions new-version", function ($newVersion, SymfonyStyle $io, Taskr $taskr, $git) use ($c) {
-  [$c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream']];
+  ['Init', $c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream']];
   chdir($c['srcDir']);
   $io->title("Push $newVersion");
 
