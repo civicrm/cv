@@ -19,9 +19,9 @@ class DebugContainerCommand extends BaseCommand {
 
   protected function configure() {
     $this
-      ->setName('debug:container')
-      ->setAliases(['service'])
-      ->setDescription('Dump the container configuration')
+      ->setName('service')
+      ->setAliases(['svc'])
+      ->setDescription('Inspect the service container')
       ->addArgument('name', InputArgument::OPTIONAL, 'An service name or regex')
       ->addOption('concrete', 'C', InputOption::VALUE_NONE, 'Display concrete class names. (This requires activating every matching service.)')
       ->addOption('internal', 'i', InputOption::VALUE_NONE, 'Include internal services')
@@ -198,20 +198,16 @@ internal services (eg `--all`, `--tag=XXX`, or `-v`).
   }
 
   /**
-   * @param $definition
-   *
+   * @param \Symfony\Component\DependencyInjection\Definition $definition
    * @return array|string
    */
-  protected function getEvents($definition) {
+  protected function getEvents($definition): array {
     if (class_exists('Civi\Core\Event\EventScanner')) {
       if ($definition->getTag('event_subscriber') || $definition->getTag('kernel.event_subscriber')) {
         return \Civi\Core\Event\EventScanner::findListeners($definition->getClass());
       }
-      else {
-        return '';
-      }
     }
-    return '?';
+    return [];
   }
 
   /**
