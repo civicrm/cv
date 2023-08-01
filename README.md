@@ -10,8 +10,7 @@ Requirements
 * A local CiviCRM installation.
 * Systems with special file-layouts may need to [configure bootstrap](#bootstrap).
 
-<a id="download"></a>
-Download: Releases
+Download
 ========
 
 `cv` is distributed in PHAR format, which is a portable executable file (for PHP). It should run on most Unix-like systems where PHP is installed.
@@ -35,13 +34,7 @@ sudo mv cv.phar /usr/local/bin/cv
 sudo chown root:root /usr/local/bin/cv
 ```
 
-Download: Pre-Release
-=====================
-
-Pre-releases are automatically posted online after any update to the `master` branch.
-
-* For the latest pre-release, download https://download.civicrm.org/cv/cv-EDGE.phar
-* To find specific pre-releases, browse the logs from https://test.civicrm.org/view/Tools/job/Tool-Publish-cv/
+For more information about releases and downloads, see [doc/release.md](doc/release.md).
 
 Documentation
 =============
