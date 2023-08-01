@@ -74,6 +74,15 @@ $globalOptions = '[-N|--dry-run] [-S|--step]';
 $commonOptions = '[-N|--dry-run] [-S|--step] new-version';
 
 $c['app']->command("release $commonOptions", function (string $publishedTagName, SymfonyStyle $io, Taskr $taskr) use ($c) {
+  if ($vars = $io->askHidden('(Optional) Paste a batch list of secrets (KEY1=VALUE1 KEY2=VALUE2...)')) {
+    assertThat(!preg_match(';[\'"\\];', $vars), "Sorry, not clever enough to handle meta-characters.");
+    foreach (explode(' ', $vars) as $keyValue) {
+      [$key, $value] = explode('=', $keyValue, 2);
+      putenv($keyValue);
+      $_ENV[$key] = $_SERVER[$key] = $value;
+    }
+  }
+
   $taskr->subcommand('tag {{0|s}}', [$publishedTagName]);
   $taskr->subcommand('build {{0|s}}', [$publishedTagName]);
   $taskr->subcommand('sign {{0|s}}', [$publishedTagName]);
@@ -181,7 +190,7 @@ $c['app']->command("upload $commonOptions", function ($publishedTagName, Symfony
 
   $io->section('Send binaries to Github');
   $taskr->passthru('{{GH_TOKEN|s}} gh release create {{VER|s}} --repo {{REPO|s}} --generate-notes', $vars);
-  $taskr->passthru('{{GH_TOKEN|s}} gh release upload {{VER|s}} --repo {{REPO|s}} --clobber {{PHAR|s}} {{PHAR|s}}.asc', $vars);
+  $taskr->passthru('{{GH_TOKEN|s}} gh release upload {{VER|s}} --repo {{REPO|s}} --clobber {{DIST|s}}/*', $vars);
 
   $io->section('Send binaries to Google Cloud Storage');
   $taskr->passthru('gsutil cp {{DIST|s}}/* {{GCLOUD|s}}/', $vars);
