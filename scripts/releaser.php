@@ -1,16 +1,13 @@
 #!/usr/bin/env pogo
 <?php
+#!depdir ../extern/releaser-deps
 #!require clippy/std: ~0.4.4
 #!require clippy/container: '~1.2'
-#!require pear/crypt_gpg: ~1.6.4
 
 ###############################################################################
 ## Bootstrap
 namespace Clippy;
 
-// use GuzzleHttp\HandlerStack;
-// use Symfony\Component\Console\Input\InputInterface;
-// use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 assertThat(PHP_SAPI === 'cli', "Releaser may only run via CLI");
@@ -19,101 +16,28 @@ $c = clippy()->register(plugins());
 ###############################################################################
 ## Configuration
 
+$c['ghRepo'] = 'totten/cv';
+// FIXME // $c['ghRepo'] = 'civicrm/cv';
 $c['srcDir'] = fn() => realpath(dirname(pogo_script_dir()));
 $c['buildDir'] = fn($srcDir) => autodir("$srcDir/build");
 $c['distDir'] = fn($buildDir) => autodir("$buildDir/dist");
+$c['toolName'] = fn($boxOutputPhar) => preg_replace(';\.phar$;', '', basename($boxOutputPhar));
+
+// Ex: "v1.2.3" ==> publishedTagName="v1.2.3", publishedPharName="mytool-1.2.3.phar"
+// Ex: "1.2.3"  ==> publishedTagName="v1.2.3", publishedPharName="mytool-1.2.3.phar"
+$c['publishedTagName'] = fn($input) => preg_replace(';^v?([\d\.]+);', 'v\1', $input->getArgument('new-version'));
+$c['publishedPharName'] = fn($toolName, $publishedTagName) => $toolName . "-" . preg_replace(';^v;', '', $publishedTagName) . '.phar';
+
 $c['cvlibUpstream'] = fn() => 'file:///tmp/cv-lib-upstream';
 // FIXME // $c['cvlibUpstream'] = fn() => 'git@github.com:civicrm/cv-lib.git';
 $c['cvlibWorkDir'] = fn($buildDir) => $buildDir . '/cv-lib';
-
-// ###############################################################################
-// ## Services / computed data
-//
-// /**
-//  * Create a client for communicating with Github API.
-//  *
-//  * @param string $userRepo
-//  * @return \GuzzleHttp\Client
-//  */
-// $c['githubClient()'] = function(string $ownerRepo, Credentials $cred, HandlerStack $guzzleHandler) {
-//   assertThat(preg_match(';^\w+/\w+$;', $ownerRepo), "Project should match OWNER/REPO");
-//   [$owner, $repo] = explode('/', $ownerRepo);
-//   $host = 'github.com';
-//
-//   static $credCache = [];
-//   $credCache[$host] = $credCache[$host] ?? $cred->get('GITHUB_TOKEN', $host);
-//
-//   $client = new \GuzzleHttp\Client([
-//     'base_uri' => "https://api.github.com/repos/{$owner}%2F{$repo}/",
-//     'headers' => [
-//       'Authorization' => 'Bearer ' . $credCache[$host],
-//       'Accept' => 'application/vnd.github.v3+json',
-//     ],
-//     'handler' => $guzzleHandler,
-//   ]);
-//   return $client;
-// };
-//
-// /**
-//  * Upload a list of files to Github. Attach them to a specific release.
-//  * @param string $projectUrl
-//  *   Base URL for Github project (https:///DOMAIN/OWNER/REPO).
-//  * @param string $verNum
-//  * @param string[] $assets
-//  *   List of local files to upload. The remote file will have a matching name.
-//  */
-// $c['githubUpload()'] = function (string $projectUrl, string $verNum, array $assets, SymfonyStyle $io, $githubClient, $input, $githubRelease) {
-//   $verbose = function($data) use ($io) {
-//     return $io->isVerbose() ? toJSON($data) : '';
-//   };
-//
-//   $client = $githubClient($projectUrl);
-//   assertThat(preg_match('/^\d[0-9a-z\.\-\+]*$/', $verNum));
-//   $io->writeln(sprintf("<info>Upload to project <comment>%s</comment> for version <comment>%s</comment> with files:\n<comment>  * %s</comment></info>", $projectUrl, $verNum, implode("\n  * ", $assets)));
-//
-//   $githubRelease($client, $verNum);
-//
-//   try {
-//     $existingAssets = fromJSON($client->get('releases/' . urlencode($verNum) . '/assets/links'));
-//     $existingAssets = index(['name'], $existingAssets);
-//   }
-//   catch (\Exception $e) {
-//     $existingAssets = [];
-//   }
-//
-//   foreach ($assets as $asset) {
-//     assertThat(file_exists($asset), "File $asset does not exist");
-//     if ($input->getOption('dry-run')) {
-//       $io->note("(DRY-RUN) Skipped upload of $asset");
-//       continue;
-//     }
-//     $upload = fromJSON($client->post('uploads', [
-//       'multipart' => [
-//         ['name' => 'file', 'contents' => fopen($asset, 'r')],
-//       ],
-//     ]));
-//     $io->writeln("<info>Created new upload</info> " . $verbose($upload));
-//
-//     if (isset($existingAssets[basename($asset)])) {
-//       $delete = fromJSON($client->delete('releases/' . urlencode($verNum) . '/assets/links/' . $existingAssets[basename($asset)]['id']));
-//       $io->writeln("<info>Deleted old upload</info> " . $verbose($delete));
-//       // Should we also delete the previous upload? Is that possible?
-//     }
-//
-//     $release = fromJSON($client->post('releases/' . urlencode($verNum) . '/assets/links', [
-//       'form_params' => [
-//         'name' => basename($asset),
-//         'url' => joinUrl($projectUrl, $upload['url']),
-//       ],
-//     ]));
-//     $io->writeln("<info>Updated release</info> " . $verbose($release));
-//   }
-// };
 
 ###############################################################################
 ## Services and other helpers
 
 $c['gpg'] = function(Credentials $cred): \Crypt_GPG {
+  // It's easier to sign multiple files if we use Crypt_GPG wrapper API.
+  #!require pear/crypt_gpg: ~1.6.4
   $gpg = new \Crypt_GPG(['binary' => trim(`which gpg`)]);
   $gpg->addSignKey($cred->get('GPG_KEY'), $cred->get('GPG_PASSPHRASE'));
   return $gpg;
@@ -125,26 +49,21 @@ $c['boxJson'] = function(string $srcDir): array {
   return fromJSON(file_get_contents($file));
 };
 
+// Ex: /home/me/src/mytool/bin/mytool.phar
 $c['boxOutputPhar'] = function($srcDir, $boxJson) {
   assertThat(!empty($boxJson['output']));
   return $srcDir . '/' . $boxJson['output'];
 };
 
 /**
- * Map 'git' subcommands to object-methods. Execute via Taskr.
- *
- * For comparison:
+ * Map 'git' subcommands to object-methods. Execute via Taskr. Compare:
  *
  * Bash:
- *   git tag -f $version
  *   git push -f origin $version
  * PHP:
- *   $git()->tag('-f', $version);
  *   $git()->push('-f', 'origin', $version);
  * PHP (advanced):
- *   $git('/path/to/repo')
- *     ->tag('-f', $version)
- *     ->push('-f', 'origin', $version);
+ *   $git('/path/to/repo')->push('-f', 'origin', $version);
  *
  * There are no output values or return results. Errors will raise exceptions.
  *
@@ -175,65 +94,26 @@ function autodir(string $path): string {
 
 ###############################################################################
 ## Commands
-$globalOptions = '[-N|--dry-run] [-S|--step]';
+$globalOptions = '[-N|--dry-run] [-S|--step] new-version';
 
-$c['app']->command("release $globalOptions new-version", function (string $newVersion, SymfonyStyle $io, Taskr $taskr) use ($c) {
-  chdir($c['srcDir']);
-  $taskr->subcommand('tag {{0|s}}', [$newVersion]);
-  $taskr->subcommand('build');
-  $taskr->subcommand('sign {{0|s}}', [$newVersion]);
-  $taskr->subcommand('push {{0|s}}', [$newVersion]);
+$c['app']->command("release $globalOptions", function (string $publishedTagName, SymfonyStyle $io, Taskr $taskr) use ($c) {
+  $taskr->subcommand('tag {{0|s}}', [$publishedTagName]);
+  $taskr->subcommand('build {{0|s}}', [$publishedTagName]);
+  $taskr->subcommand('sign {{0|s}}', [$publishedTagName]);
+  $taskr->subcommand('upload {{0|s}}', [$publishedTagName]);
+  // TODO: $taskr->subcommand('clean {{0|s}}', [$publishedTagName]);
 });
 
-$c['app']->command("build $globalOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
-  chdir($c['srcDir']);
-  $io->title('Build PHAR');
-  $taskr->passthru('bash build.sh');
-});
-
-$c['app']->command("clean $globalOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
-  ['Init', $c['srcDir'], $c['buildDir']];
-  chdir($c['srcDir']);
-  $io->title('Cleanup');
-  $taskr->passthru('rm -rf {{0|s}}', [$c['buildDir']]);
-});
-
-$c['app']->command("sign $globalOptions newVersion", function ($newVersion, SymfonyStyle $io, Taskr $taskr, \Crypt_GPG $gpg, $input) use ($c) {
-  ['Init', $c['srcDir'], $c['distDir']];
-  chdir($c['distDir']);
-  $io->title('Generate checksum and GPG signature');
-
-  $pharFile = "cv-$newVersion.phar";
-  $sha256File = "cv-$newVersion.SHA256SUMS";
-
-  $taskr->passthru('cp {{0|s}} {{1|s}}', [$c['boxOutputPhar'], $pharFile]);
-  $taskr->passthru('sha256sum {{0|s}} > {{1|s}}', [$pharFile, $sha256File]);
-
-  $io->writeln("Sign $pharFile ($pharFile.asc)");
-  if (!$input->getOption('dry-run')) {
-    $gpg->signFile($pharFile, "$pharFile.asc", \Crypt_GPG::SIGN_MODE_DETACHED);
-    assertThat(!empty($gpg->verifyFile($pharFile, file_get_contents("$pharFile.asc"))), "$pharFile should have valid signature");
-  }
-
-  $io->writeln("Sign $sha256File ($sha256File.asc)");
-  if (!$input->getOption('dry-run')) {
-    $gpg->signFile($sha256File, "$sha256File.asc", \Crypt_GPG::SIGN_MODE_DETACHED);
-    assertThat(!empty($gpg->verifyFile($sha256File, file_get_contents("$sha256File.asc"))), "$sha256File should have valid signature");
-  }
-});
-
-$c['app']->command("tag $globalOptions new-version", function ($newVersion, SymfonyStyle $io, Taskr $taskr, Cmdr $cmdr, $git) use ($c) {
+$c['app']->command("tag $globalOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, Cmdr $cmdr, $git) use ($c) {
+  $io->title("Create tags ($publishedTagName)");
   ['Init', $c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream']];
   chdir($c['srcDir']);
-  $io->title("Create tags ($newVersion)");
 
-  $io->section('Tag cv.git');
-  $git()->tag('-f', $newVersion);
+  $io->section("Tag cv.git ($publishedTagName)");
+  $git()->tag('-f', $publishedTagName);
 
   $io->section('Clone cv-lib.git');
-  if (file_exists($c['cvlibWorkDir'])) {
-    $taskr->passthru('rm -rf {{0|s}}', [$c['cvlibWorkDir']]);
-  }
+  $taskr->passthru('if [ -e {{0|s}} ]; then rm -rf {{0|s}}; fi', [$c['cvlibWorkDir']]);
   $git()->clone('-b', 'master', $c['cvlibUpstream'], $c['cvlibWorkDir']);
 
   $io->section('Sync cv-lib.git');
@@ -256,27 +136,72 @@ $c['app']->command("tag $globalOptions new-version", function ($newVersion, Symf
     $cmdr->run('cd {{0|s}} && git status --porcelain', [$c['cvlibWorkDir']]);
 
   if (!empty($status)) {
-    $git($c['cvlibWorkDir'])->add('.')->commit('-m', "Update to $newVersion");
+    $git($c['cvlibWorkDir'])->add('.')->commit('-m', "Update to $publishedTagName");
   }
   else {
     $io->note("No updates found for cv-lib.git");
   }
 
-  $io->section('Tag cv-lib.git');
-  $git($c['cvlibWorkDir'])->tag($newVersion);
+  $io->section("Tag cv-lib.git ($publishedTagName)");
+  $git($c['cvlibWorkDir'])->tag($publishedTagName);
 });
 
-$c['app']->command("push $globalOptions new-version", function ($newVersion, SymfonyStyle $io, Taskr $taskr, $git) use ($c) {
-  ['Init', $c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream']];
+$c['app']->command("build $globalOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
+  $io->title('Build PHAR');
   chdir($c['srcDir']);
-  $io->title("Push $newVersion");
+  $taskr->passthru('bash build.sh');
+});
 
-  $git($c['cvlibWorkDir'])
-    ->push('origin', $newVersion)
-    ->push('origin', 'master');
+$c['app']->command("sign $globalOptions", function (SymfonyStyle $io, Taskr $taskr, \Crypt_GPG $gpg, $input) use ($c) {
+  $io->title('Generate checksum and GPG signature');
+  ['Init', $c['srcDir'], $c['distDir'], $c['publishedPharName']];
+  chdir($c['distDir']);
 
-  $git()
-    ->push('origin', $newVersion);
+  $pharFile = $c['publishedPharName'];
+  $sha256File = preg_replace(';\.phar$;', '.SHA256SUMS', $pharFile);
+
+  $taskr->passthru('cp {{0|s}} {{1|s}}', [$c['boxOutputPhar'], $pharFile]);
+  $taskr->passthru('sha256sum {{0|s}} > {{1|s}}', [$pharFile, $sha256File]);
+
+  $io->writeln("Sign $pharFile ($pharFile.asc)");
+  if (!$input->getOption('dry-run')) {
+    $gpg->signFile($pharFile, "$pharFile.asc", \Crypt_GPG::SIGN_MODE_DETACHED);
+    assertThat(!empty($gpg->verifyFile($pharFile, file_get_contents("$pharFile.asc"))), "$pharFile should have valid signature");
+  }
+
+  $io->writeln("Sign $sha256File ($sha256File.asc)");
+  if (!$input->getOption('dry-run')) {
+    $gpg->signFile($sha256File, "$sha256File.asc", \Crypt_GPG::SIGN_MODE_DETACHED);
+    assertThat(!empty($gpg->verifyFile($sha256File, file_get_contents("$sha256File.asc"))), "$sha256File should have valid signature");
+  }
+});
+
+$c['app']->command("upload $globalOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, $git, Credentials $cred) use ($c) {
+  $io->title("Upload code and build artifacts");
+  ['Init', $c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream'], $c['ghRepo'], $c['distDir'], $c['publishedPharName']];
+  chdir($c['srcDir']);
+
+  $vars = [
+    'GH' => $cred->get('GH_TOKEN', $c['ghRepo']),
+    'VER' => $publishedTagName,
+    'REPO' => $c['ghRepo'],
+    'PHAR' => $c['distDir'] . '/' . $c['publishedPharName'],
+  ];
+
+  $git($c['cvlibWorkDir'])->push('origin', $publishedTagName, 'master');
+  $git()->push('origin', $publishedTagName);
+
+  $taskr->passthru('GH_TOKEN={{GH|s}} gh release create {{VER|s}} --repo {{REPO|s}} --generate-notes', $vars);
+  $taskr->passthru('GH_TOKEN={{GH|s}} gh release upload {{VER|s}} --repo {{REPO|s}} --clobber {{PHAR|s}} {{PHAR|s}}.asc', $vars);
+});
+
+$c['app']->command("clean $globalOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
+  ['Init', $c['srcDir'], $c['buildDir'], $c['boxOutputPhar']];
+
+  $io->title('Clean build directory');
+  chdir($c['srcDir']);
+
+  $taskr->passthru('rm -rf {{0|@s}}', [[$c['buildDir'], $c['boxOutputPhar']]]);
 });
 
 ###############################################################################
