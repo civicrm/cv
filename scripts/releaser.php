@@ -1,7 +1,7 @@
 #!/usr/bin/env pogo
 <?php
 #!depdir ../extern/releaser-deps
-#!require clippy/std: ~0.4.4
+#!require clippy/std: ~0.4.6
 #!require clippy/container: '~1.2'
 
 ###############################################################################
@@ -22,6 +22,7 @@ $c['srcDir'] = fn() => realpath(dirname(pogo_script_dir()));
 $c['buildDir'] = fn($srcDir) => autodir("$srcDir/build");
 $c['distDir'] = fn($buildDir) => autodir("$buildDir/dist");
 $c['toolName'] = fn($boxOutputPhar) => preg_replace(';\.phar$;', '', basename($boxOutputPhar));
+$c['gcloudUrl'] = fn($toolName) => joinUrl('gs://civicrm', $toolName);
 
 // Ex: "v1.2.3" ==> publishedTagName="v1.2.3", publishedPharName="mytool-1.2.3.phar"
 // Ex: "1.2.3"  ==> publishedTagName="v1.2.3", publishedPharName="mytool-1.2.3.phar"
@@ -51,33 +52,8 @@ $c['boxJson'] = function(string $srcDir): array {
 
 // Ex: /home/me/src/mytool/bin/mytool.phar
 $c['boxOutputPhar'] = function($srcDir, $boxJson) {
-  assertThat(!empty($boxJson['output']));
+  assertThat(!empty($boxJson['output']), 'box.json must declare output file');
   return $srcDir . '/' . $boxJson['output'];
-};
-
-/**
- * Map 'git' subcommands to object-methods. Execute via Taskr. Compare:
- *
- * Bash:
- *   git push -f origin $version
- * PHP:
- *   $git()->push('-f', 'origin', $version);
- * PHP (advanced):
- *   $git('/path/to/repo')->push('-f', 'origin', $version);
- *
- * There are no output values or return results. Errors will raise exceptions.
- *
- * @param \Clippy\Taskr $taskr
- * @return \Closure
- * @throws CmdrProcessException
- */
-$c['git'] = function (Taskr $taskr) {
-  return function($path = '.') use ($taskr) {
-    return new ClosureObject(function($self, $cmdName, ...$args) use ($taskr, $path) {
-      $taskr->passthru('cd {{0|s}} && git {{1|s}} {{2|@s}}', [$path, $cmdName, $args]);
-      return $self;
-    });
-  };
 };
 
 /**
@@ -106,17 +82,18 @@ $c['app']->command("release $commonOptions", function (string $publishedTagName,
   // TODO: $taskr->subcommand('clean {{0|s}}', [$publishedTagName]);
 });
 
-$c['app']->command("tag $commonOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, Cmdr $cmdr, $git) use ($c) {
+$c['app']->command("tag $commonOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, Cmdr $cmdr) use ($c) {
   $io->title("Create tags ($publishedTagName)");
   ['Init', $c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream']];
   chdir($c['srcDir']);
 
   $io->section("Tag cv.git ($publishedTagName)");
-  $git()->tag('-f', $publishedTagName);
+  $taskr->passthru('git tag -f {{0|s}}', [$publishedTagName]);
 
   $io->section('Clone cv-lib.git');
   $taskr->passthru('if [ -e {{0|s}} ]; then rm -rf {{0|s}}; fi', [$c['cvlibWorkDir']]);
-  $git()->clone('-b', 'master', $c['cvlibUpstream'], $c['cvlibWorkDir']);
+  $taskr->passthru('git clone {{...|@s}}', ['-b', 'master', $c['cvlibUpstream'], $c['cvlibWorkDir']]);
+  $cvlib = $taskr->withDefaults(['cwd' => $c['cvlibWorkDir']]);
 
   $io->section('Sync cv-lib.git');
   $flags = ['-a', '--delete'];
@@ -127,25 +104,22 @@ $c['app']->command("tag $commonOptions", function ($publishedTagName, SymfonySty
     fn($ex) => ['--exclude', $ex],
     ['.git', '.gitrepo', '*~', 'vendor', 'composer.lock']
   ));
-  $taskr->passthru("rsync {{0|@s}} {{1}}/./ {{2|s}}/./", [
-    array_merge($flags, $excludes),
-    $c['srcDir'] . '/lib',
-    $c['cvlibWorkDir'],
+  $cvlib->passthru("rsync {{FLAGS|@s}} {{SRC}}/./ ./", [
+    'FLAGS' => array_merge($flags, $excludes),
+    'SRC' => $c['srcDir'] . '/lib',
   ]);
 
-  $status = $c['input']->getOption('dry-run')
-    ? 'changed...probably...' :
-    $cmdr->run('cd {{0|s}} && git status --porcelain', [$c['cvlibWorkDir']]);
-
+  $status = $cvlib->run('git status --porcelain') ?? 'DRY-RUN: changed hypothetically...';
   if (!empty($status)) {
-    $git($c['cvlibWorkDir'])->add('.')->commit('-m', "Update to $publishedTagName");
+    $cvlib->passthru('git add .');
+    $cvlib->passthru('git commit -m {{0|s}}', ["Update to $publishedTagName"]);
   }
   else {
     $io->note("No updates found for cv-lib.git");
   }
 
   $io->section("Tag cv-lib.git ($publishedTagName)");
-  $git($c['cvlibWorkDir'])->tag($publishedTagName);
+  $cvlib->passthru('git tag -f {{0|s}}', [$publishedTagName]);
 });
 
 $c['app']->command("build $commonOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
@@ -178,23 +152,38 @@ $c['app']->command("sign $commonOptions", function (SymfonyStyle $io, Taskr $tas
   }
 });
 
-$c['app']->command("upload $commonOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, $git, Credentials $cred) use ($c) {
+$c['app']->command("upload $commonOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, Credentials $cred) use ($c) {
   $io->title("Upload code and build artifacts");
   ['Init', $c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream'], $c['ghRepo'], $c['distDir'], $c['publishedPharName']];
   chdir($c['srcDir']);
 
   $vars = [
-    'GH' => $cred->get('GH_TOKEN', $c['ghRepo']),
+    'GCLOUD' => $c['gcloudUrl'],
+    'GH_TOKEN' => 'GH_TOKEN=' . $cred->get('GH_TOKEN', $c['ghRepo']),
     'VER' => $publishedTagName,
     'REPO' => $c['ghRepo'],
+    'DIST' => $c['distDir'],
     'PHAR' => $c['distDir'] . '/' . $c['publishedPharName'],
+    'PHAR_NAME' => $c['publishedPharName'],
+    'TOOL_NAME' => 'PLACEHOLDER-' . basename($c['boxOutputPhar']),
   ];
 
-  $git($c['cvlibWorkDir'])->push('origin', $publishedTagName, 'master');
-  $git()->push('origin', $publishedTagName);
+  $cvlib = $taskr->withDefaults(['cwd' => $c['cvlibWorkDir']]);
 
-  $taskr->passthru('GH_TOKEN={{GH|s}} gh release create {{VER|s}} --repo {{REPO|s}} --generate-notes', $vars);
-  $taskr->passthru('GH_TOKEN={{GH|s}} gh release upload {{VER|s}} --repo {{REPO|s}} --clobber {{PHAR|s}} {{PHAR|s}}.asc', $vars);
+  // Upload order -- from "easiest to cleanup/ignore if failure" to "hardest to cleanup/ignore if failure"
+
+  $taskr->passthru('gsutil cp -m {{DIST|s}}/* {{GCLOUD|s}}/', $vars);
+
+  $cvlib->passthru('git push origin master');
+  $cvlib->passthru('git push -f origin {{VER|s}}', $vars);
+  $taskr->passthru('git push -f origin {{VER|s}}', $vars);
+
+  $taskr->passthru('{{GH_TOKEN|s}} gh release create {{VER|s}} --repo {{REPO|s}} --generate-notes', $vars);
+  $taskr->passthru('{{GH_TOKEN|s}} gh release upload {{VER|s}} --repo {{REPO|s}} --clobber {{PHAR|s}} {{PHAR|s}}.asc', $vars);
+
+  // Finalize: "mytool-1.2.3.phar" is the default "mytool.phar"
+  $taskr->passthru('gsutil cp {{GCLOUD|s}}/{{PHAR_NAME}} {{GCLOUD|s}}/{{TOOL_NAME}}', $vars);
+  $taskr->passthru('gsutil cp {{GCLOUD|s}}/{{PHAR_NAME}}.asc {{GCLOUD|s}}/{{TOOL_NAME}}.asc', $vars);
 });
 
 $c['app']->command("tips $commonOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
