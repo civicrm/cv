@@ -10,20 +10,37 @@ Requirements
 * A local CiviCRM installation.
 * Systems with special file-layouts may need to [configure bootstrap](#bootstrap).
 
-Download
+<a id="download"></a>
+Download: Releases
 ========
 
-`cv` is distributed in PHAR format, which is a portable executable file (for PHP). It should run on most Unix-like systems where PHP 5.4+ is installed.
+`cv` is distributed in PHAR format, which is a portable executable file (for PHP). It should run on most Unix-like systems where PHP is installed.
 
-Simply download [`cv`](https://download.civicrm.org/cv/cv.phar) and put it somewhere in the PATH, eg
+Simply download [the latest release of `cv`](https://download.civicrm.org/cv/cv.phar) and put it somewhere in the PATH, eg
 
 ```bash
 sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
 sudo chmod +x /usr/local/bin/cv
 ```
 
-> __Need PHP 5.3?__: The last version to support PHP v5.3 was [cv v0.1.32](https://download.civicrm.org/cv/cv.phar-2018-01-11-8dd41af7).
-> Please note that the current version of `civicrm-core` no longer supports PHP v5.3.
+Similarly, you may download the latest stable release and verify the [checksum](https://download.civicrm.org/cv/cv.SHA256SUMS) or [GPG signature](https://download.civicrm.org/cv/cv.phar.asc), e.g.
+
+```bash
+sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o cv.phar
+sudo curl -LsS https://download.civicrm.org/cv/cv.phar.asc -o cv.phar.asc
+gpg --keyserver hkps://keys.openpgp.org --recv-keys 61819CB662DA5FFF79183EF83801D1B07A1E75CB
+gpg --verify cv.phar.asc cv.phar
+chmod +x cv.phar
+sudo mv cv.phar /usr/local/bin/cv
+```
+
+Download: Pre-Release
+=====================
+
+Pre-releases are automatically posted online after any update to the `master` branch.
+
+* For the latest pre-release, download https://download.civicrm.org/cv/cv-EDGE.phar
+* To find specific pre-releases, browse the logs from https://test.civicrm.org/view/Tools/job/Tool-Publish-cv/
 
 Documentation
 =============
@@ -206,7 +223,7 @@ $ php -dphar.readonly=0 `which box` build
 If you want to run with the same versions of PHP+box that are used for official builds, then run:
 
 ```
-nix-shell --run ./build.sh
+nix-shell --run ./scripts/build.sh
 ```
 
 Unit-Tests (Standard)

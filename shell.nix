@@ -1,7 +1,7 @@
 /**
  * This shell is suitable for compiling civix.phar.... and not much else.
  *
- * Ex: `nix-shell --run ./build.sh`
+ * Ex: `nix-shell --run ./scripts/build.sh`
  */
 # { pkgs ? import <nixpkgs> {} }:
 let
@@ -16,11 +16,27 @@ let
     '';
   };
 
+ pogo = pkgs.stdenv.mkDerivation rec {
+    name = "pogo";
+    src = pkgs.fetchurl {
+      url = https://github.com/totten/pogo/releases/download/v0.5.0/pogo-0.5.0.phar;
+      sha256 = "heH1JFa3EGz069C+7a4YKtLEDYXShTAg0eIjx2jgASk=";
+      executable = true;
+    };
+    buildInputs = [ ];
+    buildCommand = ''
+      mkdir $out $out/bin
+      pushd $out/bin
+        ln -s ${src} $out/bin/${name}
+      popd
+    '';
+  };
+
 in
 
   pkgs.mkShell {
     # nativeBuildInputs is usually what you want -- tools you need to run
-    nativeBuildInputs = [ myphp pkgs.php81Packages.composer pkgs.bash-completion pkgs.git-subrepo ];
+    nativeBuildInputs = [ myphp pkgs.php81Packages.composer pkgs.bash-completion pkgs.git-subrepo pkgs.gh pogo ];
     shellHook = ''
       source ${pkgs.bash-completion}/etc/profile.d/bash_completion.sh
     '';
