@@ -29,7 +29,7 @@ $c['gcloudUrl'] = fn($toolName) => joinUrl('gs://civicrm', $toolName);
 $c['publishedTagName'] = fn($input) => preg_replace(';^v?([\d\.]+);', 'v\1', $input->getArgument('new-version'));
 $c['publishedPharName'] = fn($toolName, $publishedTagName) => $toolName . "-" . preg_replace(';^v;', '', $publishedTagName) . '.phar';
 
-$c['cvlibUpstream'] = fn() => 'file:///tmp/cv-lib-upstream';
+$c['cvlibUpstream'] = fn() => 'file:///tmp/cv-lib-upstream-bare';
 // FIXME // $c['cvlibUpstream'] = fn() => 'git@github.com:civicrm/cv-lib.git';
 $c['cvlibWorkDir'] = fn($buildDir) => $buildDir . '/cv-lib';
 
@@ -165,25 +165,31 @@ $c['app']->command("upload $commonOptions", function ($publishedTagName, Symfony
     'DIST' => $c['distDir'],
     'PHAR' => $c['distDir'] . '/' . $c['publishedPharName'],
     'PHAR_NAME' => $c['publishedPharName'],
-    'TOOL_NAME' => 'PLACEHOLDER-' . basename($c['boxOutputPhar']),
+    'TOOL_NAME' => basename($c['boxOutputPhar']),
   ];
 
   $cvlib = $taskr->withDefaults(['cwd' => $c['cvlibWorkDir']]);
 
-  // Upload order -- from "easiest to cleanup/ignore if failure" to "hardest to cleanup/ignore if failure"
+  $io->section('Check connections');
+  $taskr->run('gsutil ls {{GCLOUD|s}}', $vars);
+  $taskr->run('{{GH_TOKEN|s}} gh release list', $vars);
 
-  $taskr->passthru('gsutil cp -m {{DIST|s}}/* {{GCLOUD|s}}/', $vars);
-
+  $io->section('Send source-code to Github');
   $cvlib->passthru('git push origin master');
   $cvlib->passthru('git push -f origin {{VER|s}}', $vars);
   $taskr->passthru('git push -f origin {{VER|s}}', $vars);
 
+  $io->section('Send binaries to Github');
   $taskr->passthru('{{GH_TOKEN|s}} gh release create {{VER|s}} --repo {{REPO|s}} --generate-notes', $vars);
   $taskr->passthru('{{GH_TOKEN|s}} gh release upload {{VER|s}} --repo {{REPO|s}} --clobber {{PHAR|s}} {{PHAR|s}}.asc', $vars);
 
-  // Finalize: "mytool-1.2.3.phar" is the default "mytool.phar"
-  $taskr->passthru('gsutil cp {{GCLOUD|s}}/{{PHAR_NAME}} {{GCLOUD|s}}/{{TOOL_NAME}}', $vars);
-  $taskr->passthru('gsutil cp {{GCLOUD|s}}/{{PHAR_NAME}}.asc {{GCLOUD|s}}/{{TOOL_NAME}}.asc', $vars);
+  $io->section('Send binaries to Google Cloud Storage');
+  $taskr->passthru('gsutil cp {{DIST|s}}/* {{GCLOUD|s}}/', $vars);
+  if (preg_match(';^v\d;', $publishedTagName)) {
+    // Finalize: "mytool-1.2.3.phar" will be the default "mytool.phar"
+    $taskr->passthru('gsutil cp {{GCLOUD|s}}/{{PHAR_NAME}} {{GCLOUD|s}}/{{TOOL_NAME}}', $vars);
+    $taskr->passthru('gsutil cp {{GCLOUD|s}}/{{PHAR_NAME}}.asc {{GCLOUD|s}}/{{TOOL_NAME}}.asc', $vars);
+  }
 });
 
 $c['app']->command("tips $commonOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
