@@ -16,8 +16,7 @@ $c = clippy()->register(plugins());
 ###############################################################################
 ## Configuration
 
-$c['ghRepo'] = 'totten/cv';
-// FIXME // $c['ghRepo'] = 'civicrm/cv';
+$c['ghRepo'] = 'civicrm/cv';
 $c['srcDir'] = fn() => realpath(dirname(pogo_script_dir()));
 $c['buildDir'] = fn($srcDir) => autodir("$srcDir/build");
 $c['distDir'] = fn($buildDir) => autodir("$buildDir/dist");
@@ -29,9 +28,12 @@ $c['gcloudUrl'] = fn($toolName) => joinUrl('gs://civicrm', $toolName);
 $c['publishedTagName'] = fn($input) => preg_replace(';^v?([\d\.]+);', 'v\1', $input->getArgument('new-version'));
 $c['publishedPharName'] = fn($toolName, $publishedTagName) => $toolName . "-" . preg_replace(';^v;', '', $publishedTagName) . '.phar';
 
-$c['cvlibUpstream'] = fn() => 'file:///tmp/cv-lib-upstream-bare';
-// FIXME // $c['cvlibUpstream'] = fn() => 'git@github.com:civicrm/cv-lib.git';
+$c['cvlibUpstream'] = fn() => 'git@github.com:civicrm/cv-lib.git';
 $c['cvlibWorkDir'] = fn($buildDir) => $buildDir . '/cv-lib';
+
+// Some overrides for local dev/experimentation.
+// $c['ghRepo'] = 'totten/cv';
+// $c['cvlibUpstream'] = fn() => 'file:///tmp/cv-lib-upstream-bare';
 
 ###############################################################################
 ## Services and other helpers
@@ -91,7 +93,7 @@ $c['app']->command("release $commonOptions", function (string $publishedTagName,
   // TODO: $taskr->subcommand('clean {{0|s}}', [$publishedTagName]);
 });
 
-$c['app']->command("tag $commonOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, Cmdr $cmdr) use ($c) {
+$c['app']->command("tag $commonOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr) use ($c) {
   $io->title("Create tags ($publishedTagName)");
   ['Init', $c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream']];
   chdir($c['srcDir']);
@@ -201,7 +203,7 @@ $c['app']->command("upload $commonOptions", function ($publishedTagName, Symfony
   }
 });
 
-$c['app']->command("tips $commonOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
+$c['app']->command("tips $commonOptions", function (SymfonyStyle $io) use ($c) {
   $io->title('Tips');
   $cleanup = sprintf('%s clean', basename(__FILE__));
   $io->writeln("Cleanup temp files: <comment>$cleanup</comment>");
