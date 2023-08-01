@@ -136,7 +136,7 @@ $c['app']->command("tag $commonOptions", function ($publishedTagName, SymfonySty
 $c['app']->command("build $commonOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
   $io->title('Build PHAR');
   chdir($c['srcDir']);
-  $taskr->passthru('bash build.sh');
+  $taskr->passthru('bash ./scripts/build.sh');
 });
 
 $c['app']->command("sign $commonOptions", function (SymfonyStyle $io, Taskr $taskr, \Crypt_GPG $gpg, $input) use ($c) {

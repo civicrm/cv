@@ -1,7 +1,7 @@
 /**
  * This shell is suitable for compiling civix.phar.... and not much else.
  *
- * Ex: `nix-shell --run ./build.sh`
+ * Ex: `nix-shell --run ./scripts/build.sh`
  */
 # { pkgs ? import <nixpkgs> {} }:
 let

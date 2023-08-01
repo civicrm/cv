@@ -206,7 +206,7 @@ $ php -dphar.readonly=0 `which box` build
 If you want to run with the same versions of PHP+box that are used for official builds, then run:
 
 ```
-nix-shell --run ./build.sh
+nix-shell --run ./scripts/build.sh
 ```
 
 Unit-Tests (Standard)
