@@ -198,8 +198,13 @@ $c['app']->command("upload $commonOptions", function ($publishedTagName, Symfony
   $taskr->passthru('gsutil cp {{DIST|s}}/* {{GCLOUD|s}}/', $vars);
   if (preg_match(';^v\d;', $publishedTagName)) {
     // Finalize: "mytool-1.2.3.phar" will be the default "mytool.phar"
-    $taskr->passthru('gsutil cp {{GCLOUD|s}}/{{PHAR_NAME}} {{GCLOUD|s}}/{{TOOL_NAME}}', $vars);
-    $taskr->passthru('gsutil cp {{GCLOUD|s}}/{{PHAR_NAME}}.asc {{GCLOUD|s}}/{{TOOL_NAME}}.asc', $vars);
+    $suffixes = ['.phar', '.phar.asc', '.SHA256SUMS', '.SHA256SUMS.asc'];
+    foreach ($suffixes as $suffix) {
+      $taskr->passthru('gsutil cp {{GCLOUD|s}}/{{OLD_NAME}} {{GCLOUD|s}}/{{NEW_NAME}}', $vars + [
+        'OLD_NAME' => preg_replace(';\.phar$;', $suffix, $c['publishedPharName']),
+        'NEW_NAME' => preg_replace(';\.phar$;', $suffix, basename($c['boxOutputPhar'])),
+      ]);
+    }
   }
 });
 
