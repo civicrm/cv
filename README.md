@@ -26,12 +26,13 @@ sudo chmod +x /usr/local/bin/cv
 Similarly, you may download the latest stable release and verify the [checksum](https://download.civicrm.org/cv/cv.SHA256SUMS) or [GPG signature](https://download.civicrm.org/cv/cv.phar.asc), e.g.
 
 ```bash
-sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o cv.phar
-sudo curl -LsS https://download.civicrm.org/cv/cv.phar.asc -o cv.phar.asc
+curl -LsS https://download.civicrm.org/cv/cv.phar -o cv.phar
+curl -LsS https://download.civicrm.org/cv/cv.phar.asc -o cv.phar.asc
 gpg --keyserver hkps://keys.openpgp.org --recv-keys 61819CB662DA5FFF79183EF83801D1B07A1E75CB
 gpg --verify cv.phar.asc cv.phar
 chmod +x cv.phar
 sudo mv cv.phar /usr/local/bin/cv
+sudo chown root:root /usr/local/bin/cv
 ```
 
 Download: Pre-Release
