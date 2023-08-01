@@ -198,20 +198,16 @@ internal services (eg `--all`, `--tag=XXX`, or `-v`).
   }
 
   /**
-   * @param $definition
-   *
+   * @param \Symfony\Component\DependencyInjection\Definition $definition
    * @return array|string
    */
-  protected function getEvents($definition) {
+  protected function getEvents($definition): array {
     if (class_exists('Civi\Core\Event\EventScanner')) {
       if ($definition->getTag('event_subscriber') || $definition->getTag('kernel.event_subscriber')) {
         return \Civi\Core\Event\EventScanner::findListeners($definition->getClass());
       }
-      else {
-        return '';
-      }
     }
-    return '?';
+    return [];
   }
 
   /**
