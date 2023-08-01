@@ -94,17 +94,19 @@ function autodir(string $path): string {
 
 ###############################################################################
 ## Commands
-$globalOptions = '[-N|--dry-run] [-S|--step] new-version';
+$globalOptions = '[-N|--dry-run] [-S|--step]';
+$commonOptions = '[-N|--dry-run] [-S|--step] new-version';
 
-$c['app']->command("release $globalOptions", function (string $publishedTagName, SymfonyStyle $io, Taskr $taskr) use ($c) {
+$c['app']->command("release $commonOptions", function (string $publishedTagName, SymfonyStyle $io, Taskr $taskr) use ($c) {
   $taskr->subcommand('tag {{0|s}}', [$publishedTagName]);
   $taskr->subcommand('build {{0|s}}', [$publishedTagName]);
   $taskr->subcommand('sign {{0|s}}', [$publishedTagName]);
   $taskr->subcommand('upload {{0|s}}', [$publishedTagName]);
+  $taskr->subcommand('tips {{0|s}}', [$publishedTagName]);
   // TODO: $taskr->subcommand('clean {{0|s}}', [$publishedTagName]);
 });
 
-$c['app']->command("tag $globalOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, Cmdr $cmdr, $git) use ($c) {
+$c['app']->command("tag $commonOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, Cmdr $cmdr, $git) use ($c) {
   $io->title("Create tags ($publishedTagName)");
   ['Init', $c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream']];
   chdir($c['srcDir']);
@@ -146,13 +148,13 @@ $c['app']->command("tag $globalOptions", function ($publishedTagName, SymfonySty
   $git($c['cvlibWorkDir'])->tag($publishedTagName);
 });
 
-$c['app']->command("build $globalOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
+$c['app']->command("build $commonOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
   $io->title('Build PHAR');
   chdir($c['srcDir']);
   $taskr->passthru('bash build.sh');
 });
 
-$c['app']->command("sign $globalOptions", function (SymfonyStyle $io, Taskr $taskr, \Crypt_GPG $gpg, $input) use ($c) {
+$c['app']->command("sign $commonOptions", function (SymfonyStyle $io, Taskr $taskr, \Crypt_GPG $gpg, $input) use ($c) {
   $io->title('Generate checksum and GPG signature');
   ['Init', $c['srcDir'], $c['distDir'], $c['publishedPharName']];
   chdir($c['distDir']);
@@ -176,7 +178,7 @@ $c['app']->command("sign $globalOptions", function (SymfonyStyle $io, Taskr $tas
   }
 });
 
-$c['app']->command("upload $globalOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, $git, Credentials $cred) use ($c) {
+$c['app']->command("upload $commonOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, $git, Credentials $cred) use ($c) {
   $io->title("Upload code and build artifacts");
   ['Init', $c['srcDir'], $c['cvlibWorkDir'], $c['cvlibUpstream'], $c['ghRepo'], $c['distDir'], $c['publishedPharName']];
   chdir($c['srcDir']);
@@ -195,10 +197,17 @@ $c['app']->command("upload $globalOptions", function ($publishedTagName, Symfony
   $taskr->passthru('GH_TOKEN={{GH|s}} gh release upload {{VER|s}} --repo {{REPO|s}} --clobber {{PHAR|s}} {{PHAR|s}}.asc', $vars);
 });
 
-$c['app']->command("clean $globalOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
-  ['Init', $c['srcDir'], $c['buildDir'], $c['boxOutputPhar']];
+$c['app']->command("tips $commonOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
+  $io->title('Tips');
+  $cleanup = sprintf('%s clean', basename(__FILE__));
+  $io->writeln("Cleanup temp files: <comment>$cleanup</comment>");
+  $url = sprintf('https://github.com/%s/releases/edit/%s', $c['ghRepo'], $c['publishedTagName']);
+  $io->writeln("Update release notes: <comment>$url</comment>");
+});
 
+$c['app']->command("clean $globalOptions", function (SymfonyStyle $io, Taskr $taskr) use ($c) {
   $io->title('Clean build directory');
+  ['Init', $c['srcDir'], $c['buildDir'], $c['boxOutputPhar']];
   chdir($c['srcDir']);
 
   $taskr->passthru('rm -rf {{0|@s}}', [[$c['buildDir'], $c['boxOutputPhar']]]);
