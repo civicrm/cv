@@ -3,20 +3,23 @@
 Build
 =====
 
-To build a new `phar` executable, use [box](http://box-project.github.io/box2/):
+`cv.phar` is usually compiled inside a [nix](https://nixos.org/download.html) shell, i.e.
+
+```
+nix-shell --run ./scripts/build.sh
+```
+
+You may also compile it manually in another environment -- if you have [composer](https://getcomposer.org/),
+[box](http://box-project.github.io/box2/), and a suitable `php.ini` configuration.
 
 ```
 $ git clone https://github.com/civicrm/cv
 $ cd cv
 $ composer install
-$ php -dphar.readonly=0 `which box` build
+$ box compile
 ```
 
-If you want to run with the same versions of PHP+box that are used for official builds, then run:
-
-```
-nix-shell --run ./scripts/build.sh
-```
+(*TIP: To match exact versions, consult [shell.nix](shell.nix) and the corresponding release of [pharnix](https://github.com/totten/pharnix).*)
 
 Unit-Tests (Standard)
 =====================
