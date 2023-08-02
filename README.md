@@ -15,7 +15,7 @@ Download
 
 `cv` is distributed in PHAR format, which is a portable executable file (for PHP). It should run on most Unix-like systems where PHP is installed.
 
-Simply download [the latest release of `cv`](https://download.civicrm.org/cv/cv.phar) and put it somewhere in the PATH, eg
+Simply download [the latest release of `cv.phar`](https://download.civicrm.org/cv/cv.phar) and put it somewhere in the PATH, eg
 
 ```bash
 sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
@@ -32,6 +32,12 @@ gpg --verify cv.phar.asc cv.phar
 chmod +x cv.phar
 sudo mv cv.phar /usr/local/bin/cv
 sudo chown root:root /usr/local/bin/cv
+```
+
+`cv.phar` is also compatible with [phar.io's `phive` installer](https://phar.io/):
+
+```bash
+phive install civicrm/cv
 ```
 
 For more information about releases and downloads, see [doc/release.md](doc/release.md).
