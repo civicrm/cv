@@ -14,7 +14,6 @@ Pre-releases are automatically posted online after any update to the `master` br
         * `cv-X.Y.Z.phar`
         * `cv-X.Y.Z.phar.asc`
         * `cv-X.Y.Z.SHA256SUMS`
-        * `cv-X.Y.Z.SHA256SUMS.asc`
     * Archival releases are available under https://github.com/civicrm/cv/releases/
 * For v0.3.16 - v0.3.46...
     * Archival releases are available under `https://download.civicrm.org/cv/` with files:

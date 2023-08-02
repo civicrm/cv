@@ -156,11 +156,11 @@ $c['app']->command("sign $commonOptions", function (SymfonyStyle $io, Taskr $tas
     assertThat(!empty($gpg->verifyFile($pharFile, file_get_contents("$pharFile.asc"))), "$pharFile should have valid signature");
   }
 
-  $io->writeln("Sign $sha256File ($sha256File.asc)");
-  if (!$input->getOption('dry-run')) {
-    $gpg->signFile($sha256File, "$sha256File.asc", \Crypt_GPG::SIGN_MODE_DETACHED);
-    assertThat(!empty($gpg->verifyFile($sha256File, file_get_contents("$sha256File.asc"))), "$sha256File should have valid signature");
-  }
+  //$io->writeln("Sign $sha256File ($sha256File.asc)");
+  //if (!$input->getOption('dry-run')) {
+  //  $gpg->signFile($sha256File, "$sha256File.asc", \Crypt_GPG::SIGN_MODE_DETACHED);
+  //  assertThat(!empty($gpg->verifyFile($sha256File, file_get_contents("$sha256File.asc"))), "$sha256File should have valid signature");
+  //}
 });
 
 $c['app']->command("upload $commonOptions", function ($publishedTagName, SymfonyStyle $io, Taskr $taskr, Credentials $cred) use ($c) {
@@ -198,7 +198,7 @@ $c['app']->command("upload $commonOptions", function ($publishedTagName, Symfony
   $taskr->passthru('gsutil cp {{DIST|s}}/* {{GCLOUD|s}}/', $vars);
   if (preg_match(';^v\d;', $publishedTagName)) {
     // Finalize: "mytool-1.2.3.phar" will be the default "mytool.phar"
-    $suffixes = ['.phar', '.phar.asc', '.SHA256SUMS', '.SHA256SUMS.asc'];
+    $suffixes = ['.phar', '.phar.asc', '.SHA256SUMS'];
     foreach ($suffixes as $suffix) {
       $taskr->passthru('gsutil cp {{GCLOUD|s}}/{{OLD_NAME}} {{GCLOUD|s}}/{{NEW_NAME}}', $vars + [
         'OLD_NAME' => preg_replace(';\.phar$;', $suffix, $c['publishedPharName']),
