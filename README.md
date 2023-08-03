@@ -14,33 +14,23 @@ Download
 ========
 
 `cv` is distributed in PHAR format, which is a portable executable file (for PHP). It should run on most Unix-like systems where PHP is installed.
+Here are two quick ways to download it:
 
-Simply download [the latest release of `cv.phar`](https://download.civicrm.org/cv/cv.phar) and put it somewhere in the PATH, eg
+* Download [the latest release of `cv.phar`](https://download.civicrm.org/cv/cv.phar) (*[SHA256](https://download.civicrm.org/cv/cv.SHA256SUMS),
+  [GPG](https://download.civicrm.org/cv/cv.phar.asc)*) and put it in the PATH. For example:
 
-```bash
-sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
-sudo chmod +x /usr/local/bin/cv
-```
+    ```bash
+    sudo curl -LsS https://download.civicrm.org/cv/cv.phar -o /usr/local/bin/cv
+    sudo chmod +x /usr/local/bin/cv
+    ```
 
-Similarly, you may download the latest stable release and verify the [checksum](https://download.civicrm.org/cv/cv.SHA256SUMS) or [GPG signature](https://download.civicrm.org/cv/cv.phar.asc), e.g.
+* Use [phar.io's `phive` installer](https://phar.io/) to download, validate, and cache the `cv.phar` file.
 
-```bash
-curl -LsS https://download.civicrm.org/cv/cv.phar -o cv.phar
-curl -LsS https://download.civicrm.org/cv/cv.phar.asc -o cv.phar.asc
-gpg --keyserver hkps://keys.openpgp.org --recv-keys 61819CB662DA5FFF79183EF83801D1B07A1E75CB
-gpg --verify cv.phar.asc cv.phar
-chmod +x cv.phar
-sudo mv cv.phar /usr/local/bin/cv
-sudo chown root:root /usr/local/bin/cv
-```
+    ```bash
+    phive install civicrm/cv
+    ```
 
-`cv.phar` is also compatible with [phar.io's `phive` installer](https://phar.io/):
-
-```bash
-phive install civicrm/cv
-```
-
-For more information about releases and downloads, see [doc/release.md](doc/release.md).
+For additional information about signature-checking, pre-releases, and historical releases, see [doc/download.md](doc/download.md).
 
 Documentation
 =============
