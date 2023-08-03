@@ -3,41 +3,24 @@
  *
  * Ex: `nix-shell --run ./scripts/build.sh`
  */
-# { pkgs ? import <nixpkgs> {} }:
-let
-  pkgSrc = fetchTarball {
-    url = "https://github.com/nixos/nixpkgs/archive/ce6aa13369b667ac2542593170993504932eb836.tar.gz";
-    sha256 = "0d643wp3l77hv2pmg2fi7vyxn4rwy0iyr8djcw1h5x72315ck9ik";
-  };
-  pkgs = import pkgSrc {};
-  myphp = pkgs.php81.buildEnv {
-    extraConfig = ''
-      memory_limit=-1
-    '';
-  };
 
- pogo = pkgs.stdenv.mkDerivation rec {
-    name = "pogo";
-    src = pkgs.fetchurl {
-      url = https://github.com/totten/pogo/releases/download/v0.5.0/pogo-0.5.0.phar;
-      sha256 = "heH1JFa3EGz069C+7a4YKtLEDYXShTAg0eIjx2jgASk=";
-      executable = true;
-    };
-    buildInputs = [ ];
-    buildCommand = ''
-      mkdir $out $out/bin
-      pushd $out/bin
-        ln -s ${src} $out/bin/${name}
-      popd
-    '';
-  };
+{ pkgs ? import <nixpkgs> {} }:
+
+let
+
+  pharnix = pkgs.callPackage (pkgs.fetchFromGitHub {
+    owner = "totten";
+    repo = "pharnix";
+    rev = "v0.2.0";
+    sha256 = "sha256-JCK4YMgxCxUPn88t164tPnxpDNZxUWPR4W9AExEMzEU=";
+  }) {};
 
 in
-
   pkgs.mkShell {
-    # nativeBuildInputs is usually what you want -- tools you need to run
-    nativeBuildInputs = [ myphp pkgs.php81Packages.composer pkgs.bash-completion pkgs.git-subrepo pkgs.gh pogo ];
+    nativeBuildInputs = pharnix.profiles.full ++ [
+      pkgs.bash-completion
+    ];
     shellHook = ''
       source ${pkgs.bash-completion}/etc/profile.d/bash_completion.sh
     '';
-}
+  }
