@@ -76,3 +76,32 @@ A typical execution might look like:
 ```
 $ env DEBUG=1 OFFLINE=1 CV_SETUP_PATH=$HOME/src/civicrm-setup phpunit7 --group installer
 ```
+
+Release Process
+===============
+
+For the official releases, the process requires:
+
+* Google Cloud CLI tools (with authentication and suitable permissions)
+	<!-- gcloud cli has login command that should be sufficient -->
+* Github CLI tools (with authentication and suitable permissions)
+	<!-- you can create personal developer API key in github web UI -->
+* GPG (with appropriate private key loadedd; e.g. `7A1E75CB`)
+* Nix
+
+Then, on a suitably configured host:
+
+```bash
+cd cv
+git checkout master
+git pull
+
+## Open subshell with suitable versions of most tools
+nix-shell
+
+## Do a dry-run -- Preview what will happen
+./scripts/releaser.php release <VERSION> --dry-run
+
+## Perform the actual release
+./scripts/releaser.php release <VERSION>
+```
