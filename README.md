@@ -64,18 +64,43 @@ Example: CLI
 
 ```bash
 me@localhost$ cd /var/www/my/web/site
-me@localhost$ cv vars:show
-me@localhost$ cv scr /path/to/throwaway.php
-me@localhost$ cv ev 'echo Civi::paths()->getPath("[civicrm.root]/.");'
-me@localhost$ cv ev 'echo Civi::paths()->getUrl("[civicrm.root]/.");'
-me@localhost$ cv url civicrm/dashboard --open
-me@localhost$ cv api contact.get last_name=Smith
+
+## Clear caches
+me@localhost$ cv flush
+
+## Manage extensions
+me@localhost$ cv ext -Li
 me@localhost$ cv dl cividiscount
 me@localhost$ cv en cividiscount
 me@localhost$ cv dis cividiscount
-me@localhost$ cv debug:container
-me@localhost$ cv debug:event-dispatcher
-me@localhost$ cv flush
+me@localhost$ cv path -x cividiscount
+me@localhost$ cv url -x cividiscount
+
+## Manage settings
+me@localhost$ cv vget
+me@localhost$ cv vget /mail/
+me@localhost$ cv vset mailerBatchLimit=100
+
+## Call APIs
+me@localhost$ cv api3 contact.get last_name=Smith
+me@localhost$ cv api4 Contact.get +w last_name=Smith
+
+## Improvise PHP
+me@localhost$ cv ev 'echo Civi::paths()->getPath("[civicrm.root]/.");'
+me@localhost$ cv scr /path/to/my-script.php
+me@localhost$ cv cli
+
+## Improvise web requests
+me@localhost$ cv url civicrm/dashboard --open
+me@localhost$ cv url civicrm/dashboard --open -LU admin
+me@localhost$ cv http civicrm/dashboard
+me@localhost$ cv http civicrm/dashboard -LU admin
+
+## Inspect events and services
+me@localhost$ cv event
+me@localhost$ cv event /flexmailer/
+me@localhost$ cv service
+me@localhost$ cv service /flexmailer/
 ```
 
 If you intend to run unit-tests, and if you do *not* use `civibuild`,
@@ -84,8 +109,10 @@ the name of the test users). To do this, run:
 
 ```bash
 me@localhost$ cd /var/www/my/web/site
+me@localhost$ cv vars:show
 me@localhost$ cv vars:fill
 me@localhost$ vi ~/.cv.json
+me@localhost$ cv vars:show
 ```
 
 Example: PHP
