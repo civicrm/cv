@@ -17,13 +17,14 @@ existing web-project. Below, we give a general download summary and several exam
 <a name="urls"></a>
 ## Download URLs
 
-| Download | URLs |
-| -- | -- |
-| Executable binary (Current release) | PHAR: https://download.civicrm.org/cv/cv.phar<br/>GPG: https://download.civicrm.org/cv/cv.phar.asc<br/>SHA256: https://download.civicrm.org/cv/cv.SHA256SUMS |
-| Executable binary (Pre-release) | PHAR: https://download.civicrm.org/cv/cv-EDGE.phar<br/>Logs: https://test.civicrm.org/view/Tools/job/Tool-Publish-cv/ |
-| Executable binary (v0.3.47 and newer) | Browse: https://github.com/civicrm/cv/releases/<br/>PHAR: `https://download.civicrm.org/cv/cv-X.Y.Z.phar`<br/>GPG: `https://download.civicrm.org/cv/cv-X.Y.Z.phar.asc`<br/>SHA256: `https://download.civicrm.org/cv/cv-X.Y.Z.SHA256SUMS` |
-| Executable binary (v0.3.16 - v0.3.46) | PHAR: `https://download.civicrm.org/cv/cv.phar-vX.Y.Z` |
-| Source code (All versions) | Git: https://github.com/civicrm/cv<br/>Composer: `civicrm/cv` |
+| Format            | Version(s)           | URLs |
+| --                | --                   | --   |
+| Executable binary | Latest               | PHAR: https://download.civicrm.org/cv/cv.phar<br/>GPG: https://download.civicrm.org/cv/cv.phar.asc<br/>SHA256: https://download.civicrm.org/cv/cv.SHA256SUMS |
+|                   | Edge (*pre-release*) | PHAR: https://download.civicrm.org/cv/cv-EDGE.phar<br/>Logs: https://test.civicrm.org/view/Tools/job/Tool-Publish-cv/ |
+|                   | Historical           | Browse: https://github.com/civicrm/cv/releases/<br/>PHAR: `https://download.civicrm.org/cv/cv-X.Y.Z.phar`<br/>GPG: `https://download.civicrm.org/cv/cv-X.Y.Z.phar.asc`<br/>SHA256: `https://download.civicrm.org/cv/cv-X.Y.Z.SHA256SUMS` |
+| Source code       | All versions         | Git: https://github.com/civicrm/cv<br/>Composer: `civicrm/cv` |
+
+(*Note: Prior to v0.3.47, binaries were not posted to Github.*)
 
 <a name="comparison"></a>
 ## Comparison
