@@ -24,13 +24,26 @@ Here are two quick ways to download it:
     sudo chmod +x /usr/local/bin/cv
     ```
 
+    (*Learn more: [Install `cv.phar` as system-wide tool (Linux/BSD/macOS)](#phar-unix)*)
+
 * Use [phar.io's `phive` installer](https://phar.io/) to download, validate, and cache the `cv.phar` file.
 
     ```bash
     phive install civicrm/cv
     ```
 
-For additional information about signature-checking, pre-releases, and historical releases, see [doc/download.md](doc/download.md).
+    (*Learn more: [Install `cv.phar` as project tool (phive)](#phar-phive)*)
+
+There are several more options for downloading `cv`. See also:
+
+* [Download URLs](doc/download.md#urls)
+* [Comparison](doc/download.md#comparison)
+* [Install `cv.phar` as system-wide tool (Linux/BSD/macOS)](doc/download.md#phar-unix)
+* [Install `cv.phar` as project tool (composer)](doc/download.md#phar-composer)
+* [Install `cv.phar` as project tool (phive)](doc/download.md#phar-phive)
+* [Install `cv.git` as system-wide tool (Linux/BSD/macOS)](doc/download.md#src-unix)
+* [Install `cv.git` as system-wide tool (Windows)](doc/download.md#src-win)
+* [Install `cv.git` as project tool (composer)](doc/download.md#src-composer)
 
 Documentation
 =============
