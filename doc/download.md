@@ -5,8 +5,8 @@
 `cv` is available as an executable binary (`cv.phar`) and as source-code (`cv.git`).  It may be deployed as a system-wide tool, or it may be deployed as part of an
 existing web-project. Below, we give a general download summary and several example procedures.
 
-* [Download URLs](#urls)
-* [Comparison](#comparison)
+* [Download URLs for alternate versions](#urls)
+* [Comparison of install options](#comparison)
 * [Install `cv.phar` as system-wide tool (Linux/BSD/macOS)](#phar-unix)
 * [Install `cv.phar` as project tool (composer)](#phar-composer)
 * [Install `cv.phar` as project tool (phive)](#phar-phive)
@@ -15,17 +15,17 @@ existing web-project. Below, we give a general download summary and several exam
 * [Install `cv.git` as project tool (composer)](#src-composer)
 
 <a name="urls"></a>
-## Download URLs
+## Download URLs for alternate versions
 
 | Format            | Version(s)           | URLs |
 | --                | --                   | --   |
 | Executable binary | Latest               | PHAR: https://download.civicrm.org/cv/cv.phar<br/>GPG: https://download.civicrm.org/cv/cv.phar.asc<br/>SHA256: https://download.civicrm.org/cv/cv.SHA256SUMS |
 |                   | Edge (*autobuild*)   | PHAR: https://download.civicrm.org/cv/cv-EDGE.phar<br/>Logs: https://test.civicrm.org/view/Tools/job/Tool-Publish-cv/ |
-|                   | Historical           | Browse: https://github.com/civicrm/cv/releases/<br/>PHAR: `https://download.civicrm.org/cv/cv-X.Y.Z.phar`<br/>GPG: `https://download.civicrm.org/cv/cv-X.Y.Z.phar.asc`<br/>SHA256: `https://download.civicrm.org/cv/cv-X.Y.Z.SHA256SUMS`<br/><br/>(*Note: Prior to v0.3.47, binaries were not posted to Github.*) |
+|                   | Historical           | PHAR: `https://download.civicrm.org/cv/cv-X.Y.Z.phar`<br/>GPG: `https://download.civicrm.org/cv/cv-X.Y.Z.phar.asc`<br/>SHA256: `https://download.civicrm.org/cv/cv-X.Y.Z.SHA256SUMS`<br/>Browse: https://github.com/civicrm/cv/releases/<br/><br/>(*Note: Prior to v0.3.47, binaries were not posted to Github.*) |
 | Source code       | All versions         | Git: https://github.com/civicrm/cv |
 
 <a name="comparison"></a>
-## Comparison
+## Comparison of install options
 
 There are a few procedures for installing. Here are key differences:
 

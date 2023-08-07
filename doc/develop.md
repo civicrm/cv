@@ -9,8 +9,7 @@ Build
 nix-shell --run ./scripts/build.sh
 ```
 
-You may also compile it manually in another environment -- if you have [composer](https://getcomposer.org/),
-[box](http://box-project.github.io/box2/), and a suitable `php.ini` configuration.
+You may also compile it in another environment using [`git`](https://git-scm.com), [`composer`](https://getcomposer.org/), and [`box`](http://box-project.github.io/box2/).
 
 ```
 $ git clone https://github.com/civicrm/cv
@@ -19,7 +18,12 @@ $ composer install
 $ box compile
 ```
 
-(*TIP: To match exact versions, consult [shell.nix](shell.nix) and the corresponding release of [pharnix](https://github.com/totten/pharnix).*)
+The output will be `./bin/cv.phar`.
+
+__Tips__
+
+* To match exact versions of the toolchain, consult [shell.nix](../shell.nix) and the corresponding release of [buildkit `pkgs`](https://github.com/civicrm/civicrm-buildkit/blob/master/nix/pkgs/default.nix).
+* `box` may require updating `php.ini`.
 
 Unit-Tests (Standard)
 =====================
