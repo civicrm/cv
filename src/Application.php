@@ -2,6 +2,7 @@
 namespace Civi\Cv;
 
 use LesserEvil\ShellVerbosityIsEvil;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
@@ -58,7 +59,7 @@ class Application extends \Symfony\Component\Console\Application {
   /**
    * {@inheritdoc}
    */
-  protected function getDefaultInputDefinition() {
+  protected function getDefaultInputDefinition(): InputDefinition {
     $definition = parent::getDefaultInputDefinition();
     $definition->addOption(new InputOption('cwd', NULL, InputOption::VALUE_REQUIRED, 'If specified, use the given directory as working directory.'));
     return $definition;
