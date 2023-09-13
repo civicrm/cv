@@ -107,7 +107,7 @@ class Process {
    * @return bool
    */
   public static function isShellScript($file) {
-    $firstLine = file_get_contents($file, NULL, NULL, 0, 120);
+    $firstLine = file_get_contents($file, FALSE, NULL, 0, 120);
     list($firstLine) = explode("\n", $firstLine);
     return (bool) preg_match(';^#.*bin.*sh;', $firstLine);
   }
