@@ -157,13 +157,13 @@ trait SettingTrait {
     $filterList = [];
     foreach ($names as $filterPat) {
       if ($filterPat[0] === '/') {
-        if (!\CRM_Utils_String::endsWith($filterPat, '/')) {
-          throw new \RuntimeException('Malformed regular expression. (Modifiers are not supported.)');
+        if (!preg_match(';/i?$;', $filterPat)) {
+          throw new \RuntimeException('Malformed regular expression. (There may be a missing delimiter or invalid modifier.)');
         }
-        $filterList[] = substr($filterPat, 1, -1);
+        $filterList[] = $filterPat;
       }
       else {
-        $filterList[] = '^' . preg_quote($filterPat, '/') . '$';
+        $filterList[] = '/^' . preg_quote($filterPat, '/') . '$/';
       }
     }
 
@@ -174,8 +174,13 @@ trait SettingTrait {
     }
     else {
       $filterExpr = '/' . implode('|', $filterList) . '/';
-      $filter = function (string $name) use ($filterExpr) {
-        return (bool) preg_match($filterExpr, $name);
+      $filter = function (string $name) use ($filterList) {
+        foreach ($filterList as $filterExpr) {
+          if (preg_match($filterExpr, $name)) {
+            return TRUE;
+          }
+        }
+        return FALSE;
       };
     }
     return $filter;
