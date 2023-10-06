@@ -1,5 +1,5 @@
 /**
- * This shell is suitable for compiling civix.phar.... and not much else.
+ * This shell is suitable for compiling PHAR executables.... and not much else.
  *
  * Ex: `nix-shell --run ./scripts/build.sh`
  */
@@ -8,16 +8,25 @@
 
 let
 
-  pharnix = pkgs.callPackage (pkgs.fetchFromGitHub {
-    owner = "totten";
-    repo = "pharnix";
-    rev = "v0.2.0";
-    sha256 = "sha256-JCK4YMgxCxUPn88t164tPnxpDNZxUWPR4W9AExEMzEU=";
-  }) {};
+  buildkit = (import ./nix/buildkit.nix) { inherit pkgs; };
 
 in
+
   pkgs.mkShell {
-    nativeBuildInputs = pharnix.profiles.full ++ [
+    nativeBuildInputs = buildkit.profiles.base ++ [
+
+      (buildkit.pins.v2305.php81.buildEnv {
+        extraConfig = ''
+          memory_limit=-1
+        '';
+      })
+
+      buildkit.pkgs.box
+      buildkit.pkgs.composer
+      buildkit.pkgs.pogo
+      buildkit.pkgs.phpunit8
+      buildkit.pkgs.phpunit9
+
       pkgs.bash-completion
     ];
     shellHook = ''
