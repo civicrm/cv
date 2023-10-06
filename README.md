@@ -14,7 +14,7 @@ Download
 ========
 
 `cv` is distributed in PHAR format, which is a portable executable file (for PHP). It should run on most Unix-like systems where PHP is installed.
-Here are two quick ways to download it:
+Here are three quick ways to download it:
 
 * Download [the latest release of `cv.phar`](https://download.civicrm.org/cv/cv.phar) (*[SHA256](https://download.civicrm.org/cv/cv.SHA256SUMS),
   [GPG](https://download.civicrm.org/cv/cv.phar.asc)*) and put it in the PATH. For example:
@@ -25,6 +25,14 @@ Here are two quick ways to download it:
     ```
 
     (*Learn more: [Install `cv.phar` as system-wide tool (Linux/BSD/macOS)](doc/download.md#phar-unix)*)
+
+* Add `cv` and other CiviCRM tools to a composer project (Drupal 9/10)
+
+    ```bash
+    composer require civicrm/cli-tools
+    ```
+
+    (*Learn more: [Install `cv.phar` as project tool (composer)](doc/download.md#phar-composer)*)
 
 * Use [phar.io's `phive` installer](https://phar.io/) to download, validate, and cache the `cv.phar` file.
 

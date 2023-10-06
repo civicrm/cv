@@ -83,31 +83,32 @@ That is the quickest procedure, but it does not defend against supply-chain atta
 <a name="phar-composer"></a>
 ## Install `cv.phar` as project tool (composer)
 
-If you have are developing a web-project with [`composer`](https://getcomposer.org) (e.g.  Drupal 8/9/10) and wish to add `cv.phar` to your project,
-then use the [composer-downloads-plugin](https://github.com/civicrm/composer-downloads-plugin).
+If you are developing a web-project with [`composer`](https://getcomposer.org) (e.g.  Drupal 8/9/10) and wish to add `cv.phar` to your project,
+then use the [civicrm/cli-tools](https://github.com/totten/civicrm-cli-tools).
 
 ```bash
-composer require civicrm/composer-downloads-plugin
+composer require civicrm/cli-tools
 ```
 
-Add the binary URL to your top-level `composer.json`:
+This will add `cv` and related tools in [composer's `vendor/bin` folder](https://getcomposer.org/doc/articles/vendor-binaries.md).
 
-```javascript
-{
-  "extra": {
-    "downloads": {
-      "cv": {"url": "https://download.civicrm.org/cv/cv-X.Y.Z.phar", "path": "bin/cv", "type": "phar"}
-    }
-  }
-}
-```
-
-And finally run `composer` to download the file. Either of these commands will work:
+This adds CLI tools in [composer's `vendor/bin` folder](https://getcomposer.org/doc/articles/vendor-binaries.md).
+You can call commands through `composer exec` or `vendor/bin`.
 
 ```bash
-composer install
-composer update --lock
+## Ex #1: Call cv through `composer exec`
+composer exec cv api4 Contact.get +l 1
+
+## Ex #2: Call cv through `./vendor/bin`
+./vendor/bin/cv api4 Contact.get +l 1
+
+## Ex #3: Add cv your PATH
+PATH="/path/to/vendor/bin:$PATH"
+cv api4 Contact.get +l 1
 ```
+
+(*Alternatively, if you prefer to pick a specific version of each tool, then use [composer-downloads-plugin](https://github.com/civicrm/composer-downloads-plugin)
+to download the specific PHAR release.*)
 
 <a name="phar-phive"></a>
 ## Install `cv.phar` as project tool (phive)
