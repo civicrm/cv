@@ -229,6 +229,10 @@ Bootstrap
 > ___NOTE___: In absence of a configuration variable, the __Automatic__ mode will behave like `CIVICRM_SETTINGS="Auto"` (in v0.3.x).
   This is tentatively planned to change in v0.4.x, where it will behave like `CIVICRM_BOOT="Auto://."`
 
+Additionally, the following variables may be used to supplement:
+
+* __`HTTP_HOST`__: For multisite deployments, set this variable to the hostname (e.g. `HTTP_HOST=www.example.com`).
+
 Autocomplete
 ============
 
