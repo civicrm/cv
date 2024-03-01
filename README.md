@@ -203,8 +203,7 @@ Bootstrap
     configuring "multi-site", adding bespoke "symlinks", or moving the `wp-admin` folder.  For advanced layouts, you
     may need to set an environment variable.
 
-* __`CIVICRM_BOOT`__: The default boot order is that `cv` loads a CMS first and then asks it to bootstrap CiviCRM. This is more representative of a typical HTTP page-view, and it is compatible with commands like `core:install`.
-To enable  _alternative boot protocol_, set this environment variable. Specify the CMS type and base-directory. Examples:
+* __`CIVICRM_BOOT`__ (*new protocol*): Boot the CMS first (and then ask it to boot CiviCRM). This is more representative of a typical HTTP page-view, and it is compatible with commands like `core:install`. Set this environment variable to specify the CMS type and base-directory. Compare:
 
     ```bash
     export CIVICRM_BOOT="Drupal://var/www/public"
@@ -213,12 +212,7 @@ To enable  _alternative boot protocol_, set this environment variable. Specify t
     export CIVICRM_BOOT="Auto://."
     ```
 
-  Example:
-  ```
-  export CIVICRM_BOOT="WordPress:/$HOME/public_html/" ; cv ext:list -L
-  ```
-
-* __`CIVICRM_SETTINGS`__: To enable the _legacy boot protocol_, set this environment variable. Specify the `civicrm.settings.php` location. Examples:
+* __`CIVICRM_SETTINGS`__ (*old protocol*): Boot CiviCRM first (and then ask it to boot the CMS). Set this environment variable to specify the `civicrm.settings.php` location. Compare:
 
     ```bash
     export CIVICRM_SETTINGS="/var/www/sites/default/files/civicrm.settings.php"
@@ -232,19 +226,28 @@ To enable  _alternative boot protocol_, set this environment variable. Specify t
 > ___NOTE___: In absence of a configuration variable, the __Automatic__ mode will behave like `CIVICRM_SETTINGS="Auto"` (in v0.3.x).
   This is tentatively planned to change in v0.4.x, where it will behave like `CIVICRM_BOOT="Auto://."`
 
-Additionally, the following variables may be used to supplement:
+Additionally, some deployments handle multiple sites ("multisite"/"multidomain"). You should target a specific site using `--hostname` or `HTTP_HOST`.
 
-* __`HTTP_HOST`__: For multisite deployments, set this variable to the hostname (e.g. `HTTP_HOST=www.example.com` or `--hostname='www.example.com'`).   This setting can be especially useful in CiviCRM MultiDomain in specifying which site to target.
+Here are a few examples of putting these together:
 
-  Examples:
-  ```
-  export CIVICRM_BOOT="WordPress:/$HOME/public_html/" ; cv --hostname='www.example.org' ext:list -L
-  ```
-  ```
-  export CIVICRM_BOOT="WordPress:/$HOME/public_html/" ; cv --hostname='www.example.org/nyc' ext:list -L
-  ```
+```bash
+## Use --hostname for a domain
+export CIVICRM_BOOT="WordPress:/$HOME/public_html/"
+cv --hostname='www.example.org' ext:list -L
+```
 
+```bash
+## Use HTTP_HOST for a domain
+export CIVICRM_BOOT="WordPress:/$HOME/public_html/"
+export HTTP_HOST=www.example.org
+cv ext:list -L
+```
 
+```bash
+## Use --hostname for a subfolder
+export CIVICRM_BOOT="WordPress:/$HOME/public_html/"
+cv --hostname='www.example.org/nyc' ext:list -L
+```
 
 Autocomplete
 ============
