@@ -203,7 +203,8 @@ Bootstrap
     configuring "multi-site", adding bespoke "symlinks", or moving the `wp-admin` folder.  For advanced layouts, you
     may need to set an environment variable.
 
-* __`CIVICRM_BOOT`__: To enable the _standard boot protocol_, set this environment variable. Specify the CMS type and base-directory. Examples:
+* __`CIVICRM_BOOT`__: The default boot order is that `cv` loads a CMS first and then asks it to bootstrap CiviCRM. This is more representative of a typical HTTP page-view, and it is compatible with commands like `core:install`.
+To enable  _alternative boot protocol_, set this environment variable. Specify the CMS type and base-directory. Examples:
 
     ```bash
     export CIVICRM_BOOT="Drupal://var/www/public"
@@ -212,8 +213,10 @@ Bootstrap
     export CIVICRM_BOOT="Auto://."
     ```
 
-    (Note: In the standard protocol, `cv` loads a CMS first and then asks it to bootstrap CiviCRM. This is more representative of
-    a typical HTTP page-view, and it is compatible with commands like `core:install`. However, it has not been used for as long.)
+  Example:
+  ```
+  export CIVICRM_BOOT="WordPress:/$HOME/public_html/" ; cv ext:list -L
+  ```
 
 * __`CIVICRM_SETTINGS`__: To enable the _legacy boot protocol_, set this environment variable. Specify the `civicrm.settings.php` location. Examples:
 
@@ -231,7 +234,17 @@ Bootstrap
 
 Additionally, the following variables may be used to supplement:
 
-* __`HTTP_HOST`__: For multisite deployments, set this variable to the hostname (e.g. `HTTP_HOST=www.example.com`).
+* __`HTTP_HOST`__: For multisite deployments, set this variable to the hostname (e.g. `HTTP_HOST=www.example.com` or `--hostname='www.example.com'`).   This setting can be especially useful in CiviCRM MultiDomain in specifying which site to target.
+
+  Examples:
+  ```
+  export CIVICRM_BOOT="WordPress:/$HOME/public_html/" ; cv --hostname='www.example.org' ext:list -L
+  ```
+  ```
+  export CIVICRM_BOOT="WordPress:/$HOME/public_html/" ; cv --hostname='www.example.org/nyc' ext:list -L
+  ```
+
+
 
 Autocomplete
 ============
