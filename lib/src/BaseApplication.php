@@ -1,8 +1,9 @@
 <?php
 namespace Civi\Cv;
 
+use Civi\Cv\Util\AliasFilter;
+use Civi\Cv\Util\CvArgvInput;
 use LesserEvil\ShellVerbosityIsEvil;
-use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -18,16 +19,18 @@ class BaseApplication extends \Symfony\Component\Console\Application {
     $class = static::class;
 
     Cv::plugins()->init();
-    $application = Cv::filter("${name}.app.boot", [
-      'app' => new $class($name, static::version() ?? 'UNKNOWN'),
-    ])['app'];
-
-    $input = new ArgvInput($argv);
-    $output = new ConsoleOutput();
+    $appEvent = ['app' => new $class($name, static::version() ?? 'UNKNOWN')];
+    $appEvent = Cv::filter('cv.app.boot', $appEvent);
+    $application = $appEvent['app'];
 
     $application->setAutoExit(FALSE);
     ErrorHandler::pushHandler();
+
     try {
+      $argv = AliasFilter::filter($argv);
+      $input = new CvArgvInput($argv);
+      $output = new ConsoleOutput();
+
       $result = $application->run($input, $output);
     }
     finally {
@@ -78,7 +81,27 @@ class BaseApplication extends \Symfony\Component\Console\Application {
         throw new \RuntimeException("Failed to use directory specified, $workingDir as working directory.");
       }
     }
+
     Cv::filter($this->getName() . '.app.run', []);
+
+    if ($input->hasParameterOption('--site-alias')) {
+      $aliasEvent = Cv::filter($this->getName() . ".app.site-alias", [
+        'alias' => $input->getParameterOption('--site-alias'),
+        'app' => $this,
+        'input' => $input,
+        'output' => $output,
+        'argv' => $input->getOriginalArgv(),
+        'transport' => NULL,
+        'exec' => function() use (&$aliasEvent) {
+          return parent::doRun($aliasEvent['input'], $aliasEvent['output']);
+        },
+      ]);
+      if (empty($aliasEvent['transport'])) {
+        throw new \RuntimeException("Unknown site alias: " . $aliasEvent['alias']);
+      }
+      return call_user_func($aliasEvent['transport'], $aliasEvent);
+    }
+
     return parent::doRun($input, $output);
   }
 
