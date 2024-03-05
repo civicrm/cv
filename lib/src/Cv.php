@@ -51,12 +51,15 @@ class Cv {
    * Filter a set of data through an event.
    *
    * @param string $eventName
+   *   Ex: "cv.app.run"
+   *   Note: This will dispatch listeners for both "cv.app.run" and "*.app.run".
    * @param array $data
    *   Open-ended set of data.
+   *
    * @return array
    *   Filtered $data
    */
-  public static function filter(string $eventName, array $data) {
+  public static function filter($eventName, array $data) {
     $event = new CvEvent($data);
     self::dispatcher()->dispatch($event, $eventName);
     return $event->getArguments();
