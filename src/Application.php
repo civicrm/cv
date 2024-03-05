@@ -2,8 +2,10 @@
 namespace Civi\Cv;
 
 use LesserEvil\ShellVerbosityIsEvil;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -39,12 +41,15 @@ class Application extends \Symfony\Component\Console\Application {
   /**
    * Primary entry point for execution of the standalone command.
    */
-  public static function main($binDir) {
+  public static function main($binDir, array $argv) {
     $application = new Application('cv', static::version() ?? 'UNKNOWN');
+
+    $input = new ArgvInput($argv);
+    $output = new ConsoleOutput();
 
     $application->setAutoExit(FALSE);
     ErrorHandler::pushHandler();
-    $result = $application->run();
+    $result = $application->run($input, $output);
     ErrorHandler::popHandler();
     exit($result);
   }
