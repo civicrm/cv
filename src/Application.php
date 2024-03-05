@@ -42,7 +42,10 @@ class Application extends \Symfony\Component\Console\Application {
    * Primary entry point for execution of the standalone command.
    */
   public static function main($binDir, array $argv) {
-    $application = new Application('cv', static::version() ?? 'UNKNOWN');
+    Cv::plugins()->init();
+    $application = Cv::filter('cv.app.boot', [
+      'app' => new Application('cv', static::version() ?? 'UNKNOWN'),
+    ])['app'];
 
     $input = new ArgvInput($argv);
     $output = new ConsoleOutput();
@@ -91,6 +94,7 @@ class Application extends \Symfony\Component\Console\Application {
         throw new \RuntimeException("Failed to use directory specified, $workingDir as working directory.");
       }
     }
+    Cv::filter('cv.app.run', []);
     return parent::doRun($input, $output);
   }
 
@@ -141,6 +145,7 @@ class Application extends \Symfony\Component\Console\Application {
       $commands[] = new \Civi\Cv\Command\CoreUninstallCommand();
       $commands[] = new \Stecman\Component\Symfony\Console\BashCompletion\CompletionCommand();
     }
+    $commands = Cv::filter('cv.app.commands', ['commands' => $commands])['commands'];
     return $commands;
   }
 
