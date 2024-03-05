@@ -1,15 +1,7 @@
 <?php
 namespace Civi\Cv;
 
-use LesserEvil\ShellVerbosityIsEvil;
-use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-
-class Application extends \Symfony\Component\Console\Application {
+class Application extends BaseApplication {
 
   protected $deprecatedAliases = [
     'debug:container' => 'service',
@@ -36,66 +28,6 @@ class Application extends \Symfony\Component\Console\Application {
       }
     }
     return NULL;
-  }
-
-  /**
-   * Primary entry point for execution of the standalone command.
-   */
-  public static function main($binDir, array $argv) {
-    Cv::plugins()->init();
-    $application = Cv::filter('cv.app.boot', [
-      'app' => new Application('cv', static::version() ?? 'UNKNOWN'),
-    ])['app'];
-
-    $input = new ArgvInput($argv);
-    $output = new ConsoleOutput();
-
-    $application->setAutoExit(FALSE);
-    ErrorHandler::pushHandler();
-    $result = $application->run($input, $output);
-    ErrorHandler::popHandler();
-    exit($result);
-  }
-
-  public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN') {
-    parent::__construct($name, $version);
-    $this->setCatchExceptions(TRUE);
-    $this->addCommands($this->createCommands());
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getDefaultInputDefinition() {
-    $definition = parent::getDefaultInputDefinition();
-    $definition->addOption(new InputOption('cwd', NULL, InputOption::VALUE_REQUIRED, 'If specified, use the given directory as working directory.'));
-    return $definition;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function doRun(InputInterface $input, OutputInterface $output) {
-    ErrorHandler::setRenderer(function($e) use ($output) {
-      if ($output instanceof ConsoleOutputInterface) {
-        $this->renderThrowable($e, $output->getErrorOutput());
-      }
-      else {
-        $this->renderThrowable($e, $output);
-      }
-    });
-
-    $workingDir = $input->getParameterOption(array('--cwd'));
-    if (FALSE !== $workingDir && '' !== $workingDir) {
-      if (!is_dir($workingDir)) {
-        throw new \RuntimeException("Invalid working directory specified, $workingDir does not exist.");
-      }
-      if (!chdir($workingDir)) {
-        throw new \RuntimeException("Failed to use directory specified, $workingDir as working directory.");
-      }
-    }
-    Cv::filter('cv.app.run', []);
-    return parent::doRun($input, $output);
   }
 
   /**
@@ -145,14 +77,7 @@ class Application extends \Symfony\Component\Console\Application {
       $commands[] = new \Civi\Cv\Command\CoreUninstallCommand();
       $commands[] = new \Stecman\Component\Symfony\Console\BashCompletion\CompletionCommand();
     }
-    $commands = Cv::filter('cv.app.commands', ['commands' => $commands])['commands'];
     return $commands;
-  }
-
-  protected function configureIO(InputInterface $input, OutputInterface $output) {
-    ShellVerbosityIsEvil::doWithoutEvil(function() use ($input, $output) {
-      parent::configureIO($input, $output);
-    });
   }
 
   public function find($name) {
