@@ -6,31 +6,49 @@ class CvDispatcher {
 
   protected $listeners = [];
 
-  public function dispatch($event, string $eventName = NULL) {
-    if (!isset($this->listeners[$eventName])) {
-      return $event;
+  /**
+   * @param object $event
+   * @param string|null $eventName
+   * @return object
+   */
+  public function dispatch($event, $eventName = NULL) {
+    $activeListeners = [];
+
+    if ($eventName === NULL) {
+      $eventName = get_class($event);
+    }
+    $eventNames = [$eventName, preg_replace(';^\w+\.;', '*.', $eventName)];
+    foreach ($eventNames as $name) {
+      if (isset($this->listeners[$name])) {
+        $activeListeners = array_merge($activeListeners, $this->listeners[$name]);
+      }
     }
 
-    ksort($this->listeners[$eventName], SORT_NUMERIC);
-    foreach ($this->listeners[$eventName] as $listeners) {
-      foreach ($listeners as $listener) {
-        $listener($event);
+    usort($activeListeners, function ($a, $b) {
+      if ($a['priority'] !== $b['priority']) {
+        return $a['priority'] - $b['priority'];
       }
+      else {
+        return $a['natPriority'] - $b['natPriority'];
+      }
+    });
+    foreach ($activeListeners as $listener) {
+      call_user_func($listener['callback'], $event);
     }
 
     return $event;
   }
 
   public function addListener(string $eventName, $callback, int $priority = 0): void {
+    static $natPriority = 0;
+    $natPriority++;
     $id = $this->getCallbackId($callback);
-    $this->listeners[$eventName][$priority][$id] = $callback;
+    $this->listeners[$eventName][$id] = ['callback' => $callback, 'priority' => $priority, 'natPriority' => $natPriority];
   }
 
   public function removeListener(string $eventName, $callback) {
     $id = $this->getCallbackId($callback);
-    foreach ($this->listeners[$eventName] as &$listeners) {
-      unset($listeners[$id]);
-    }
+    unset($this->listeners[$eventName][$id]);
   }
 
   /**
