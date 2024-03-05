@@ -46,7 +46,19 @@ This sequencing meaning that some early events (e.g.  `cv.app.boot` or `cv.confi
 
 ## Events
 
-* `cv.app.boot` (*global-only*): Fires immediately when the application starts
-* `cv.app.run` (*global-only*): Fires when the application begins executing a command
-* `cv.app.commands` (*global-only*): Fires when the application builds a list of available commands
+* `cv.app.boot`: Fires immediately when the application starts
+   * __Argument__: `$e['app']`: Reference to the `Application` object
+* `cv.app.commands`: Fires when the application builds a list of available commands
    * __Argument__: `$e['commands`]`: alterable list of commands
+* `cv.app.run`: Fires when the application begins executing a command
+   * __Argument__: `$e['app']`: Reference to the `Application` object
+* `cv.app.site-alias`: Fires if the command is called with an alias (eg `cv @mysite ext:list`)
+   * __Argument__: `$e['alias']`: The name of the alias
+   * __Argument__: `$e['app']`: Reference to the `Application` object
+   * __Argument__: `$e['input']`: Reference to the `InputInterface`
+   * __Argument__: `$e['output']`: Reference to the `OutputInterface`
+   * __Argument__: `$e['argv']`: Raw/original arguments passed to the current command
+   * __Argument__: `$e['transport']`: Alternable callback (output). Fill in a value to specify how to forward the command to the referenced site.
+   * __Argument__: `$e['exec']`: Non-alterable callback (input). Use this if you need to immediately call the action within the current process. 
+
+(Note: When subscribing to an event like `cv.app.site-alias`, you may alternatively subscribe to the wildcard `*.app.site-alias`. In the future, this should allow you hook into adjacent commands like civix and coworker.)
