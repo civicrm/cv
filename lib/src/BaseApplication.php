@@ -16,6 +16,8 @@ class BaseApplication extends \Symfony\Component\Console\Application {
    * Primary entry point for execution of the standalone command.
    */
   public static function main(string $name, ?string $binDir, array $argv) {
+    ErrorHandler::pushHandler();
+
     $class = static::class;
 
     Cv::plugins()->init();
@@ -24,18 +26,16 @@ class BaseApplication extends \Symfony\Component\Console\Application {
     $application = $appEvent['app'];
 
     $application->setAutoExit(FALSE);
-    ErrorHandler::pushHandler();
 
-    try {
-      $argv = AliasFilter::filter($argv);
-      $input = new CvArgvInput($argv);
-      $output = new ConsoleOutput();
+    $argv = AliasFilter::filter($argv);
+    $input = new CvArgvInput($argv);
+    $output = new ConsoleOutput();
+    $result = $application->run($input, $output);
 
-      $result = $application->run($input, $output);
-    }
-    finally {
-      ErrorHandler::popHandler();
-    }
+    ## NOTE: We do *not* use try/finally here. Doing so seems to counterintuitively
+    ## muck with the exit code in some cases (eg `testPhpEval_ExitCodeError()`).
+    ErrorHandler::popHandler();
+
     exit($result);
   }
 
