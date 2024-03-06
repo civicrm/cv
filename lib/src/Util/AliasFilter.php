@@ -2,31 +2,35 @@
 
 namespace Civi\Cv\Util;
 
+use Symfony\Component\Console\Input\ArgvInput;
+
 class AliasFilter {
 
   /**
    * Find an option like `cv @mysite ext:list`. Convert the `@mysite`
    * notation to `--site-alias=mysite`.
    *
-   * @param array $input
+   * @param array $argv
    * @return array
    */
-  public static function filter(array $input): array {
-    $todo = $input;
-    $result = [];
-    $result[] = array_shift($todo);
-    while (count($todo) > 0) {
-      $value = array_shift($todo);
-      if ($value[0] === '@') {
-        $result[] = '--site-alias=' . substr($value, 1);
-        $result = array_merge($result, $todo);
-        $todo = [];
-      }
-      else {
-        $result[] = $value;
-      }
+  public static function filter(array $argv): array {
+    if (!preg_grep('/^@/', $argv)) {
+      return $argv;
     }
-    return $result;
+
+    $input = new ArgvInput($argv);
+    $firstArg = $input->getFirstArgument();
+    if ($firstArg[0] === '@') {
+      return static::replace($argv, $firstArg, '--site-alias=' . substr($firstArg, 1));
+    }
+
+    return $argv;
+  }
+
+  private static function replace(array $original, $old, $new) {
+    $pos = array_search($old, $original, TRUE);
+    $original[$pos] = $new;
+    return $original;
   }
 
 }
