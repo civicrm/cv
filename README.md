@@ -47,13 +47,13 @@ There are several more options for downloading `cv`. See also:
 * [Download URLs for alternate versions](doc/download.md#urls)
 * [Comparison of install options](doc/download.md#comparison)
 * Install `cv` as a system-wide/standalone tool
-    * [Install `cv.phar` as system-wide tool (Linux/BSD/macOS)](doc/download.md#phar-unix)
-    * [Install `cv.git` as system-wide tool (Linux/BSD/macOS)](doc/download.md#src-unix)
-    * [Install `cv.git` as system-wide tool (Windows)](doc/download.md#src-win)
+    * [Install `cv.phar` (binary) as system-wide tool (Linux/BSD/macOS)](doc/download.md#phar-unix)
+    * [Install `cv.git` (source) as standalone project (Linux/BSD/macOS)](doc/download.md#src-unix)
+    * [Install `cv.git` (source) as standalone project (Windows)](doc/download.md#src-win)
 * Install `cv` as a tool within another project
-    * [Install `cv.phar` as project tool (composer)](doc/download.md#phar-composer)
-    * [Install `cv.phar` as project tool (phive)](doc/download.md#phar-phive)
-    * [Install `cv.git` as project tool (composer)](doc/download.md#src-composer)
+    * [Install `cv.phar` (binary) as project tool (composer)](doc/download.md#phar-composer)
+    * [Install `cv.phar` (binary) as project tool (phive)](doc/download.md#phar-phive)
+    * [Install `cv.git` (source) as project tool (composer)](doc/download.md#src-composer)
 
 Documentation
 =============
