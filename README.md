@@ -26,7 +26,7 @@ Here are three quick ways to download it:
 
     (*Learn more: [Install `cv.phar` as system-wide tool (Linux/BSD/macOS)](doc/download.md#phar-unix)*)
 
-* Add `cv` and other CiviCRM tools to a composer project (Drupal 9/10)
+* Or... add `cv` and other CiviCRM tools to a composer project (Drupal 9/10/11)
 
     ```bash
     composer require civicrm/cli-tools
@@ -34,7 +34,7 @@ Here are three quick ways to download it:
 
     (*Learn more: [Install `cv.phar` as project tool (composer)](doc/download.md#phar-composer)*)
 
-* Use [phar.io's `phive` installer](https://phar.io/) to download, validate, and cache the `cv.phar` file.
+* Or... use [phar.io's `phive` installer](https://phar.io/) to download, validate, and cache the `cv.phar` file.
 
     ```bash
     phive install civicrm/cv
@@ -46,12 +46,14 @@ There are several more options for downloading `cv`. See also:
 
 * [Download URLs for alternate versions](doc/download.md#urls)
 * [Comparison of install options](doc/download.md#comparison)
-* [Install `cv.phar` as system-wide tool (Linux/BSD/macOS)](doc/download.md#phar-unix)
-* [Install `cv.phar` as project tool (composer)](doc/download.md#phar-composer)
-* [Install `cv.phar` as project tool (phive)](doc/download.md#phar-phive)
-* [Install `cv.git` as system-wide tool (Linux/BSD/macOS)](doc/download.md#src-unix)
-* [Install `cv.git` as system-wide tool (Windows)](doc/download.md#src-win)
-* [Install `cv.git` as project tool (composer)](doc/download.md#src-composer)
+* Install `cv` as a system-wide/standalone tool
+    * [Install `cv.phar` as system-wide tool (Linux/BSD/macOS)](doc/download.md#phar-unix)
+    * [Install `cv.git` as system-wide tool (Linux/BSD/macOS)](doc/download.md#src-unix)
+    * [Install `cv.git` as system-wide tool (Windows)](doc/download.md#src-win)
+* Install `cv` as a tool within another project
+    * [Install `cv.phar` as project tool (composer)](doc/download.md#phar-composer)
+    * [Install `cv.phar` as project tool (phive)](doc/download.md#phar-phive)
+    * [Install `cv.git` as project tool (composer)](doc/download.md#src-composer)
 
 Documentation
 =============

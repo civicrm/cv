@@ -2,17 +2,19 @@
 
 <!-- The instructions for `cv` and `civix` are nearly identical. Consider updating them in tandem. -->
 
-`cv` is available as an executable binary (`cv.phar`) and as source-code (`cv.git`).  It may be deployed as a system-wide tool, or it may be deployed as part of an
+`cv` is available as an executable binary (`cv.phar`) and as source-code (`cv.git`).  It may be deployed as a standalone (system-wide) tool, or it may be deployed as part of an
 existing web-project. Below, we give a general download summary and several example procedures.
 
 * [Download URLs for alternate versions](#urls)
 * [Comparison of install options](#comparison)
-* [Install `cv.phar` as system-wide tool (Linux/BSD/macOS)](#phar-unix)
-* [Install `cv.phar` as project tool (composer)](#phar-composer)
-* [Install `cv.phar` as project tool (phive)](#phar-phive)
-* [Install `cv.git` as system-wide tool (Linux/BSD/macOS)](#src-unix)
-* [Install `cv.git` as system-wide tool (Windows)](#src-win)
-* [Install `cv.git` as project tool (composer)](#src-composer)
+* Install `cv` as a system-wide/standalone tool
+    * [Install `cv.phar` (binary) as system-wide tool (Linux/BSD/macOS)](#phar-unix)
+    * [Install `cv.git` (source) as standalone project (Linux/BSD/macOS)](#src-unix)
+    * [Install `cv.git` (source) as standalone project (Windows)](#src-win)
+* Install `cv` as a tool within another project
+    * [Install `cv.phar` (binary) as project tool (composer)](#phar-composer)
+    * [Install `cv.phar` (binary) as project tool (phive)](#phar-phive)
+    * [Install `cv.git` (source) as project tool (composer)](#src-composer)
 
 <a name="urls"></a>
 ## Download URLs for alternate versions
@@ -83,27 +85,20 @@ That is the quickest procedure, but it does not defend against supply-chain atta
 <a name="phar-composer"></a>
 ## Install `cv.phar` as project tool (composer)
 
-If you are developing a web-project with [`composer`](https://getcomposer.org) (e.g.  Drupal 8/9/10) and wish to add `cv.phar` to your project,
-then use the [civicrm/cli-tools](https://github.com/totten/civicrm-cli-tools).
+If you are developing a web-project with [`composer`](https://getcomposer.org) (e.g.  Drupal 8/9/10/11) and wish to add `cv.phar` to your project,
+then use [civicrm/cli-tools](https://github.com/totten/civicrm-cli-tools).
 
 ```bash
 composer require civicrm/cli-tools
 ```
 
-This adds CLI tools in [composer's `vendor/bin` folder](https://getcomposer.org/doc/articles/vendor-binaries.md).
+The CLI tools will be placed in [composer's `vendor/bin` folder](https://getcomposer.org/doc/articles/vendor-binaries.md).
 
-You can call commands through `composer exec` or `vendor/bin`:
+To enable easy/fluid CLI usage, add this folder to your `PATH`:
 
 ```bash
-## Example 1: Call cv through `composer exec`
-composer exec cv api4 Contact.get +l 1
-
-## Example 2: Call cv through `./vendor/bin`
-./vendor/bin/cv api4 Contact.get +l 1
-
-## Example 3: Add cv your PATH
 PATH="/path/to/vendor/bin:$PATH"
-cv api4 Contact.get +l 1
+cv --version
 ```
 
 (*Alternatively, if you prefer to pick a specific version of each tool, then use [composer-downloads-plugin](https://github.com/civicrm/composer-downloads-plugin)
@@ -131,7 +126,7 @@ For example, you might download to `$HOME/src/cv`:
 git clone https://github.com/totten/cv $HOME/src/cv
 cd $HOME/src/cv
 composer install
-./bin/cv --help
+./bin/cv --version
 ```
 
 You may then add `$HOME/src/cv/bin` to your `PATH`. The command will be available in other folders:
@@ -139,7 +134,7 @@ You may then add `$HOME/src/cv/bin` to your `PATH`. The command will be availabl
 ```bash
 export PATH="$HOME/src/cv/bin:$PATH"
 cd /var/www/example.com/
-cv api3 System.get | less
+cv --version
 ```
 
 __TIP__: If your web-site uses Symfony components (as in D8/9/10), then you may see dependency-conflicts. You can resolve these by [building a custom PHAR](develop.md).
@@ -196,5 +191,7 @@ composer require civicrm/cv
 
 By default, this will create the command `./vendor/bin/cv`.
 
-__TIP__: If your web-site uses Symfony components (as in D8/9/10/11), then `composer` will attempt to reconcile the versions.  However, this is a
+__Warning__: If your web-project uses Symfony components (as in D8/9/10/11), then `composer` will attempt to reconcile the versions.  However, this is a
 moving target, and the results may differ from the standard binaries.  It may occasionally require overrides or patches for compatibility.
+
+__Tip__: You may have better experience with [installing `cv.phar` (binary) via composer)(#phar-composer).
