@@ -404,6 +404,7 @@ class CmsBootstrap {
     /* @todo clarify: assumes $cmsPath is to the project root, not the webroot */
     $candidates = [
       $cmsPath . '/vendor/autoload.php',
+      $cmsPath . '/core/vendor/autoload.php',
       $cmsPath . '/web/core/vendor/autoload.php',
       dirname($cmsPath) . '/vendor/autoload.php',
     ];
@@ -471,6 +472,7 @@ class CmsBootstrap {
         'core/modules/layout/layout.module',
       ),
       'Standalone' => array(
+        'civicrm.standalone.php',
         'civicrm.config.php.standalone',
         // or?
         // 'data/civicrm.settings.php',

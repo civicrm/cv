@@ -374,8 +374,16 @@ class Bootstrap {
         break;
 
       case 'standalone':
-        $settings = $cmsRoot . '/data/civicrm.settings.php';
-        // $result =  $cmsRoot . 'components/com_civicrm/civicrm.settings.php';
+        $settings = $this->findFirstFile(
+          [
+            $cmsRoot,
+            implode(DIRECTORY_SEPARATOR, [$cmsRoot, 'data'])
+          ],
+          [
+           'civicrm.standalone.php',
+           'civicrm.settings.php',
+          ]
+        );
         break;
     }
     return array($cmsType, $cmsRoot, $settings);
@@ -447,6 +455,7 @@ class Bootstrap {
         'core/modules/layout/layout.module',
       ),
       'standalone' => array(
+        'civicrm.standalone.php',
         'civicrm.config.php.standalone',
       ),
     );
