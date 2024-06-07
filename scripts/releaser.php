@@ -32,7 +32,7 @@ $c['cvlibUpstream'] = fn() => 'git@github.com:civicrm/cv-lib.git';
 $c['cvlibWorkDir'] = fn($buildDir) => $buildDir . '/cv-lib';
 
 // Some overrides for local dev/experimentation.
-// $c['ghRepo'] = 'totten/cv';
+// $c['ghRepo'] = 'civicrm/cv';
 // $c['cvlibUpstream'] = fn() => 'file:///tmp/cv-lib-upstream-bare';
 
 ###############################################################################

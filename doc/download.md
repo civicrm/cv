@@ -122,7 +122,7 @@ To download the source tree and all dependencies, use [`git`](https://git-scm.co
 For example, you might download to `$HOME/src/cv`:
 
 ```bash
-git clone https://github.com/totten/cv $HOME/src/cv
+git clone https://github.com/civicrm/cv $HOME/src/cv
 cd $HOME/src/cv
 composer install
 ./bin/cv --version
@@ -159,7 +159,7 @@ From the start menu choose All Programs -> Git -> Git Bash.
 In the window that appears, type:
   cd "/c/users/<your name>"
   (note the forward slashes)
-git clone git://github.com/totten/cv.git
+git clone git://github.com/civicrm/cv.git
 exit
 
 # Download dependencies
