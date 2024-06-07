@@ -13,8 +13,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 assertThat(PHP_SAPI === 'cli', "Releaser may only run via CLI");
 $c = clippy()->register(plugins());
 
-die("TODO: This will be the first run with automatic call to clean. So pay attention to that...");
-
 ###############################################################################
 ## Configuration
 
