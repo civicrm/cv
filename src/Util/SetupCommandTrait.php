@@ -67,6 +67,7 @@ trait SetupCommandTrait {
       implode(DIRECTORY_SEPARATOR, [dirname($b->getBootedCmsPath()), 'vendor', 'civicrm', 'civicrm-core']),
     ];
     if ($b->getBootedCmsType() === 'Standalone') {
+      $possibleSrcPaths[] = implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'core']);
       $possibleSrcPaths[] = implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'web', 'core']);
       $possibleSrcPaths[] = dirname($b->getBootedCmsPath());
     }
