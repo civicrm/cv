@@ -7,13 +7,14 @@ Cv plugins are PHP files which register event listeners.
 ```php
 // FILE: /etc/cv/plugin/hello-command.php
 use Civi\Cv\Cv;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+use CvDeps\Symfony\Component\Console\Input\InputInterface;
+use CvDeps\Symfony\Component\Console\Output\OutputInterface;
+use CvDeps\Symfony\Component\Console\Command\Command;
 
 if (empty($CV_PLUGIN['protocol']) || $CV_PLUGIN['protocol'] > 1) die("Expect CV_PLUGIN API v1");
 
 Cv::dispatcher()->addListener('cv.app.commands', function($e) {
-  $e['commands'][] = new class extends \Symfony\Component\Console\Command\Command {
+  $e['commands'][] = new class extends Command {
     protected function configure() {
       $this->setName('hello')->setDescription('Say a greeting');
     }
@@ -43,6 +44,18 @@ After loading the global plugins, `cv` reads the the `cv.yml` and then loads any
 
 This sequencing meaning that some early events (e.g.  `cv.app.boot` or `cv.config.find`) are only available to *global plugins*.
 -->
+
+## Namespacing
+
+The plugin itself may live in a global namespace or its own namespace.
+
+When a plugin refers to another class, it will be affected by `cv`'s namespace-prefixing:
+
+* Classes provided by CiviCRM and the user-framework (eg `Civi\*`, `CRM_*`, `Drupal\*`) are referenced by their original names.
+* Classes provided by `cv`'s internal dependencies (eg `Symfony\Component\Console\*`)  should be accessed with the prefix `CvDeps\*` (eg `CvDeps\Symfony\Component\Console\*`).
+
+(Technically, `cv`'s internal dependencies may have different concrete names depending on how `cv` is installed. The prefix `CvDeps\` is a logical alias that will work in
+more environments.)
 
 ## Events
 
