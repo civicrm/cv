@@ -26,4 +26,5 @@ foreach ($autoloaders as $autoloader) {
 if (!$found) {
   die("Failed to find autoloader");
 }
+\Civi\Cv\ClassAliases::register();
 \Civi\Cv\Application::main('cv', __DIR__, $argv);
