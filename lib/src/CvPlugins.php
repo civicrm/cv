@@ -43,7 +43,7 @@ class CvPlugins {
             $this->plugins[$pluginName] = $file;
           }
           else {
-            fprintf(STDERR, "WARNING: Plugin %s has multiple definitions (%s, %s)\n", $file, $this->plugins[$pluginName]);
+            fprintf(STDERR, "WARNING: Plugin %s has multiple definitions (%s, %s)\n", $pluginName, $file, $this->plugins[$pluginName]);
           }
         }
       }
