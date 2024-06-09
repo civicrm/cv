@@ -4,6 +4,7 @@ namespace Civi\Cv;
 use Civi\Cv\Util\AliasFilter;
 use Civi\Cv\Util\CvArgvInput;
 use LesserEvil\ShellVerbosityIsEvil;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -57,6 +58,19 @@ class BaseApplication extends \Symfony\Component\Console\Application {
     $definition->addOption(new InputOption('cwd', NULL, InputOption::VALUE_REQUIRED, 'If specified, use the given directory as working directory.'));
     $definition->addOption(new InputOption('site-alias', NULL, InputOption::VALUE_REQUIRED, 'Load site connection data based on its alias'));
     return $definition;
+  }
+
+  public function run(?InputInterface $input = NULL, ?OutputInterface $output = NULL) {
+    $input = $input ?: new CvArgvInput();
+    $output = $output ?: new ConsoleOutput();
+
+    try {
+      Cv::ioStack()->push($input, $output);
+      return parent::run($input, $output);
+    }
+    finally {
+      Cv::ioStack()->pop();
+    }
   }
 
   /**
