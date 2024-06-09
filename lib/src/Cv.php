@@ -2,6 +2,8 @@
 
 namespace Civi\Cv;
 
+use Civi\Cv\Util\IOStack;
+
 class Cv {
 
   protected static $instances = [];
@@ -63,6 +65,39 @@ class Cv {
     $event = new CvEvent($data);
     self::dispatcher()->dispatch($event, $eventName);
     return $event->getArguments();
+  }
+
+  /**
+   * Get a list of input/output objects for pending commands.
+   *
+   * @return \Civi\Cv\Util\IOStack
+   */
+  public static function ioStack(): IOStack {
+    if (!isset(static::$instances[__FUNCTION__])) {
+      static::$instances[__FUNCTION__] = new IOStack();
+    }
+    return static::$instances[__FUNCTION__];
+  }
+
+  /**
+   * @return \CvDeps\Symfony\Component\Console\Input\InputInterface|\Symfony\Component\Console\Input\InputInterface
+   */
+  public static function input() {
+    return static::ioStack()->current('input');
+  }
+
+  /**
+   * @return \CvDeps\Symfony\Component\Console\Output\OutputInterface|\Symfony\Component\Console\Output\OutputInterface
+   */
+  public static function output() {
+    return static::ioStack()->current('output');
+  }
+
+  /**
+   * @return \CvDeps\Symfony\Component\Console\Style\StyleInterface|\Symfony\Component\Console\Style\StyleInterface
+   */
+  public static function io() {
+    return static::ioStack()->current('io');
   }
 
   /**
