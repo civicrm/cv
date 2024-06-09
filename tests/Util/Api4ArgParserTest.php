@@ -147,7 +147,7 @@ class Api4ArgParserTest extends \PHPUnit\Framework\TestCase {
       $this->fail('Expected a runtime exception');
     }
     catch (\RuntimeException $e) {
-      $this->assertRegExp(';(Unrecognized option|Failed to parse);', $e->getMessage());
+      $this->assertMatchesRegularExpression(';(Unrecognized option|Failed to parse);', $e->getMessage());
     }
   }
 

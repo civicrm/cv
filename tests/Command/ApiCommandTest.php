@@ -35,7 +35,7 @@ class ApiCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function testCsvMisuse() {
     $p = Process::runOk($this->cv("api OptionValue.getsingle rowCount=1 --out=csv"));
-    $this->assertRegExp('/The output format "csv" only works with tabular data. Try using a "get" API. Forcing format to "json-pretty"./', $p->getErrorOutput());
+    $this->assertMatchesRegularExpression('/The output format "csv" only works with tabular data. Try using a "get" API. Forcing format to "json-pretty"./', $p->getErrorOutput());
     $data = json_decode($p->getOutput(), 1);
     $this->assertTrue(!empty($data['option_group_id']));
   }

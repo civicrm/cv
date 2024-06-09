@@ -15,9 +15,9 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
     $fullUrl = $this->cvJsonOk("url $url");
     $this->assertNotEmpty(parse_url($fullUrl, PHP_URL_HOST));
     $this->assertNotEmpty(parse_url($fullUrl, PHP_URL_SCHEME));
-    $this->assertRegExp(':angularDebug=1:', $fullUrl);
-    $this->assertRegExp(':foo=bar:', $fullUrl);
-    $this->assertRegExp(':/mailing/new:', $fullUrl);
+    $this->assertMatchesRegularExpression(':angularDebug=1:', $fullUrl);
+    $this->assertMatchesRegularExpression(':foo=bar:', $fullUrl);
+    $this->assertMatchesRegularExpression(':/mailing/new:', $fullUrl);
   }
 
   public function testMultipleRoute() {
@@ -27,39 +27,39 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
       $fullUrl = $urlTable[$i]['value'];
       $this->assertNotEmpty(parse_url($fullUrl, PHP_URL_HOST));
       $this->assertNotEmpty(parse_url($fullUrl, PHP_URL_SCHEME));
-      $this->assertRegExp(':angularDebug=1:', $fullUrl);
-      $this->assertRegExp(':foo=bar:', $fullUrl);
-      $this->assertRegExp(':/mailing/new:', $fullUrl);
+      $this->assertMatchesRegularExpression(':angularDebug=1:', $fullUrl);
+      $this->assertMatchesRegularExpression(':foo=bar:', $fullUrl);
+      $this->assertMatchesRegularExpression(':/mailing/new:', $fullUrl);
     }
   }
 
   public function testOutput() {
     $output = $this->cvFail('url -x. -c extensionsURL --out=json');
-    $this->assertRegExp(';specify --tabular;', $output);
+    $this->assertMatchesRegularExpression(';specify --tabular;', $output);
 
     $output = $this->cvJsonOk('url -x. -c extensionsURL --out=json --tabular');
     $this->assertEquals(2, count($output));
-    $this->assertRegExp(';https?://.*;', $output[0]['value']);
-    $this->assertRegExp(';https?://.*;', $output[1]['value']);
+    $this->assertMatchesRegularExpression(';https?://.*;', $output[0]['value']);
+    $this->assertMatchesRegularExpression(';https?://.*;', $output[1]['value']);
 
     $output = explode("\n", trim($this->cvOk('url -x. -c extensionsURL --out=list')));
     $this->assertEquals(2, count($output));
-    $this->assertRegExp(';https?://.*;', $output[0]);
-    $this->assertRegExp(';https?://.*;', $output[1]);
+    $this->assertMatchesRegularExpression(';https?://.*;', $output[0]);
+    $this->assertMatchesRegularExpression(';https?://.*;', $output[1]);
 
     $output = $this->cvJsonOk('url -x. --out=json');
-    $this->assertRegExp(';https?://.*;', $output);
+    $this->assertMatchesRegularExpression(';https?://.*;', $output);
   }
 
   public function testExtPaths() {
     $plain = rtrim($this->cvJsonOk("url -x civicrm"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm($|/core$);', $plain);
+    $this->assertMatchesRegularExpression(';https?://.*/civicrm($|/core$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -x civicrm/"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm(/$|/core/$);', $plain);
+    $this->assertMatchesRegularExpression(';https?://.*/civicrm(/$|/core/$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -x civicrm/packages"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm(/|/core/)packages$;', $plain);
+    $this->assertMatchesRegularExpression(';https?://.*/civicrm(/|/core/)packages$;', $plain);
   }
 
   public function testDynamicExprPaths() {
@@ -69,16 +69,16 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
     }
 
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.root]'"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm($|/\w+$);', $plain);
+    $this->assertMatchesRegularExpression(';https?://.*/civicrm($|/\w+$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.root]/'"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm(/$|/\w+/$);', $plain);
+    $this->assertMatchesRegularExpression(';https?://.*/civicrm(/$|/\w+/$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.root]/packages'"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm(/|/core/)packages$;', $plain);
+    $this->assertMatchesRegularExpression(';https?://.*/civicrm(/|/core/)packages$;', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.packages]'"), "\n");
-    $this->assertRegExp(';https?://.*/civicrm/packages$;', $plain);
+    $this->assertMatchesRegularExpression(';https?://.*/civicrm/packages$;', $plain);
   }
 
   public function testConfigPaths() {
@@ -94,7 +94,7 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
     );
     foreach ($mandatorySettingNames as $settingName) {
       $plain = rtrim($this->cvOk("path -c $settingName"), "\n");
-      $this->assertRegExp(';^https?://.*;', $plain, "Check $settingName");
+      $this->assertMatchesRegularExpression(';^https?://.*;', $plain, "Check $settingName");
     }
 
     $optionalSettingNames = array(
@@ -102,7 +102,7 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
     );
     foreach ($optionalSettingNames as $settingName) {
       $plain = rtrim($this->cvOk("path -c $settingName"), "\n");
-      $this->assertRegExp(';^(|https?://.*);', $plain, "Check $settingName");
+      $this->assertMatchesRegularExpression(';^(|https?://.*);', $plain, "Check $settingName");
     }
   }
 

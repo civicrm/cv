@@ -29,7 +29,7 @@ class SettingLifecycleTest extends \Civi\Cv\CivilTestCase {
     $this->assertTableHasRow(['domain', 'dummy_scalar_2', '"More text"', 'explicit'], $vgetRegex);
 
     $this->cvOk('vdel dummy_scalar_1 dummy_scalar_2');
-    $this->assertNotRegExp('/dummy_scalar/', $this->cvOk('vget /dummy/'));
+    $this->assertDoesNotMatchRegularExpression('/dummy_scalar/', $this->cvOk('vget /dummy/'));
   }
 
   public function testList() {
@@ -52,7 +52,7 @@ class SettingLifecycleTest extends \Civi\Cv\CivilTestCase {
 
     Process::runOk($this->cv('vdel dummy_list'));
 
-    $this->assertNotRegExp('/dummy_list/', $this->cvOk('vget /dummy/'));
+    $this->assertDoesNotMatchRegularExpression('/dummy_list/', $this->cvOk('vget /dummy/'));
   }
 
   public function testObject() {
@@ -75,13 +75,13 @@ class SettingLifecycleTest extends \Civi\Cv\CivilTestCase {
     // We leave an empty object. For PHP-JSON, there's an ambiguity between `[]` and `{}`.
 
     Process::runOk($this->cv('vdel dummy_obj'));
-    $this->assertNotRegExp('/dummy_obj/', $this->cvOk('vget /dummy/'));
+    $this->assertDoesNotMatchRegularExpression('/dummy_obj/', $this->cvOk('vget /dummy/'));
   }
 
   protected function assertTableHasRow($expectRow, $actualTable) {
     $vr = '\s*\|\s*';
     $regex = '/' . $vr . implode($vr, $expectRow) . $vr . '/';
-    $this->assertRegExp($regex, $actualTable);
+    $this->assertMatchesRegularExpression($regex, $actualTable);
   }
 
 }

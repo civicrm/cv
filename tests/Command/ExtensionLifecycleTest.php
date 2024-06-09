@@ -126,7 +126,7 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
    */
   public function testUpgradeDb() {
     $p = Process::runOk($this->cv('ext:upgrade-db'));
-    $this->assertRegExp(';Applying database upgrades from extensions;', $p->getOutput());
+    $this->assertMatchesRegularExpression(';Applying database upgrades from extensions;', $p->getOutput());
   }
 
   /**
