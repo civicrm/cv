@@ -46,19 +46,19 @@ class ExtensionListCommandTest extends \Civi\Cv\CivilTestCase {
    */
   public function testGetRegex() {
     $p = Process::runOk($this->cv('ext:list'));
-    $this->assertRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
 
     // matches key
     $p = Process::runOk($this->cv('ext:list /org.civicrm/'));
-    $this->assertRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
 
     // matches name
     $p = Process::runOk($this->cv('ext:list /^cividiscount/'));
-    $this->assertRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
 
     // matches name
     $p = Process::runOk($this->cv('ext:list /^com\./'));
-    $this->assertNotRegexp('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
+    $this->assertDoesNotMatchRegularExpression('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
   }
 
   /**

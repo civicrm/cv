@@ -14,7 +14,7 @@ class PathCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function testNothing() {
     $p = Process::runFail($this->cv('path'));
-    $this->assertRegExp('/Must use -x, -c, or -d/', $p->getErrorOutput());
+    $this->assertMatchesRegularExpression('/Must use -x, -c, or -d/', $p->getErrorOutput());
   }
 
   public function testExtPaths() {

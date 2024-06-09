@@ -14,7 +14,7 @@ class FlushCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function testFlush() {
     $p = Process::runOk($this->cv("flush"));
-    $this->assertRegExp('/Flushing/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/Flushing/', $p->getOutput());
   }
 
 }

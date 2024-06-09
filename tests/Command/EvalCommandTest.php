@@ -16,14 +16,14 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
   public function testEv() {
     $helloPhp = escapeshellarg('printf("eval says version is %s\n", CRM_Utils_System::version());');
     $p = Process::runOk($this->cv("ev $helloPhp"));
-    $this->assertRegExp('/^eval says version is [0-9a-z\.]+\s*$/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/^eval says version is [0-9a-z\.]+\s*$/', $p->getOutput());
   }
 
   public function testPhpEval_ReturnObj_json() {
     $phpCode = escapeshellarg('return (object)["ab"=>"cd"];');
     $p = Process::runOk($this->cv("ev $phpCode --out=json"));
     $this->assertEquals(0, $p->getExitCode());
-    $this->assertRegExp(';"ab":\w*"cd\";', $p->getOutput());
+    $this->assertMatchesRegularExpression(';"ab":\w*"cd\";', $p->getOutput());
   }
 
   public function testPhpEval_ReturnObj_shell() {
@@ -36,14 +36,14 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
       $escaped = escapeshellarg($phpCode);
       $p = Process::runOk($this->cv("ev $escaped --out=shell"));
       $this->assertEquals(0, $p->getExitCode());
-      $this->assertRegExp(';ab=["\']cd;', $p->getOutput());
+      $this->assertMatchesRegularExpression(';ab=["\']cd;', $p->getOutput());
     }
   }
 
   public function testPhpEval() {
     $helloPhp = escapeshellarg('printf("eval says version is %s\n", CRM_Utils_System::version());');
     $p = Process::runOk($this->cv("ev $helloPhp"));
-    $this->assertRegExp('/^eval says version is [0-9a-z\.]+\s*$/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/^eval says version is [0-9a-z\.]+\s*$/', $p->getOutput());
   }
 
   public function testPhpEval_Exit0() {
@@ -64,20 +64,20 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
   public function testPhpEval_CvVar_Full() {
     $helloPhp = escapeshellarg('printf("my admin is %s\n", $GLOBALS["_CV"]["ADMIN_USER"]);');
     $p = Process::runOk($this->cv("ev --level=full $helloPhp"));
-    $this->assertRegExp('/^my admin is \w+\s*$/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/^my admin is \w+\s*$/', $p->getOutput());
   }
 
   public function testPhpEval_CvVar_CmsFull() {
     $helloPhp = escapeshellarg('printf("my admin is %s\n", $GLOBALS["_CV"]["ADMIN_USER"]);');
     $p = Process::runOk($this->cv("ev --level=cms-full $helloPhp"));
-    $this->assertRegExp('/^my admin is \w+\s*$/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/^my admin is \w+\s*$/', $p->getOutput());
   }
 
   public function testBoot() {
     $checkBoot = escapeshellarg('echo (function_exists("drupal_add_js") || function_exists("wp_redirect") || class_exists("JFactory") || class_exists("Drupal")) ? "found" : "not-found";');
 
     $p1 = Process::runOk($this->cv("ev $checkBoot"));
-    $this->assertRegExp('/^found$/', $p1->getOutput());
+    $this->assertMatchesRegularExpression('/^found$/', $p1->getOutput());
   }
 
   public function getLevels() {
@@ -98,17 +98,17 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $checkBoot = escapeshellarg('echo "Hello world";');
 
     $p1 = Process::runOk($this->cv("ev $checkBoot --level=$level"));
-    $this->assertRegExp('/^Hello world/', $p1->getOutput());
+    $this->assertMatchesRegularExpression('/^Hello world/', $p1->getOutput());
   }
 
   public function testTestMode() {
     $checkUf = escapeshellarg('return CIVICRM_UF;');
 
     $p1 = Process::runOk($this->cv("ev $checkUf"));
-    $this->assertRegExp('/(Drupal|Joomla|WordPress|Backdrop)/i', $p1->getOutput());
+    $this->assertMatchesRegularExpression('/(Drupal|Joomla|WordPress|Backdrop)/i', $p1->getOutput());
 
     $p1 = Process::runOk($this->cv("ev -t $checkUf"));
-    $this->assertRegExp('/UnitTests/i', $p1->getOutput());
+    $this->assertMatchesRegularExpression('/UnitTests/i', $p1->getOutput());
   }
 
   /**
@@ -120,7 +120,7 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $cwdOpt = "--cwd=" . escapeshellarg($this->getExampleDir());
     $helloPhp = escapeshellarg('printf("eval says version is %s\n", CRM_Utils_System::version());');
     $p = Process::runOk($this->cv("ev $cwdOpt $helloPhp"));
-    $this->assertRegExp('/^eval says version is [0-9a-z\.]+\s*$/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/^eval says version is [0-9a-z\.]+\s*$/', $p->getOutput());
   }
 
 }

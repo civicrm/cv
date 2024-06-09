@@ -24,7 +24,7 @@ class AngularHtmlShowCommandTest extends \Civi\Cv\CivilTestCase {
   public function testShow() {
 
     $p = Process::runOk($this->cv('ang:html:show crmUi/field.html'));
-    $this->assertRegexp(';div.*ng-transclude;', $p->getOutput());
+    $this->assertMatchesRegularExpression(';div.*ng-transclude;', $p->getOutput());
   }
 
   /**
@@ -32,7 +32,7 @@ class AngularHtmlShowCommandTest extends \Civi\Cv\CivilTestCase {
    */
   public function testShowRaw() {
     $p = Process::runOk($this->cv('ang:html:show --raw crmUi/field.html'));
-    $this->assertRegexp(';div.*ng-transclude;', $p->getOutput());
+    $this->assertMatchesRegularExpression(';div.*ng-transclude;', $p->getOutput());
   }
 
   /**

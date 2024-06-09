@@ -94,16 +94,16 @@ class CoreLifecycleTest extends \PHPUnit\Framework\TestCase {
 
     // We've installed CMS -- but not Civi. Expect an error.
     $output = $this->cvFail("ev 'return CRM_Utils_System::version();'");
-    $this->assertRegExp('/Failed to locate civicrm.settings.php/', $output);
+    $this->assertMatchesRegularExpression('/Failed to locate civicrm.settings.php/', $output);
 
     $output = Process::runDebug($this->cv('core:check-req --out=table'))->getOutput();
-    $this->assertRegExp('/Found.*civicrm-core/', $output);
-    $this->assertRegExp('/Found.*civicrm-setup/', $output);
-    $this->assertRegExp('/| *info *| *lang/', $output);
+    $this->assertMatchesRegularExpression('/Found.*civicrm-core/', $output);
+    $this->assertMatchesRegularExpression('/Found.*civicrm-setup/', $output);
+    $this->assertMatchesRegularExpression('/| *info *| *lang/', $output);
 
     $output = $this->cvOk($installCmd);
-    $this->assertRegExp('/Creating file.*civicrm.settings.php/', $output);
-    $this->assertRegExp('/Creating civicrm_\* database/', $output);
+    $this->assertMatchesRegularExpression('/Creating file.*civicrm.settings.php/', $output);
+    $this->assertMatchesRegularExpression('/Creating civicrm_\* database/', $output);
 
     if ($postInstallCmd) {
       Process::runOk(new \Symfony\Component\Process\Process($postInstallCmd));
@@ -111,24 +111,24 @@ class CoreLifecycleTest extends \PHPUnit\Framework\TestCase {
 
     // We've installed CMS+Civi. All should be well.
     $result = $this->cvJsonOk("ev 'return CRM_Utils_System::version();'");
-    $this->assertRegExp('/^[0-9]([0-9\.]|alpha|beta)+$/', $result);
+    $this->assertMatchesRegularExpression('/^[0-9]([0-9\.]|alpha|beta)+$/', $result);
     $this->assertTrue(version_compare($result, '4.6.0', '>='));
 
     // The upgrade command doesn't have much to do, but let's make sure it doesn't crash.
     $output = $this->cvOk("upgrade:db");
-    $this->assertRegExp('/Found CiviCRM database version ([0-9\.]|alpha|beta)+/', $output);
-    $this->assertRegExp('/Found CiviCRM code version ([0-9\.]|alpha|beta)+/', $output);
-    $this->assertRegExp('/\[latestVer\] => ([0-9\.]|alpha|beta)+/', $output);
-    $this->assertRegExp('/\[message\] => You are already/', $output);
-    $this->assertRegExp('/\[text\] => You are already/', $output);
+    $this->assertMatchesRegularExpression('/Found CiviCRM database version ([0-9\.]|alpha|beta)+/', $output);
+    $this->assertMatchesRegularExpression('/Found CiviCRM code version ([0-9\.]|alpha|beta)+/', $output);
+    $this->assertMatchesRegularExpression('/\[latestVer\] => ([0-9\.]|alpha|beta)+/', $output);
+    $this->assertMatchesRegularExpression('/\[message\] => You are already/', $output);
+    $this->assertMatchesRegularExpression('/\[text\] => You are already/', $output);
 
     $output = $this->cvOk('core:uninstall -f');
-    $this->assertRegExp('/Removing .*civicrm.settings.php/', $output);
-    $this->assertRegExp('/Removing civicrm_\*/', $output);
+    $this->assertMatchesRegularExpression('/Removing .*civicrm.settings.php/', $output);
+    $this->assertMatchesRegularExpression('/Removing civicrm_\*/', $output);
 
     // We've n o longer got Civi - expect an error.
     $output = $this->cvFail("ev 'return CRM_Utils_System::version();'");
-    $this->assertRegExp('/Failed to locate civicrm.settings.php/', $output);
+    $this->assertMatchesRegularExpression('/Failed to locate civicrm.settings.php/', $output);
   }
 
   /**

@@ -14,19 +14,19 @@ class AngularHtmlListCommandTest extends \Civi\Cv\CivilTestCase {
    */
   public function testGetRegex() {
     $p = Process::runOk($this->cv('ang:html:list'));
-    $this->assertRegexp(';crmUi/field.html;', $p->getOutput());
+    $this->assertMatchesRegularExpression(';crmUi/field.html;', $p->getOutput());
 
     // matches key
     $p = Process::runOk($this->cv('ang:html:list crmUi'));
-    $this->assertRegexp(';crmUi/field.html;', $p->getOutput());
+    $this->assertMatchesRegularExpression(';crmUi/field.html;', $p->getOutput());
 
     // matches name
     $p = Process::runOk($this->cv('ang:html:list ";field;"'));
-    $this->assertRegexp(';crmUi/field.html;', $p->getOutput());
+    $this->assertMatchesRegularExpression(';crmUi/field.html;', $p->getOutput());
 
     // matches name
     $p = Process::runOk($this->cv('ang:html:list crmAttachment'));
-    $this->assertNotRegexp(';crmUi/field.html;', $p->getOutput());
+    $this->assertDoesNotMatchRegularExpression(';crmUi/field.html;', $p->getOutput());
   }
 
   /**

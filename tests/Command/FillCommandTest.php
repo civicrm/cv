@@ -21,7 +21,7 @@ class FillCommandTest extends \Civi\Cv\CivilTestCase {
     $config = json_decode(file_get_contents($tmpConfigFile), 1);
     unlink($tmpConfigFile);
 
-    $this->assertRegExp('/Please edit.*' . preg_quote($tmpConfigFile, '/') . '/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/Please edit.*' . preg_quote($tmpConfigFile, '/') . '/', $p->getOutput());
     $this->assertNotEmpty($config);
     $this->assertNotEmpty($config['sites']);
     foreach ($config['sites'] as $path => $siteConfig) {

@@ -28,8 +28,8 @@ class HttpCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertTrue(is_numeric($data['contact_id']), "civicrm/authx/id should return current contact. Received: $body");
 
     $body = $this->cvOk("http {$this->login} 'civicrm/user?reset=1'");
-    $this->assertRegExp(':<html:', $body);
-    $this->assertRegExp(';Your Group;', $body);
+    $this->assertMatchesRegularExpression(':<html:', $body);
+    $this->assertMatchesRegularExpression(';Your Group;', $body);
   }
 
   public function testUnauthorizedGet() {
@@ -38,8 +38,8 @@ class HttpCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertTrue(empty($data['contact_id']), "civicrm/authx/id should return anonymous. Received: $body");
 
     $body = $this->cvFail("http 'civicrm/user?reset=1'");
-    $this->assertRegExp(':<html:', $body);
-    $this->assertNotRegExp(';Your Group;', $body);
+    $this->assertMatchesRegularExpression(':<html:', $body);
+    $this->assertDoesNotMatchRegularExpression(';Your Group;', $body);
   }
 
   public function testGetWebService() {
@@ -61,10 +61,10 @@ class HttpCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertEquals(1, count($parsed['values']), "Response should have been limited to 1 record.");
 
     $error = $p->getErrorOutput();
-    $this->assertRegExp(';> POST http;', $error);
-    $this->assertRegExp(';> Content-Type: application/x-www-form-urlencoded;', $error);
-    $this->assertRegExp(';> X-Civi-Auth: Bearer;', $error);
-    $this->assertRegExp(';< Content-Type: application/json;', $error);
+    $this->assertMatchesRegularExpression(';> POST http;', $error);
+    $this->assertMatchesRegularExpression(';> Content-Type: application/x-www-form-urlencoded;', $error);
+    $this->assertMatchesRegularExpression(';> X-Civi-Auth: Bearer;', $error);
+    $this->assertMatchesRegularExpression(';< Content-Type: application/json;', $error);
   }
 
 }
