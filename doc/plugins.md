@@ -75,3 +75,16 @@ more environments.)
    * __Argument__: `$e['exec']`: Non-alterable callback (input). Use this if you need to immediately call the action within the current process. 
 
 (Note: When subscribing to an event like `cv.app.site-alias`, you may alternatively subscribe to the wildcard `*.app.site-alias`. In the future, this should allow you hook into adjacent commands like civix and coworker.)
+
+## Global helpers
+
+The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
+
+* Event helpers
+    * __`Cv::dispatcher()`__: Get a reference to the dispatcher service. Add listeners and/or fire events.
+    * __`Cv::filter(string $eventName, array $eventData)`__: Fire a basic event to modify `$eventData`.
+* I/O helpers
+    * __`Cv::io()`__: Get the Symfony "Style" interface for current subcommand
+    * __`Cv::input()`__: Get the Symfony "Input" interface for current subcommand
+    * __`Cv::output()`__: Get the Symfony "Output" interface for current subcommand
+    * (*During cv's initial bootstrap, there is no active subcommand. These return stubs.*)
