@@ -49,13 +49,12 @@ This sequencing meaning that some early events (e.g.  `cv.app.boot` or `cv.confi
 
 The plugin itself may live in a global namespace or its own namespace.
 
-When a plugin refers to another class, it will be affected by `cv`'s namespace-prefixing:
+Plugins execute within `cv`'s process, so they are affected by `cv`'s namespace-prefixing rules:
 
-* Classes provided by CiviCRM and the user-framework (eg `Civi\*`, `CRM_*`, `Drupal\*`) are referenced by their original names.
-* Classes provided by `cv`'s internal dependencies (eg `Symfony\Component\Console\*`)  should be accessed with the prefix `CvDeps\*` (eg `CvDeps\Symfony\Component\Console\*`).
-
-(Technically, `cv`'s internal dependencies may have different concrete names depending on how `cv` is installed. The prefix `CvDeps\` is a logical alias that will work in
-more environments.)
+* External dependencies (eg CiviCRM, Drupal, WordPress) are not provided by `cv`. They do not have prefixing.
+  Access these with their canonical names (eg `Civi\*`, `CRM_*`, `Drupal\*`).
+* Internal dependencies (eg Symfony Console) are bundled with `cv`. They are generally prefixed, though the
+  concrete names vary. To maximize portability, access these classes with the logical alias `CvDeps\*` (eg `CvDeps\Symfony\Component\Console\*`).
 
 ## Events
 
@@ -76,7 +75,7 @@ more environments.)
 
 (Note: When subscribing to an event like `cv.app.site-alias`, you may alternatively subscribe to the wildcard `*.app.site-alias`. In the future, this should allow you hook into adjacent commands like civix and coworker.)
 
-## Global helpers
+## `Cv` helpers
 
 The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
 
@@ -88,3 +87,12 @@ The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
     * __`Cv::input()`__: Get the Symfony "Input" interface for current subcommand
     * __`Cv::output()`__: Get the Symfony "Output" interface for current subcommand
     * (*During cv's initial bootstrap, there is no active subcommand. These return stubs.*)
+
+## `$CV_PLUGIN` data
+
+When loading a plugin, the variable `$CV_PLUGIN` is prepopulated with information about the plugin and its environment.
+
+* __Property__: `$CV_PLUGIN['appName']`: Logical name of the CLI application
+* __Property__: `$CV_PLUGIN['appVersion']`: Version of the main application
+* __Property__: `$CV_PLUGIN['name']`: Logical name of the plugin
+* __Property__: `$CV_PLUGIN['file']`: Full path to the plugin-file

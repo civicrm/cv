@@ -9,6 +9,21 @@ if (empty($CV_PLUGIN['protocol']) || $CV_PLUGIN['protocol'] > 1) {
   die("Expect CV_PLUGIN API v1");
 }
 
+if (!preg_match(';^[\w_-]+$;', $CV_PLUGIN['appName'])) {
+  throw new \RuntimeException("Invalid CV_PLUGIN[appName]" . json_encode($CV_PLUGIN['appName']));
+}
+
+if (!preg_match(';^([0-9x\.]+(-[\w-]+)?|UNKNOWN)$;', $CV_PLUGIN['appVersion'])) {
+  throw new \RuntimeException("Invalid CV_PLUGIN[appVersion]: " . json_encode($CV_PLUGIN['appVersion']));
+}
+
+if ($CV_PLUGIN['name'] !== 'hello') {
+  throw new \RuntimeException("Invalid CV_PLUGIN[name]");
+}
+if (realpath($CV_PLUGIN['file']) !== realpath(__FILE__)) {
+  throw new \RuntimeException("Invalid CV_PLUGIN[file]");
+}
+
 Cv::dispatcher()->addListener('*.app.boot', function ($e) {
   Cv::io()->writeln("Hello during initial bootstrap!");
 });
