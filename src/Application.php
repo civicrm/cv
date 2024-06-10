@@ -3,10 +3,19 @@ namespace Civi\Cv;
 
 class Application extends BaseApplication {
 
+  const DEV_VERSION = '0.3.x';
+
   protected $deprecatedAliases = [
     'debug:container' => 'service',
     'debug:event-dispatcher' => 'event',
   ];
+
+  public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN') {
+    if ($version === 'UNKNOWN') {
+      $version = static::version() ?? 'UNKNOWN';
+    }
+    parent::__construct($name, $version);
+  }
 
   /**
    * Determine the version number.
@@ -19,7 +28,7 @@ class Application extends BaseApplication {
     $marker = '@' . 'package' . '_' . 'version' . '@';
     $v = '@package_version@';
     if ($v !== $marker) {
-      return $v;
+      return ltrim($v, 'v');
     }
     if (is_callable('\Composer\InstalledVersions::getVersion')) {
       $v = \Composer\InstalledVersions::getVersion('civicrm/cv');
@@ -27,7 +36,7 @@ class Application extends BaseApplication {
         return $v;
       }
     }
-    return NULL;
+    return static::DEV_VERSION;
   }
 
   /**

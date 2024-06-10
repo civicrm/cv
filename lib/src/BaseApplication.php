@@ -18,20 +18,12 @@ class BaseApplication extends \Symfony\Component\Console\Application {
   public static function main(string $name, ?string $binDir, array $argv) {
     ErrorHandler::pushHandler();
 
-    $preBootInput = new CvArgvInput([$argv[0]]);
+    $preBootInput = new CvArgvInput($argv);
     $preBootOutput = new ConsoleOutput();
     Cv::ioStack()->push($preBootInput, $preBootOutput);
 
     try {
-      $class = static::class;
-
-      Cv::plugins()->init();
-      $appEvent = ['app' => new $class($name, static::version() ?? 'UNKNOWN')];
-      $appEvent = Cv::filter('cv.app.boot', $appEvent);
-      $application = $appEvent['app'];
-
-      $application->setAutoExit(FALSE);
-
+      $application = new static($name);
       $argv = AliasFilter::filter($argv);
       $result = $application->run(new CvArgvInput($argv), Cv::ioStack()->current('output'));
     }
@@ -49,11 +41,22 @@ class BaseApplication extends \Symfony\Component\Console\Application {
   public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN') {
     parent::__construct($name, $version);
     $this->setCatchExceptions(TRUE);
+    $this->setAutoExit(FALSE);
+
+    Cv::plugins()->init(['appName' => $this->getName(), 'appVersion' => $this->getVersion()]);
+    Cv::filter($this->getName() . '.app.boot', ['app' => $this]);
 
     $commands = Cv::filter($this->getName() . '.app.commands', [
       'commands' => $this->createCommands(),
     ])['commands'];
     $this->addCommands($commands);
+  }
+
+  /**
+   * @return \Symfony\Component\Console\Command\Command[]
+   */
+  public function createCommands($context = 'default') {
+    return [];
   }
 
   /**

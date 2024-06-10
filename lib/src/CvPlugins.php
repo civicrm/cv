@@ -16,8 +16,12 @@ class CvPlugins {
    * This will scan any folders listed in CV_PLUGIN_PATH. If CV_PLUGIN_PATH
    * is undefined, then the default will be
    * `$HOME/.cv/plugin:/etc/cv/plugin:/usr/local/share/cv/plugin:/usr/share/cv/plugin`.
+   *
+   * @param array $pluginEnv
+   *   Description the current application environment.
+   *   Ex: ['appName' => 'cv', 'appVersion' => '0.3.50']
    */
-  public function init() {
+  public function init(array $pluginEnv) {
     if (getenv('CV_PLUGIN_PATH')) {
       $this->paths = explode(PATH_SEPARATOR, getenv('CV_PLUGIN_PATH'));
     }
@@ -52,7 +56,7 @@ class CvPlugins {
     ksort($this->plugins);
     foreach ($this->plugins as $pluginName => $pluginFile) {
       // FIXME: Refactor so that you can add more plugins post-boot `load("/some/glob*.php")`
-      $this->load([
+      $this->load($pluginEnv + [
         'protocol' => 1,
         'name' => $pluginName,
         'file' => $pluginFile,
