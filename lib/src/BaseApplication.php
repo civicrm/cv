@@ -4,7 +4,6 @@ namespace Civi\Cv;
 use Civi\Cv\Util\AliasFilter;
 use Civi\Cv\Util\CvArgvInput;
 use LesserEvil\ShellVerbosityIsEvil;
-use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -19,19 +18,26 @@ class BaseApplication extends \Symfony\Component\Console\Application {
   public static function main(string $name, ?string $binDir, array $argv) {
     ErrorHandler::pushHandler();
 
-    $class = static::class;
+    $preBootInput = new CvArgvInput([$argv[0]]);
+    $preBootOutput = new ConsoleOutput();
+    Cv::ioStack()->push($preBootInput, $preBootOutput);
 
-    Cv::plugins()->init();
-    $appEvent = ['app' => new $class($name, static::version() ?? 'UNKNOWN')];
-    $appEvent = Cv::filter('cv.app.boot', $appEvent);
-    $application = $appEvent['app'];
+    try {
+      $class = static::class;
 
-    $application->setAutoExit(FALSE);
+      Cv::plugins()->init();
+      $appEvent = ['app' => new $class($name, static::version() ?? 'UNKNOWN')];
+      $appEvent = Cv::filter('cv.app.boot', $appEvent);
+      $application = $appEvent['app'];
 
-    $argv = AliasFilter::filter($argv);
-    $input = new CvArgvInput($argv);
-    $output = new ConsoleOutput();
-    $result = $application->run($input, $output);
+      $application->setAutoExit(FALSE);
+
+      $argv = AliasFilter::filter($argv);
+      $result = $application->run(new CvArgvInput($argv), Cv::ioStack()->current('output'));
+    }
+    finally {
+      Cv::ioStack()->pop();
+    }
 
     ## NOTE: We do *not* use try/finally here. Doing so seems to counterintuitively
     ## muck with the exit code in some cases (eg `testPhpEval_ExitCodeError()`).
