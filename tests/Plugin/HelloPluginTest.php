@@ -18,7 +18,12 @@ class HelloPluginTest extends \Civi\Cv\CivilTestCase {
 
   public function testRun() {
     $output = $this->cvOk('hello');
-    $this->assertMatchesRegularExpression('/^Hello there/', $output);
+    $this->assertMatchesRegularExpression('/Hello world via parameter.*Hello world via StyleInterface/s', $output);
+  }
+
+  public function testRunWithName() {
+    $output = $this->cvOk('hello Bob');
+    $this->assertMatchesRegularExpression('/Hello Bob via parameter.*Hello Bob via StyleInterface/s', $output);
   }
 
 }
