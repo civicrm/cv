@@ -31,6 +31,7 @@ Note:
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $output->writeln("<error>WARNING: \"ext:upgrade-db\" is deprecated. Use the main \"updb\" command instead.</error>");
     $this->boot($input, $output);
 
     $output->writeln("<info>Applying database upgrades from extensions</info>");
