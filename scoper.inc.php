@@ -3,6 +3,9 @@
 return [
   'prefix' => 'Cvphar',
   'exclude-namespaces' => [
+    // Provided by cv
+    'CvDeps',
+
     // Provided by civicrm
     'Civi',
     'Guzzle',
