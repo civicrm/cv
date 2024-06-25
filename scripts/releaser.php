@@ -79,6 +79,7 @@ $c['app']->command("release $commonOptions", function (string $publishedTagName,
   if ($vars = $io->askHidden('(Optional) Paste a batch list of secrets (KEY1=VALUE1 KEY2=VALUE2...)')) {
     assertThat(!preg_match(';[\'\\"];', $vars), "Sorry, not clever enough to handle meta-characters.");
     foreach (explode(' ', $vars) as $keyValue) {
+      if ($keyValue === '') continue;
       [$key, $value] = explode('=', $keyValue, 2);
       putenv($keyValue);
       $_ENV[$key] = $_SERVER[$key] = $value;
