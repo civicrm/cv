@@ -17,7 +17,7 @@ class ExtensionUpgradeDbCommand extends BaseExtensionCommand {
     $this
       ->setName('ext:upgrade-db')
       ->setAliases(array())
-      ->setDescription('Apply DB upgrades for any extensions')
+      ->setDescription('Apply DB upgrades for any extensions (DEPRECATED)')
       ->setHelp('Apply DB upgrades for any extensions
 
 Examples:
@@ -26,6 +26,10 @@ Examples:
 Note:
   This subcommand does not output parseable data. For parseable output,
   consider using `cv api extension.upgrade`.
+
+Deprecation:
+  This command is now deprecated. Use "cv upgrade:db" to perform upgrades
+  for core and/or extensions.
 ');
     $this->configureBootOptions();
   }
