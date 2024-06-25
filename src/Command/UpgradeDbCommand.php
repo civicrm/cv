@@ -269,6 +269,11 @@ Examples:
   }
 
   protected function runExtensionUpgrade(bool $isFirstTry): int {
+    // `cv upgrade:db` started with CIVICRM_UPGRADE_ACTIVE, which means that the system
+    // booted with a narrow dispatch policy (preventing extensions from mucking with core-upgrade).
+    // But we've now decided we don't need full core-upgrade. So we can use an ordinary environment.
+    \Civi::dispatcher()->setDispatchPolicy(NULL);
+
     $input = $this->input;
     $output = $this->output;
 
