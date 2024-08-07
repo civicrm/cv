@@ -159,7 +159,7 @@ class CoreLifecycleTest extends \PHPUnit\Framework\TestCase {
     return $values;
   }
 
-  protected function proc($commandline, $cwd = NULL, array $env = NULL, $input = NULL, $timeout = self::TIMEOUT, array $options = array()) {
+  protected function proc($commandline, $cwd = NULL, ?array $env = NULL, $input = NULL, $timeout = self::TIMEOUT, array $options = array()) {
     $p = new \Symfony\Component\Process\Process($commandline, $cwd, $env, $input, $timeout, $options);
     return $p;
   }

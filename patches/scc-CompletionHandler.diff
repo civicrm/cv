@@ -1,0 +1,14 @@
+diff --git a/src/CompletionHandler.php b/src/CompletionHandler.php
+index 236687b..871838e 100644
+--- a/src/CompletionHandler.php
++++ b/src/CompletionHandler.php
+@@ -40,7 +40,7 @@ class CompletionHandler
+      */
+     private $commandWordIndex;
+ 
+-    public function __construct(Application $application, CompletionContext $context = null)
++    public function __construct(Application $application, ?CompletionContext $context = null)
+     {
+         $this->application = $application;
+         $this->context = $context;
+
