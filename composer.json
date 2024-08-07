@@ -39,5 +39,12 @@
             "civicrm/composer-downloads-plugin": true,
             "cweagans/composer-patches": true
         }
+    },
+    "extra": {
+        "patches": {
+            "stecman/symfony-console-completion": {
+                "Fix warnings on PHP 8.4": "patches/scc-CompletionHandler.diff"
+            }
+        }
     }
 }

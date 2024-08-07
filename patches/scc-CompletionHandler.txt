@@ -1,0 +1,2 @@
+At time of writing, `stecman/symfony-console-completion@0.11.0` is the last
+version to support PHP 7.x. Add the PHP 8.4 fixes to it.
