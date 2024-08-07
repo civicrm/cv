@@ -1,0 +1,1119 @@
+commit 909275e1fa880ce8efb24d7c8be67dd012d720a4
+Author: Tim Otten <totten@civicrm.org>
+Date:   Wed Aug 7 11:57:53 2024 -0700
+
+    Fix PHP 8.4 warnings
+
+diff --git a/src/CodeCleaner.php b/src/CodeCleaner.php
+index 8429847f..c85c6097 100644
+--- a/src/CodeCleaner.php
++++ b/src/CodeCleaner.php
+@@ -66,7 +66,7 @@ class CodeCleaner
+      * @param bool               $yolo        run without input validation
+      * @param bool               $strictTypes enforce strict types by default
+      */
+-    public function __construct(Parser $parser = null, Printer $printer = null, NodeTraverser $traverser = null, bool $yolo = false, bool $strictTypes = false)
++    public function __construct(?Parser $parser = null, ?Printer $printer = null, ?NodeTraverser $traverser = null, bool $yolo = false, bool $strictTypes = false)
+     {
+         $this->yolo = $yolo;
+         $this->strictTypes = $strictTypes;
+@@ -290,7 +290,7 @@ class CodeCleaner
+      *
+      * @param array|null $namespace (default: null)
+      */
+-    public function setNamespace(array $namespace = null)
++    public function setNamespace(?array $namespace = null)
+     {
+         $this->namespace = $namespace;
+     }
+diff --git a/src/Command/CodeArgumentParser.php b/src/Command/CodeArgumentParser.php
+index 4803aec1..faa214ff 100644
+--- a/src/Command/CodeArgumentParser.php
++++ b/src/Command/CodeArgumentParser.php
+@@ -22,7 +22,7 @@ class CodeArgumentParser
+ {
+     private $parser;
+ 
+-    public function __construct(Parser $parser = null)
++    public function __construct(?Parser $parser = null)
+     {
+         $this->parser = $parser ?? (new ParserFactory())->createParser();
+     }
+diff --git a/src/Command/Command.php b/src/Command/Command.php
+index 09750884..893152c4 100644
+--- a/src/Command/Command.php
++++ b/src/Command/Command.php
+@@ -30,7 +30,7 @@ abstract class Command extends BaseCommand
+      *
+      * @api
+      */
+-    public function setApplication(Application $application = null)
++    public function setApplication(?Application $application = null)
+     {
+         if ($application !== null && !$application instanceof Shell) {
+             throw new \InvalidArgumentException('PsySH Commands require an instance of Psy\Shell');
+diff --git a/src/Command/EditCommand.php b/src/Command/EditCommand.php
+index af2914d5..8efb30b8 100644
+--- a/src/Command/EditCommand.php
++++ b/src/Command/EditCommand.php
+@@ -115,7 +115,7 @@ class EditCommand extends Command implements ContextAware
+      * @param bool        $noExecOption
+      * @param string|null $filePath
+      */
+-    private function shouldExecuteFile(bool $execOption, bool $noExecOption, string $filePath = null): bool
++    private function shouldExecuteFile(bool $execOption, bool $noExecOption, ?string $filePath = null): bool
+     {
+         if ($execOption) {
+             return true;
+@@ -136,7 +136,7 @@ class EditCommand extends Command implements ContextAware
+      *
+      * @throws \InvalidArgumentException If the variable is not found in the current context
+      */
+-    private function extractFilePath(string $fileArgument = null)
++    private function extractFilePath(?string $fileArgument = null)
+     {
+         // If the file argument was a variable, get it from the context
+         if ($fileArgument !== null &&
+diff --git a/src/Command/ListCommand/ClassConstantEnumerator.php b/src/Command/ListCommand/ClassConstantEnumerator.php
+index 2ae84b12..0b77b87f 100644
+--- a/src/Command/ListCommand/ClassConstantEnumerator.php
++++ b/src/Command/ListCommand/ClassConstantEnumerator.php
+@@ -22,7 +22,7 @@ class ClassConstantEnumerator extends Enumerator
+     /**
+      * {@inheritdoc}
+      */
+-    protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array
++    protected function listItems(InputInterface $input, ?\Reflector $reflector = null, $target = null): array
+     {
+         // only list constants when a Reflector is present.
+         if ($reflector === null) {
+diff --git a/src/Command/ListCommand/ClassEnumerator.php b/src/Command/ListCommand/ClassEnumerator.php
+index cf80ba72..b0edf035 100644
+--- a/src/Command/ListCommand/ClassEnumerator.php
++++ b/src/Command/ListCommand/ClassEnumerator.php
+@@ -22,7 +22,7 @@ class ClassEnumerator extends Enumerator
+     /**
+      * {@inheritdoc}
+      */
+-    protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array
++    protected function listItems(InputInterface $input, ?\Reflector $reflector = null, $target = null): array
+     {
+         // if we have a reflector, ensure that it's a namespace reflector
+         if (($target !== null || $reflector !== null) && !$reflector instanceof ReflectionNamespace) {
+@@ -66,7 +66,7 @@ class ClassEnumerator extends Enumerator
+      *
+      * @return array
+      */
+-    protected function filterClasses(string $key, array $classes, bool $internal, bool $user, string $prefix = null): array
++    protected function filterClasses(string $key, array $classes, bool $internal, bool $user, ?string $prefix = null): array
+     {
+         $ret = [];
+ 
+diff --git a/src/Command/ListCommand/ConstantEnumerator.php b/src/Command/ListCommand/ConstantEnumerator.php
+index c8346e94..a754c1de 100644
+--- a/src/Command/ListCommand/ConstantEnumerator.php
++++ b/src/Command/ListCommand/ConstantEnumerator.php
+@@ -49,7 +49,7 @@ class ConstantEnumerator extends Enumerator
+     /**
+      * {@inheritdoc}
+      */
+-    protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array
++    protected function listItems(InputInterface $input, ?\Reflector $reflector = null, $target = null): array
+     {
+         // if we have a reflector, ensure that it's a namespace reflector
+         if (($target !== null || $reflector !== null) && !$reflector instanceof ReflectionNamespace) {
+@@ -122,7 +122,7 @@ class ConstantEnumerator extends Enumerator
+      *
+      * @return array
+      */
+-    protected function getConstants(string $category = null): array
++    protected function getConstants(?string $category = null): array
+     {
+         if (!$category) {
+             return \get_defined_constants();
+diff --git a/src/Command/ListCommand/Enumerator.php b/src/Command/ListCommand/Enumerator.php
+index ecc4613f..83bdf67a 100644
+--- a/src/Command/ListCommand/Enumerator.php
++++ b/src/Command/ListCommand/Enumerator.php
+@@ -54,7 +54,7 @@ abstract class Enumerator
+      *
+      * @return array
+      */
+-    public function enumerate(InputInterface $input, \Reflector $reflector = null, $target = null): array
++    public function enumerate(InputInterface $input, ?\Reflector $reflector = null, $target = null): array
+     {
+         $this->filter->bind($input);
+ 
+@@ -82,7 +82,7 @@ abstract class Enumerator
+      *
+      * @return array
+      */
+-    abstract protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array;
++    abstract protected function listItems(InputInterface $input, ?\Reflector $reflector = null, $target = null): array;
+ 
+     protected function showItem($name)
+     {
+diff --git a/src/Command/ListCommand/FunctionEnumerator.php b/src/Command/ListCommand/FunctionEnumerator.php
+index beccb4bd..fe3891a5 100644
+--- a/src/Command/ListCommand/FunctionEnumerator.php
++++ b/src/Command/ListCommand/FunctionEnumerator.php
+@@ -22,7 +22,7 @@ class FunctionEnumerator extends Enumerator
+     /**
+      * {@inheritdoc}
+      */
+-    protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array
++    protected function listItems(InputInterface $input, ?\Reflector $reflector = null, $target = null): array
+     {
+         // if we have a reflector, ensure that it's a namespace reflector
+         if (($target !== null || $reflector !== null) && !$reflector instanceof ReflectionNamespace) {
+@@ -67,7 +67,7 @@ class FunctionEnumerator extends Enumerator
+      *
+      * @return array
+      */
+-    protected function getFunctions(string $type = null): array
++    protected function getFunctions(?string $type = null): array
+     {
+         $funcs = \get_defined_functions();
+ 
+@@ -86,7 +86,7 @@ class FunctionEnumerator extends Enumerator
+      *
+      * @return array
+      */
+-    protected function prepareFunctions(array $functions, string $prefix = null): array
++    protected function prepareFunctions(array $functions, ?string $prefix = null): array
+     {
+         \natcasesort($functions);
+ 
+diff --git a/src/Command/ListCommand/GlobalVariableEnumerator.php b/src/Command/ListCommand/GlobalVariableEnumerator.php
+index fab59704..81be16e5 100644
+--- a/src/Command/ListCommand/GlobalVariableEnumerator.php
++++ b/src/Command/ListCommand/GlobalVariableEnumerator.php
+@@ -21,7 +21,7 @@ class GlobalVariableEnumerator extends Enumerator
+     /**
+      * {@inheritdoc}
+      */
+-    protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array
++    protected function listItems(InputInterface $input, ?\Reflector $reflector = null, $target = null): array
+     {
+         // only list globals when no Reflector is present.
+         if ($reflector !== null || $target !== null) {
+diff --git a/src/Command/ListCommand/MethodEnumerator.php b/src/Command/ListCommand/MethodEnumerator.php
+index 68c74dd4..e7b4503f 100644
+--- a/src/Command/ListCommand/MethodEnumerator.php
++++ b/src/Command/ListCommand/MethodEnumerator.php
+@@ -21,7 +21,7 @@ class MethodEnumerator extends Enumerator
+     /**
+      * {@inheritdoc}
+      */
+-    protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array
++    protected function listItems(InputInterface $input, ?\Reflector $reflector = null, $target = null): array
+     {
+         // only list methods when a Reflector is present.
+         if ($reflector === null) {
+diff --git a/src/Command/ListCommand/PropertyEnumerator.php b/src/Command/ListCommand/PropertyEnumerator.php
+index dfde8eaf..17661455 100644
+--- a/src/Command/ListCommand/PropertyEnumerator.php
++++ b/src/Command/ListCommand/PropertyEnumerator.php
+@@ -21,7 +21,7 @@ class PropertyEnumerator extends Enumerator
+     /**
+      * {@inheritdoc}
+      */
+-    protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array
++    protected function listItems(InputInterface $input, ?\Reflector $reflector = null, $target = null): array
+     {
+         // only list properties when a Reflector is present.
+ 
+diff --git a/src/Command/ListCommand/VariableEnumerator.php b/src/Command/ListCommand/VariableEnumerator.php
+index 38f3f602..2da1c6d7 100644
+--- a/src/Command/ListCommand/VariableEnumerator.php
++++ b/src/Command/ListCommand/VariableEnumerator.php
+@@ -45,7 +45,7 @@ class VariableEnumerator extends Enumerator
+     /**
+      * {@inheritdoc}
+      */
+-    protected function listItems(InputInterface $input, \Reflector $reflector = null, $target = null): array
++    protected function listItems(InputInterface $input, ?\Reflector $reflector = null, $target = null): array
+     {
+         // only list variables when no Reflector is present.
+         if ($reflector !== null || $target !== null) {
+diff --git a/src/Command/ParseCommand.php b/src/Command/ParseCommand.php
+index a62be67f..67666130 100644
+--- a/src/Command/ParseCommand.php
++++ b/src/Command/ParseCommand.php
+@@ -138,7 +138,7 @@ HELP
+      *
+      * @param string|null $kind One of Psy\ParserFactory constants (only for PHP parser 2.0 and above)
+      */
+-    private function getParser(string $kind = null): CodeArgumentParser
++    private function getParser(?string $kind = null): CodeArgumentParser
+     {
+         if (!\array_key_exists($kind, $this->parsers)) {
+             $this->parsers[$kind] = new CodeArgumentParser($this->parserFactory->createParser($kind));
+diff --git a/src/Command/ThrowUpCommand.php b/src/Command/ThrowUpCommand.php
+index 5d8402f5..8676de6a 100644
+--- a/src/Command/ThrowUpCommand.php
++++ b/src/Command/ThrowUpCommand.php
+@@ -110,7 +110,7 @@ HELP
+      *
+      * @return Arg[]
+      */
+-    private function prepareArgs(string $code = null): array
++    private function prepareArgs(?string $code = null): array
+     {
+         if (!$code) {
+             // Default to last exception if nothing else was supplied
+diff --git a/src/Command/TimeitCommand/TimeitVisitor.php b/src/Command/TimeitCommand/TimeitVisitor.php
+index 0020ff66..0d1c1447 100644
+--- a/src/Command/TimeitCommand/TimeitVisitor.php
++++ b/src/Command/TimeitCommand/TimeitVisitor.php
+@@ -120,7 +120,7 @@ class TimeitVisitor extends NodeVisitorAbstract
+      *
+      * @param Expr|null $arg
+      */
+-    private function getEndCall(Expr $arg = null): StaticCall
++    private function getEndCall(?Expr $arg = null): StaticCall
+     {
+         if ($arg === null) {
+             $arg = NoReturnValue::create();
+diff --git a/src/Command/TraceCommand.php b/src/Command/TraceCommand.php
+index 8ba1ad86..b917384e 100644
+--- a/src/Command/TraceCommand.php
++++ b/src/Command/TraceCommand.php
+@@ -92,7 +92,7 @@ HELP
+      *
+      * @return array Formatted stacktrace lines
+      */
+-    protected function getBacktrace(\Throwable $e, int $count = null, bool $includePsy = true): array
++    protected function getBacktrace(\Throwable $e, ?int $count = null, bool $includePsy = true): array
+     {
+         return TraceFormatter::formatTrace($e, $this->filter, $count, $includePsy);
+     }
+diff --git a/src/ConfigPaths.php b/src/ConfigPaths.php
+index 8eb0e1cb..e9fb7619 100644
+--- a/src/ConfigPaths.php
++++ b/src/ConfigPaths.php
+@@ -31,7 +31,7 @@ class ConfigPaths
+      * @param string[]     $overrides Directory overrides
+      * @param EnvInterface $env
+      */
+-    public function __construct(array $overrides = [], EnvInterface $env = null)
++    public function __construct(array $overrides = [], ?EnvInterface $env = null)
+     {
+         $this->overrideDirs($overrides);
+ 
+diff --git a/src/Exception/BreakException.php b/src/Exception/BreakException.php
+index 4061442a..5c56914f 100644
+--- a/src/Exception/BreakException.php
++++ b/src/Exception/BreakException.php
+@@ -21,7 +21,7 @@ class BreakException extends \Exception implements Exception
+     /**
+      * {@inheritdoc}
+      */
+-    public function __construct($message = '', $code = 0, \Throwable $previous = null)
++    public function __construct($message = '', $code = 0, ?\Throwable $previous = null)
+     {
+         $this->rawMessage = $message;
+         parent::__construct(\sprintf('Exit:  %s', $message), $code, $previous);
+diff --git a/src/Exception/ErrorException.php b/src/Exception/ErrorException.php
+index 13e24fe9..d0ad9428 100644
+--- a/src/Exception/ErrorException.php
++++ b/src/Exception/ErrorException.php
+@@ -28,7 +28,7 @@ class ErrorException extends \ErrorException implements Exception
+      * @param int|null        $lineno   (default: null)
+      * @param \Throwable|null $previous (default: null)
+      */
+-    public function __construct($message = '', $code = 0, $severity = 1, $filename = null, $lineno = null, \Throwable $previous = null)
++    public function __construct($message = '', $code = 0, $severity = 1, $filename = null, $lineno = null, ?\Throwable $previous = null)
+     {
+         $this->rawMessage = $message;
+ 
+diff --git a/src/Exception/FatalErrorException.php b/src/Exception/FatalErrorException.php
+index 21b22348..c7dcbf66 100644
+--- a/src/Exception/FatalErrorException.php
++++ b/src/Exception/FatalErrorException.php
+@@ -28,7 +28,7 @@ class FatalErrorException extends \ErrorException implements Exception
+      * @param int|null        $lineno   (default: null)
+      * @param \Throwable|null $previous (default: null)
+      */
+-    public function __construct($message = '', $code = 0, $severity = 1, $filename = null, $lineno = null, \Throwable $previous = null)
++    public function __construct($message = '', $code = 0, $severity = 1, $filename = null, $lineno = null, ?\Throwable $previous = null)
+     {
+         // Since these are basically always PHP Parser Node line numbers, treat -1 as null.
+         if ($lineno === -1) {
+diff --git a/src/Exception/RuntimeException.php b/src/Exception/RuntimeException.php
+index 6228813b..fd423ffb 100644
+--- a/src/Exception/RuntimeException.php
++++ b/src/Exception/RuntimeException.php
+@@ -25,7 +25,7 @@ class RuntimeException extends \RuntimeException implements Exception
+      * @param int             $code     (default: 0)
+      * @param \Throwable|null $previous (default: null)
+      */
+-    public function __construct(string $message = '', int $code = 0, \Throwable $previous = null)
++    public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null)
+     {
+         $this->rawMessage = $message;
+         parent::__construct($message, $code, $previous);
+diff --git a/src/Exception/TypeErrorException.php b/src/Exception/TypeErrorException.php
+index cbf00eaa..ffed7a67 100644
+--- a/src/Exception/TypeErrorException.php
++++ b/src/Exception/TypeErrorException.php
+@@ -27,7 +27,7 @@ class TypeErrorException extends \Exception implements Exception
+      * @param int             $code     (default: 0)
+      * @param \Throwable|null $previous (default: null)
+      */
+-    public function __construct(string $message = '', int $code = 0, \Throwable $previous = null)
++    public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null)
+     {
+         $this->rawMessage = $message;
+         $message = \preg_replace('/, called in .*?: eval\\(\\)\'d code/', '', $message);
+diff --git a/src/Exception/UnexpectedTargetException.php b/src/Exception/UnexpectedTargetException.php
+index 9d2b70d1..35ce2d23 100644
+--- a/src/Exception/UnexpectedTargetException.php
++++ b/src/Exception/UnexpectedTargetException.php
+@@ -21,7 +21,7 @@ class UnexpectedTargetException extends RuntimeException
+      * @param int             $code     (default: 0)
+      * @param \Throwable|null $previous (default: null)
+      */
+-    public function __construct($target, string $message = '', int $code = 0, \Throwable $previous = null)
++    public function __construct($target, string $message = '', int $code = 0, ?\Throwable $previous = null)
+     {
+         $this->target = $target;
+         parent::__construct($message, $code, $previous);
+diff --git a/src/Formatter/CodeFormatter.php b/src/Formatter/CodeFormatter.php
+index d795cf1e..f9275104 100644
+--- a/src/Formatter/CodeFormatter.php
++++ b/src/Formatter/CodeFormatter.php
+@@ -81,7 +81,7 @@ class CodeFormatter implements ReflectorFormatter
+      *
+      * @return string formatted code
+      */
+-    public static function format(\Reflector $reflector, string $colorMode = null): string
++    public static function format(\Reflector $reflector, ?string $colorMode = null): string
+     {
+         if (self::isReflectable($reflector)) {
+             if ($code = @\file_get_contents($reflector->getFileName())) {
+@@ -104,7 +104,7 @@ class CodeFormatter implements ReflectorFormatter
+      *
+      * @return string formatted code
+      */
+-    public static function formatCode(string $code, int $startLine = 1, int $endLine = null, int $markLine = null): string
++    public static function formatCode(string $code, int $startLine = 1, ?int $endLine = null, ?int $markLine = null): string
+     {
+         $spans = self::tokenizeSpans($code);
+         $lines = self::splitLines($spans, $startLine, $endLine);
+@@ -207,7 +207,7 @@ class CodeFormatter implements ReflectorFormatter
+      *
+      * @return \Generator lines, each an array of [$spanType, $spanText] pairs
+      */
+-    private static function splitLines(\Generator $spans, int $startLine = 1, int $endLine = null): \Generator
++    private static function splitLines(\Generator $spans, int $startLine = 1, ?int $endLine = null): \Generator
+     {
+         $lineNum = 1;
+         $buffer = [];
+@@ -274,7 +274,7 @@ class CodeFormatter implements ReflectorFormatter
+      *
+      * @return \Generator Numbered, formatted lines
+      */
+-    private static function numberLines(\Generator $lines, int $markLine = null): \Generator
++    private static function numberLines(\Generator $lines, ?int $markLine = null): \Generator
+     {
+         $lines = \iterator_to_array($lines);
+ 
+diff --git a/src/Formatter/SignatureFormatter.php b/src/Formatter/SignatureFormatter.php
+index 799d669d..6bc7f463 100644
+--- a/src/Formatter/SignatureFormatter.php
++++ b/src/Formatter/SignatureFormatter.php
+@@ -323,7 +323,7 @@ class SignatureFormatter implements ReflectorFormatter
+      *
+      * @param \ReflectionType $type
+      */
+-    private static function formatReflectionType(\ReflectionType $type = null): string
++    private static function formatReflectionType(?\ReflectionType $type = null): string
+     {
+         if ($type === null) {
+             return '';
+diff --git a/src/Formatter/TraceFormatter.php b/src/Formatter/TraceFormatter.php
+index f9859225..a30b4b8c 100644
+--- a/src/Formatter/TraceFormatter.php
++++ b/src/Formatter/TraceFormatter.php
+@@ -29,7 +29,7 @@ class TraceFormatter
+      *
+      * @return string[] Formatted stacktrace lines
+      */
+-    public static function formatTrace(\Throwable $throwable, FilterOptions $filter = null, int $count = null, bool $includePsy = true): array
++    public static function formatTrace(\Throwable $throwable, ?FilterOptions $filter = null, ?int $count = null, bool $includePsy = true): array
+     {
+         if ($cwd = \getcwd()) {
+             $cwd = \rtrim($cwd, \DIRECTORY_SEPARATOR).\DIRECTORY_SEPARATOR;
+diff --git a/src/Input/CodeArgument.php b/src/Input/CodeArgument.php
+index c4153478..2654c943 100644
+--- a/src/Input/CodeArgument.php
++++ b/src/Input/CodeArgument.php
+@@ -39,7 +39,7 @@ class CodeArgument extends InputArgument
+      *
+      * @throws \InvalidArgumentException When argument mode is not valid
+      */
+-    public function __construct(string $name, int $mode = null, string $description = '', $default = null)
++    public function __construct(string $name, ?int $mode = null, string $description = '', $default = null)
+     {
+         if ($mode & InputArgument::IS_ARRAY) {
+             throw new \InvalidArgumentException('Argument mode IS_ARRAY is not valid');
+diff --git a/src/Input/FilterOptions.php b/src/Input/FilterOptions.php
+index 64eee3f8..4f8c6b27 100644
+--- a/src/Input/FilterOptions.php
++++ b/src/Input/FilterOptions.php
+@@ -85,7 +85,7 @@ class FilterOptions
+      * @param string $string
+      * @param array  $matches
+      */
+-    public function match(string $string, array &$matches = null): bool
++    public function match(string $string, ?array &$matches = null): bool
+     {
+         return $this->filter === false || (\preg_match($this->pattern, $string, $matches) xor $this->invert);
+     }
+diff --git a/src/Output/ShellOutput.php b/src/Output/ShellOutput.php
+index 543baccb..8ad673d6 100644
+--- a/src/Output/ShellOutput.php
++++ b/src/Output/ShellOutput.php
+@@ -38,7 +38,7 @@ class ShellOutput extends ConsoleOutput
+      * @param OutputFormatterInterface|null $formatter (default: null)
+      * @param string|OutputPager|null       $pager     (default: null)
+      */
+-    public function __construct($verbosity = self::VERBOSITY_NORMAL, $decorated = null, OutputFormatterInterface $formatter = null, $pager = null, $theme = null)
++    public function __construct($verbosity = self::VERBOSITY_NORMAL, $decorated = null, ?OutputFormatterInterface $formatter = null, $pager = null, $theme = null)
+     {
+         parent::__construct($verbosity, $decorated, $formatter);
+ 
+diff --git a/src/Readline/GNUReadline.php b/src/Readline/GNUReadline.php
+index 877e1a30..28fd5d8c 100644
+--- a/src/Readline/GNUReadline.php
++++ b/src/Readline/GNUReadline.php
+@@ -105,7 +105,7 @@ class GNUReadline implements Readline
+     /**
+      * {@inheritdoc}
+      */
+-    public function readline(string $prompt = null)
++    public function readline(?string $prompt = null)
+     {
+         return \readline($prompt);
+     }
+diff --git a/src/Readline/Hoa/AutocompleterPath.php b/src/Readline/Hoa/AutocompleterPath.php
+index a922b789..f1eaca0e 100644
+--- a/src/Readline/Hoa/AutocompleterPath.php
++++ b/src/Readline/Hoa/AutocompleterPath.php
+@@ -62,8 +62,8 @@ class AutocompleterPath implements Autocompleter
+      * Constructor.
+      */
+     public function __construct(
+-        string $root = null,
+-        \Closure $iteratorFactory = null
++        ?string $root = null,
++        ?\Closure $iteratorFactory = null
+     ) {
+         if (null === $root) {
+             $root = static::PWD;
+diff --git a/src/Readline/Hoa/ConsoleCursor.php b/src/Readline/Hoa/ConsoleCursor.php
+index 6745e257..8828d8b6 100644
+--- a/src/Readline/Hoa/ConsoleCursor.php
++++ b/src/Readline/Hoa/ConsoleCursor.php
+@@ -154,7 +154,7 @@ class ConsoleCursor
+      * Move to the line X and the column Y.
+      * If null, use the current coordinate.
+      */
+-    public static function moveTo(int $x = null, int $y = null)
++    public static function moveTo(?int $x = null, ?int $y = null)
+     {
+         if (null === $x || null === $y) {
+             $position = static::getPosition();
+diff --git a/src/Readline/Hoa/ConsoleInput.php b/src/Readline/Hoa/ConsoleInput.php
+index faa5ce18..6b00e2ad 100644
+--- a/src/Readline/Hoa/ConsoleInput.php
++++ b/src/Readline/Hoa/ConsoleInput.php
+@@ -53,7 +53,7 @@ class ConsoleInput implements StreamIn
+     /**
+      * Wraps an `Hoa\Stream\IStream\In` stream.
+      */
+-    public function __construct(StreamIn $input = null)
++    public function __construct(?StreamIn $input = null)
+     {
+         if (null === $input) {
+             if (\defined('STDIN') &&
+diff --git a/src/Readline/Hoa/ConsoleOutput.php b/src/Readline/Hoa/ConsoleOutput.php
+index fbba894c..b7ed2795 100644
+--- a/src/Readline/Hoa/ConsoleOutput.php
++++ b/src/Readline/Hoa/ConsoleOutput.php
+@@ -57,7 +57,7 @@ class ConsoleOutput implements StreamOut
+     /**
+      * Wraps an `Hoa\Stream\IStream\Out` stream.
+      */
+-    public function __construct(StreamOut $output = null)
++    public function __construct(?StreamOut $output = null)
+     {
+         $this->_output = $output;
+ 
+diff --git a/src/Readline/Hoa/ConsoleProcessus.php b/src/Readline/Hoa/ConsoleProcessus.php
+index 69bf1ddb..da729854 100644
+--- a/src/Readline/Hoa/ConsoleProcessus.php
++++ b/src/Readline/Hoa/ConsoleProcessus.php
+@@ -245,10 +245,10 @@ class ConsoleProcessus extends Stream implements StreamIn, StreamOut, StreamPath
+      */
+     public function __construct(
+         string $command,
+-        array $options = null,
+-        array $descriptors = null,
+-        string $cwd = null,
+-        array $environment = null,
++        ?array $options = null,
++        ?array $descriptors = null,
++        ?string $cwd = null,
++        ?array $environment = null,
+         int $timeout = 30
+     ) {
+         $this->setCommand($command);
+@@ -285,7 +285,7 @@ class ConsoleProcessus extends Stream implements StreamIn, StreamOut, StreamPath
+     /**
+      * Open the stream and return the associated resource.
+      */
+-    protected function &_open(string $streamName, StreamContext $context = null)
++    protected function &_open(string $streamName, ?StreamContext $context = null)
+     {
+         $out = @\proc_open(
+             $streamName,
+@@ -527,7 +527,7 @@ class ConsoleProcessus extends Stream implements StreamIn, StreamOut, StreamPath
+      * Read an array.
+      * Alias of the $this->scanf() method.
+      */
+-    public function readArray(string $format = null, int $pipe = 1)
++    public function readArray(?string $format = null, int $pipe = 1)
+     {
+         return $this->scanf($format, $pipe);
+     }
+diff --git a/src/Readline/Hoa/Exception.php b/src/Readline/Hoa/Exception.php
+index e0b8bc8c..0a08f7a9 100644
+--- a/src/Readline/Hoa/Exception.php
++++ b/src/Readline/Hoa/Exception.php
+@@ -52,7 +52,7 @@ class Exception extends ExceptionIdle implements EventSource
+         string $message,
+         int $code = 0,
+         $arguments = [],
+-        \Throwable $previous = null
++        ?\Throwable $previous = null
+     ) {
+         parent::__construct($message, $code, $arguments, $previous);
+ 
+diff --git a/src/Readline/Hoa/ExceptionIdle.php b/src/Readline/Hoa/ExceptionIdle.php
+index 1d44c435..29497f06 100644
+--- a/src/Readline/Hoa/ExceptionIdle.php
++++ b/src/Readline/Hoa/ExceptionIdle.php
+@@ -79,7 +79,7 @@ class ExceptionIdle extends \Exception
+         string $message,
+         int $code = 0,
+         $arguments = [],
+-        \Exception $previous = null
++        ?\Exception $previous = null
+     ) {
+         $this->_tmpArguments = $arguments;
+         parent::__construct($message, $code, $previous);
+diff --git a/src/Readline/Hoa/File.php b/src/Readline/Hoa/File.php
+index bdfd9478..7ab2339b 100644
+--- a/src/Readline/Hoa/File.php
++++ b/src/Readline/Hoa/File.php
+@@ -105,7 +105,7 @@ abstract class File extends FileGeneric implements StreamBufferable, StreamLocka
+     public function __construct(
+         string $streamName,
+         string $mode,
+-        string $context = null,
++        ?string $context = null,
+         bool $wait = false
+     ) {
+         $this->setMode($mode);
+@@ -144,7 +144,7 @@ abstract class File extends FileGeneric implements StreamBufferable, StreamLocka
+     /**
+      * Open the stream and return the associated resource.
+      */
+-    protected function &_open(string $streamName, StreamContext $context = null)
++    protected function &_open(string $streamName, ?StreamContext $context = null)
+     {
+         if (\substr($streamName, 0, 4) === 'file' &&
+             false === \is_dir(\dirname($streamName))) {
+@@ -185,7 +185,7 @@ abstract class File extends FileGeneric implements StreamBufferable, StreamLocka
+      * Start a new buffer.
+      * The callable acts like a light filter.
+      */
+-    public function newBuffer($callable = null, int $size = null): int
++    public function newBuffer($callable = null, ?int $size = null): int
+     {
+         $this->setStreamBuffer($size);
+ 
+diff --git a/src/Readline/Hoa/FileDirectory.php b/src/Readline/Hoa/FileDirectory.php
+index e7191410..31adb00f 100644
+--- a/src/Readline/Hoa/FileDirectory.php
++++ b/src/Readline/Hoa/FileDirectory.php
+@@ -66,7 +66,7 @@ class FileDirectory extends FileGeneric
+     public function __construct(
+         string $streamName,
+         string $mode = self::MODE_READ,
+-        string $context = null,
++        ?string $context = null,
+         bool $wait = false
+     ) {
+         $this->setMode($mode);
+@@ -78,7 +78,7 @@ class FileDirectory extends FileGeneric
+     /**
+      * Open the stream and return the associated resource.
+      */
+-    protected function &_open(string $streamName, StreamContext $context = null)
++    protected function &_open(string $streamName, ?StreamContext $context = null)
+     {
+         if (false === \is_dir($streamName)) {
+             if ($this->getMode() === self::MODE_READ) {
+@@ -185,7 +185,7 @@ class FileDirectory extends FileGeneric
+     public static function create(
+         string $name,
+         string $mode = self::MODE_CREATE_RECURSIVE,
+-        string $context = null
++        ?string $context = null
+     ): bool {
+         if (true === \is_dir($name)) {
+             return true;
+diff --git a/src/Readline/Hoa/FileGeneric.php b/src/Readline/Hoa/FileGeneric.php
+index aa3b70cf..767b8045 100644
+--- a/src/Readline/Hoa/FileGeneric.php
++++ b/src/Readline/Hoa/FileGeneric.php
+@@ -229,7 +229,7 @@ abstract class FileGeneric extends Stream implements StreamPathable, StreamStata
+     /**
+      * Set access and modification time of file.
+      */
+-    public function touch(int $time = null, int $atime = null): bool
++    public function touch(?int $time = null, ?int $atime = null): bool
+     {
+         if (null === $time) {
+             $time = \time();
+@@ -333,7 +333,7 @@ abstract class FileGeneric extends Stream implements StreamPathable, StreamStata
+     /**
+      * Change the current umask.
+      */
+-    public static function umask(int $umask = null): int
++    public static function umask(?int $umask = null): int
+     {
+         if (null === $umask) {
+             return \umask();
+diff --git a/src/Readline/Hoa/FileLink.php b/src/Readline/Hoa/FileLink.php
+index 21a4485f..e48a4111 100644
+--- a/src/Readline/Hoa/FileLink.php
++++ b/src/Readline/Hoa/FileLink.php
+@@ -49,7 +49,7 @@ class FileLink extends File
+     public function __construct(
+         string $streamName,
+         string $mode,
+-        string $context = null,
++        ?string $context = null,
+         bool $wait = false
+     ) {
+         if (!\is_link($streamName)) {
+diff --git a/src/Readline/Hoa/FileLinkRead.php b/src/Readline/Hoa/FileLinkRead.php
+index 37bb514c..ffa4ebcf 100644
+--- a/src/Readline/Hoa/FileLinkRead.php
++++ b/src/Readline/Hoa/FileLinkRead.php
+@@ -57,7 +57,7 @@ class FileLinkRead extends FileLink implements StreamIn
+     public function __construct(
+         string $streamName,
+         string $mode = parent::MODE_READ,
+-        string $context = null,
++        ?string $context = null,
+         bool $wait = false
+     ) {
+         parent::__construct($streamName, $mode, $context, $wait);
+@@ -76,7 +76,7 @@ class FileLinkRead extends FileLink implements StreamIn
+      * @throws \Hoa\File\Exception\FileDoesNotExist
+      * @throws \Hoa\File\Exception
+      */
+-    protected function &_open(string $streamName, StreamContext $context = null)
++    protected function &_open(string $streamName, ?StreamContext $context = null)
+     {
+         static $createModes = [
+             parent::MODE_READ,
+@@ -190,7 +190,7 @@ class FileLinkRead extends FileLink implements StreamIn
+      *
+      * @return array
+      */
+-    public function readArray(string $format = null)
++    public function readArray(?string $format = null)
+     {
+         return $this->scanf($format);
+     }
+diff --git a/src/Readline/Hoa/FileLinkReadWrite.php b/src/Readline/Hoa/FileLinkReadWrite.php
+index 0d16585c..e930d919 100644
+--- a/src/Readline/Hoa/FileLinkReadWrite.php
++++ b/src/Readline/Hoa/FileLinkReadWrite.php
+@@ -49,7 +49,7 @@ class FileLinkReadWrite extends FileLink implements StreamIn, StreamOut
+     public function __construct(
+         string $streamName,
+         string $mode = parent::MODE_APPEND_READ_WRITE,
+-        string $context = null,
++        ?string $context = null,
+         bool $wait = false
+     ) {
+         parent::__construct($streamName, $mode, $context, $wait);
+@@ -60,7 +60,7 @@ class FileLinkReadWrite extends FileLink implements StreamIn, StreamOut
+     /**
+      * Open the stream and return the associated resource.
+      */
+-    protected function &_open(string $streamName, StreamContext $context = null)
++    protected function &_open(string $streamName, ?StreamContext $context = null)
+     {
+         static $createModes = [
+             parent::MODE_READ_WRITE,
+@@ -150,7 +150,7 @@ class FileLinkReadWrite extends FileLink implements StreamIn, StreamOut
+      * Read an array.
+      * Alias of the $this->scanf() method.
+      */
+-    public function readArray(string $format = null)
++    public function readArray(?string $format = null)
+     {
+         return $this->scanf($format);
+     }
+diff --git a/src/Readline/Hoa/FileRead.php b/src/Readline/Hoa/FileRead.php
+index 9e10fe69..f737ba5d 100644
+--- a/src/Readline/Hoa/FileRead.php
++++ b/src/Readline/Hoa/FileRead.php
+@@ -49,7 +49,7 @@ class FileRead extends File implements StreamIn
+     public function __construct(
+         string $streamName,
+         string $mode = parent::MODE_READ,
+-        string $context = null,
++        ?string $context = null,
+         bool $wait = false
+     ) {
+         parent::__construct($streamName, $mode, $context, $wait);
+@@ -60,7 +60,7 @@ class FileRead extends File implements StreamIn
+     /**
+      * Open the stream and return the associated resource.
+      */
+-    protected function &_open(string $streamName, StreamContext $context = null)
++    protected function &_open(string $streamName, ?StreamContext $context = null)
+     {
+         static $createModes = [
+             parent::MODE_READ,
+@@ -146,7 +146,7 @@ class FileRead extends File implements StreamIn
+      * Read an array.
+      * Alias of the $this->scanf() method.
+      */
+-    public function readArray(string $format = null)
++    public function readArray(?string $format = null)
+     {
+         return $this->scanf($format);
+     }
+diff --git a/src/Readline/Hoa/FileReadWrite.php b/src/Readline/Hoa/FileReadWrite.php
+index 406b6aa7..d97aa174 100644
+--- a/src/Readline/Hoa/FileReadWrite.php
++++ b/src/Readline/Hoa/FileReadWrite.php
+@@ -49,7 +49,7 @@ class FileReadWrite extends File implements StreamIn, StreamOut
+     public function __construct(
+         string $streamName,
+         string $mode = parent::MODE_APPEND_READ_WRITE,
+-        string $context = null,
++        ?string $context = null,
+         bool $wait = false
+     ) {
+         parent::__construct($streamName, $mode, $context, $wait);
+@@ -60,7 +60,7 @@ class FileReadWrite extends File implements StreamIn, StreamOut
+     /**
+      * Open the stream and return the associated resource.
+      */
+-    protected function &_open(string $streamName, StreamContext $context = null)
++    protected function &_open(string $streamName, ?StreamContext $context = null)
+     {
+         static $createModes = [
+             parent::MODE_READ_WRITE,
+@@ -150,7 +150,7 @@ class FileReadWrite extends File implements StreamIn, StreamOut
+      * Read an array.
+      * Alias of the $this->scanf() method.
+      */
+-    public function readArray(string $format = null)
++    public function readArray(?string $format = null)
+     {
+         return $this->scanf($format);
+     }
+diff --git a/src/Readline/Hoa/IteratorFileSystem.php b/src/Readline/Hoa/IteratorFileSystem.php
+index f0fc5c57..2ed84315 100644
+--- a/src/Readline/Hoa/IteratorFileSystem.php
++++ b/src/Readline/Hoa/IteratorFileSystem.php
+@@ -53,7 +53,7 @@ class IteratorFileSystem extends \FilesystemIterator
+      * Please, see \FileSystemIterator::__construct() method.
+      * We add the $splFileInfoClass parameter.
+      */
+-    public function __construct(string $path, int $flags = null, string $splFileInfoClass = null)
++    public function __construct(string $path, ?int $flags = null, ?string $splFileInfoClass = null)
+     {
+         $this->_splFileInfoClass = $splFileInfoClass;
+ 
+diff --git a/src/Readline/Hoa/IteratorRecursiveDirectory.php b/src/Readline/Hoa/IteratorRecursiveDirectory.php
+index ad695123..80fd02ac 100644
+--- a/src/Readline/Hoa/IteratorRecursiveDirectory.php
++++ b/src/Readline/Hoa/IteratorRecursiveDirectory.php
+@@ -58,7 +58,7 @@ class IteratorRecursiveDirectory extends \RecursiveDirectoryIterator
+      * Please, see \RecursiveDirectoryIterator::__construct() method.
+      * We add the $splFileInfoClass parameter.
+      */
+-    public function __construct(string $path, int $flags = null, string $splFileInfoClass = null)
++    public function __construct(string $path, ?int $flags = null, ?string $splFileInfoClass = null)
+     {
+         if (null === $flags) {
+             parent::__construct($path);
+diff --git a/src/Readline/Hoa/IteratorSplFileInfo.php b/src/Readline/Hoa/IteratorSplFileInfo.php
+index 3cf54b84..61fa0806 100644
+--- a/src/Readline/Hoa/IteratorSplFileInfo.php
++++ b/src/Readline/Hoa/IteratorSplFileInfo.php
+@@ -56,7 +56,7 @@ class IteratorSplFileInfo extends \SplFileInfo
+     /**
+      * Construct.
+      */
+-    public function __construct(string $filename, string $relativePath = null)
++    public function __construct(string $filename, ?string $relativePath = null)
+     {
+         parent::__construct($filename);
+ 
+diff --git a/src/Readline/Hoa/ProtocolNode.php b/src/Readline/Hoa/ProtocolNode.php
+index 78812d7e..4a82cf49 100644
+--- a/src/Readline/Hoa/ProtocolNode.php
++++ b/src/Readline/Hoa/ProtocolNode.php
+@@ -62,7 +62,7 @@ class ProtocolNode implements \ArrayAccess, \IteratorAggregate
+      * overload the `$_name` attribute), we can set the `$_name` attribute
+      * dynamically. This is useful to create a node on-the-fly.
+      */
+-    public function __construct(string $name = null, string $reach = null, array $children = [])
++    public function __construct(?string $name = null, ?string $reach = null, array $children = [])
+     {
+         if (null !== $name) {
+             $this->_name = $name;
+@@ -133,7 +133,7 @@ class ProtocolNode implements \ArrayAccess, \IteratorAggregate
+      * Resolve a path, i.e. iterate the nodes tree and reach the queue of
+      * the path.
+      */
+-    protected function _resolve(string $path, &$accumulator, string $id = null)
++    protected function _resolve(string $path, &$accumulator, ?string $id = null)
+     {
+         if (\substr($path, 0, 6) === 'hoa://') {
+             $path = \substr($path, 6);
+@@ -246,7 +246,7 @@ class ProtocolNode implements \ArrayAccess, \IteratorAggregate
+      * Queue of the node.
+      * Generic one. Must be overrided in children classes.
+      */
+-    public function reach(string $queue = null)
++    public function reach(?string $queue = null)
+     {
+         return empty($queue) ? $this->_reach : $queue;
+     }
+diff --git a/src/Readline/Hoa/ProtocolNodeLibrary.php b/src/Readline/Hoa/ProtocolNodeLibrary.php
+index 0719374c..023f0300 100644
+--- a/src/Readline/Hoa/ProtocolNodeLibrary.php
++++ b/src/Readline/Hoa/ProtocolNodeLibrary.php
+@@ -44,7 +44,7 @@ class ProtocolNodeLibrary extends ProtocolNode
+     /**
+      * Queue of the component.
+      */
+-    public function reach(string $queue = null)
++    public function reach(?string $queue = null)
+     {
+         $withComposer = \class_exists('Composer\Autoload\ClassLoader', false) ||
+             ('cli' === \PHP_SAPI && \file_exists(__DIR__.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'..'.\DIRECTORY_SEPARATOR.'autoload.php'));
+diff --git a/src/Readline/Hoa/Readline.php b/src/Readline/Hoa/Readline.php
+index 0338c902..614ce52a 100644
+--- a/src/Readline/Hoa/Readline.php
++++ b/src/Readline/Hoa/Readline.php
+@@ -137,7 +137,7 @@ class Readline
+     /**
+      * Read a line from the input.
+      */
+-    public function readLine(string $prefix = null)
++    public function readLine(?string $prefix = null)
+     {
+         $input = Console::getInput();
+ 
+@@ -270,7 +270,7 @@ class Readline
+     /**
+      * Add an entry in the history.
+      */
+-    public function addHistory(string $line = null)
++    public function addHistory(?string $line = null)
+     {
+         if (empty($line)) {
+             return;
+@@ -294,7 +294,7 @@ class Readline
+     /**
+      * Get an entry in the history.
+      */
+-    public function getHistory(int $i = null)
++    public function getHistory(?int $i = null)
+     {
+         if (null === $i) {
+             $i = $this->_historyCurrent;
+diff --git a/src/Readline/Hoa/Stream.php b/src/Readline/Hoa/Stream.php
+index 62e56ce3..7a7bd8e4 100644
+--- a/src/Readline/Hoa/Stream.php
++++ b/src/Readline/Hoa/Stream.php
+@@ -110,7 +110,7 @@ abstract class Stream implements IStream, EventListenable
+      * If not exists in the register, try to call the
+      * `$this->_open()` method. Please, see the `self::_getStream()` method.
+      */
+-    public function __construct(string $streamName, string $context = null, bool $wait = false)
++    public function __construct(string $streamName, ?string $context = null, bool $wait = false)
+     {
+         $this->_streamName = $streamName;
+         $this->_context = $context;
+@@ -150,7 +150,7 @@ abstract class Stream implements IStream, EventListenable
+     private static function &_getStream(
+         string $streamName,
+         self $handler,
+-        string $context = null
++        ?string $context = null
+     ): array {
+         $name = \md5($streamName);
+ 
+@@ -195,7 +195,7 @@ abstract class Stream implements IStream, EventListenable
+      * Note: This method is protected, but do not forget that it could be
+      * overloaded into a public context.
+      */
+-    abstract protected function &_open(string $streamName, StreamContext $context = null);
++    abstract protected function &_open(string $streamName, ?StreamContext $context = null);
+ 
+     /**
+      * Close the current stream.
+diff --git a/src/Readline/Hoa/StreamBufferable.php b/src/Readline/Hoa/StreamBufferable.php
+index e431021a..6a0c363e 100644
+--- a/src/Readline/Hoa/StreamBufferable.php
++++ b/src/Readline/Hoa/StreamBufferable.php
+@@ -49,7 +49,7 @@ interface StreamBufferable extends IStream
+      * Start a new buffer.
+      * The callable acts like a light filter.
+      */
+-    public function newBuffer($callable = null, int $size = null): int;
++    public function newBuffer($callable = null, ?int $size = null): int;
+ 
+     /**
+      * Flush the buffer.
+diff --git a/src/Readline/Hoa/StreamTouchable.php b/src/Readline/Hoa/StreamTouchable.php
+index 08b75255..f1b50d52 100644
+--- a/src/Readline/Hoa/StreamTouchable.php
++++ b/src/Readline/Hoa/StreamTouchable.php
+@@ -106,5 +106,5 @@ interface StreamTouchable extends IStream
+     /**
+      * Change the current umask.
+      */
+-    public static function umask(int $umask = null): int;
++    public static function umask(?int $umask = null): int;
+ }
+diff --git a/src/Readline/Readline.php b/src/Readline/Readline.php
+index e9b45b3c..429b2b1f 100644
+--- a/src/Readline/Readline.php
++++ b/src/Readline/Readline.php
+@@ -70,7 +70,7 @@ interface Readline
+      *
+      * @return false|string
+      */
+-    public function readline(string $prompt = null);
++    public function readline(?string $prompt = null);
+ 
+     /**
+      * Redraw readline to redraw the display.
+diff --git a/src/Readline/Transient.php b/src/Readline/Transient.php
+index 43eb2851..22c62493 100644
+--- a/src/Readline/Transient.php
++++ b/src/Readline/Transient.php
+@@ -110,7 +110,7 @@ class Transient implements Readline
+      *
+      * @return false|string
+      */
+-    public function readline(string $prompt = null)
++    public function readline(?string $prompt = null)
+     {
+         echo $prompt;
+ 
+diff --git a/src/Readline/Userland.php b/src/Readline/Userland.php
+index 62018b77..95b12282 100644
+--- a/src/Readline/Userland.php
++++ b/src/Readline/Userland.php
+@@ -138,7 +138,7 @@ class Userland implements Readline
+      *
+      * @return string
+      */
+-    public function readline(string $prompt = null)
++    public function readline(?string $prompt = null)
+     {
+         $this->lastPrompt = $prompt;
+ 
+diff --git a/src/Shell.php b/src/Shell.php
+index 57295a96..00fb2243 100644
+--- a/src/Shell.php
++++ b/src/Shell.php
+@@ -88,7 +88,7 @@ class Shell extends Application
+      *
+      * @param Configuration|null $config (default: null)
+      */
+-    public function __construct(Configuration $config = null)
++    public function __construct(?Configuration $config = null)
+     {
+         $this->config = $config ?: new Configuration();
+         $this->cleaner = $this->config->getCodeCleaner();
+@@ -326,7 +326,7 @@ class Shell extends Application
+      *
+      * @return int 0 if everything went fine, or an error code
+      */
+-    public function run(InputInterface $input = null, OutputInterface $output = null): int
++    public function run(?InputInterface $input = null, ?OutputInterface $output = null): int
+     {
+         // We'll just ignore the input passed in, and set up our own!
+         $input = new ArrayInput([]);
+diff --git a/src/Util/Mirror.php b/src/Util/Mirror.php
+index c151c06f..2b960fba 100644
+--- a/src/Util/Mirror.php
++++ b/src/Util/Mirror.php
+@@ -43,7 +43,7 @@ class Mirror
+      *
+      * @return \Reflector
+      */
+-    public static function get($value, string $member = null, int $filter = 15): \Reflector
++    public static function get($value, ?string $member = null, int $filter = 15): \Reflector
+     {
+         if ($member === null && \is_string($value)) {
+             if (\function_exists($value)) {
+diff --git a/src/VarDumper/Presenter.php b/src/VarDumper/Presenter.php
+index 7e54dac0..b63ca8d0 100644
+--- a/src/VarDumper/Presenter.php
++++ b/src/VarDumper/Presenter.php
+@@ -105,7 +105,7 @@ class Presenter
+      * @param int   $depth   (default: null)
+      * @param int   $options One of Presenter constants
+      */
+-    public function present($value, int $depth = null, int $options = 0): string
++    public function present($value, ?int $depth = null, int $options = 0): string
+     {
+         $data = $this->cloner->cloneVar($value, !($options & self::VERBOSE) ? Caster::EXCLUDE_VERBOSE : 0);
+ 
+diff --git a/src/VersionUpdater/Installer.php b/src/VersionUpdater/Installer.php
+index eb20cb86..83dded81 100644
+--- a/src/VersionUpdater/Installer.php
++++ b/src/VersionUpdater/Installer.php
+@@ -25,7 +25,7 @@ class Installer
+      */
+     protected $tempDirectory;
+ 
+-    public function __construct(string $tempDirectory = null)
++    public function __construct(?string $tempDirectory = null)
+     {
+         $this->tempDirectory = $tempDirectory ?: \sys_get_temp_dir();
+         $this->installLocation = \Phar::running(false);
+diff --git a/src/functions.php b/src/functions.php
+index f0e771c2..04420d62 100644
+--- a/src/functions.php
++++ b/src/functions.php
+@@ -128,7 +128,7 @@ if (!\function_exists('Psy\\info')) {
+      *
+      * @return array|null
+      */
+-    function info(Configuration $config = null)
++    function info(?Configuration $config = null)
+     {
+         static $lastConfig;
+         if ($config !== null) {
