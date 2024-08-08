@@ -106,7 +106,7 @@ class CoreLifecycleTest extends \PHPUnit\Framework\TestCase {
     $this->assertMatchesRegularExpression('/Creating civicrm_\* database/', $output);
 
     if ($postInstallCmd) {
-      Process::runOk(new \Symfony\Component\Process\Process($postInstallCmd));
+      Process::runOk(\Symfony\Component\Process\Process::fromShellCommandline($postInstallCmd));
     }
 
     // We've installed CMS+Civi. All should be well.
@@ -160,7 +160,10 @@ class CoreLifecycleTest extends \PHPUnit\Framework\TestCase {
   }
 
   protected function proc($commandline, $cwd = NULL, ?array $env = NULL, $input = NULL, $timeout = self::TIMEOUT, array $options = array()) {
-    $p = new \Symfony\Component\Process\Process($commandline, $cwd, $env, $input, $timeout, $options);
+    if (!empty($options)) {
+      throw new \LogicException("The old options are not supported");
+    }
+    $p = \Symfony\Component\Process\Process::fromShellCommandline($commandline, $cwd, $env, $input, $timeout);
     return $p;
   }
 

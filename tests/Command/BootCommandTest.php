@@ -21,7 +21,7 @@ class BootCommandTest extends \Civi\Cv\CivilTestCase {
       . 'printf("count is %s\n", CRM_Core_DAO::singleValueQuery("select count(*) from civicrm_contact"));'
       . 'printf("my admin is %s\n", $GLOBALS["_CV"]["ADMIN_USER"]);'
     );
-    $phpRun = Process::runOk(new \Symfony\Component\Process\Process("php -r $helloPhp"));
+    $phpRun = Process::runOk(\Symfony\Component\Process\Process::fromShellCommandline("php -r $helloPhp"));
     $this->assertMatchesRegularExpression('/^count is [0-9]+\n/', $phpRun->getOutput());
     $this->assertMatchesRegularExpression('/my admin is \w+\n/', $phpRun->getOutput());
   }
@@ -35,7 +35,7 @@ class BootCommandTest extends \Civi\Cv\CivilTestCase {
       . 'printf("count is %s\n", CRM_Core_DAO::singleValueQuery("select count(*) from civicrm_contact"));'
       . 'printf("my admin is %s\n", $GLOBALS["_CV"]["ADMIN_USER"]);'
     );
-    $phpRun = Process::runOk(new \Symfony\Component\Process\Process("php -r $helloPhp"));
+    $phpRun = Process::runOk(\Symfony\Component\Process\Process::fromShellCommandline("php -r $helloPhp"));
     $this->assertMatchesRegularExpression('/^count is [0-9]+\n/', $phpRun->getOutput());
     $this->assertMatchesRegularExpression('/my admin is \w+\n/', $phpRun->getOutput());
   }
@@ -49,7 +49,7 @@ class BootCommandTest extends \Civi\Cv\CivilTestCase {
       . '$x=array("a"=>defined("CIVICRM_DSN") ? "yup" : "nope");'
       . 'printf("phpr says %s\n", CRM_Utils_Array::value("a",$x));'
     );
-    $phpRun = Process::runOk(new \Symfony\Component\Process\Process("php -r $helloPhp"));
+    $phpRun = Process::runOk(\Symfony\Component\Process\Process::fromShellCommandline("php -r $helloPhp"));
     $this->assertMatchesRegularExpression('/^phpr says nope$/', $phpRun->getOutput());
   }
 
@@ -60,7 +60,7 @@ class BootCommandTest extends \Civi\Cv\CivilTestCase {
     $helloPhp = escapeshellarg($phpBoot->getOutput()
       . 'echo CIVICRM_UF;'
     );
-    $phpRun = Process::runOk(new \Symfony\Component\Process\Process("php -ddisplay_errors=1 -r $helloPhp"));
+    $phpRun = Process::runOk(\Symfony\Component\Process\Process::fromShellCommandline("php -ddisplay_errors=1 -r $helloPhp"));
     $this->assertMatchesRegularExpression('/UnitTests/i', $phpRun->getOutput());
   }
 

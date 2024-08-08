@@ -57,7 +57,7 @@ class ApiCommandTest extends \Civi\Cv\CivilTestCase {
     $input = escapeshellarg(json_encode(array(
       'options' => array('limit' => 1),
     )));
-    $p = Process::runOk(new \Symfony\Component\Process\Process("echo $input | {$this->cv} api Contact.get --in=json"));
+    $p = Process::runOk(\Symfony\Component\Process\Process::fromShellCommandline("echo $input | {$this->cv} api Contact.get --in=json"));
     $data = json_decode($p->getOutput(), 1);
     $this->assertTrue(!empty($data['values']));
     $this->assertEquals(1, count($data['values']));

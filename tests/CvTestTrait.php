@@ -14,7 +14,7 @@ trait CvTestTrait {
    */
   protected function cv($command) {
     $cvPath = getenv('CV_TEST_BINARY') ?: dirname(__DIR__) . '/bin/cv';
-    $process = new \Symfony\Component\Process\Process("{$cvPath} $command");
+    $process = \Symfony\Component\Process\Process::fromShellCommandline("{$cvPath} $command");
     return $process;
   }
 
