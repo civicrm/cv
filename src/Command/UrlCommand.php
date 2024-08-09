@@ -94,7 +94,7 @@ NOTE: If you use `--login` and do not have `authx`, then it prompts about
       foreach ($rows as $row) {
         if (!empty($row['value'])) {
           $escaped = escapeshellarg($row['value']);
-          Process::runOk(new \Symfony\Component\Process\Process("$cmd $escaped"));
+          Process::runOk(\Symfony\Component\Process\Process::fromShellCommandline("$cmd $escaped"));
         }
       }
     }

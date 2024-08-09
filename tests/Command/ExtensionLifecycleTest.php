@@ -150,7 +150,7 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
     $cvTestSrc = dirname(__DIR__) . '/fixtures/org.example.cvtest';
     $makePhp = $cvTestSrc . DIRECTORY_SEPARATOR . 'make.php';
     $cvTestZip = $this->tmpDir . DIRECTORY_SEPARATOR . 'cvtest.zip';
-    Process::runOk(new \Symfony\Component\Process\Process(
+    Process::runOk(\Symfony\Component\Process\Process::fromShellCommandline(
       escapeshellcmd($makePhp) . ' ' . escapeshellarg($cvTestZip),
       $cvTestSrc
     ));
@@ -158,7 +158,7 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
   }
 
   protected function extractZip($zipFile, $path) {
-    Process::runOk(new \Symfony\Component\Process\Process(
+    Process::runOk(\Symfony\Component\Process\Process::fromShellCommandline(
       "unzip " . escapeshellarg($zipFile),
       $path
     ));

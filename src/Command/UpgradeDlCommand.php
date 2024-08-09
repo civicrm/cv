@@ -104,7 +104,7 @@ Returns a JSON object with the properties:
         // won't know the site's URL.
         $www = dirname($dest);
         $sitename = basename($dest);
-        $p = new Process("joomla extension:installfile --www $www $sitename $temploc/$filename");
+        $p = Process::fromShellCommandline("joomla extension:installfile --www $www $sitename $temploc/$filename");
         $p->run();
         if (!$p->isSuccessful()) {
           throw new ProcessFailedException($p);
@@ -135,7 +135,7 @@ Returns a JSON object with the properties:
     else {
       $command = "tar -xzf $fileloc -C $folderloc";
     }
-    $p = new Process("mkdir -p $folderloc && $command");
+    $p = Process::fromShellCommandline("mkdir -p $folderloc && $command");
     $p->run();
     if (!$p->isSuccessful()) {
       throw new ProcessFailedException($p);
@@ -152,7 +152,7 @@ Returns a JSON object with the properties:
       $command .= " --exclude $x";
     }
 
-    $p = new Process("$command $folderloc/civicrm/ $dest");
+    $p = Process::fromShellCommandline("$command $folderloc/civicrm/ $dest");
     $p->run();
     if (!$p->isSuccessful()) {
       throw new ProcessFailedException($p);

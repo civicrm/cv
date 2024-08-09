@@ -26,20 +26,20 @@ class ProcessTest extends \PHPUnit\Framework\TestCase {
       ProcessUtil::sprintf('ls %s', '/foo/bar')
     );
 
-    $echoResult = ProcessUtil::runOk(new Process(
+    $echoResult = ProcessUtil::runOk(Process::fromShellCommandline(
       ProcessUtil::sprintf('echo %s', 'whiz=1&amp;bang=>')
     ));
     $this->assertEquals('whiz=1&amp;bang=>', rtrim($echoResult->getOutput()));
   }
 
   public function testRunOk_pass() {
-    $process = ProcessUtil::runOk(new \Symfony\Component\Process\Process("echo times were good"));
+    $process = ProcessUtil::runOk(\Symfony\Component\Process\Process::fromShellCommandline("echo times were good"));
     $this->assertEquals("times were good", trim($process->getOutput()));
   }
 
   public function testRunOk_fail() {
     try {
-      ProcessUtil::runOk(new \Symfony\Component\Process\Process("echo tragedy befell the software > /dev/stderr; exit 1"));
+      ProcessUtil::runOk(\Symfony\Component\Process\Process::fromShellCommandline("echo tragedy befell the software > /dev/stderr; exit 1"));
       $this->fail("Failed to generate expected exception");
     }
     catch (\Civi\Cv\Exception\ProcessErrorException $e) {

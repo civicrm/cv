@@ -20,7 +20,7 @@ class ApiBatchCommandTest extends \Civi\Cv\CivilTestCase {
         array('Contact', 'get', array('id' => 101)),
       ))
     );
-    $p = Process::runOk(new \Symfony\Component\Process\Process("echo $input | {$this->cv} api:batch"));
+    $p = Process::runOk(\Symfony\Component\Process\Process::fromShellCommandline("echo $input | {$this->cv} api:batch"));
     $data = json_decode($p->getOutput(), 1);
     $this->assertTrue(isset($data[0]['is_error']));
     $this->assertTrue(isset($data[1]['is_error']));
@@ -40,7 +40,7 @@ class ApiBatchCommandTest extends \Civi\Cv\CivilTestCase {
     ));
     $input = ($jsonNumArray . "\n" . $jsonAssocArray);
 
-    $p = new \Symfony\Component\Process\Process("{$this->cv} api:batch");
+    $p = \Symfony\Component\Process\Process::fromShellCommandline("{$this->cv} api:batch");
     $p->setInput($input);
     $p = Process::runOk($p);
 
