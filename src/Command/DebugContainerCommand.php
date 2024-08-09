@@ -36,7 +36,7 @@ internal services (eg `--all`, `--tag=XXX`, or `-v`).
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     define('CIVICRM_CONTAINER_CACHE', 'never');
     $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
     $this->boot($input, $output);
@@ -89,6 +89,7 @@ internal services (eg `--all`, `--tag=XXX`, or `-v`).
     else {
       $this->showBasicReport($input, $output, $definitions);
     }
+    return 0;
   }
 
   public function showBasicReport(InputInterface $input, OutputInterface $output, array $definitions): void {

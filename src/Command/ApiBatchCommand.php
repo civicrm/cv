@@ -59,7 +59,7 @@ Protocol:
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     if ($input->getOption('in') !== 'json' || $input->getOption('out') !== 'json') {
       // Other formats may not work with the fgets() loop.
       throw new \Exception("api:batch only supports JSON dialog");
@@ -129,6 +129,8 @@ Protocol:
       }
       flush();
     }
+
+    return 0;
   }
 
 }

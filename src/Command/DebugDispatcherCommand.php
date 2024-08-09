@@ -30,7 +30,7 @@ Examples:
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     define('CIVICRM_CONTAINER_CACHE', 'never');
     $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
     $this->boot($input, $output);
@@ -55,6 +55,7 @@ Examples:
     $eventFilter = $input->getArgument('event');
     $eventNames = $this->findEventNames($dispatcher, $eventFilter);
     $this->printEventListeners($output, $dispatcher, $eventNames);
+    return 0;
   }
 
 }

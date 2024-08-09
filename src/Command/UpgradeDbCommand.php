@@ -55,7 +55,7 @@ Examples:
     parent::initialize($input, $output);
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     if (!defined('CIVICRM_UPGRADE_ACTIVE')) {
       define('CIVICRM_UPGRADE_ACTIVE', 1);
     }

@@ -20,11 +20,12 @@ class ShowCommand extends BaseCommand {
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
     $reader = new SiteConfigReader(CIVICRM_SETTINGS_PATH);
     $data = $reader->compile(array('buildkit', 'home', 'active'));
     $this->sendResult($input, $output, $data);
+    return 0;
   }
 
 }
