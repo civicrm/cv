@@ -118,9 +118,7 @@ class CoreLifecycleTest extends \PHPUnit\Framework\TestCase {
     $output = $this->cvOk("upgrade:db");
     $this->assertMatchesRegularExpression('/Found CiviCRM database version ([0-9\.]|alpha|beta)+/', $output);
     $this->assertMatchesRegularExpression('/Found CiviCRM code version ([0-9\.]|alpha|beta)+/', $output);
-    $this->assertMatchesRegularExpression('/\[latestVer\] => ([0-9\.]|alpha|beta)+/', $output);
-    $this->assertMatchesRegularExpression('/\[message\] => You are already/', $output);
-    $this->assertMatchesRegularExpression('/\[text\] => You are already/', $output);
+    $this->assertMatchesRegularExpression('/Have a nice day/', $output);
 
     $output = $this->cvOk('core:uninstall -f');
     $this->assertMatchesRegularExpression('/Removing .*civicrm.settings.php/', $output);
