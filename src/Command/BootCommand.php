@@ -16,7 +16,7 @@ class BootCommand extends BaseCommand {
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
 
     switch ($input->getOption('level')) {
@@ -41,6 +41,7 @@ class BootCommand extends BaseCommand {
         break;
 
       case 'none':
+        $code = '';
         break;
 
       default:
@@ -50,6 +51,7 @@ class BootCommand extends BaseCommand {
     $output->writeln('/*BEGINPHP*/');
     $output->writeln($code);
     $output->writeln('/*ENDPHP*/');
+    return 0;
   }
 
 }

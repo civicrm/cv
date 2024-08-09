@@ -34,7 +34,7 @@ Deprecation:
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $output->writeln("<error>WARNING: \"ext:upgrade-db\" is deprecated. Use the main \"updb\" command instead.</error>");
     $this->boot($input, $output);
 
@@ -43,6 +43,7 @@ Deprecation:
     if (!empty($result['is_error'])) {
       return 1;
     }
+    return 0;
   }
 
 }
