@@ -49,7 +49,7 @@ Note:
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $wo = ($input->getOption('out') === 'table')
       ? (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_NORMAL)
       : (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_VERBOSE);

@@ -68,7 +68,7 @@ Note:
     parent::initialize($input, $output);
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $fs = new Filesystem();
 
     if ($extRepoUrl = $this->parseRepoUrl($input)) {

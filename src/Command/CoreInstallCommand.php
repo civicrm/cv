@@ -52,7 +52,7 @@ $ cv core:install -m extras.opt-in.versionCheck=1
     $this->configureBootOptions('none');
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $setup = $this->bootSetupSubsystem($input, $output);
 
     $debugMode = FALSE;

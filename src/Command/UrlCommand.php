@@ -76,7 +76,7 @@ NOTE: If you use `--login` and do not have `authx`, then it prompts about
     }
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     if (in_array($input->getOption('out'), Encoder::getTabularFormats())
     && !in_array($input->getOption('out'), Encoder::getFormats())) {
       $input->setOption('tabular', TRUE);

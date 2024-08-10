@@ -38,7 +38,7 @@ $ cv core:check-req -we
     $this->configureBootOptions('none');
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $filterSeverities = $this->parseFilter($input);
 
     $showBootMsgsByDefault = in_array($input->getOption('out'), ['table', 'pretty']);

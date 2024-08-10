@@ -71,7 +71,7 @@ class SettingGetCommand extends BaseCommand {
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
 
     $filter = $this->createSettingFilter($input->getArgument('name'));

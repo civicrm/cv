@@ -50,7 +50,7 @@ See also: https://docs.civicrm.org/dev/en/latest/framework/pipe
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
     if (!is_callable(['Civi', 'pipe'])) {
       fwrite(STDERR, "This version of CiviCRM does not include Civi::pipe() support.\n");

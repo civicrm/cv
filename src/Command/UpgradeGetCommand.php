@@ -42,7 +42,7 @@ Returns a JSON object with the properties:
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $result = array();
     $exitCode = 0;
     $stability = $input->getOption('stability');

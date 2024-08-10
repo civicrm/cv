@@ -85,7 +85,7 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $C = '<comment>';
     $_C = '</comment>';
     $I = '<info>';

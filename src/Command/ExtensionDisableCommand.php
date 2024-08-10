@@ -37,7 +37,7 @@ Note:
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
     list ($foundKeys, $missingKeys) = $this->parseKeys($input, $output);
 

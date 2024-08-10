@@ -58,7 +58,7 @@ class FillCommand extends BaseCommand {
     );
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
     if (!$input->getOption('file')) {
       $reader = new SiteConfigReader(CIVICRM_SETTINGS_PATH);
@@ -105,6 +105,7 @@ class FillCommand extends BaseCommand {
       });
       $output->writeln(sprintf("<info>Please edit</info> %s", Config::getFileName()));
     }
+    return 0;
   }
 
 }
