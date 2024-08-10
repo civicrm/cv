@@ -30,6 +30,9 @@ return [
     '/^(drupal|backdrop|user|module)_/',
     't',
   ],
+  'exclude-files' => [
+    'vendor/symfony/polyfill-php80/Resources/stubs/Stringable.php'
+  ],
 
   // Do not generate wrappers/aliases for `civicrm_api()` etc or various CMS-booting functions.
   'expose-global-functions' => FALSE,
