@@ -202,6 +202,10 @@ class Bootstrap {
           // Hint for D7 multisite
           $_SERVER['HTTP_HOST'] = $options['httpHost'];
         }
+        elseif (empty($_SERVER['HTTP_HOST']) && $cmsType === 'backdrop') {
+          // backdrop_settings_initialize() tries to configure cookie policy - and complains if HTTP_HOST is missing
+          $_SERVER['HTTP_HOST'] = 'localhost';
+        }
         if (ord($_SERVER['SCRIPT_NAME']) != 47) {
           $_SERVER['SCRIPT_NAME'] = '/' . $_SERVER['SCRIPT_NAME'];
         }
@@ -254,6 +258,10 @@ class Bootstrap {
       'REQUEST_METHOD',
       'SCRIPT_NAME',
     );
+    if (CIVICRM_UF === 'Backdrop') {
+      $srvVars[] = 'HTTP_HOST';
+      // ^^ This might make sense for all UF's, but it would require more testing to QA.
+    }
     foreach ($srvVars as $srvVar) {
       $code[] = sprintf('$_SERVER["%s"] = %s;',
         $srvVar, var_export($_SERVER[$srvVar], 1));
