@@ -377,11 +377,11 @@ class Bootstrap {
         $settings = $this->findFirstFile(
           [
             $cmsRoot,
-            implode(DIRECTORY_SEPARATOR, [$cmsRoot, 'data'])
+            implode(DIRECTORY_SEPARATOR, [$cmsRoot, 'data']),
           ],
           [
-           'civicrm.standalone.php',
-           'civicrm.settings.php',
+            'civicrm.standalone.php',
+            'civicrm.settings.php',
           ]
         );
         break;
