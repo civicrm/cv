@@ -58,7 +58,7 @@ Example: Lookup multiple items
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
 
     if (!$input->getOption('ext') && !$input->getOption('config') && !$input->getOption('dynamic')) {

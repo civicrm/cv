@@ -46,7 +46,7 @@ class EditCommand extends BaseCommand {
     });
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
 
     $config = Config::read();

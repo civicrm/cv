@@ -125,7 +125,7 @@ NOTE: To change the default output format, set CV_OUTPUT.
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $C = '<comment>';
     $_C = '</comment>';
     $I = '<info>';

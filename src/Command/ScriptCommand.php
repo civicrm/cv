@@ -21,7 +21,7 @@ class ScriptCommand extends BaseCommand {
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $fs = new Filesystem();
     $origScript = $fs->toAbsolutePath($input->getArgument('script'));
     $scriptArguments = $input->getArgument('scriptArguments');

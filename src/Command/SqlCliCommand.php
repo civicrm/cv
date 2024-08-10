@@ -47,7 +47,7 @@ The ENV expressions are prefixed to indicate their escaping rule:
     }
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
 
     $datasource = new Datasource();

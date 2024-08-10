@@ -40,7 +40,7 @@ Note:
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
 
     // Refresh extensions if (a) ---refresh enabled or (b) there's a cache-miss.
