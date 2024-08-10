@@ -46,7 +46,7 @@ NOTE: If you use `--login` and do not have `authx`, then it prompts about
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
 
     $method = $input->getOption('request');
@@ -67,6 +67,7 @@ NOTE: If you use `--login` and do not have `authx`, then it prompts about
       $statusCode = $this->sendRequest($output, $method, $row['value'], array_merge($headers, $row['headers'] ?? []), $data);
       return ($statusCode >= 200 && $statusCode < 300) ? 0 : $statusCode;
     }
+    return 0;
   }
 
   /**

@@ -55,7 +55,7 @@ Returns a JSON object with the properties:
     // parent::configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     // $report will be POSTed too https://upgrade.civicrm.org/report.
     // See also: https://github.com/civicrm/civicrm-dist-manager#route-post-report-web-service
 
@@ -111,6 +111,7 @@ Returns a JSON object with the properties:
     $report['response'] = $this->reportToCivi($report);
 
     $this->sendResult($input, $output, $report);
+    return 0;
   }
 
   /**

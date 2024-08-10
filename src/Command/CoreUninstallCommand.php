@@ -31,7 +31,7 @@ options for "core:uninstall" as the preceding "core:install".
     $this->configureBootOptions('none');
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $setup = $this->bootSetupSubsystem($input, $output);
 
     $debugEvent = $this->parseOptionalOption($input, ['--debug-event'], NULL, '');
@@ -74,6 +74,8 @@ options for "core:uninstall" as the preceding "core:install".
       $output->writeln(sprintf("<info>Removing <comment>%s</comment> from <comment>%s</comment></info>", basename($setup->getModel()->settingsPath), dirname($setup->getModel()->settingsPath)));
       $setup->uninstallFiles();
     }
+
+    return 0;
   }
 
 }

@@ -37,7 +37,7 @@ Returns a JSON object with the properties:
     // parent::configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     // Figure out the URL, whether specified or automatic
     $url = $input->getOption('url');
     if (empty($url)) {
@@ -114,6 +114,7 @@ Returns a JSON object with the properties:
     $result['installedTo'] = $dest;
 
     $this->sendResult($input, $output, $result);
+    return 0;
   }
 
   /**

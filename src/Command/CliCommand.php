@@ -21,7 +21,7 @@ class CliCommand extends BaseCommand {
     $this->configureBootOptions();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
 
     $cv = new Application();
@@ -32,6 +32,7 @@ class CliCommand extends BaseCommand {
     //  new ApiMatcher(),
     //));
     $sh->run();
+    return 0;
   }
 
 }
