@@ -77,6 +77,7 @@ $ cv core:install -m extras.opt-in.versionCheck=1
     if ($output->getVerbosity() > OutputInterface::VERBOSITY_NORMAL) {
       $output->writeln(Encoder::encode($setup->getModel()->getValues(), 'json-pretty'));
     }
+    return 0;
   }
 
   /**
