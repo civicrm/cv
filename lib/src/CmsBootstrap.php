@@ -171,10 +171,6 @@ class CmsBootstrap {
     call_user_func([$this, $func],
       $cms['path'], $this->options['user'], $this->options['httpHost']);
 
-    if (PHP_SAPI === "cli") {
-      error_reporting(1);
-    }
-
     $this->log->debug("Finished");
     $this->bootedCms = $cms;
     return $this;

@@ -43,9 +43,7 @@ class Application extends \Symfony\Component\Console\Application {
     $application = new Application('cv', static::version() ?? 'UNKNOWN');
 
     $application->setAutoExit(FALSE);
-    ErrorHandler::pushHandler();
     $result = $application->run();
-    ErrorHandler::popHandler();
     exit($result);
   }
 

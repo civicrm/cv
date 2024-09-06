@@ -213,7 +213,7 @@ class Bootstrap {
 
       $this->log->debug("Load settings file \"" . $settings . "\"");
       define('CIVICRM_SETTINGS_PATH', $settings);
-      $error = @include_once $settings;
+      $error = include_once $settings;
       if ($error == FALSE) {
         $this->log->notice("Failed to load settings file");
         throw new \Exception("Could not load the CiviCRM settings file: {$settings}");
