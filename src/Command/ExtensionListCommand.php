@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Cv;
 use Civi\Cv\Util\ArrayUtil;
 use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
@@ -81,7 +82,10 @@ Note:
       }
     }
 
-    $this->sendStandardTable($this->find($input));
+    $records = $this->find($input);
+    $columns = ArrayUtil::resolveColumns($this->parseColumns($input), $records);
+    $records = $this->applyExtras($records, $columns);
+    $this->sendStandardTable($records);
     return 0;
   }
 
@@ -231,6 +235,78 @@ Note:
     catch (\CRM_Extension_Exception_MissingException $e) {
       return NULL;
     }
+  }
+
+  protected function applyExtras(array $rows, array $columns): array {
+    if (!in_array('extras', $columns)) {
+      return $rows;
+    }
+
+    foreach ($rows as &$row) {
+      $extra = [];
+
+      if (!in_array('upgrade', $columns) && !in_array('upgradeVersion', $columns)) {
+        if ($row['upgrade'] === 'available') {
+          $extra[] = $this->formatInlineKeyValue('upgrade', $row['upgradeVersion']);
+        }
+        elseif ($row['upgrade'] === 'manual') {
+          $extra[] = $this->formatInlineKeyValue('upgrade', [$row['upgradeVersion'], 'manual']);
+        }
+      }
+      if (!in_array('downloadUrl', $columns) && !empty($row['downloadUrl'])) {
+        $extra[] = $this->formatInlineKeyValue('url', parse_url($row['downloadUrl'], PHP_URL_HOST));
+      }
+
+      $row['extras'] = implode(' ', $extra);
+    }
+    return $rows;
+  }
+
+  /**
+   * Format in an inlined expression with a name (and its alias).
+   *
+   * @param string $name
+   * @param string|null $alias
+   * @return string
+   */
+  private function formatInlineAlias(string $name, ?string $alias): string {
+    if ($alias !== NULL && $alias !== '' && $alias !== $name) {
+      $suffix = $this->isAnsiEnabled() ? " (<comment>$alias</comment>)" : " ($alias)";
+    }
+    else {
+      $suffix = '';
+    }
+    return $name . $suffix;
+  }
+
+  /**
+   * Format an inlined expression with a key-value.
+   *
+   * @param string $key
+   * @param string|string[] $value
+   * @return string
+   */
+  private function formatInlineKeyValue(string $key, $value): string {
+    $value = (array) $value;
+    if ($this->isAnsiEnabled()) {
+      $value = array_map(function($s) {
+        return "<comment>$s</comment>";
+      }, (array) $value);
+    }
+    $value = implode(',', $value);
+    return "{$key}[$value]";
+  }
+
+  private function isAnsiEnabled(): bool {
+    $input = Cv::input();
+    if ($input->getOption('no-ansi')) {
+      return FALSE;
+    }
+    if ($input->getOption('ansi')) {
+      return TRUE;
+    }
+    $out = $input->getOption('out');
+    return ($out === 'table');
   }
 
 }
