@@ -2,6 +2,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\ArrayUtil;
+use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -132,6 +133,7 @@ Note:
           'status' => '',
           'type' => $info->type,
           'path' => '',
+          'relPath' => '',
           'downloadUrl' => $info->downloadUrl,
           'upgrade' => '',
           'upgradeVersion' => '',
@@ -144,8 +146,10 @@ Note:
       $statuses = \CRM_Extension_System::singleton()->getManager()->getStatuses();
       $mapper = \CRM_Extension_System::singleton()->getMapper();
       $remotes = $this->getRemoteInfos();
+      $relativizer = new Relativizer();
       foreach ($keys as $key) {
         $info = $mapper->keyToInfo($key);
+        $localPath = $mapper->keyToBasePath($key);
         $rows[] = array(
           'location' => 'local',
           'key' => $key,
@@ -154,9 +158,10 @@ Note:
           'label' => $info->label,
           'status' => isset($statuses[$key]) ? $statuses[$key] : '',
           'type' => $info->type,
-          'path' => $mapper->keyToBasePath($key),
+          'path' => $localPath,
+          'relPath' => $localPath ? $relativizer->filter($localPath) : '',
           'downloadUrl' => property_exists($info, 'downloadUrl') ? $info->downloadUrl : NULL,
-          'upgrade' => $this->getUpgradeStatus($info, $remotes[$key] ?? NULL),
+          'upgrade' => $this->getUpgradeStatus($info, $remotes[$key] ?? NULL, $localPath),
           'upgradeVersion' => isset($remotes[$key]->version) && version_compare($remotes[$key]->version, $info->version, '>') ? $remotes[$key]->version : '',
         );
       }
@@ -193,7 +198,7 @@ Note:
     }
   }
 
-  protected function getUpgradeStatus(?\CRM_Extension_Info $localInfo, ?\CRM_Extension_Info $remoteInfo): string {
+  protected function getUpgradeStatus(?\CRM_Extension_Info $localInfo, ?\CRM_Extension_Info $remoteInfo, ?string $localPath): string {
     if (empty($localInfo) || empty($remoteInfo)) {
       return '';
     }
@@ -207,7 +212,6 @@ Note:
     }
 
     $sys = \CRM_Extension_System::singleton();
-    $localPath = $this->getPath($sys->getFullContainer(), $localInfo->key);
     if (!\CRM_Utils_File::isChildPath($sys->getDefaultContainer()->getBaseDir(), $localPath)) {
       // Only try to manage upgrades within the default container.
       // Don't encourage folks to have split-paths.
