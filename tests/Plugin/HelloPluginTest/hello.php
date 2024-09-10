@@ -35,13 +35,14 @@ Cv::dispatcher()->addListener('cv.app.commands', function ($e) {
       $this->setName('hello')->setDescription('Say a greeting')->addArgument('name');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output): int {
       if ($input->getArgument('name') !== Cv::input()->getArgument('name')) {
         throw new \RuntimeException("Argument \"name\" is inconsistent!");
       }
       $name = $input->getArgument('name') ?: 'world';
       $output->writeln("Hello $name via parameter!");
       Cv::io()->writeln("Hello $name via StyleInterface!");
+      return 0;
     }
 
   };

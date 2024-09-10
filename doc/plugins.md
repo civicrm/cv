@@ -18,8 +18,9 @@ Cv::dispatcher()->addListener('cv.app.commands', function($e) {
     protected function configure() {
       $this->setName('hello')->setDescription('Say a greeting');
     }
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output): int {
       $output->writeln('Hello there!');
+      return 0;
     }
   };
 });
