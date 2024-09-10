@@ -12,7 +12,7 @@ use CvDeps\Symfony\Component\Console\Output\OutputInterface;
 use CvDeps\Symfony\Component\Console\Command\Command;
 
 if (empty($CV_PLUGIN['protocol']) || $CV_PLUGIN['protocol'] > 1) {
-  die(__FILE__ " . has only been tested with CV_PLUGIN API v1");
+  die(__FILE__ . " has only been tested with CV_PLUGIN API v1");
 }
 
 Cv::dispatcher()->addListener('cv.app.commands', function($e) {
