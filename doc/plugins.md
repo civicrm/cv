@@ -35,7 +35,7 @@ deduped by name (with earlier folders having higher precedence).
 If otherwise unspecified, the default value of `CV_PLUGIN_PATH` is:
 
 ```bash
-CV_PLUGIN_PATH=$HOME/.config/cv/plugin/:/etc/cv/plugin:/usr/share/cv/plugin:/usr/local/share/cv/plugin
+CV_PLUGIN_PATH=$HOME/.cv/plugin/:/etc/cv/plugin:/usr/local/share/cv/plugin:/usr/share/cv/plugin
 ```
 
 <!--

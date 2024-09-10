@@ -14,8 +14,8 @@ class CvPlugins {
    * Load any plugins.
    *
    * This will scan any folders listed in CV_PLUGIN_PATH. If CV_PLUGIN_PATH
-   * is undefined, then the default will be
-   * `$HOME/.cv/plugin:/etc/cv/plugin:/usr/local/share/cv/plugin:/usr/share/cv/plugin`.
+   * is undefined, then the default will include paths under /home, /etc,
+   * and /usr/../share
    *
    * @param array $pluginEnv
    *   Description the current application environment.
