@@ -133,6 +133,8 @@ Note:
           'type' => $info->type,
           'path' => '',
           'downloadUrl' => $info->downloadUrl,
+          'upgrade' => '',
+          'upgradeVersion' => '',
         );
       }
     }
@@ -141,6 +143,7 @@ Note:
       $keys = \CRM_Extension_System::singleton()->getFullContainer()->getKeys();
       $statuses = \CRM_Extension_System::singleton()->getManager()->getStatuses();
       $mapper = \CRM_Extension_System::singleton()->getMapper();
+      $remotes = $this->getRemoteInfos();
       foreach ($keys as $key) {
         $info = $mapper->keyToInfo($key);
         $rows[] = array(
@@ -153,6 +156,8 @@ Note:
           'type' => $info->type,
           'path' => $mapper->keyToBasePath($key),
           'downloadUrl' => property_exists($info, 'downloadUrl') ? $info->downloadUrl : NULL,
+          'upgrade' => $this->getUpgradeStatus($info, $remotes[$key] ?? NULL),
+          'upgradeVersion' => isset($remotes[$key]->version) && version_compare($remotes[$key]->version, $info->version, '>') ? $remotes[$key]->version : '',
         );
       }
     }
@@ -185,6 +190,42 @@ Note:
     else {
       $local = $remote = TRUE;
       return array($local, $remote);
+    }
+  }
+
+  protected function getUpgradeStatus(?\CRM_Extension_Info $localInfo, ?\CRM_Extension_Info $remoteInfo): string {
+    if (empty($localInfo) || empty($remoteInfo)) {
+      return '';
+    }
+
+    if (empty($localInfo->version) || empty($remoteInfo->version)) {
+      return 'unknown';
+    }
+
+    if (version_compare($localInfo->version, $remoteInfo->version, '>=')) {
+      return 'current';
+    }
+
+    $sys = \CRM_Extension_System::singleton();
+    $localPath = $this->getPath($sys->getFullContainer(), $localInfo->key);
+    if (!\CRM_Utils_File::isChildPath($sys->getDefaultContainer()->getBaseDir(), $localPath)) {
+      // Only try to manage upgrades within the default container.
+      // Don't encourage folks to have split-paths.
+      return 'manual';
+    }
+    else {
+      return 'available';
+    }
+
+    // return version_compare($localInfo->version, $remoteInfo->version, '>=') ? 'current' : 'available';
+  }
+
+  protected function getPath(\CRM_Extension_Container_Interface $c, string $key): ?string {
+    try {
+      return $c->getPath($key);
+    }
+    catch (\CRM_Extension_Exception_MissingException $e) {
+      return NULL;
     }
   }
 
