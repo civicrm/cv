@@ -36,16 +36,22 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key or short name')
       ->setHelp('List extensions
 
-Examples:
-  cv ext:list
-  cv ext:list --remote --dev /mail/
-  cv ext:list /^org.civicrm.*/
-  cv ext:list -Li --columns=key,label
+Example: Search for extensions with "mail" in the name
+  cv ext:list /mail/
+
+Example: Search [L]ocal system for [i]nstalled extensions
+  cv ext:list -Li
+
+Example: Search remote feed for "mail". Include alpha/beta releases.
+  cv ext:list --remote /mail/ --dev
+
+Example: Search [L]ocal system. Display key and label.
+  cv ext:list -L --columns=key,label
+
+Example: Search [R]emote feed for "mosaico". Show [a]ll properties.
   cv ext:list -Ra /mosaico/
 
 Note:
-  If you do not specify --local (-L) or --remote (-R), then both are listed.
-
   Beginning circa CiviCRM v4.2+, it has been recommended that extensions
   include a unique long name ("org.example.foobar") and a unique short
   name ("foobar"). However, short names are not strongly guaranteed.
