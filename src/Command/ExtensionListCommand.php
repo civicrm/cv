@@ -31,7 +31,7 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the list of extensions')
       ->addOption('installed', 'i', InputOption::VALUE_NONE, 'Filter extensions by "installed" status (Equivalent to --statuses=installed)')
       ->addOption('statuses', NULL, InputOption::VALUE_REQUIRED, 'Filter extensions by status (comma separated)', '*')
-      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => 'location,key,name,version,status,downloadUrl', 'shortcuts' => TRUE])
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => '...', 'shortcuts' => TRUE])
       ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key or short name')
       ->setHelp('List extensions
 
@@ -51,6 +51,23 @@ Note:
 ');
     parent::configureRepoOptions();
     $this->configureBootOptions();
+  }
+
+  protected function initialize(InputInterface $input, OutputInterface $output) {
+    parent::initialize($input, $output);
+
+    // We apply different defaults for the 'columns' list depending on the output medium.
+    // The main CLI should use a shorter format, but the machine-readable (JSON/CSV/etc) should continue with traditional format.
+    // At some point (say v0.4.0), consider simplifying.
+    if ($input->getOption('columns') === '...') {
+      $out = $input->getOption('out');
+      if ($out === 'table') {
+        $input->setOption('columns', 'location,nameKey,version,status,extras');
+      }
+      else {
+        $input->setOption('columns', 'location,name,key,version,status,downloadUrl');
+      }
+    }
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
