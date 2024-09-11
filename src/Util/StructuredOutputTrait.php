@@ -230,6 +230,20 @@ trait StructuredOutputTrait {
   }
 
   /**
+   * Send a sorted table (with user-configurable columns).
+   *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   * @param $records
+   * @return void
+   */
+  protected function sendStandardTable($records) {
+    $columns = ArrayUtil::resolveColumns($this->parseColumns(\Civi\Cv\Cv::input()), $records);
+    $records = ArrayUtil::sortColumns($records, $columns);
+    $this->sendTable(\Civi\Cv\Cv::input(), \Civi\Cv\Cv::output(), $records, $columns);
+  }
+
+  /**
    * Determine the columns to display.
    *
    * @param \Symfony\Component\Console\Input\InputInterface $input
