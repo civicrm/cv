@@ -31,6 +31,7 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the list of extensions')
       ->addOption('installed', 'i', InputOption::VALUE_NONE, 'Filter extensions by "installed" status (Equivalent to --statuses=installed)')
       ->addOption('statuses', NULL, InputOption::VALUE_REQUIRED, 'Filter extensions by status (comma separated)', '*')
+      ->addOption('upgrade', NULL, InputOption::VALUE_REQUIRED, 'Filter extensions by upgrade-status (comma separated)', '*')
       ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => '...', 'shortcuts' => TRUE])
       ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key or short name')
       ->setHelp('List extensions
@@ -141,6 +142,13 @@ Note:
       $statusFilter = NULL;
     }
 
+    if ($input->getOption('upgrade') && $input->getOption('upgrade') !== '*') {
+      $upgradeFilter = explode(',', $input->getOption('upgrade'));
+    }
+    else {
+      $upgradeFilter = NULL;
+    }
+
     $rows = array();
 
     if ($remote) {
@@ -190,8 +198,11 @@ Note:
       }
     }
 
-    $rows = array_filter($rows, function ($row) use ($regex, $statusFilter) {
+    $rows = array_filter($rows, function ($row) use ($regex, $statusFilter, $upgradeFilter) {
       if ($statusFilter !== NULL && !in_array($row['status'], $statusFilter)) {
+        return FALSE;
+      }
+      if ($upgradeFilter !== NULL && !in_array($row['upgrade'], $upgradeFilter)) {
         return FALSE;
       }
       if ($regex) {
