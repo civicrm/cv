@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\ArrayUtil;
 use Civi\Cv\Util\SetupCommandTrait;
 use Civi\Cv\Util\DebugDispatcherTrait;
 use Civi\Cv\Util\StructuredOutputTrait;

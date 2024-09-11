@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\ArrayUtil;
 use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
