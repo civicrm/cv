@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ArrayUtil;
 use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
@@ -24,7 +25,7 @@ class AngularModuleListCommand extends BaseCommand {
       ->setName('ang:module:list')
       ->setAliases(array())
       ->setDescription('List Angular modules')
-      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => 'name,basePages,requires'])
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => 'name,basePages,requires', 'shortcuts' => TRUE])
       ->addArgument('regex', InputArgument::OPTIONAL,
         'Filter extensions by full key or short name')
       ->setHelp('List Angular modules
@@ -46,7 +47,7 @@ Examples:
     }
 
     $columns = explode(',', $input->getOption('columns'));
-    $records = $this->sort($this->find($input), $columns);
+    $records = ArrayUtil::sortColumns($this->find($input), $columns);
 
     $this->sendTable($input, $output, $records, $columns);
 
@@ -102,23 +103,6 @@ Examples:
         }
       }
       return TRUE;
-    });
-
-    return $rows;
-  }
-
-  protected function sort($rows, $orderByColumns) {
-    usort($rows, function ($a, $b) use ($orderByColumns) {
-      foreach ($orderByColumns as $col) {
-        if ($a[$col] < $b[$col]) {
-          return -1;
-        }
-        if ($a[$col] > $b[$col]) {
-          return 1;
-        }
-      }
-
-      return 0;
     });
 
     return $rows;
