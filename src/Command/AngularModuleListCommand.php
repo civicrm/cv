@@ -46,11 +46,7 @@ Examples:
       $output->getErrorOutput()->writeln("<comment>For a full list, try passing --user=[username].</comment>");
     }
 
-    $columns = explode(',', $input->getOption('columns'));
-    $records = ArrayUtil::sortColumns($this->find($input), $columns);
-
-    $this->sendTable($input, $output, $records, $columns);
-
+    $this->sendStandardTable($this->find($input));
     return 0;
   }
 

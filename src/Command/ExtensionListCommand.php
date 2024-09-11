@@ -80,11 +80,7 @@ Note:
       }
     }
 
-    $columns = explode(',', $input->getOption('columns'));
-    $records = ArrayUtil::sortColumns($this->find($input), $columns);
-
-    $this->sendTable($input, $output, $records, $columns);
-
+    $this->sendStandardTable($this->find($input));
     return 0;
   }
 

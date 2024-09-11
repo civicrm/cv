@@ -48,9 +48,7 @@ $ cv core:check-req -we
     $messages = array_filter($reqs->getMessages(), function ($m) use ($filterSeverities) {
       return in_array($m['severity'], $filterSeverities);
     });
-    $columns = ArrayUtil::resolveColumns($this->parseColumns($input), $messages);
-    $messages = ArrayUtil::sortColumns($messages, $columns);
-    $this->sendTable($input, $output, $messages, $columns);
+    $this->sendStandardTable($messages);
     return $reqs->getErrors() ? 1 : 0;
   }
 
