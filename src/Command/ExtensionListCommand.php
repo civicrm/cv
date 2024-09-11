@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ArrayUtil;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,7 +29,7 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the list of extensions')
       ->addOption('installed', 'i', InputOption::VALUE_NONE, 'Filter extensions by "installed" status (Equivalent to --statuses=installed)')
       ->addOption('statuses', NULL, InputOption::VALUE_REQUIRED, 'Filter extensions by status (comma separated)', '*')
-      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => 'location,key,name,version,status,downloadUrl'])
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => 'location,key,name,version,status,downloadUrl', 'shortcuts' => TRUE])
       ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key or short name')
       ->setHelp('List extensions
 
@@ -37,9 +38,10 @@ Examples:
   cv ext:list --remote --dev /mail/
   cv ext:list /^org.civicrm.*/
   cv ext:list -Li --columns=key,label
+  cv ext:list -Ra /mosaico/
 
 Note:
-  If you do not specify --local (-L) or --remote (-R), then all are listed.
+  If you do not specify --local (-L) or --remote (-R), then both are listed.
 
   Beginning circa CiviCRM v4.2+, it has been recommended that extensions
   include a unique long name ("org.example.foobar") and a unique short
@@ -78,11 +80,7 @@ Note:
       }
     }
 
-    $columns = explode(',', $input->getOption('columns'));
-    $records = $this->sort($this->find($input), $columns);
-
-    $this->sendTable($input, $output, $records, $columns);
-
+    $this->sendStandardTable($this->find($input));
     return 0;
   }
 
@@ -169,23 +167,6 @@ Note:
         }
       }
       return TRUE;
-    });
-
-    return $rows;
-  }
-
-  protected function sort($rows, $orderByColumns) {
-    usort($rows, function ($a, $b) use ($orderByColumns) {
-      foreach ($orderByColumns as $col) {
-        if ($a[$col] < $b[$col]) {
-          return -1;
-        }
-        if ($a[$col] > $b[$col]) {
-          return 1;
-        }
-      }
-
-      return 0;
     });
 
     return $rows;

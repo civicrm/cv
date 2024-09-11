@@ -3,6 +3,64 @@ namespace Civi\Cv\Util;
 
 class ArrayUtil {
 
+  /**
+   * Evaluate each item in the list. Concatenate the results.
+   *
+   * @param array $items
+   *   Ex: ["a", "b"]
+   * @param callable $filter
+   *   Ex: fn($item) => "<li>$item</li>"
+   * @param string $delimiter
+   * @return string
+   *   Ex: "<li>a</li><li>b</li>"
+   */
+  public static function mapImplode(array $items, callable $filter, string $delimiter = ''): string {
+    return implode($delimiter, array_map($filter, $items));
+  }
+
+  /**
+   * Evaluate each item in the list.
+   *
+   * Similar to array_map(), but the order matches the other variants of map.
+   *
+   * @param array $array
+   * @param callable $func
+   *   function($value): mixed
+   * @return array
+   */
+  public static function map(array $array, callable $func): array {
+    return array_map($func, $array);
+  }
+
+  /**
+   * Evaluate each item in the list.
+   *
+   * Similar to array_map(), but guaranteed to provide two inputs ($key,$value).
+   *
+   * @param array $array
+   * @param callable $func
+   *   function($key, $value): mixed
+   * @return array
+   */
+  public static function mapKV(array $array, callable $func): array {
+    return array_map($func, array_keys($array), array_values($array));
+  }
+
+  /**
+   * Evaluate each item in the list. Concatenate the results.
+   *
+   * @param array $items
+   *   Ex: ["Ray" => "A drop of golden sun"]
+   * @param callable $filter
+   *   Ex: fn($key, $value) => "<dt>$key</dt><dd>$value</dd>"
+   * @param string $delimiter
+   * @return string
+   *   Ex: "<dt>Ray</dt><dd>A drop of golden sun</dd>"
+   */
+  public static function mapImplodeKV(array $items, callable $filter, string $delimiter = '') {
+    return implode($delimiter, static::mapKV($items, $filter));
+  }
+
   public static function collect($array, $index) {
     $result = array();
     foreach ($array as $item) {
@@ -144,6 +202,41 @@ class ArrayUtil {
       }
     }
     return NULL;
+  }
+
+  /**
+   * Given some requested columns, determine the actual set of columns (available for this data).
+   *
+   * @param string[]|null $columns
+   *   List of requested columns. May include wildcard '*'.
+   * @param array $records
+   *   List of records
+   * @return array
+   *   The concrete list of column-names. (Wildcard replaced by actual values.)
+   */
+  public static function resolveColumns(?array $columns, array $records): array {
+    if (is_array($columns) && in_array('*', $columns)) {
+      $columns = NULL;
+    }
+    return $columns ?: ArrayUtil::findColumns($records);
+  }
+
+  public static function sortColumns(array $records, ?array $columns): array {
+    $columns = static::resolveColumns($columns, $records);
+    usort($records, function ($a, $b) use ($columns) {
+      foreach ($columns as $col) {
+        if ($a[$col] < $b[$col]) {
+          return -1;
+        }
+        if ($a[$col] > $b[$col]) {
+          return 1;
+        }
+      }
+
+      return 0;
+    });
+
+    return $records;
   }
 
   /**

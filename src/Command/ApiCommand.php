@@ -33,7 +33,7 @@ class ApiCommand extends BaseCommand {
       ->setAliases(['api'])
       ->setDescription('Call APIv3')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
-      ->configureOutputOptions(['tabular' => TRUE, 'shortcuts' => ['table', 'list']])
+      ->configureOutputOptions(['tabular' => TRUE, 'shortcuts' => ['table', 'list', 'json']])
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
       ->setHelp('Call APIv3

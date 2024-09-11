@@ -19,9 +19,15 @@ trait StructuredOutputTrait {
 
   /**
    * @var array
-   *   Array(string $outputFormat => string $cliShortcut).
+   *   Array(string $logicalName => [string $cliShortCut, string $cliLongCut, array $cliOptions]).
    */
-  private $outputFormatShortcuts = ['table' => 'T', 'csv' => 'C', 'list' => 'I'];
+  private $shortcuts = [
+    'table' => ['T', 'out=table', ['out' => 'table']],
+    'csv' => ['C', 'out=csv', ['out' => 'csv']],
+    'list' => ['I', 'out=list', ['out' => 'list']],
+    'json' => ['J', 'out=json-pretty', ['out' => 'json-pretty']],
+    'all' => ['a', 'all-columns', ['columns' => '*', 'out' => 'json-pretty']],
+  ];
 
   /**
    * @param string $name
@@ -67,19 +73,6 @@ trait StructuredOutputTrait {
     $this->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', $formats) . ')', Encoder::getDefaultFormat($fallback));
     $this->addOption('flat', NULL, InputOption::VALUE_OPTIONAL, 'Flatten output data. Optionally specified a delimiter.', '.');
 
-    if (!empty($config['shortcuts'])) {
-      foreach ($config['shortcuts'] as $format) {
-        $shortcut = $this->outputFormatShortcuts[$format];
-        $optName = 'out=' . $format;
-        $this->addOption($optName, $shortcut, InputOption::VALUE_NONE, 'Shortcut for --out=' . $format);
-        $this->addOptionCallback($optName, function(InputInterface $input, OutputInterface $output, InputOption $option) use ($optName, $format) {
-          if ($input->getOption($optName)) {
-            $input->setOption('out', $format);
-          }
-        });
-      }
-    }
-
     if (array_key_exists('defaultColumns', $config) || array_key_exists('availColumns', $config)) {
       $defaultValue = array_key_exists('defaultColumns', $config) ? $config['defaultColumns'] : NULL;
       $desc = 'Comma-separated list of columns to display';
@@ -87,6 +80,27 @@ trait StructuredOutputTrait {
         $desc .= ' <comment>[available: ' . $config['availColumns'] . ']</comment>';
       }
       $this->addOption('columns', NULL, InputOption::VALUE_REQUIRED, $desc, $defaultValue);
+    }
+
+    $shortcuts = $config['shortcuts'] ?? [];
+    if ($shortcuts === TRUE) {
+      $shortcuts = array_keys($this->shortcuts);
+    }
+    if (!$this->getDefinition()->hasOption('columns')) {
+      $shortcuts = array_diff($shortcuts, ['all']);
+    }
+    foreach ($shortcuts as $shortcutId) {
+      [$shortcut, $optName, $assigns] = $this->shortcuts[$shortcutId];
+      $this->addOption($optName, $shortcut, InputOption::VALUE_NONE, 'Shortcut for' . ArrayUtil::mapImplodeKV($assigns, function($k, $v) {
+        return " --{$k}={$v}";
+      }));
+      $this->addOptionCallback($optName, function(InputInterface $input, OutputInterface $output, InputOption $option) use ($optName, $assigns) {
+        if ($input->getOption($optName)) {
+          foreach ($assigns as $key => $value) {
+            $input->setOption($key, $value);
+          }
+        }
+      });
     }
 
     return $this;
@@ -134,10 +148,7 @@ trait StructuredOutputTrait {
   protected function sendTable(InputInterface $input, OutputInterface $output, $records, $columns = NULL) {
     // Maybe we should standardize '--columns=...' so it doesn't ned to be passed in?
 
-    if (is_array($columns) && in_array('*', $columns)) {
-      $columns = NULL;
-    }
-    $columns = $columns ? $columns : ArrayUtil::findColumns($records);
+    $columns = ArrayUtil::resolveColumns($columns, $records);
 
     // If it's not one of our, then fallback to generic rendering
     if (!in_array($input->getOption('out'), ['table', 'csv', 'list'])) {
@@ -216,6 +227,20 @@ trait StructuredOutputTrait {
       default:
         throw new \RuntimeException("Unsupported table format: " . $input->getOption('out'));
     }
+  }
+
+  /**
+   * Send a sorted table (with user-configurable columns).
+   *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   * @param $records
+   * @return void
+   */
+  protected function sendStandardTable($records) {
+    $columns = ArrayUtil::resolveColumns($this->parseColumns(\Civi\Cv\Cv::input()), $records);
+    $records = ArrayUtil::sortColumns($records, $columns);
+    $this->sendTable(\Civi\Cv\Cv::input(), \Civi\Cv\Cv::output(), $records, $columns);
   }
 
   /**

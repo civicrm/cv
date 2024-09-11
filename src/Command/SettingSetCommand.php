@@ -28,7 +28,7 @@ class SettingSetCommand extends BaseCommand {
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
       ->configureOutputOptions([
         'tabular' => TRUE,
-        'shortcuts' => ['table', 'list'],
+        'shortcuts' => TRUE,
         'fallback' => 'table',
         'availColumns' => 'scope,key,value,default,explicit,mandatory,layer',
         'defaultColumns' => 'scope,key,value,layer',
