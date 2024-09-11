@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ArrayUtil;
 use Civi\Cv\Util\SetupCommandTrait;
 use Civi\Cv\Util\DebugDispatcherTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
@@ -18,7 +19,7 @@ class CoreCheckReqCommand extends BaseCommand {
     $this
       ->setName('core:check-req')
       ->setDescription('Check installation requirements')
-      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table'])
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'shortcuts' => TRUE, 'defaultColumns' => 'severity,section,name,message'])
       ->addOption('filter-warnings', 'w', InputOption::VALUE_NONE, 'Show warnings')
       ->addOption('filter-errors', 'e', InputOption::VALUE_NONE, 'Show errors')
       ->addOption('filter-infos', 'i', InputOption::VALUE_NONE, 'Show info')
@@ -47,13 +48,9 @@ $ cv core:check-req -we
     $messages = array_filter($reqs->getMessages(), function ($m) use ($filterSeverities) {
       return in_array($m['severity'], $filterSeverities);
     });
-    uasort($messages, function ($a, $b) {
-      return strcmp(
-        $a['severity'] . '-' . $a['section'] . '-' . $a['name'],
-        $b['severity'] . '-' . $b['section'] . '-' . $b['name']
-      );
-    });
-    $this->sendTable($input, $output, $messages, array('severity', 'section', 'name', 'message'));
+    $columns = ArrayUtil::resolveColumns($this->parseColumns($input), $messages);
+    $messages = ArrayUtil::sortColumns($messages, $columns);
+    $this->sendTable($input, $output, $messages, $columns);
     return $reqs->getErrors() ? 1 : 0;
   }
 
