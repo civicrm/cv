@@ -25,7 +25,7 @@ class AngularHtmlListCommand extends BaseCommand {
       ->setName('ang:html:list')
       ->setAliases(array())
       ->setDescription('List Angular HTML files')
-      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'list', 'defaultColumns' => 'file'])
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'list', 'defaultColumns' => 'file', 'shortcuts' => TRUE])
       ->addArgument('filter', InputArgument::OPTIONAL,
         'Filter by filename. For regex filtering, use semicolon delimiter.')
       ->setHelp('List Angular HTML files
