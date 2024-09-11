@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ArrayUtil;
 use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
@@ -26,7 +27,7 @@ class DebugContainerCommand extends BaseCommand {
       ->addOption('concrete', 'C', InputOption::VALUE_NONE, 'Display concrete class names. (This requires activating every matching service.)')
       ->addOption('internal', 'i', InputOption::VALUE_NONE, 'Include internal services')
       ->addOption('tag', NULL, InputOption::VALUE_REQUIRED, 'Find services by tag.')
-      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table'])
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => 'service,class,events,extras', 'shortcuts' => ['table', 'list', 'json', 'all']])
       ->setHelp('
 Dump the container configuration
 
@@ -113,7 +114,7 @@ internal services (eg `--all`, `--tag=XXX`, or `-v`).
       $rows[] = array('service' => $name, 'class' => $class, 'events' => $events ? count($events) : '', 'extras' => implode(' ', $extras));
     }
 
-    $this->sendTable($input, $output, $rows, array('service', 'class', 'events', 'extras'));
+    $this->sendStandardTable($rows);
   }
 
   public function showVerboseReport(InputInterface $input, OutputInterface $output, array $definitions): void {
