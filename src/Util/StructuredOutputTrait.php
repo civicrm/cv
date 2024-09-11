@@ -19,9 +19,15 @@ trait StructuredOutputTrait {
 
   /**
    * @var array
-   *   Array(string $outputFormat => string $cliShortcut).
+   *   Array(string $logicalName => [string $cliShortCut, string $cliLongCut, array $cliOptions]).
    */
-  private $outputFormatShortcuts = ['table' => 'T', 'csv' => 'C', 'list' => 'I'];
+  private $shortcuts = [
+    'table' => ['T', 'out=table', ['out' => 'table']],
+    'csv' => ['C', 'out=csv', ['out' => 'csv']],
+    'list' => ['I', 'out=list', ['out' => 'list']],
+    'json' => ['J', 'out=json-pretty', ['out' => 'json-pretty']],
+    'all' => ['a', 'all-columns', ['columns' => '*', 'out' => 'json-pretty']],
+  ];
 
   /**
    * @param string $name
@@ -67,19 +73,6 @@ trait StructuredOutputTrait {
     $this->addOption('out', NULL, InputOption::VALUE_REQUIRED, 'Output format (' . implode(',', $formats) . ')', Encoder::getDefaultFormat($fallback));
     $this->addOption('flat', NULL, InputOption::VALUE_OPTIONAL, 'Flatten output data. Optionally specified a delimiter.', '.');
 
-    if (!empty($config['shortcuts'])) {
-      foreach ($config['shortcuts'] as $format) {
-        $shortcut = $this->outputFormatShortcuts[$format];
-        $optName = 'out=' . $format;
-        $this->addOption($optName, $shortcut, InputOption::VALUE_NONE, 'Shortcut for --out=' . $format);
-        $this->addOptionCallback($optName, function(InputInterface $input, OutputInterface $output, InputOption $option) use ($optName, $format) {
-          if ($input->getOption($optName)) {
-            $input->setOption('out', $format);
-          }
-        });
-      }
-    }
-
     if (array_key_exists('defaultColumns', $config) || array_key_exists('availColumns', $config)) {
       $defaultValue = array_key_exists('defaultColumns', $config) ? $config['defaultColumns'] : NULL;
       $desc = 'Comma-separated list of columns to display';
@@ -87,6 +80,27 @@ trait StructuredOutputTrait {
         $desc .= ' <comment>[available: ' . $config['availColumns'] . ']</comment>';
       }
       $this->addOption('columns', NULL, InputOption::VALUE_REQUIRED, $desc, $defaultValue);
+    }
+
+    $shortcuts = $config['shortcuts'] ?? [];
+    if ($shortcuts === TRUE) {
+      $shortcuts = array_keys($this->shortcuts);
+    }
+    if (!$this->getDefinition()->hasOption('columns')) {
+      $shortcuts = array_diff($shortcuts, ['all']);
+    }
+    foreach ($shortcuts as $shortcutId) {
+      [$shortcut, $optName, $assigns] = $this->shortcuts[$shortcutId];
+      $this->addOption($optName, $shortcut, InputOption::VALUE_NONE, 'Shortcut for' . ArrayUtil::mapImplodeKV($assigns, function($k, $v) {
+        return " --{$k}={$v}";
+      }));
+      $this->addOptionCallback($optName, function(InputInterface $input, OutputInterface $output, InputOption $option) use ($optName, $assigns) {
+        if ($input->getOption($optName)) {
+          foreach ($assigns as $key => $value) {
+            $input->setOption($key, $value);
+          }
+        }
+      });
     }
 
     return $this;
