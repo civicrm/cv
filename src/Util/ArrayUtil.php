@@ -147,6 +147,41 @@ class ArrayUtil {
   }
 
   /**
+   * Given some requested columns, determine the actual set of columns (available for this data).
+   *
+   * @param string[]|null $columns
+   *   List of requested columns. May include wildcard '*'.
+   * @param array $records
+   *   List of records
+   * @return array
+   *   The concrete list of column-names. (Wildcard replaced by actual values.)
+   */
+  public static function resolveColumns(?array $columns, array $records): array {
+    if (is_array($columns) && in_array('*', $columns)) {
+      $columns = NULL;
+    }
+    return $columns ?: ArrayUtil::findColumns($records);
+  }
+
+  public static function sortColumns(array $records, ?array $columns): array {
+    $columns = static::resolveColumns($columns, $records);
+    usort($records, function ($a, $b) use ($columns) {
+      foreach ($columns as $col) {
+        if ($a[$col] < $b[$col]) {
+          return -1;
+        }
+        if ($a[$col] > $b[$col]) {
+          return 1;
+        }
+      }
+
+      return 0;
+    });
+
+    return $records;
+  }
+
+  /**
    * Grab the first non-empty-ish value.
    *
    * @param array $values

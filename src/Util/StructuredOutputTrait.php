@@ -134,10 +134,7 @@ trait StructuredOutputTrait {
   protected function sendTable(InputInterface $input, OutputInterface $output, $records, $columns = NULL) {
     // Maybe we should standardize '--columns=...' so it doesn't ned to be passed in?
 
-    if (is_array($columns) && in_array('*', $columns)) {
-      $columns = NULL;
-    }
-    $columns = $columns ? $columns : ArrayUtil::findColumns($records);
+    $columns = ArrayUtil::resolveColumns($columns, $records);
 
     // If it's not one of our, then fallback to generic rendering
     if (!in_array($input->getOption('out'), ['table', 'csv', 'list'])) {
