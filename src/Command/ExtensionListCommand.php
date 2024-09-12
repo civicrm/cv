@@ -1,7 +1,9 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Cv;
 use Civi\Cv\Util\ArrayUtil;
+use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,26 +31,50 @@ class ExtensionListCommand extends BaseExtensionCommand {
       ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Refresh the list of extensions')
       ->addOption('installed', 'i', InputOption::VALUE_NONE, 'Filter extensions by "installed" status (Equivalent to --statuses=installed)')
       ->addOption('statuses', NULL, InputOption::VALUE_REQUIRED, 'Filter extensions by status (comma separated)', '*')
-      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => 'location,key,name,version,status,downloadUrl', 'shortcuts' => TRUE])
+      ->addOption('upgrade', NULL, InputOption::VALUE_REQUIRED, 'Filter extensions by upgrade-status (comma separated)', '*')
+      ->configureOutputOptions(['tabular' => TRUE, 'fallback' => 'table', 'defaultColumns' => '...', 'shortcuts' => TRUE])
       ->addArgument('regex', InputArgument::OPTIONAL, 'Filter extensions by full key or short name')
       ->setHelp('List extensions
 
-Examples:
-  cv ext:list
-  cv ext:list --remote --dev /mail/
-  cv ext:list /^org.civicrm.*/
-  cv ext:list -Li --columns=key,label
+Example: Search for extensions with "mail" in the name
+  cv ext:list /mail/
+
+Example: Search [L]ocal system for [i]nstalled extensions
+  cv ext:list -Li
+
+Example: Search remote feed for "mail". Include alpha/beta releases.
+  cv ext:list --remote /mail/ --dev
+
+Example: Search [L]ocal system. Display key and label.
+  cv ext:list -L --columns=key,label
+
+Example: Search [R]emote feed for "mosaico". Show [a]ll properties.
   cv ext:list -Ra /mosaico/
 
 Note:
-  If you do not specify --local (-L) or --remote (-R), then both are listed.
-
   Beginning circa CiviCRM v4.2+, it has been recommended that extensions
   include a unique long name ("org.example.foobar") and a unique short
   name ("foobar"). However, short names are not strongly guaranteed.
 ');
     parent::configureRepoOptions();
     $this->configureBootOptions();
+  }
+
+  protected function initialize(InputInterface $input, OutputInterface $output) {
+    parent::initialize($input, $output);
+
+    // We apply different defaults for the 'columns' list depending on the output medium.
+    // The main CLI should use a shorter format, but the machine-readable (JSON/CSV/etc) should continue with traditional format.
+    // At some point (say v0.4.0), consider simplifying.
+    if ($input->getOption('columns') === '...') {
+      $out = $input->getOption('out');
+      if ($out === 'table') {
+        $input->setOption('columns', 'location,nameKey,version,status,extras');
+      }
+      else {
+        $input->setOption('columns', 'location,name,key,version,status,downloadUrl');
+      }
+    }
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -80,7 +106,10 @@ Note:
       }
     }
 
-    $this->sendStandardTable($this->find($input));
+    $records = $this->find($input);
+    $columns = ArrayUtil::resolveColumns($this->parseColumns($input), $records);
+    $records = $this->applyExtras($records, $columns);
+    $this->sendStandardTable($records);
     return 0;
   }
 
@@ -119,6 +148,13 @@ Note:
       $statusFilter = NULL;
     }
 
+    if ($input->getOption('upgrade') && $input->getOption('upgrade') !== '*') {
+      $upgradeFilter = explode(',', $input->getOption('upgrade'));
+    }
+    else {
+      $upgradeFilter = NULL;
+    }
+
     $rows = array();
 
     if ($remote) {
@@ -127,12 +163,16 @@ Note:
           'location' => 'remote',
           'key' => $info->key,
           'name' => $info->file,
+          'nameKey' => $this->formatInlineAlias($info->file, $info->key),
           'version' => $info->version,
           'label' => $info->label,
           'status' => '',
           'type' => $info->type,
           'path' => '',
+          'relPath' => '',
           'downloadUrl' => $info->downloadUrl,
+          'upgrade' => '',
+          'upgradeVersion' => '',
         );
       }
     }
@@ -141,24 +181,34 @@ Note:
       $keys = \CRM_Extension_System::singleton()->getFullContainer()->getKeys();
       $statuses = \CRM_Extension_System::singleton()->getManager()->getStatuses();
       $mapper = \CRM_Extension_System::singleton()->getMapper();
+      $remotes = $this->getRemoteInfos();
+      $relativizer = new Relativizer();
       foreach ($keys as $key) {
         $info = $mapper->keyToInfo($key);
+        $localPath = $mapper->keyToBasePath($key);
         $rows[] = array(
           'location' => 'local',
           'key' => $key,
           'name' => $info->file,
+          'nameKey' => $this->formatInlineAlias($info->file, $info->key),
           'version' => $info->version,
           'label' => $info->label,
           'status' => isset($statuses[$key]) ? $statuses[$key] : '',
           'type' => $info->type,
-          'path' => $mapper->keyToBasePath($key),
+          'path' => $localPath,
+          'relPath' => $localPath ? $relativizer->filter($localPath) : '',
           'downloadUrl' => property_exists($info, 'downloadUrl') ? $info->downloadUrl : NULL,
+          'upgrade' => $this->getUpgradeStatus($info, $remotes[$key] ?? NULL, $localPath),
+          'upgradeVersion' => isset($remotes[$key]->version) && version_compare($remotes[$key]->version, $info->version, '>') ? $remotes[$key]->version : '',
         );
       }
     }
 
-    $rows = array_filter($rows, function ($row) use ($regex, $statusFilter) {
+    $rows = array_filter($rows, function ($row) use ($regex, $statusFilter, $upgradeFilter) {
       if ($statusFilter !== NULL && !in_array($row['status'], $statusFilter)) {
+        return FALSE;
+      }
+      if ($upgradeFilter !== NULL && !in_array($row['upgrade'], $upgradeFilter)) {
         return FALSE;
       }
       if ($regex) {
@@ -186,6 +236,113 @@ Note:
       $local = $remote = TRUE;
       return array($local, $remote);
     }
+  }
+
+  protected function getUpgradeStatus(?\CRM_Extension_Info $localInfo, ?\CRM_Extension_Info $remoteInfo, ?string $localPath): string {
+    if (empty($localInfo) || empty($remoteInfo)) {
+      return '';
+    }
+
+    if (empty($localInfo->version) || empty($remoteInfo->version)) {
+      return 'unknown';
+    }
+
+    if (version_compare($localInfo->version, $remoteInfo->version, '>=')) {
+      return 'current';
+    }
+
+    $sys = \CRM_Extension_System::singleton();
+    if (!\CRM_Utils_File::isChildPath($sys->getDefaultContainer()->getBaseDir(), $localPath)) {
+      // Only try to manage upgrades within the default container.
+      // Don't encourage folks to have split-paths.
+      return 'manual';
+    }
+    else {
+      return 'available';
+    }
+
+    // return version_compare($localInfo->version, $remoteInfo->version, '>=') ? 'current' : 'available';
+  }
+
+  protected function getPath(\CRM_Extension_Container_Interface $c, string $key): ?string {
+    try {
+      return $c->getPath($key);
+    }
+    catch (\CRM_Extension_Exception_MissingException $e) {
+      return NULL;
+    }
+  }
+
+  protected function applyExtras(array $rows, array $columns): array {
+    if (!in_array('extras', $columns)) {
+      return $rows;
+    }
+
+    foreach ($rows as &$row) {
+      $extra = [];
+
+      if (!in_array('upgrade', $columns) && !in_array('upgradeVersion', $columns)) {
+        if ($row['upgrade'] === 'available') {
+          $extra[] = $this->formatInlineKeyValue('upgrade', $row['upgradeVersion']);
+        }
+        elseif ($row['upgrade'] === 'manual') {
+          $extra[] = $this->formatInlineKeyValue('upgrade', [$row['upgradeVersion'], 'manual']);
+        }
+      }
+      if (!in_array('downloadUrl', $columns) && !empty($row['downloadUrl'])) {
+        $extra[] = $this->formatInlineKeyValue('url', parse_url($row['downloadUrl'], PHP_URL_HOST));
+      }
+
+      $row['extras'] = implode(' ', $extra);
+    }
+    return $rows;
+  }
+
+  /**
+   * Format in an inlined expression with a name (and its alias).
+   *
+   * @param string $name
+   * @param string|null $alias
+   * @return string
+   */
+  private function formatInlineAlias(string $name, ?string $alias): string {
+    if ($alias !== NULL && $alias !== '' && $alias !== $name) {
+      $suffix = $this->isAnsiEnabled() ? " (<comment>$alias</comment>)" : " ($alias)";
+    }
+    else {
+      $suffix = '';
+    }
+    return $name . $suffix;
+  }
+
+  /**
+   * Format an inlined expression with a key-value.
+   *
+   * @param string $key
+   * @param string|string[] $value
+   * @return string
+   */
+  private function formatInlineKeyValue(string $key, $value): string {
+    $value = (array) $value;
+    if ($this->isAnsiEnabled()) {
+      $value = array_map(function($s) {
+        return "<comment>$s</comment>";
+      }, (array) $value);
+    }
+    $value = implode(',', $value);
+    return "{$key}[$value]";
+  }
+
+  private function isAnsiEnabled(): bool {
+    $input = Cv::input();
+    if ($input->getOption('no-ansi')) {
+      return FALSE;
+    }
+    if ($input->getOption('ansi')) {
+      return TRUE;
+    }
+    $out = $input->getOption('out');
+    return ($out === 'table');
   }
 
 }

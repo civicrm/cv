@@ -42,23 +42,59 @@ class ExtensionListCommandTest extends \Civi\Cv\CivilTestCase {
   }
 
   /**
+   * Get all available columns
+   */
+  public function testGetAllColumns() {
+    $p = Process::runOk($this->cv('ext:list -a'));
+    $exts = json_decode($p->getOutput(), 1);
+    $this->assertTrue(count($exts) > 1);
+    foreach ($exts as $ext) {
+      $this->assertMatchesRegularExpression('/^[_\w]+$/', $ext['name'], 'name should be well-formed');
+      $this->assertMatchesRegularExpression('/^[\.\-_\w]+$/', $ext['key'], 'key should be well-formed');
+      $this->assertMatchesRegularExpression('/^\d[\.\-_\w]*$/', $ext['version'], 'version should be well-formed');
+      if (!empty($ext['downloadUrl'])) {
+        $this->assertMatchesRegularExpression(';^https?://;', $ext['downloadUrl'], 'downloadUrl should be well-formed');
+      }
+      $this->assertMatchesRegularExpression(';^(|unknown|manual|current|available)$;', $ext['upgrade'], 'upgrade should be well-formed');
+      if (!empty($ext['upgradeVersion'])) {
+        $this->assertMatchesRegularExpression('/^\d[\.\-_\w]*$/', $ext['upgradeVersion'], 'upgradeVersion should be well-formed');
+      }
+      if ($ext['location'] === 'local') {
+        $this->assertMatchesRegularExpression(';^(installed|uninstalled|disabled|unknown|installed-missing|disabled-missing)$;', $ext['status'], 'status should be well-formed for local extensions');
+      }
+      else {
+        $this->assertEquals('', $ext['status'], 'status should be empty for remote extensions');
+      }
+      $this->assertTrue(isset($ext['nameKey']), 'nameKey should be set');
+      $this->assertTrue(isset($ext['label']), 'label should be set');
+      if (!empty($ext['path'])) {
+        $this->assertTrue(file_exists($ext['path']), 'path should be valid');
+      }
+      if (!empty($ext['relPath'])) {
+        $this->assertMatchesRegularExpression(';^\[(civicrm\.|cms\.);', $ext['relPath'], 'relPath should start with a path variable');
+      }
+    }
+  }
+
+  /**
    * List extensions using a regular expression.
    */
   public function testGetRegex() {
     $p = Process::runOk($this->cv('ext:list'));
-    $this->assertMatchesRegularExpression('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
+    $hasCiviDiscount = '/remote.*cividiscount \(org.civicrm.module.cividiscount\)/';
+    $this->assertMatchesRegularExpression($hasCiviDiscount, $p->getOutput());
 
     // matches key
     $p = Process::runOk($this->cv('ext:list /org.civicrm/'));
-    $this->assertMatchesRegularExpression('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
+    $this->assertMatchesRegularExpression($hasCiviDiscount, $p->getOutput());
 
     // matches name
     $p = Process::runOk($this->cv('ext:list /^cividiscount/'));
-    $this->assertMatchesRegularExpression('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
+    $this->assertMatchesRegularExpression($hasCiviDiscount, $p->getOutput());
 
     // matches name
     $p = Process::runOk($this->cv('ext:list /^com\./'));
-    $this->assertDoesNotMatchRegularExpression('/remote.*org.civicrm.module.cividiscount.*cividiscount/', $p->getOutput());
+    $this->assertDoesNotMatchRegularExpression($hasCiviDiscount, $p->getOutput());
   }
 
   /**
