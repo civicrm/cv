@@ -10,7 +10,15 @@ class Api4ArgParser extends AbstractPlusParser {
   private $operators;
 
   public function __construct() {
-    $this->operators = '\<=|\>=|=|!=|\<|\>|IS NULL|IS NOT NULL|IS EMPTY|IS NOT EMPTY|LIKE|NOT LIKE|IN|NOT IN|CONTAINS|NOT CONTAINS|REGEXP|NOT REGEXP|REGEXP BINARY|NOT REGEXP BINARY';
+    if (is_callable(['\Civi\Api4\Utils\CoreUtil', 'getOperators'])) {
+      // 5.30+
+      $this->operators = implode('|', ArrayUtil::map(\Civi\Api4\Utils\CoreUtil::getOperators(), function($op) {
+        return preg_quote($op, '/');
+      }));
+    }
+    else {
+      $this->operators = '\<=|\>=|=|!=|\<|\>|IS NULL|IS NOT NULL|IS EMPTY|IS NOT EMPTY|LIKE|NOT LIKE|IN|NOT IN|CONTAINS|NOT CONTAINS|REGEXP|NOT REGEXP|REGEXP BINARY|NOT REGEXP BINARY';
+    }
   }
 
   /**
