@@ -71,6 +71,9 @@ trait UrlCommandTrait {
         throw new \RuntimeException("No paths specified");
       }
     }
+    foreach (array_keys($rows) as $rowId) {
+      $rows[$rowId]['value'] = $this->normalizeUrl($rows[$rowId]['value']);
+    }
 
     if ($input->getOption('login')) {
       if (!\CRM_Extension_System::singleton()->getMapper()->isActiveModule('authx')) {
@@ -137,7 +140,12 @@ trait UrlCommandTrait {
   protected function resolveExt($extExpr, OutputInterface $output) {
     $mapper = \CRM_Extension_System::singleton()->getMapper();
 
-    [$keyOrName, $file] = explode('/', $extExpr, 2);
+    if (strpos($extExpr, '/')) {
+      [$keyOrName, $file] = explode('/', $extExpr, 2);
+    }
+    else {
+      [$keyOrName, $file] = [$extExpr, NULL];
+    }
     if ($keyOrName === '.') {
       return array(
         'type' => 'ext',
@@ -262,6 +270,20 @@ trait UrlCommandTrait {
         ($entry === 'backend')
       ),
     ];
+  }
+
+  protected function normalizeUrl(string $url): string {
+    // Across different versions+environments+APIs, we don't get consistent renditions of relative/absolute.
+    $preferRelative = \Civi\Cv\Cv::input()->getOption('relative');
+    if (!$preferRelative && $url[0] === '/') {
+      // Base of the domain. Drop paths. Keep scheme+host+port.
+      $baseUrl = preg_replace(';^(https?://[^/]+/?).*$;', '\1', \CRM_Utils_System::baseCMSURL());
+      return $this->urlJoin($baseUrl, ltrim($url, '/'));
+    }
+    if ($preferRelative && preg_match(';^(https?://[^/]+)(/.*)$;', $url, $m)) {
+      return $m[2];
+    }
+    return $url;
   }
 
 }

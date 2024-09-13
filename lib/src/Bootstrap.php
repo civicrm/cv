@@ -202,10 +202,6 @@ class Bootstrap {
           // Hint for D7 multisite
           $_SERVER['HTTP_HOST'] = $options['httpHost'];
         }
-        elseif (empty($_SERVER['HTTP_HOST']) && $cmsType === 'backdrop') {
-          // backdrop_settings_initialize() tries to configure cookie policy - and complains if HTTP_HOST is missing
-          $_SERVER['HTTP_HOST'] = 'localhost';
-        }
         if (ord($_SERVER['SCRIPT_NAME']) != 47) {
           $_SERVER['SCRIPT_NAME'] = '/' . $_SERVER['SCRIPT_NAME'];
         }
@@ -217,6 +213,14 @@ class Bootstrap {
       if ($error == FALSE) {
         $this->log->notice("Failed to load settings file");
         throw new \Exception("Could not load the CiviCRM settings file: {$settings}");
+      }
+
+      if (empty($_SERVER['HTTP_HOST']) && $cmsType === 'backdrop') {
+        // backdrop_settings_initialize() tries to configure cookie policy - and complains if HTTP_HOST is missing
+        $webHostVars = $this->convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : 'http://localhost');
+        foreach ($webHostVars as $key => $value) {
+          $_SERVER[$key] = $value;
+        }
       }
     }
 
@@ -239,6 +243,21 @@ class Bootstrap {
     $isBooting = FALSE;
   }
 
+  private function convertUrlToCgiVars(string $url): array {
+    $parts = parse_url($url);
+    $result = [];
+    $result['SERVER_NAME'] = $parts['host'];
+    if (!empty($parts['port'])) {
+      $result['HTTP_HOST'] = $parts['host'] . ':' . $parts['port'];
+      $result['SERVER_PORT'] = $parts['port'];
+    }
+    else {
+      $result['HTTP_HOST'] = $parts['host'];
+      $result['SERVER_PORT'] = $parts['scheme'] === 'http' ? 80 : 443;
+    }
+    return $result;
+  }
+
   /**
    * Generate bootstrap logic.
    *
@@ -259,7 +278,8 @@ class Bootstrap {
       'SCRIPT_NAME',
     );
     if (CIVICRM_UF === 'Backdrop') {
-      $srvVars[] = 'HTTP_HOST';
+      $webHostVars = $this->convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : 'http://localhost');
+      $srvVars = array_merge($srvVars, array_keys($webHostVars));
       // ^^ This might make sense for all UF's, but it would require more testing to QA.
     }
     foreach ($srvVars as $srvVar) {
