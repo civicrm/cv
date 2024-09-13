@@ -137,7 +137,12 @@ trait UrlCommandTrait {
   protected function resolveExt($extExpr, OutputInterface $output) {
     $mapper = \CRM_Extension_System::singleton()->getMapper();
 
-    [$keyOrName, $file] = explode('/', $extExpr, 2);
+    if (strpos($extExpr, '/')) {
+      [$keyOrName, $file] = explode('/', $extExpr, 2);
+    }
+    else {
+      [$keyOrName, $file] = [$extExpr, NULL];
+    }
     if ($keyOrName === '.') {
       return array(
         'type' => 'ext',
