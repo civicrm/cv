@@ -106,18 +106,4 @@ abstract class AbstractPlusParser {
     }
   }
 
-  public function parseWhere($expr) {
-    if (preg_match('/^([a-zA-Z0-9_:\.]+)\s*(\<=|\>=|=|!=|\<|\>|IS NULL|IS NOT NULL|IS EMPTY|IS NOT EMPTY|LIKE|NOT LIKE|IN|NOT IN)\s*(.*)$/i', $expr, $matches)) {
-      if (!empty($matches[3])) {
-        return [$matches[1], strtoupper(trim($matches[2])), $this->parseValueExpr(trim($matches[3]))];
-      }
-      else {
-        return [$matches[1], strtoupper($matches[2])];
-      }
-    }
-    else {
-      throw new \RuntimeException("Error parsing \"where\": $expr");
-    }
-  }
-
 }
