@@ -54,7 +54,7 @@ The ENV expressions are prefixed to indicate their escaping rule:
     $datasource->loadFromCiviDSN($this->pickDsn($input->getOption('target')));
 
     $mysql = Process::findCommand('mysql');
-    if (Process::isShellScript($mysql)) {
+    if (Process::isShellScript($mysql) && !static::supportsDefaultsFile($mysql)) {
       $output->getErrorOutput()->writeln("<info>[SqlCommand]</info> <comment>WARNING: The mysql command appears to be a wrapper script. In some environments, this may interfere with credential passing.</comment>");
     }
 
@@ -156,6 +156,11 @@ The ENV expressions are prefixed to indicate their escaping rule:
     }
 
     return $dsn;
+  }
+
+  protected function supportsDefaultsFile(string $bin): bool {
+    $code = file_get_contents($bin);
+    return preg_match(';@ respect --defaults-file;', $code);
   }
 
 }
