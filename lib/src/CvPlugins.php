@@ -1,7 +1,11 @@
 <?php
 namespace Civi\Cv;
 
+use Civi\Core\Event\GenericHookEvent;
+
 class CvPlugins {
+
+  const PROTOCOL_VERSION = 1;
 
   /**
    * @var string[]
@@ -9,6 +13,13 @@ class CvPlugins {
   private $paths;
 
   private $plugins;
+
+  /**
+   * @var array
+   *   Description the current application environment.
+   *   Ex: ['appName' => 'cv', 'appVersion' => '0.3.50']
+   */
+  private $pluginEnv;
 
   /**
    * Load any plugins.
@@ -22,6 +33,7 @@ class CvPlugins {
    *   Ex: ['appName' => 'cv', 'appVersion' => '0.3.50']
    */
   public function init(array $pluginEnv) {
+    $this->pluginEnv = $pluginEnv;
     if (getenv('CV_PLUGIN_PATH')) {
       $this->paths = explode(PATH_SEPARATOR, getenv('CV_PLUGIN_PATH'));
     }
@@ -35,7 +47,7 @@ class CvPlugins {
     // Always load internal plugins
     $this->paths[] = dirname(__DIR__) . '/plugin';
 
-    $this->plugins = [];
+    $plugins = [];
     foreach ($this->paths as $path) {
       if (file_exists($path) && is_dir($path)) {
         foreach ((array) glob("$path/*.php") as $file) {
@@ -43,21 +55,28 @@ class CvPlugins {
           if ($pluginName === basename($file)) {
             throw new \RuntimeException("Malformed plugin name: $file");
           }
-          if (!isset($this->plugins[$pluginName])) {
-            $this->plugins[$pluginName] = $file;
+          if (!isset($plugins[$pluginName])) {
+            $plugins[$pluginName] = $file;
           }
           else {
-            fprintf(STDERR, "WARNING: Plugin %s has multiple definitions (%s, %s)\n", $pluginName, $file, $this->plugins[$pluginName]);
+            fprintf(STDERR, "WARNING: Plugin %s has multiple definitions (%s, %s)\n", $pluginName, $file, $plugins[$pluginName]);
           }
         }
       }
     }
 
-    ksort($this->plugins);
-    foreach ($this->plugins as $pluginName => $pluginFile) {
-      // FIXME: Refactor so that you can add more plugins post-boot `load("/some/glob*.php")`
-      $this->load($pluginEnv + [
-        'protocol' => 1,
+    $this->loadAll($plugins);
+  }
+
+  /**
+   * @param array $plugins
+   *   Ex: ['helloworld' => '/etc/cv/plugin/helloworld.php']
+   */
+  protected function loadAll(array $plugins): void {
+    ksort($plugins);
+    foreach ($plugins as $pluginName => $pluginFile) {
+      $this->load($this->pluginEnv + [
+        'protocol' => self::PROTOCOL_VERSION,
         'name' => $pluginName,
         'file' => $pluginFile,
       ]);
@@ -74,6 +93,7 @@ class CvPlugins {
    * @return void
    */
   protected function load(array $CV_PLUGIN) {
+    $this->plugins[$CV_PLUGIN['name']] = $CV_PLUGIN['file'];
     include $CV_PLUGIN['file'];
   }
 
