@@ -33,6 +33,8 @@ class CvPlugins {
    *   Ex: ['appName' => 'cv', 'appVersion' => '0.3.50']
    */
   public function init(array $pluginEnv) {
+    require_once __DIR__ . '/cvplugin_loader.php';
+
     $this->pluginEnv = $pluginEnv;
     if (getenv('CV_PLUGIN_PATH')) {
       $this->paths = explode(PATH_SEPARATOR, getenv('CV_PLUGIN_PATH'));
@@ -69,10 +71,27 @@ class CvPlugins {
   }
 
   /**
+   * Like CvPlugins::init(), this searches for and loads plugins. This is effectively
+   * the second phase of plugin-loading. It focuses on CiviCRM extensions
+   * which embed extra plugins.
+   */
+  public function initExtensions(): void {
+    $plugins = [];
+    $event = GenericHookEvent::create([
+      'plugins' => &$plugins,
+      'pluginEnv' => $this->pluginEnv + ['protocol' => self::PROTOCOL_VERSION],
+    ]);
+    \Civi::dispatcher()->dispatch('civi.cv-lib.plugins', $event);
+
+    $this->loadAll($plugins);
+  }
+
+  /**
    * @param array $plugins
    *   Ex: ['helloworld' => '/etc/cv/plugin/helloworld.php']
+   * @internal
    */
-  protected function loadAll(array $plugins): void {
+  public function loadAll(array $plugins): void {
     ksort($plugins);
     foreach ($plugins as $pluginName => $pluginFile) {
       $this->load($this->pluginEnv + [
@@ -90,9 +109,21 @@ class CvPlugins {
    *   - version: Protocol version (ex: "1")
    *   - name: Basenemae of the plugin (eg `hello.php`)
    *   - file: Logic filename (eg `/etc/cv/plugin/hello.php`)
+   *
    * @return void
+   * @internal
    */
-  protected function load(array $CV_PLUGIN) {
+  public function load(array $CV_PLUGIN) {
+    if (isset($this->plugins[$CV_PLUGIN['name']])) {
+      if ($this->plugins[$CV_PLUGIN['name']] === $CV_PLUGIN['file']) {
+        return;
+      }
+      else {
+        fprintf(STDERR, "WARNING: Plugin %s has already been loaded from %s. Ignore duplicate %s.\n",
+          $CV_PLUGIN['name'], $this->plugins[$CV_PLUGIN['name']], $CV_PLUGIN['file']);
+        return;
+      }
+    }
     $this->plugins[$CV_PLUGIN['name']] = $CV_PLUGIN['file'];
     include $CV_PLUGIN['file'];
   }
