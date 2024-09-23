@@ -113,7 +113,7 @@ trait StructuredOutputTrait {
    * @see Encoder::getFormats
    */
   protected function sendResult(InputInterface $input, OutputInterface $output, $result) {
-    $flat = $this->parseOptionalOption($input, ['--flat'], FALSE, '.');
+    $flat = OptionalOption::parse($input, ['--flat'], FALSE, '.');
     if ($flat !== FALSE) {
       $result = ArrayUtil::implodeTree($flat, $result);
     }
@@ -157,7 +157,7 @@ trait StructuredOutputTrait {
       return;
     }
 
-    $flat = $this->parseOptionalOption($input, ['--flat'], FALSE, '.');
+    $flat = OptionalOption::parse($input, ['--flat'], FALSE, '.');
     if ($flat !== FALSE) {
       $filtered = ArrayUtil::filterColumns($records, $columns);
       $flattened = ArrayUtil::implodeTree($flat, $filtered);

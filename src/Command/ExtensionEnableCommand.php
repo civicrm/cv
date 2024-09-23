@@ -45,7 +45,7 @@ Note:
 
     // Refresh extensions if (a) ---refresh enabled or (b) there's a cache-miss.
     $refresh = $input->getOption('refresh') ? 'yes' : 'auto';
-    // $refresh = $this->parseOptionalOption($input, array('--refresh', '-r'), 'auto', 'yes');
+    // $refresh = OptionalOption::parse(array('--refresh', '-r'), 'auto', 'yes');
     while (TRUE) {
       if ($refresh === 'yes') {
         $output->writeln("<info>Refreshing extension cache</info>");

@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\OptionalOption;
 use Civi\Cv\Util\SetupCommandTrait;
 use Civi\Cv\Util\DebugDispatcherTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
@@ -34,7 +35,7 @@ options for "core:uninstall" as the preceding "core:install".
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $setup = $this->bootSetupSubsystem($input, $output);
 
-    $debugEvent = $this->parseOptionalOption($input, ['--debug-event'], NULL, '');
+    $debugEvent = OptionalOption::parse($input, ['--debug-event'], NULL, '');
     if ($debugEvent !== NULL) {
       $eventNames = $this->findEventNames($setup->getDispatcher(), $debugEvent);
       $this->printEventListeners($output, $setup->getDispatcher(), $eventNames);

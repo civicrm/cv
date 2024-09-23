@@ -2,6 +2,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Encoder;
+use Civi\Cv\Util\OptionalOption;
 use Civi\Cv\Util\SetupCommandTrait;
 use Civi\Cv\Util\DebugDispatcherTrait;
 use Symfony\Component\Console\Input\InputInterface;
@@ -57,7 +58,7 @@ $ cv core:install -m extras.opt-in.versionCheck=1
 
     $debugMode = FALSE;
 
-    $debugEvent = $this->parseOptionalOption($input, ['--debug-event'], NULL, '');
+    $debugEvent = OptionalOption::parse($input, ['--debug-event'], NULL, '');
     if ($debugEvent !== NULL) {
       $eventNames = $this->findEventNames($setup->getDispatcher(), $debugEvent);
       $this->printEventListeners($output, $setup->getDispatcher(), $eventNames);
