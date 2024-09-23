@@ -2,6 +2,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\BootTrait;
+use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -34,7 +35,7 @@ Flush system caches
     }
 
     $output->writeln("<info>Flushing system caches</info>");
-    $result = $this->callApiSuccess($input, $output, 'System', 'flush', $params);
+    $result = VerboseApi::callApi3Success('System', 'flush', $params);
     return empty($result['is_error']) ? 0 : 1;
   }
 

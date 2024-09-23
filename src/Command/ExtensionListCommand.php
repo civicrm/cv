@@ -5,6 +5,7 @@ use Civi\Cv\Cv;
 use Civi\Cv\Util\ArrayUtil;
 use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
+use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -82,7 +83,7 @@ Note:
       ? (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_NORMAL)
       : (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_VERBOSE);
 
-    list($local, $remote) = $this->parseLocalRemote($input);
+    [$local, $remote] = $this->parseLocalRemote($input);
 
     if ($extRepoUrl = $this->parseRepoUrl($input)) {
       global $civicrm_setting;
@@ -97,7 +98,7 @@ Note:
 
     if ($input->getOption('refresh')) {
       $output->writeln("<info>Refreshing extensions</info>", $wo);
-      $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
+      $result = VerboseApi::callApi3Success('Extension', 'refresh', array(
         'local' => $local,
         'remote' => $remote,
       ));
@@ -136,7 +137,7 @@ Note:
    */
   protected function find($input) {
     $regex = $input->getArgument('regex');
-    list($local, $remote) = $this->parseLocalRemote($input);
+    [$local, $remote] = $this->parseLocalRemote($input);
 
     if ($input->getOption('installed')) {
       $statusFilter = array('installed');

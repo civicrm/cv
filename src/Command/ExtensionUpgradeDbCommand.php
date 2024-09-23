@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -39,7 +40,7 @@ Deprecation:
     $this->boot($input, $output);
 
     $output->writeln("<info>Applying database upgrades from extensions</info>");
-    $result = $this->callApiSuccess($input, $output, 'Extension', 'upgrade', array());
+    $result = VerboseApi::callApi3Success('Extension', 'upgrade', array());
     if (!empty($result['is_error'])) {
       return 1;
     }

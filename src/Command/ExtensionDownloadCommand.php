@@ -3,6 +3,7 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\Filesystem;
 use Civi\Cv\Util\HeadlessDownloader;
+use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -91,7 +92,7 @@ Note:
     while (TRUE) {
       if ($refresh === 'yes' && $this->isBooted()) {
         $output->writeln("<info>Refreshing extension cache</info>");
-        $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
+        $result = VerboseApi::callApi3Success('Extension', 'refresh', array(
           'local' => FALSE,
           'remote' => TRUE,
         ));
@@ -100,7 +101,7 @@ Note:
         }
       }
 
-      list ($downloads, $errors) = $this->parseDownloads($input);
+      [$downloads, $errors] = $this->parseDownloads($input);
       if ($refresh == 'auto' && !empty($errors)) {
         $output->writeln("<info>Extension cache does not contain requested item(s)</info>");
         $refresh = 'yes';
@@ -135,7 +136,7 @@ Note:
           else {
             $output->writeln("<info>Downloading extension \"$key\" ($url)</info>");
             $this->assertBooted();
-            $result = $this->callApiSuccess($input, $output, 'Extension', 'download', array(
+            $result = VerboseApi::callApi3Success('Extension', 'download', array(
               'key' => $key,
               'url' => $url,
               'install' => !$input->getOption('no-install'),
@@ -145,7 +146,7 @@ Note:
 
         case 'install':
           $output->writeln("<info>Found extension \"$key\". Enabling.</info>");
-          $result = $this->callApiSuccess($input, $output, 'Extension', 'enable', array(
+          $result = VerboseApi::callApi3Success('Extension', 'enable', array(
             'key' => $key,
           ));
           break;
@@ -225,7 +226,7 @@ Note:
       $origExpr = $keyOrName;
       $url = NULL;
       if (strpos($keyOrName, '@') !== FALSE) {
-        list ($keyOrName, $url) = explode('@', $keyOrName, 2);
+        [$keyOrName, $url] = explode('@', $keyOrName, 2);
       }
 
       if (empty($keyOrName) && !empty($url)) {

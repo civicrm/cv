@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -49,7 +50,7 @@ Note:
     while (TRUE) {
       if ($refresh === 'yes') {
         $output->writeln("<info>Refreshing extension cache</info>");
-        $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
+        $result = VerboseApi::callApi3Success('Extension', 'refresh', array(
           'local' => TRUE,
           'remote' => FALSE,
         ));
@@ -58,7 +59,7 @@ Note:
         }
       }
 
-      list ($foundKeys, $missingKeys) = $this->parseKeys($input, $output);
+      [$foundKeys, $missingKeys] = $this->parseKeys($input, $output);
       if ($refresh == 'auto' && !empty($missingKeys)) {
         $output->writeln("<info>Extension cache does not contain requested item(s)</info>");
         $refresh = 'yes';
@@ -87,7 +88,7 @@ Note:
       $output->writeln("<info>Enabling extension \"$key\"</info>");
     }
 
-    $result = $this->callApiSuccess($input, $output, 'Extension', 'install', array(
+    $result = VerboseApi::callApi3Success('Extension', 'install', array(
       'keys' => $foundKeys,
     ));
     return empty($result['is_error']) ? 0 : 1;
