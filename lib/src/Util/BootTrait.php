@@ -290,4 +290,17 @@ trait BootTrait {
     return new SymfonyConsoleLogger('BootTrait', $output);
   }
 
+  /**
+   * @return bool
+   */
+  protected function isBooted() {
+    return defined('CIVICRM_DSN');
+  }
+
+  protected function assertBooted() {
+    if (!$this->isBooted()) {
+      throw new \Exception("Error: This command requires bootstrapping, but the system does not appear to be bootstrapped. Perhaps you set --level=none?");
+    }
+  }
+
 }

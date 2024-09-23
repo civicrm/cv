@@ -20,12 +20,6 @@ class BaseCommand extends Command {
     $this->runOptionCallbacks($input, $output);
   }
 
-  protected function assertBooted() {
-    if (!$this->isBooted()) {
-      throw new \Exception("Error: This command requires bootstrapping, but the system does not appear to be bootstrapped. Perhaps you set --level=none?");
-    }
-  }
-
   /**
    * Execute an API call. If it fails, display a formatted error.
    *
@@ -99,13 +93,6 @@ class BaseCommand extends Command {
       }
     }
     return $omittedDefault;
-  }
-
-  /**
-   * @return bool
-   */
-  protected function isBooted() {
-    return defined('CIVICRM_DSN');
   }
 
 }
