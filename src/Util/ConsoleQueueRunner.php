@@ -34,12 +34,12 @@ class ConsoleQueueRunner {
   /**
    * ConsoleQueueRunner constructor.
    *
-   * @param \Symfony\Component\Console\Style\SymfonyStyle $io
+   * @param \Symfony\Component\Console\Style\StyleInterface $io
    * @param \CRM_Queue_Queue $queue
    * @param bool $dryRun
    * @param bool $step
    */
-  public function __construct(\Symfony\Component\Console\Style\SymfonyStyle $io, \CRM_Queue_Queue $queue, $dryRun = FALSE, $step = FALSE) {
+  public function __construct(\Symfony\Component\Console\Style\StyleInterface $io, \CRM_Queue_Queue $queue, $dryRun = FALSE, $step = FALSE) {
     $this->io = $io;
     $this->queue = $queue;
     $this->dryRun = $dryRun;
