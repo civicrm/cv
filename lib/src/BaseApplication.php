@@ -24,6 +24,8 @@ class BaseApplication extends \Symfony\Component\Console\Application {
 
     try {
       $application = new static($name);
+      Cv::ioStack()->replace('app', $application);
+      $application->configure();
       $argv = AliasFilter::filter($argv);
       $result = $application->run(new CvArgvInput($argv), Cv::ioStack()->current('output'));
     }
@@ -38,8 +40,7 @@ class BaseApplication extends \Symfony\Component\Console\Application {
     exit($result);
   }
 
-  public function __construct($name = 'UNKNOWN', $version = 'UNKNOWN') {
-    parent::__construct($name, $version);
+  public function configure() {
     $this->setCatchExceptions(TRUE);
     $this->setAutoExit(FALSE);
 
