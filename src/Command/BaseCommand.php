@@ -6,16 +6,10 @@ use Civi\Cv\Util\OptionCallbackTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 class BaseCommand extends Command {
 
   use OptionCallbackTrait;
-
-  /**
-   * @var \Symfony\Component\Console\Style\StyleInterface
-   */
-  private $io;
 
   /**
    * @param \Symfony\Component\Console\Input\InputInterface $input
@@ -23,15 +17,7 @@ class BaseCommand extends Command {
    */
   protected function initialize(InputInterface $input, OutputInterface $output) {
     parent::initialize($input, $output);
-    $this->io = new SymfonyStyle($input, $output);
     $this->runOptionCallbacks($input, $output);
-  }
-
-  /**
-   * @return \Symfony\Component\Console\Style\StyleInterface
-   */
-  protected function getIO() {
-    return $this->io;
   }
 
   protected function assertBooted() {

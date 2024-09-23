@@ -181,7 +181,7 @@ Examples:
       $upgrade->setPreUpgradeMessage($preUpgradeMessage, $dbVer, $codeVer);
       if ($preUpgradeMessage) {
         $output->writeln(\CRM_Utils_String::htmlToText($preUpgradeMessage), $this->niceVerbosity);
-        if (!$this->getIO()->confirm('Continue?')) {
+        if (!\Civi\Cv\Cv::io()->confirm('Continue?')) {
           $output->writeln("<error>Abort</error>");
           return 1;
         }
@@ -219,7 +219,7 @@ Examples:
     }
 
     $output->writeln("<info>Executing upgrade...</info>", $this->niceVerbosity);
-    $runner = new ConsoleQueueRunner($this->getIO(), $queue, $input->getOption('dry-run'), $input->getOption('step'));
+    $runner = new ConsoleQueueRunner(\Civi\Cv\Cv::io(), $queue, $input->getOption('dry-run'), $input->getOption('step'));
     $runner->runAll();
 
     $output->writeln("<info>Finishing upgrade...</info>", $this->niceVerbosity);
@@ -297,7 +297,7 @@ Examples:
       }
     }
 
-    $runner = new ConsoleQueueRunner($this->getIO(), $queue, $input->getOption('dry-run'), $input->getOption('step'));
+    $runner = new ConsoleQueueRunner(\Civi\Cv\Cv::io(), $queue, $input->getOption('dry-run'), $input->getOption('step'));
     $runner->runAll();
     return 0;
   }

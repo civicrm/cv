@@ -77,7 +77,7 @@ trait UrlCommandTrait {
 
     if ($input->getOption('login')) {
       if (!\CRM_Extension_System::singleton()->getMapper()->isActiveModule('authx')) {
-        if ($this->getIO()->confirm('Enable authx?')) {
+        if (\Civi\Cv\Cv::io()->confirm('Enable authx?')) {
           // ^^ Does the question go to STDERR or STDOUT?
           $output->getErrorOutput()->writeln('<info>Enabling extension "authx"</info>');
           civicrm_api3('Extension', 'enable', ['key' => 'authx']);
