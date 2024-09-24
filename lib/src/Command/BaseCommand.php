@@ -20,18 +20,9 @@ class BaseCommand extends Command {
   use OptionCallbackTrait;
   use BootTrait;
 
-  public function getBootOptions(): array {
-    return [
-      'auto' => TRUE,
-      'default' => 'full|cms-full',
-      'allow' => ['full|cms-full', 'full', 'cms-full', 'settings', 'classloader', 'cms-only', 'none'],
-    ];
-  }
-
   public function mergeApplicationDefinition($mergeArgs = TRUE) {
     parent::mergeApplicationDefinition($mergeArgs);
-    $bootOptions = $this->getBootOptions();
-    $this->getDefinition()->getOption('level')->setDefault($bootOptions['default']);
+    $this->mergeBootDefinition($this->getDefinition());
   }
 
   /**
@@ -39,16 +30,7 @@ class BaseCommand extends Command {
    * @param \Symfony\Component\Console\Output\OutputInterface $output
    */
   protected function initialize(InputInterface $input, OutputInterface $output) {
-    $bootOptions = $this->getBootOptions();
-    if (!in_array($input->getOption('level'), $bootOptions['allow'])) {
-      throw new \LogicException(sprintf("Command called with with level (%s) but only accepts levels (%s)",
-        $input->getOption('level'), implode(', ', $bootOptions['allow'])));
-    }
-
-    if (!$this->isBooted() && ($bootOptions['auto'] ?? TRUE)) {
-      $this->boot($input, $output);
-    }
-
+    $this->autoboot($input, $output);
     parent::initialize($input, $output);
     $this->runOptionCallbacks($input, $output);
   }

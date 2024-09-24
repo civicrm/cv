@@ -72,7 +72,7 @@ class BaseApplication extends \Symfony\Component\Console\Application {
     $c = new class() {
       use BootTrait;
     };
-    $c->configureDefinition($definition);
+    $c->mergeDefaultBootDefinition($definition);
 
     return $definition;
   }
