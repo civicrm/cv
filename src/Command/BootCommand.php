@@ -13,8 +13,6 @@ class BootCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     switch ($input->getOption('level')) {
       case 'classloader':
         $code = sprintf('require_once  %s . "/CRM/Core/ClassLoader.php";', var_export(rtrim($GLOBALS["civicrm_root"], '/'), 1))

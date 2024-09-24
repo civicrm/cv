@@ -18,8 +18,6 @@ class CliCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     $cv = new Application();
     $sh = new \Psy\Shell();
     $sh->addCommands($cv->createCommands());

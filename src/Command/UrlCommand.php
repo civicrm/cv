@@ -69,20 +69,17 @@ NOTE: If you use `--login` and do not have `authx`, then it prompts about
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {
-    parent::initialize($input, $output);
     if ($input->getFirstArgument() === 'open') {
       $input->setOption('open', TRUE);
     }
-  }
-
-  protected function execute(InputInterface $input, OutputInterface $output): int {
     if (in_array($input->getOption('out'), Encoder::getTabularFormats())
     && !in_array($input->getOption('out'), Encoder::getFormats())) {
       $input->setOption('tabular', TRUE);
     }
+    parent::initialize($input, $output);
+  }
 
-    $this->boot($input, $output);
-
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $rows = $this->createUrls($input, $output);
 
     if ($input->getOption('open')) {

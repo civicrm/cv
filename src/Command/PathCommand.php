@@ -58,8 +58,6 @@ Example: Lookup multiple items
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     if (!$input->getOption('ext') && !$input->getOption('config') && !$input->getOption('dynamic')) {
       $output->getErrorOutput()->writeln("<error>No paths specified. Must use -x, -c, or -d. (See also: cv path -h)</error>");
       return 1;

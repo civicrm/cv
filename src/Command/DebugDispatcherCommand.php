@@ -27,11 +27,13 @@ Examples:
 ');
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output): int {
+  protected function initialize(InputInterface $input, OutputInterface $output) {
     define('CIVICRM_CONTAINER_CACHE', 'never');
     $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
-    $this->boot($input, $output);
+    parent::initialize($input, $output);
+  }
 
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $container = \Civi::container();
 
     /*

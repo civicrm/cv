@@ -61,6 +61,11 @@ Note:
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {
+    if ($extRepoUrl = $this->parseRepoUrl($input)) {
+      global $civicrm_setting;
+      $civicrm_setting['Extension Preferences']['ext_repo_url'] = $extRepoUrl;
+    }
+
     parent::initialize($input, $output);
 
     // We apply different defaults for the 'columns' list depending on the output medium.
@@ -83,13 +88,6 @@ Note:
       : (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_VERBOSE);
 
     [$local, $remote] = $this->parseLocalRemote($input);
-
-    if ($extRepoUrl = $this->parseRepoUrl($input)) {
-      global $civicrm_setting;
-      $civicrm_setting['Extension Preferences']['ext_repo_url'] = $extRepoUrl;
-    }
-
-    $this->boot($input, $output);
 
     if ($remote) {
       $output->writeln("<info>Using extension feed \"" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . "\"</info>", $wo);

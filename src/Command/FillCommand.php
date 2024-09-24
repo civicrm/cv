@@ -55,7 +55,6 @@ class FillCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
     if (!$input->getOption('file')) {
       $reader = new SiteConfigReader(CIVICRM_SETTINGS_PATH);
       $liveData = $reader->compile(array('buildkit', 'home', 'active'));

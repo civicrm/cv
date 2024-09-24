@@ -43,8 +43,6 @@ class EditCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     $config = Config::read();
     $oldSiteData = empty($config['sites'][CIVICRM_SETTINGS_PATH]) ? array() : $config['sites'][CIVICRM_SETTINGS_PATH];
     $oldJson = Encoder::encode($oldSiteData, 'json-pretty');

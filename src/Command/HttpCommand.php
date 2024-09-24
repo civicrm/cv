@@ -46,8 +46,6 @@ NOTE: If you use `--login` and do not have `authx`, then it prompts about
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     $method = $input->getOption('request');
     $data = $this->parseRequestData($input);
     $headers = $this->parseRequestHeaders($input);

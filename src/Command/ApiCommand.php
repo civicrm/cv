@@ -53,8 +53,6 @@ TIP: To display a full backtrace of any errors, pass "-vv" (very verbose).
     $I = '<info>';
     $_I = '</info>';
 
-    $this->boot($input, $output);
-
     list($entity, $action) = explode('.', $input->getArgument('Entity.action'));
     $params = $this->parseParams($input);
 

@@ -128,8 +128,6 @@ NOTE: To change the default output format, set CV_OUTPUT.
     $I = '<info>';
     $_I = '</info>';
 
-    $this->boot($input, $output);
-
     if (!function_exists('civicrm_api4')) {
       throw new \RuntimeException("Please enable APIv4 before running APIv4 commands.");
     }

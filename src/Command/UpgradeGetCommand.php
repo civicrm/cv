@@ -39,6 +39,10 @@ Returns a JSON object with the properties:
 ');
   }
 
+  public function getBootOptions(): array {
+    return parent::getBootOptions() + ['auto' => FALSE];
+  }
+
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $result = array();
     $exitCode = 0;

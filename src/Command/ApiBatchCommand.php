@@ -60,7 +60,6 @@ Protocol:
       // Other formats may not work with the fgets() loop.
       throw new \Exception("api:batch only supports JSON dialog");
     }
-    $this->boot($input, $output);
 
     $addDefault = function($v) {
       $this->defaults = \CRM_Utils_Array::crmArrayMerge($v, $this->defaults);

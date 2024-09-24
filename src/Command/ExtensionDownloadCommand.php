@@ -65,18 +65,15 @@ Note:
       $input->setOption('level', 'none');
       $input->setOption('no-install', TRUE);
     }
+    if ($extRepoUrl = $this->parseRepoUrl($input)) {
+      global $civicrm_setting;
+      $civicrm_setting['Extension Preferences']['ext_repo_url'] = $extRepoUrl;
+    }
     parent::initialize($input, $output);
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $fs = new Filesystem();
-
-    if ($extRepoUrl = $this->parseRepoUrl($input)) {
-      global $civicrm_setting;
-      $civicrm_setting['Extension Preferences']['ext_repo_url'] = $extRepoUrl;
-    }
-
-    $this->boot($input, $output);
 
     if ($input->getOption('to') && !$fs->isAbsolutePath($input->getOption('to'))) {
       throw new \RuntimeException("The --to argument requires an absolute path.");

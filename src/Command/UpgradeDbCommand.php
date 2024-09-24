@@ -49,15 +49,13 @@ Examples:
   protected function initialize(InputInterface $input, OutputInterface $output) {
     $this->input = $input;
     $this->output = $output;
+    if (!defined('CIVICRM_UPGRADE_ACTIVE')) {
+      define('CIVICRM_UPGRADE_ACTIVE', 1);
+    }
     parent::initialize($input, $output);
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    if (!defined('CIVICRM_UPGRADE_ACTIVE')) {
-      define('CIVICRM_UPGRADE_ACTIVE', 1);
-    }
-    $this->boot($input, $output);
-
     if (!ini_get('safe_mode')) {
       set_time_limit(0);
     }

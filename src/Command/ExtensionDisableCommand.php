@@ -38,7 +38,6 @@ Note:
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
     [$foundKeys, $missingKeys] = $this->parseKeys($input, $output);
 
     // Uninstall what's recognized or what looks like an ext key.

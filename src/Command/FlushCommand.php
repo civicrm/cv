@@ -19,10 +19,15 @@ Flush system caches
 ');
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output): int {
+  protected function initialize(InputInterface $input, OutputInterface $output) {
     // The main reason we have this as separate command -- so we can ignore
     // stale class-references that might be retained by the container cache.
     define('CIVICRM_CONTAINER_CACHE', 'never');
+
+    parent::initialize($input, $output);
+  }
+
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->boot($input, $output);
 
     $params = array();

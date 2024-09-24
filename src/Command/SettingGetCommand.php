@@ -69,8 +69,6 @@ class SettingGetCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     $filter = $this->createSettingFilter($input->getArgument('name'));
 
     $result = [];

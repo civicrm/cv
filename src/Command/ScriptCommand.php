@@ -17,6 +17,10 @@ class ScriptCommand extends BaseCommand {
       ->addArgument('scriptArguments', InputArgument::IS_ARRAY, 'Optional arguments to pass to the script as $argv');
   }
 
+  public function getBootOptions(): array {
+    return parent::getBootOptions() + ['auto' => FALSE];
+  }
+
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $fs = new Filesystem();
     $origScript = $fs->toAbsolutePath($input->getArgument('script'));

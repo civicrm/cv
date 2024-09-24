@@ -88,7 +88,6 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
     $I = '<info>';
     $_I = '</info>';
 
-    $this->boot($input, $output);
     $errorOutput = is_callable([$output, 'getErrorOutput']) ? $output->getErrorOutput() : $output;
 
     $result = [];

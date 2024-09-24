@@ -41,8 +41,6 @@ Note:
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     // Refresh extensions if (a) ---refresh enabled or (b) there's a cache-miss.
     $refresh = $input->getOption('refresh') ? 'yes' : 'auto';
     // $refresh = OptionalOption::parse(array('--refresh', '-r'), 'auto', 'yes');

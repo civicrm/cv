@@ -37,7 +37,6 @@ Examples:
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
     if (!$input->getOption('user')) {
       $output->getErrorOutput()->writeln("<comment>For a full list, try passing --user=[username].</comment>");
     }

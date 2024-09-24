@@ -38,8 +38,6 @@ NOTE: To change the default output format, set CV_OUTPUT.
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     if ($input->getOption('out') === 'auto') {
       $hasReturn = preg_match('/^\s*return[ \t\r\n]/', $input->getArgument('code'))
         || preg_match('/[;\{]\s*return[ \t\r\n]/', $input->getArgument('code'));

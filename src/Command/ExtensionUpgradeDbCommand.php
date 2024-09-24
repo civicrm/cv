@@ -34,10 +34,12 @@ Deprecation:
 ');
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output): int {
+  protected function initialize(InputInterface $input, OutputInterface $output) {
     $output->writeln("<error>WARNING: \"ext:upgrade-db\" is deprecated. Use the main \"updb\" command instead.</error>");
-    $this->boot($input, $output);
+    parent::initialize($input, $output);
+  }
 
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $output->writeln("<info>Applying database upgrades from extensions</info>");
     $result = VerboseApi::callApi3Success('Extension', 'upgrade', array());
     if (!empty($result['is_error'])) {
