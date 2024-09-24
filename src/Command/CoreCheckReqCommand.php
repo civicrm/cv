@@ -35,7 +35,10 @@ $ cv core:check-req -e
 Example: Show warnings and errors
 $ cv core:check-req -we
 ');
-    $this->configureBootOptions('none');
+  }
+
+  public function getBootOptions(): array {
+    return ['default' => 'none', 'allow' => ['none']];
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

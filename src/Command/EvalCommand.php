@@ -2,7 +2,6 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Encoder;
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,7 +9,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class EvalCommand extends BaseCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   protected function configure() {
@@ -37,7 +35,6 @@ you use a "return" statement. In that case, it will use the default (' . \Civi\C
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

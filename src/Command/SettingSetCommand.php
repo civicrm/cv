@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\SettingTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
@@ -11,7 +10,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SettingSetCommand extends BaseCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
   use SettingTrait;
 
@@ -82,7 +80,6 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
     {$C}cv setting:set --scope={$_C}{$I}contact{$_I}{$C} --user={$_C}{$I}admin{$_I}               (admin's contact)
     {$C}cv setting:set --scope={$_C}{$I}contact:201{$_I}                        (contact #201)
 ");
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

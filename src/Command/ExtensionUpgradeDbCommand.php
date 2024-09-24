@@ -32,7 +32,6 @@ Deprecation:
   This command is now deprecated. Use "cv upgrade:db" to perform upgrades
   for core and/or extensions.
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

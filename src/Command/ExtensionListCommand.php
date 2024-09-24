@@ -58,7 +58,6 @@ Note:
   name ("foobar"). However, short names are not strongly guaranteed.
 ');
     parent::configureRepoOptions();
-    $this->configureBootOptions();
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {

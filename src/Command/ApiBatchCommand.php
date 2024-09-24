@@ -1,14 +1,11 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ApiBatchCommand extends BaseCommand {
-
-  use BootTrait;
 
   /**
    * @var array
@@ -56,7 +53,6 @@ Protocol:
 * Each line of input is a JSON document, listing a batch of API requests.
 * Each line of output is a JSON document, listing a batch of API responses.
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

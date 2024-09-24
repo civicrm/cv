@@ -66,7 +66,6 @@ NOTE: If you use `--login` and do not have `authx`, then it prompts about
       enabling the extension. The extra I/O may influence some scripted
       use-cases.
 ');
-    $this->configureBootOptions();
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {

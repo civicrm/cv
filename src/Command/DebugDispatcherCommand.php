@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\DebugDispatcherTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,7 +8,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class DebugDispatcherCommand extends BaseCommand {
 
-  use BootTrait;
   use DebugDispatcherTrait;
 
   protected function configure() {
@@ -27,7 +25,6 @@ Examples:
   cv debug:event-dispatcher actionSchedule.getMappings
   cv debug:event-dispatcher /^actionSchedule/
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

@@ -35,7 +35,6 @@ Note:
   This subcommand does not output parseable data. For parseable output,
   consider using `cv api extension.disable`.
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,7 +8,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AngularModuleListCommand extends BaseCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   /**
@@ -36,7 +34,6 @@ Examples:
   cv ang:module:list \'/crmMail/\' --user=admin --columns=extDir,css
   cv ang:module:list --columns=name,js,css --out=json-pretty
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

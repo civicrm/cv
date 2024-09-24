@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,7 +13,6 @@ class UpgradeGetCommand extends BaseCommand {
   const DEFAULT_CHECK_URL = "https://upgrade.civicrm.org/check";
   // const DEFAULT_CHECK_URL = "http://civicrm-upgrade-manager.l/check";
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   /**
@@ -39,7 +37,6 @@ Returns a JSON object with the properties:
   vars       the site variables from cv vars:show
   error      only appears if there is an error
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

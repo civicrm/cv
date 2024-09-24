@@ -1,15 +1,12 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class FlushCommand extends BaseCommand {
-
-  use BootTrait;
 
   protected function configure() {
     $this
@@ -20,7 +17,6 @@ class FlushCommand extends BaseCommand {
       ->setHelp('
 Flush system caches
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

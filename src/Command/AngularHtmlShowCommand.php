@@ -2,15 +2,12 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\Process;
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class AngularHtmlShowCommand extends BaseCommand {
-
-  use BootTrait;
 
   /**
    * @param string|null $name
@@ -38,7 +35,6 @@ Examples:
   cv ang:html:show crmMailing/BlockMailing.html --diff | colordiff
   cv ang:html:show "~/crmMailing/BlockMailing.html"
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

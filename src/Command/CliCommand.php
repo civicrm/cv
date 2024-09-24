@@ -6,19 +6,15 @@ namespace Civi\Cv\Command;
 // **********************
 
 use Civi\Cv\Application;
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class CliCommand extends BaseCommand {
 
-  use BootTrait;
-
   protected function configure() {
     $this
       ->setName('cli')
       ->setDescription('Load interactive command line');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

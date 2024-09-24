@@ -58,7 +58,6 @@ Note:
   consider using `cv api extension.install`.
 ');
     parent::configureRepoOptions();
-    $this->configureBootOptions();
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {

@@ -38,7 +38,6 @@ Note:
   This subcommand does not output parseable data. For parseable output,
   consider using `cv api extension.install`.
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

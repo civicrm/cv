@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Civi\Cv\Util\ConsoleQueueRunner;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,7 +12,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class UpgradeDbCommand extends BaseCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   protected function configure() {
@@ -34,7 +32,6 @@ Examples:
   cv upgrade:db --dry-run
   cv upgrade:db --retry
 ');
-    $this->configureBootOptions();
   }
 
   /**

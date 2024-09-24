@@ -1,14 +1,11 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class BaseExtensionCommand extends BaseCommand {
-
-  use BootTrait;
 
   /**
    * Register CLI options for filtering the extension feed, such as "--dev" or "--filter-ver".

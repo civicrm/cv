@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
@@ -14,7 +13,6 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class DebugContainerCommand extends BaseCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   protected function configure() {
@@ -33,7 +31,6 @@ Dump the container configuration
 NOTE: By default, internal services are not displayed. However, some flags will enable display of
 internal services (eg `--all`, `--tag=XXX`, or `-v`).
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

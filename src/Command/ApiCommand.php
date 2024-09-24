@@ -2,7 +2,6 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Encoder;
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,7 +10,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ApiCommand extends BaseCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   /**
@@ -47,7 +45,6 @@ TIP: To change the default output format, set CV_OUTPUT.
 
 TIP: To display a full backtrace of any errors, pass "-vv" (very verbose).
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

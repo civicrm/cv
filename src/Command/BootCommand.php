@@ -1,19 +1,15 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class BootCommand extends BaseCommand {
 
-  use BootTrait;
-
   protected function configure() {
     $this
       ->setName('php:boot')
       ->setDescription('Generate PHP bootstrap code');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

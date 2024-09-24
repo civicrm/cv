@@ -1,14 +1,11 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class PipeCommand extends BaseCommand {
-
-  use BootTrait;
 
   /**
    * @param string|null $name
@@ -46,8 +43,6 @@ See also: https://docs.civicrm.org/dev/en/latest/framework/pipe
     // Tempting to add separate CLI flags that map to 'connection-flags', but this seems easier given that:
     // 1. The existing flags have different meanings (eg (v)erbose vs (v)ersion).
     // 2. The connection-flags are owned by civicrm-core.git. Don't want to update this whenever there's a new one.
-
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

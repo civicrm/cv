@@ -3,14 +3,11 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Util\Datasource;
 use Civi\Cv\Util\Process;
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SqlCliCommand extends BaseCommand {
-
-  use BootTrait;
 
   protected function configure() {
     $this
@@ -38,7 +35,6 @@ The ENV expressions are prefixed to indicate their escaping rule:
   #ENV[FOO]    Produces the numerical value of FOO (or fails)
   !ENV[FOO]    Produces the raw, unescaped string version of FOO
 ");
-    $this->configureBootOptions();
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {

@@ -55,7 +55,6 @@ Examples: Lookup dynamic paths
 Example: Lookup multiple items
   cv path -x cividiscount/info.xml -x flexmailer/info.xml -d \'[civicrm.root]/civicrm-version.php\'
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

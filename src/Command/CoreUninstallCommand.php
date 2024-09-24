@@ -29,7 +29,10 @@ Purge CiviCRM schema and settings files
 TIP: If you have a special system configuration, it may help to pass the same
 options for "core:uninstall" as the preceding "core:install".
 ');
-    $this->configureBootOptions('none');
+  }
+
+  public function getBootOptions(): array {
+    return ['default' => 'none', 'allow' => ['none']];
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
