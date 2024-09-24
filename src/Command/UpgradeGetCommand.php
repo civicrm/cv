@@ -40,7 +40,7 @@ Returns a JSON object with the properties:
   }
 
   public function getBootOptions(): array {
-    return parent::getBootOptions() + ['auto' => FALSE];
+    return ['auto' => FALSE] + parent::getBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

@@ -14,6 +14,7 @@ class BaseCommand extends Command {
 
   public function getBootOptions(): array {
     return [
+      'auto' => TRUE,
       'default' => 'full|cms-full',
       'allow' => ['full|cms-full', 'full', 'cms-full', 'settings', 'classloader', 'cms-only', 'none'],
     ];
