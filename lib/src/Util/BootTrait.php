@@ -16,11 +16,14 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 trait BootTrait {
 
-  public function configureBootOptions($defaultLevel = 'full|cms-full') {
-    $this->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (none,classloader,settings,full,cms-only,cms-full)', $defaultLevel);
-    $this->addOption('hostname', NULL, InputOption::VALUE_REQUIRED, 'Hostname (for a multisite system)');
-    $this->addOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)');
-    $this->addOption('user', 'U', InputOption::VALUE_REQUIRED, 'CMS user');
+  /**
+   * @internal
+   */
+  public function configureDefinition($definition, $defaultLevel = 'full|cms-full') {
+    $definition->addOption(new InputOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (none,classloader,settings,full,cms-only,cms-full)', $defaultLevel));
+    $definition->addOption(new InputOption('hostname', NULL, InputOption::VALUE_REQUIRED, 'Hostname (for a multisite system)'));
+    $definition->addOption(new InputOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)'));
+    $definition->addOption(new InputOption('user', 'U', InputOption::VALUE_REQUIRED, 'CMS user'));
   }
 
   public function boot(InputInterface $input, OutputInterface $output) {

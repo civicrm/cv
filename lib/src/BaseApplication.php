@@ -2,6 +2,7 @@
 namespace Civi\Cv;
 
 use Civi\Cv\Util\AliasFilter;
+use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\CvArgvInput;
 use LesserEvil\ShellVerbosityIsEvil;
 use Symfony\Component\Console\Input\InputInterface;
@@ -67,6 +68,12 @@ class BaseApplication extends \Symfony\Component\Console\Application {
     $definition = parent::getDefaultInputDefinition();
     $definition->addOption(new InputOption('cwd', NULL, InputOption::VALUE_REQUIRED, 'If specified, use the given directory as working directory.'));
     $definition->addOption(new InputOption('site-alias', NULL, InputOption::VALUE_REQUIRED, 'Load site connection data based on its alias'));
+
+    $c = new class() {
+      use BootTrait;
+    };
+    $c->configureDefinition($definition);
+
     return $definition;
   }
 
