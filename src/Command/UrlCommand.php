@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class UrlCommand extends BaseCommand {
+class UrlCommand extends CvCommand {
 
   use ExtensionTrait;
   use StructuredOutputTrait;

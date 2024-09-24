@@ -37,7 +37,7 @@ class BaseExtensionCommandTest extends \Civi\Cv\CivilTestCase {
    * @dataProvider repoOptionExamples
    */
   public function testParseRepo($inputArgv, $expectUrl) {
-    $c = new class('ext:example') extends BaseCommand {
+    $c = new class('ext:example') extends CvCommand {
       use ExtensionTrait;
     };
     $c->configureRepoOptions();

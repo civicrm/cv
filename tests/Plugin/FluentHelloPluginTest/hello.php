@@ -1,7 +1,7 @@
 <?php
 
 use Civi\Cv\Cv;
-use Civi\Cv\Command\BaseCommand;
+use Civi\Cv\Command\CvCommand;
 use CvDeps\Symfony\Component\Console\Input\InputInterface;
 use CvDeps\Symfony\Component\Console\Output\OutputInterface;
 
@@ -30,7 +30,7 @@ Cv::dispatcher()->addListener('*.app.boot', function ($e) {
 
 Cv::dispatcher()->addListener('cv.app.commands', function ($e) {
 
-  $e['commands'][] = (new BaseCommand('hello:normal'))
+  $e['commands'][] = (new CvCommand('hello:normal'))
     ->setDescription('Say a greeting')
     ->addArgument('name')
     ->setCode(function($input, $output) {
@@ -39,7 +39,7 @@ Cv::dispatcher()->addListener('cv.app.commands', function ($e) {
         throw new \RuntimeException("Argument \"name\" is inconsistent!");
       }
       if (!Civi\Core\Container::isContainerBooted()) {
-        throw new \LogicException("Container should have been booted by BaseCommand!");
+        throw new \LogicException("Container should have been booted by CvCommand!");
       }
       $name = $input->getArgument('name') ?: 'world';
       $output->writeln("Hey-yo $name via parameter!");
@@ -47,7 +47,7 @@ Cv::dispatcher()->addListener('cv.app.commands', function ($e) {
       return 0;
     });
 
-  $e['commands'][] = (new BaseCommand('hello:noboot'))
+  $e['commands'][] = (new CvCommand('hello:noboot'))
     ->setDescription('Say a greeting')
     ->addArgument('name')
     ->setBootOptions(['auto' => FALSE])
@@ -57,7 +57,7 @@ Cv::dispatcher()->addListener('cv.app.commands', function ($e) {
         throw new \RuntimeException("Argument \"name\" is inconsistent!");
       }
       if (class_exists('Civi\Core\Container')) {
-        throw new \LogicException("Container should not have been booted by BaseCommand!");
+        throw new \LogicException("Container should not have been booted by CvCommand!");
       }
       $name = $input->getArgument('name') ?: 'world';
       $output->writeln("Hey-yo $name via parameter!");

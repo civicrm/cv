@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SettingRevertCommand extends BaseCommand {
+class SettingRevertCommand extends CvCommand {
 
   use StructuredOutputTrait;
   use SettingTrait;

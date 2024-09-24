@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
-class DebugContainerCommand extends BaseCommand {
+class DebugContainerCommand extends CvCommand {
 
   use StructuredOutputTrait;
 

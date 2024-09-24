@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Command for asking CiviCRM for the appropriate tarball to download.
  */
-class UpgradeGetCommand extends BaseCommand {
+class UpgradeGetCommand extends CvCommand {
   const DEFAULT_CHECK_URL = "https://upgrade.civicrm.org/check";
   // const DEFAULT_CHECK_URL = "http://civicrm-upgrade-manager.l/check";
 

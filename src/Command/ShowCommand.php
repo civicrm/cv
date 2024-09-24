@@ -6,7 +6,7 @@ use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ShowCommand extends BaseCommand {
+class ShowCommand extends CvCommand {
 
   use StructuredOutputTrait;
 

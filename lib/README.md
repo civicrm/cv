@@ -86,5 +86,5 @@ Civi bootstrap behaviors.
   (circa v0.3.44).  It changed significantly (circa v0.3.56), where
   `configureBootOptions()` was replaced by  `$bootOptions`, `mergeDefaultBootDefinition()`,
   and `mergeBootDefinition()`.
-* As an alternative, consider the classes `BaseApplication` and `BaseCommand` if you aim
+* As an alternative, consider the classes `BaseApplication` and `CvCommand` if you aim
   to build a tool using Symfony Console and Cv Lib.

@@ -6,7 +6,7 @@ use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionUpgradeDbCommand extends BaseCommand {
+class ExtensionUpgradeDbCommand extends CvCommand {
 
   use ExtensionTrait;
 

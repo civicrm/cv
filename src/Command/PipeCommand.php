@@ -5,7 +5,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class PipeCommand extends BaseCommand {
+class PipeCommand extends CvCommand {
 
   /**
    * @param string|null $name

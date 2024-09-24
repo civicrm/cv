@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class PathCommand extends BaseCommand {
+class PathCommand extends CvCommand {
 
   use ExtensionTrait;
   use StructuredOutputTrait;

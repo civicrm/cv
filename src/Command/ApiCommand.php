@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ApiCommand extends BaseCommand {
+class ApiCommand extends CvCommand {
 
   use StructuredOutputTrait;
 

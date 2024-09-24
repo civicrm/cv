@@ -9,7 +9,7 @@ use Civi\Cv\Application;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CliCommand extends BaseCommand {
+class CliCommand extends CvCommand {
 
   protected function configure() {
     $this

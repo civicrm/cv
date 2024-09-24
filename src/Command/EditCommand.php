@@ -12,7 +12,7 @@ use Civi\Cv\Util\CliEditor;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class EditCommand extends BaseCommand {
+class EditCommand extends CvCommand {
 
   /**
    * @var \Civi\Cv\Util\CliEditor

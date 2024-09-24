@@ -11,7 +11,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 /**
  * Command for asking CiviCRM for the appropriate tarball to download.
  */
-class UpgradeDlCommand extends BaseCommand {
+class UpgradeDlCommand extends CvCommand {
 
   use StructuredOutputTrait;
 

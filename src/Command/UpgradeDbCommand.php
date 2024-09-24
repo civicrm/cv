@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Command for asking CiviCRM for the appropriate tarball to download.
  */
-class UpgradeDbCommand extends BaseCommand {
+class UpgradeDbCommand extends CvCommand {
 
   use StructuredOutputTrait;
 

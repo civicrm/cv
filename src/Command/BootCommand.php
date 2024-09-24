@@ -4,7 +4,7 @@ namespace Civi\Cv\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BootCommand extends BaseCommand {
+class BootCommand extends CvCommand {
 
   protected function configure() {
     $this

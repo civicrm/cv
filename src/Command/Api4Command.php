@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Api4Command extends BaseCommand {
+class Api4Command extends CvCommand {
 
   use StructuredOutputTrait;
 

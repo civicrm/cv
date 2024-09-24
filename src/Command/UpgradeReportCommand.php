@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Command for asking CiviCRM for the appropriate tarball to download.
  */
-class UpgradeReportCommand extends BaseCommand {
+class UpgradeReportCommand extends CvCommand {
   const DEFAULT_REPORT_URL = 'https://upgrade.civicrm.org/report';
 
   use StructuredOutputTrait;

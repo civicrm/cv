@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionListCommand extends BaseCommand {
+class ExtensionListCommand extends CvCommand {
 
   use ExtensionTrait;
   use StructuredOutputTrait;

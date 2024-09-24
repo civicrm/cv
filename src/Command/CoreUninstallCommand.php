@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-class CoreUninstallCommand extends BaseCommand {
+class CoreUninstallCommand extends CvCommand {
 
   use SetupCommandTrait;
   use DebugDispatcherTrait;
