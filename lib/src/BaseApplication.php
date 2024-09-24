@@ -5,6 +5,7 @@ use Civi\Cv\Util\AliasFilter;
 use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\CvArgvInput;
 use LesserEvil\ShellVerbosityIsEvil;
+use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -12,6 +13,8 @@ use Symfony\Component\Console\Output\ConsoleOutputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class BaseApplication extends \Symfony\Component\Console\Application {
+
+  protected $stage = 'new';
 
   /**
    * Primary entry point for execution of the standalone command.
@@ -52,6 +55,37 @@ class BaseApplication extends \Symfony\Component\Console\Application {
       'commands' => $this->createCommands(),
     ])['commands'];
     $this->addCommands($commands);
+    $this->stage = 'configured';
+  }
+
+  public function find($name) {
+    switch ($this->stage) {
+      case 'new':
+      case 'extended':
+        return parent::find($name);
+
+      case 'configured':
+        try {
+          return parent::find($name);
+        }
+        catch (CommandNotFoundException $e) {
+          $this->stage = 'extended';
+          $c = new class() {
+            use BootTrait;
+          };
+
+          $okLevels = ['full|cms-full', 'full', 'cms-full'];
+          if (in_array(Cv::input()->getOption('level'), $okLevels)) {
+            $c->boot(Cv::input(), Cv::output());
+            return parent::find($name);
+          }
+          else {
+            $output = is_callable([Cv::output(), 'getErrorOutput']) ? Cv::output()->getErrorOutput() : Cv::output();
+            $output->writeln(sprintf("<error>WARNING: When using bootstrap --level=%s, some commands may be unavailable.</error>", Cv::input()->getOption('level')));
+            throw $e;
+          }
+        }
+    }
   }
 
   /**
