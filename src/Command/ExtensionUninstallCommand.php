@@ -1,12 +1,15 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionUninstallCommand extends BaseExtensionCommand {
+class ExtensionUninstallCommand extends BaseCommand {
+
+  use ExtensionTrait;
 
   /**
    * @param string|null $name

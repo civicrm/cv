@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\Filesystem;
 use Civi\Cv\Util\HeadlessDownloader;
 use Civi\Cv\Util\VerboseApi;
@@ -10,7 +11,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 
-class ExtensionDownloadCommand extends BaseExtensionCommand {
+class ExtensionDownloadCommand extends BaseCommand {
+
+  use ExtensionTrait;
 
   /**
    * @param string|null $name
@@ -57,7 +60,7 @@ Note:
   This subcommand does not output parseable data. For parseable output,
   consider using `cv api extension.install`.
 ');
-    parent::configureRepoOptions();
+    $this->configureRepoOptions();
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {

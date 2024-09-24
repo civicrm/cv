@@ -3,6 +3,7 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Cv;
 use Civi\Cv\Util\ArrayUtil;
+use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Civi\Cv\Util\VerboseApi;
@@ -11,8 +12,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionListCommand extends BaseExtensionCommand {
+class ExtensionListCommand extends BaseCommand {
 
+  use ExtensionTrait;
   use StructuredOutputTrait;
 
   /**
@@ -57,7 +59,7 @@ Note:
   include a unique long name ("org.example.foobar") and a unique short
   name ("foobar"). However, short names are not strongly guaranteed.
 ');
-    parent::configureRepoOptions();
+    $this->configureRepoOptions();
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {

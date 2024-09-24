@@ -2,6 +2,7 @@
 
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Civi\Cv\Util\UrlCommandTrait;
 use GuzzleHttp\Client;
@@ -9,8 +10,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class HttpCommand extends BaseExtensionCommand {
+class HttpCommand extends BaseCommand {
 
+  use ExtensionTrait;
   use StructuredOutputTrait;
   use UrlCommandTrait;
 

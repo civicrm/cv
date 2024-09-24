@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ExtensionTrait;
 use Symfony\Component\Console\Input\ArgvInput;
 
 /**
@@ -36,7 +37,9 @@ class BaseExtensionCommandTest extends \Civi\Cv\CivilTestCase {
    * @dataProvider repoOptionExamples
    */
   public function testParseRepo($inputArgv, $expectUrl) {
-    $c = new BaseExtensionCommand('ext:example');
+    $c = new class('ext:example') extends BaseCommand {
+      use ExtensionTrait;
+    };
     $c->configureRepoOptions();
 
     $input = new ArgvInput($inputArgv, $c->getDefinition());
