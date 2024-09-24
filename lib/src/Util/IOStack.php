@@ -21,16 +21,19 @@ class IOStack {
    *
    * @param \Symfony\Component\Console\Input\InputInterface $input
    * @param \Symfony\Component\Console\Output\OutputInterface $output
+   * @param \Symfony\Component\Console\Application|null $app
    * @return scalar
    *   Internal identifier for the stack-frame. ID formatting is not guaranteed.
    */
-  public function push(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output) {
+  public function push(\Symfony\Component\Console\Input\InputInterface $input, \Symfony\Component\Console\Output\OutputInterface $output, ?\Symfony\Component\Console\Application $app = NULL) {
     ++static::$id;
+    $app = $app ?: ($this->stack[0]['app'] ?? NULL);
     array_unshift($this->stack, [
       'id' => static::$id,
       'input' => $input,
       'output' => $output,
       'io' => new SymfonyStyle($input, $output),
+      'app' => $app,
     ]);
     return static::$id;
   }
@@ -66,6 +69,10 @@ class IOStack {
       }
     }
     return NULL;
+  }
+
+  public function replace($property, $value) {
+    $this->stack[0][$property] = $value;
   }
 
   public function reset() {

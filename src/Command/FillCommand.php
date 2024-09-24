@@ -4,14 +4,11 @@ namespace Civi\Cv\Command;
 use Civi\Cv\Config;
 use Civi\Cv\Encoder;
 use Civi\Cv\SiteConfigReader;
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class FillCommand extends BaseCommand {
-
-  use BootTrait;
+class FillCommand extends CvCommand {
 
   protected $fields;
 
@@ -25,7 +22,6 @@ class FillCommand extends BaseCommand {
       ->setName('vars:fill')
       ->setDescription('Generate a configuration file for any missing site data')
       ->addOption('file', NULL, InputOption::VALUE_REQUIRED, 'Read existing configuration from a file');
-    $this->configureBootOptions();
   }
 
   public function __construct($name = NULL) {
@@ -59,7 +55,6 @@ class FillCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
     if (!$input->getOption('file')) {
       $reader = new SiteConfigReader(CIVICRM_SETTINGS_PATH);
       $liveData = $reader->compile(array('buildkit', 'home', 'active'));

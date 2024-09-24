@@ -2,6 +2,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Encoder;
+use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\Process;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Civi\Cv\Util\UrlCommandTrait;
@@ -9,8 +10,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class UrlCommand extends BaseExtensionCommand {
+class UrlCommand extends CvCommand {
 
+  use ExtensionTrait;
   use StructuredOutputTrait;
   use UrlCommandTrait;
 
@@ -66,24 +68,20 @@ NOTE: If you use `--login` and do not have `authx`, then it prompts about
       enabling the extension. The extra I/O may influence some scripted
       use-cases.
 ');
-    $this->configureBootOptions();
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {
-    parent::initialize($input, $output);
     if ($input->getFirstArgument() === 'open') {
       $input->setOption('open', TRUE);
     }
-  }
-
-  protected function execute(InputInterface $input, OutputInterface $output): int {
     if (in_array($input->getOption('out'), Encoder::getTabularFormats())
     && !in_array($input->getOption('out'), Encoder::getFormats())) {
       $input->setOption('tabular', TRUE);
     }
+    parent::initialize($input, $output);
+  }
 
-    $this->boot($input, $output);
-
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $rows = $this->createUrls($input, $output);
 
     if ($input->getOption('open')) {

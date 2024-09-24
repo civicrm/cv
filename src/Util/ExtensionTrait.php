@@ -1,14 +1,11 @@
 <?php
-namespace Civi\Cv\Command;
+namespace Civi\Cv\Util;
 
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BaseExtensionCommand extends BaseCommand {
-
-  use BootTrait;
+trait ExtensionTrait {
 
   /**
    * Register CLI options for filtering the extension feed, such as "--dev" or "--filter-ver".
@@ -46,6 +43,7 @@ class BaseExtensionCommand extends BaseCommand {
 
   /**
    * @param \Symfony\Component\Console\Input\InputInterface $input
+   * @param Symfony\Component\Console\Output\OutputInterface $output
    * @return array
    *   Array(0=>$keys, 1=>$errors).
    */

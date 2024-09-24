@@ -78,11 +78,13 @@ For more info about `$options`, see the docblocks.
 
 ## Experimental API
 
-Other classes are included, but their contracts are subject to change.
+Other classes are included, but their contracts are subject to change. These
+include higher-level helpers for building Symfony Console apps that incorporate
+Civi bootstrap behaviors.
 
-A particularly interesting one is `BootTrait`.  This requires `symfony/console`, and it is used by most `cv` subcommands
-to achieve common behaviors:
-
-1. `BootTrait` defines certain CLI options (`--level`, `--user`, `--hostname`, etc).
-2. `BootTrait` automatically decides between `Bootstrap.php` and `CmsBootstrap.php`.
-3. `BootTrait` passes CLI options through to `Bootstrap.php` or `CmsBootstrap.php`.
+* `BootTrait` has previously suggested as an experimentally available API
+  (circa v0.3.44).  It changed significantly (circa v0.3.56), where
+  `configureBootOptions()` was replaced by  `$bootOptions`, `mergeDefaultBootDefinition()`,
+  and `mergeBootDefinition()`.
+* As an alternative, consider the classes `BaseApplication` and `CvCommand` if you aim
+  to build a tool using Symfony Console and Cv Lib.

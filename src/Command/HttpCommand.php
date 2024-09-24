@@ -2,6 +2,7 @@
 
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Civi\Cv\Util\UrlCommandTrait;
 use GuzzleHttp\Client;
@@ -9,8 +10,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class HttpCommand extends BaseExtensionCommand {
+class HttpCommand extends CvCommand {
 
+  use ExtensionTrait;
   use StructuredOutputTrait;
   use UrlCommandTrait;
 
@@ -43,12 +45,9 @@ NOTE: If you use `--login` and do not have `authx`, then it prompts about
       enabling the extension. The extra I/O may influence some scripted
       use-cases.
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     $method = $input->getOption('request');
     $data = $this->parseRequestData($input);
     $headers = $this->parseRequestHeaders($input);

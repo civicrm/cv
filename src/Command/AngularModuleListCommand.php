@@ -1,15 +1,13 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class AngularModuleListCommand extends BaseCommand {
+class AngularModuleListCommand extends CvCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   /**
@@ -36,11 +34,9 @@ Examples:
   cv ang:module:list \'/crmMail/\' --user=admin --columns=extDir,css
   cv ang:module:list --columns=name,js,css --out=json-pretty
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
     if (!$input->getOption('user')) {
       $output->getErrorOutput()->writeln("<comment>For a full list, try passing --user=[username].</comment>");
     }

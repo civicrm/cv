@@ -3,16 +3,14 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Encoder;
 use Civi\Cv\Util\Api4ArgParser;
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Api4Command extends BaseCommand {
+class Api4Command extends CvCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   /**
@@ -122,7 +120,6 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
 
 NOTE: To change the default output format, set CV_OUTPUT.
 ");
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -130,8 +127,6 @@ NOTE: To change the default output format, set CV_OUTPUT.
     $_C = '</comment>';
     $I = '<info>';
     $_I = '</info>';
-
-    $this->boot($input, $output);
 
     if (!function_exists('civicrm_api4')) {
       throw new \RuntimeException("Please enable APIv4 before running APIv4 commands.");

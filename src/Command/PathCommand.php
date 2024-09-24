@@ -1,13 +1,15 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class PathCommand extends BaseExtensionCommand {
+class PathCommand extends CvCommand {
 
+  use ExtensionTrait;
   use StructuredOutputTrait;
 
   /**
@@ -55,12 +57,9 @@ Examples: Lookup dynamic paths
 Example: Lookup multiple items
   cv path -x cividiscount/info.xml -x flexmailer/info.xml -d \'[civicrm.root]/civicrm-version.php\'
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     if (!$input->getOption('ext') && !$input->getOption('config') && !$input->getOption('dynamic')) {
       $output->getErrorOutput()->writeln("<error>No paths specified. Must use -x, -c, or -d. (See also: cv path -h)</error>");
       return 1;

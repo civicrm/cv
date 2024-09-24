@@ -1,15 +1,19 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\Filesystem;
 use Civi\Cv\Util\HeadlessDownloader;
+use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 
-class ExtensionDownloadCommand extends BaseExtensionCommand {
+class ExtensionDownloadCommand extends CvCommand {
+
+  use ExtensionTrait;
 
   /**
    * @param string|null $name
@@ -56,8 +60,7 @@ Note:
   This subcommand does not output parseable data. For parseable output,
   consider using `cv api extension.install`.
 ');
-    parent::configureRepoOptions();
-    $this->configureBootOptions();
+    $this->configureRepoOptions();
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {
@@ -65,18 +68,15 @@ Note:
       $input->setOption('level', 'none');
       $input->setOption('no-install', TRUE);
     }
+    if ($extRepoUrl = $this->parseRepoUrl($input)) {
+      global $civicrm_setting;
+      $civicrm_setting['Extension Preferences']['ext_repo_url'] = $extRepoUrl;
+    }
     parent::initialize($input, $output);
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $fs = new Filesystem();
-
-    if ($extRepoUrl = $this->parseRepoUrl($input)) {
-      global $civicrm_setting;
-      $civicrm_setting['Extension Preferences']['ext_repo_url'] = $extRepoUrl;
-    }
-
-    $this->boot($input, $output);
 
     if ($input->getOption('to') && !$fs->isAbsolutePath($input->getOption('to'))) {
       throw new \RuntimeException("The --to argument requires an absolute path.");
@@ -91,7 +91,7 @@ Note:
     while (TRUE) {
       if ($refresh === 'yes' && $this->isBooted()) {
         $output->writeln("<info>Refreshing extension cache</info>");
-        $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
+        $result = VerboseApi::callApi3Success('Extension', 'refresh', array(
           'local' => FALSE,
           'remote' => TRUE,
         ));
@@ -100,7 +100,7 @@ Note:
         }
       }
 
-      list ($downloads, $errors) = $this->parseDownloads($input);
+      [$downloads, $errors] = $this->parseDownloads($input);
       if ($refresh == 'auto' && !empty($errors)) {
         $output->writeln("<info>Extension cache does not contain requested item(s)</info>");
         $refresh = 'yes';
@@ -135,7 +135,7 @@ Note:
           else {
             $output->writeln("<info>Downloading extension \"$key\" ($url)</info>");
             $this->assertBooted();
-            $result = $this->callApiSuccess($input, $output, 'Extension', 'download', array(
+            $result = VerboseApi::callApi3Success('Extension', 'download', array(
               'key' => $key,
               'url' => $url,
               'install' => !$input->getOption('no-install'),
@@ -145,7 +145,7 @@ Note:
 
         case 'install':
           $output->writeln("<info>Found extension \"$key\". Enabling.</info>");
-          $result = $this->callApiSuccess($input, $output, 'Extension', 'enable', array(
+          $result = VerboseApi::callApi3Success('Extension', 'enable', array(
             'key' => $key,
           ));
           break;
@@ -225,7 +225,7 @@ Note:
       $origExpr = $keyOrName;
       $url = NULL;
       if (strpos($keyOrName, '@') !== FALSE) {
-        list ($keyOrName, $url) = explode('@', $keyOrName, 2);
+        [$keyOrName, $url] = explode('@', $keyOrName, 2);
       }
 
       if (empty($keyOrName) && !empty($url)) {

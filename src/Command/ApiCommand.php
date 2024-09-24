@@ -2,16 +2,14 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Encoder;
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ApiCommand extends BaseCommand {
+class ApiCommand extends CvCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   /**
@@ -47,7 +45,6 @@ TIP: To change the default output format, set CV_OUTPUT.
 
 TIP: To display a full backtrace of any errors, pass "-vv" (very verbose).
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -55,8 +52,6 @@ TIP: To display a full backtrace of any errors, pass "-vv" (very verbose).
     $_C = '</comment>';
     $I = '<info>';
     $_I = '</info>';
-
-    $this->boot($input, $output);
 
     list($entity, $action) = explode('.', $input->getArgument('Entity.action'));
     $params = $this->parseParams($input);

@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\OptionalOption;
 use Civi\Cv\Util\SetupCommandTrait;
 use Civi\Cv\Util\DebugDispatcherTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
@@ -9,7 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-class CoreUninstallCommand extends BaseCommand {
+class CoreUninstallCommand extends CvCommand {
 
   use SetupCommandTrait;
   use DebugDispatcherTrait;
@@ -28,13 +29,16 @@ Purge CiviCRM schema and settings files
 TIP: If you have a special system configuration, it may help to pass the same
 options for "core:uninstall" as the preceding "core:install".
 ');
-    $this->configureBootOptions('none');
+  }
+
+  public function getBootOptions(): array {
+    return ['default' => 'none', 'allow' => ['none']];
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $setup = $this->bootSetupSubsystem($input, $output);
 
-    $debugEvent = $this->parseOptionalOption($input, ['--debug-event'], NULL, '');
+    $debugEvent = OptionalOption::parse($input, ['--debug-event'], NULL, '');
     if ($debugEvent !== NULL) {
       $eventNames = $this->findEventNames($setup->getDispatcher(), $debugEvent);
       $this->printEventListeners($output, $setup->getDispatcher(), $eventNames);

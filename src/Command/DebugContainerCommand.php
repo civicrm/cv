@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,9 +11,8 @@ use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
-class DebugContainerCommand extends BaseCommand {
+class DebugContainerCommand extends CvCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   protected function configure() {
@@ -33,14 +31,15 @@ Dump the container configuration
 NOTE: By default, internal services are not displayed. However, some flags will enable display of
 internal services (eg `--all`, `--tag=XXX`, or `-v`).
 ');
-    $this->configureBootOptions();
+  }
+
+  protected function initialize(InputInterface $input, OutputInterface $output) {
+    define('CIVICRM_CONTAINER_CACHE', 'never');
+    $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
+    parent::initialize($input, $output);
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    define('CIVICRM_CONTAINER_CACHE', 'never');
-    $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
-    $this->boot($input, $output);
-
     $c = $this->getInspectableContainer($input);
 
     $filterPat = $input->getArgument('name');

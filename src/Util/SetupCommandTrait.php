@@ -15,7 +15,6 @@ define('CV_SETUP_PROTOCOL_VER', '1.0');
  * civicrm-setup framework.
  */
 trait SetupCommandTrait {
-  use BootTrait;
 
   /**
    * Register any CLI options which affect the initialization of the

@@ -1,7 +1,6 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Civi\Cv\Util\ConsoleQueueRunner;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,9 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Command for asking CiviCRM for the appropriate tarball to download.
  */
-class UpgradeDbCommand extends BaseCommand {
+class UpgradeDbCommand extends CvCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   protected function configure() {
@@ -34,7 +32,6 @@ Examples:
   cv upgrade:db --dry-run
   cv upgrade:db --retry
 ');
-    $this->configureBootOptions();
   }
 
   /**
@@ -52,15 +49,13 @@ Examples:
   protected function initialize(InputInterface $input, OutputInterface $output) {
     $this->input = $input;
     $this->output = $output;
+    if (!defined('CIVICRM_UPGRADE_ACTIVE')) {
+      define('CIVICRM_UPGRADE_ACTIVE', 1);
+    }
     parent::initialize($input, $output);
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    if (!defined('CIVICRM_UPGRADE_ACTIVE')) {
-      define('CIVICRM_UPGRADE_ACTIVE', 1);
-    }
-    $this->boot($input, $output);
-
     if (!ini_get('safe_mode')) {
       set_time_limit(0);
     }

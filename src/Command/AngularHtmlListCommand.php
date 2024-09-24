@@ -1,15 +1,13 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class AngularHtmlListCommand extends BaseCommand {
+class AngularHtmlListCommand extends CvCommand {
 
-  use BootTrait;
   use StructuredOutputTrait;
 
   /**
@@ -34,11 +32,9 @@ Examples:
   cv ang:html:list crmUi/*
   cv ang:html:list \';(tabset|wizard)\\.html;\'
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
     if (!$input->getOption('user')) {
       $output->getErrorOutput()->writeln("<comment>For a full list, try passing --user=[username].</comment>");
     }

@@ -3,15 +3,18 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Cv;
 use Civi\Cv\Util\ArrayUtil;
+use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\Relativizer;
 use Civi\Cv\Util\StructuredOutputTrait;
+use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionListCommand extends BaseExtensionCommand {
+class ExtensionListCommand extends CvCommand {
 
+  use ExtensionTrait;
   use StructuredOutputTrait;
 
   /**
@@ -56,11 +59,15 @@ Note:
   include a unique long name ("org.example.foobar") and a unique short
   name ("foobar"). However, short names are not strongly guaranteed.
 ');
-    parent::configureRepoOptions();
-    $this->configureBootOptions();
+    $this->configureRepoOptions();
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output) {
+    if ($extRepoUrl = $this->parseRepoUrl($input)) {
+      global $civicrm_setting;
+      $civicrm_setting['Extension Preferences']['ext_repo_url'] = $extRepoUrl;
+    }
+
     parent::initialize($input, $output);
 
     // We apply different defaults for the 'columns' list depending on the output medium.
@@ -82,14 +89,7 @@ Note:
       ? (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_NORMAL)
       : (OutputInterface::OUTPUT_NORMAL | OutputInterface::VERBOSITY_VERBOSE);
 
-    list($local, $remote) = $this->parseLocalRemote($input);
-
-    if ($extRepoUrl = $this->parseRepoUrl($input)) {
-      global $civicrm_setting;
-      $civicrm_setting['Extension Preferences']['ext_repo_url'] = $extRepoUrl;
-    }
-
-    $this->boot($input, $output);
+    [$local, $remote] = $this->parseLocalRemote($input);
 
     if ($remote) {
       $output->writeln("<info>Using extension feed \"" . \CRM_Extension_System::singleton()->getBrowser()->getRepositoryUrl() . "\"</info>", $wo);
@@ -97,7 +97,7 @@ Note:
 
     if ($input->getOption('refresh')) {
       $output->writeln("<info>Refreshing extensions</info>", $wo);
-      $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
+      $result = VerboseApi::callApi3Success('Extension', 'refresh', array(
         'local' => $local,
         'remote' => $remote,
       ));
@@ -136,7 +136,7 @@ Note:
    */
   protected function find($input) {
     $regex = $input->getArgument('regex');
-    list($local, $remote) = $this->parseLocalRemote($input);
+    [$local, $remote] = $this->parseLocalRemote($input);
 
     if ($input->getOption('installed')) {
       $statusFilter = array('installed');

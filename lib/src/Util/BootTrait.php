@@ -16,13 +16,70 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 trait BootTrait {
 
-  public function configureBootOptions($defaultLevel = 'full|cms-full') {
-    $this->addOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (none,classloader,settings,full,cms-only,cms-full)', $defaultLevel);
-    $this->addOption('hostname', NULL, InputOption::VALUE_REQUIRED, 'Hostname (for a multisite system)');
-    $this->addOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)');
-    $this->addOption('user', 'U', InputOption::VALUE_REQUIRED, 'CMS user');
+  /**
+   * Describe the expected bootstrap behaviors for this command.
+   *
+   * - For most commands, you will want to automatically boot CiviCRM/CMS.
+   *   The default implementation will do this.
+   * - For some special commands (e.g. core-installer or PHP-script-runner), you may
+   *   want more fine-grained control over when/how the system boots.
+   *
+   * @var array
+   */
+  protected $bootOptions = [
+    // Whether to automatically boot Civi during `initialize()` phase.
+    'auto' => TRUE,
+
+    // Default boot level.
+    'default' => 'full|cms-full',
+
+    // List of all boot levels that are allowed in this command.
+    'allow' => ['full|cms-full', 'full', 'cms-full', 'settings', 'classloader', 'cms-only', 'none'],
+  ];
+
+  /**
+   * @internal
+   */
+  public function mergeDefaultBootDefinition($definition, $defaultLevel = 'full|cms-full') {
+    // If we were only dealing with built-in/global commands, then these options could be defined at the command-level.
+    // However, we also have extension-based commands. The system will boot before we have a chance to discover them.
+    // By putting these options at the application level, we ensure they will be defined+used.
+    $definition->addOption(new InputOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (none,classloader,settings,full,cms-only,cms-full)', $defaultLevel));
+    $definition->addOption(new InputOption('hostname', NULL, InputOption::VALUE_REQUIRED, 'Hostname (for a multisite system)'));
+    $definition->addOption(new InputOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)'));
+    $definition->addOption(new InputOption('user', 'U', InputOption::VALUE_REQUIRED, 'CMS user'));
   }
 
+  /**
+   * @internal
+   */
+  public function mergeBootDefinition($definition) {
+    $bootOptions = $this->getBootOptions();
+    $definition->getOption('level')->setDefault($bootOptions['default']);
+  }
+
+  /**
+   * Evaluate the $bootOptions.
+   *
+   * - If we've already booted, do nothing.
+   * - If the configuration looks reasonable and if we haven't booted yet, then boot().
+   * - If the configuration looks unreasonable, then abort.
+   */
+  protected function autoboot(InputInterface $input, OutputInterface $output): void {
+    $bootOptions = $this->getBootOptions();
+    if (!in_array($input->getOption('level'), $bootOptions['allow'])) {
+      throw new \LogicException(sprintf("Command called with with level (%s) but only accepts levels (%s)",
+        $input->getOption('level'), implode(', ', $bootOptions['allow'])));
+    }
+
+    if (!$this->isBooted() && ($bootOptions['auto'] ?? TRUE)) {
+      $this->boot($input, $output);
+    }
+  }
+
+  /**
+   * Start CiviCRM and/or CMS. Respect options like --user and --level.
+   */
   public function boot(InputInterface $input, OutputInterface $output) {
     $logger = $this->bootLogger($output);
     $logger->debug('Start');
@@ -288,6 +345,35 @@ trait BootTrait {
 
   private function bootLogger(OutputInterface $output): InternalLogger {
     return new SymfonyConsoleLogger('BootTrait', $output);
+  }
+
+  /**
+   * @return bool
+   */
+  protected function isBooted() {
+    return defined('CIVICRM_DSN');
+  }
+
+  protected function assertBooted() {
+    if (!$this->isBooted()) {
+      throw new \Exception("Error: This command requires bootstrapping, but the system does not appear to be bootstrapped. Perhaps you set --level=none?");
+    }
+  }
+
+  /**
+   * @return array{auto: bool, default: string, allow: string[]}
+   */
+  public function getBootOptions(): array {
+    return $this->bootOptions;
+  }
+
+  /**
+   * @param array{auto: bool, default: string, allow: string[]} $bootOptions
+   * @return $this
+   */
+  public function setBootOptions(array $bootOptions) {
+    $this->bootOptions = array_merge($this->bootOptions, $bootOptions);
+    return $this;
   }
 
 }

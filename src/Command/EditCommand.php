@@ -9,13 +9,10 @@ namespace Civi\Cv\Command;
 use Civi\Cv\Config;
 use Civi\Cv\Encoder;
 use Civi\Cv\Util\CliEditor;
-use Civi\Cv\Util\BootTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class EditCommand extends BaseCommand {
-
-  use BootTrait;
+class EditCommand extends CvCommand {
 
   /**
    * @var \Civi\Cv\Util\CliEditor
@@ -26,7 +23,6 @@ class EditCommand extends BaseCommand {
     $this
       ->setName('vars:edit')
       ->setDescription('Edit configuration values for this build');
-    $this->configureBootOptions();
   }
 
   public function __construct($name = NULL) {
@@ -47,8 +43,6 @@ class EditCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     $config = Config::read();
     $oldSiteData = empty($config['sites'][CIVICRM_SETTINGS_PATH]) ? array() : $config['sites'][CIVICRM_SETTINGS_PATH];
     $oldJson = Encoder::encode($oldSiteData, 'json-pretty');

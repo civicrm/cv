@@ -1,11 +1,15 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ExtensionTrait;
+use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionUninstallCommand extends BaseExtensionCommand {
+class ExtensionUninstallCommand extends CvCommand {
+
+  use ExtensionTrait;
 
   /**
    * @param string|null $name
@@ -34,12 +38,10 @@ Note:
   This subcommand does not output parseable data. For parseable output,
   consider using `cv api extension.uninstall`.
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-    list ($foundKeys, $missingKeys) = $this->parseKeys($input, $output);
+    [$foundKeys, $missingKeys] = $this->parseKeys($input, $output);
 
     // Uninstall what's recognized or what looks like an ext key.
     $uninstallKeys = array_merge($foundKeys, preg_grep('/\./', $missingKeys));
@@ -52,14 +54,14 @@ Note:
       $output->writeln("<info>Uninstalling extension \"$key\"</info>");
     }
 
-    $result = $this->callApiSuccess($input, $output, 'Extension', 'disable', array(
+    $result = VerboseApi::callApi3Success('Extension', 'disable', array(
       'keys' => $uninstallKeys,
     ));
     if (!empty($result['is_error'])) {
       return 1;
     }
 
-    $result = $this->callApiSuccess($input, $output, 'Extension', 'uninstall', array(
+    $result = VerboseApi::callApi3Success('Extension', 'uninstall', array(
       'keys' => $uninstallKeys,
     ));
     return empty($result['is_error']) ? 0 : 1;

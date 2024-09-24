@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CoreCheckReqCommand extends BaseCommand {
+class CoreCheckReqCommand extends CvCommand {
 
   use SetupCommandTrait;
   use DebugDispatcherTrait;
@@ -35,7 +35,10 @@ $ cv core:check-req -e
 Example: Show warnings and errors
 $ cv core:check-req -we
 ');
-    $this->configureBootOptions('none');
+  }
+
+  public function getBootOptions(): array {
+    return ['default' => 'none', 'allow' => ['none']];
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

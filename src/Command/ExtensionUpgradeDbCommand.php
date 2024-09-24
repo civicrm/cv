@@ -1,10 +1,14 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ExtensionTrait;
+use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionUpgradeDbCommand extends BaseExtensionCommand {
+class ExtensionUpgradeDbCommand extends CvCommand {
+
+  use ExtensionTrait;
 
   /**
    * @param string|null $name
@@ -31,15 +35,16 @@ Deprecation:
   This command is now deprecated. Use "cv upgrade:db" to perform upgrades
   for core and/or extensions.
 ');
-    $this->configureBootOptions();
+  }
+
+  protected function initialize(InputInterface $input, OutputInterface $output) {
+    $output->writeln("<error>WARNING: \"ext:upgrade-db\" is deprecated. Use the main \"updb\" command instead.</error>");
+    parent::initialize($input, $output);
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $output->writeln("<error>WARNING: \"ext:upgrade-db\" is deprecated. Use the main \"updb\" command instead.</error>");
-    $this->boot($input, $output);
-
     $output->writeln("<info>Applying database upgrades from extensions</info>");
-    $result = $this->callApiSuccess($input, $output, 'Extension', 'upgrade', array());
+    $result = VerboseApi::callApi3Success('Extension', 'upgrade', array());
     if (!empty($result['is_error'])) {
       return 1;
     }

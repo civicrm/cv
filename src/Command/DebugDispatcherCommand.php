@@ -1,15 +1,13 @@
 <?php
 namespace Civi\Cv\Command;
 
-use Civi\Cv\Util\BootTrait;
 use Civi\Cv\Util\DebugDispatcherTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DebugDispatcherCommand extends BaseCommand {
+class DebugDispatcherCommand extends CvCommand {
 
-  use BootTrait;
   use DebugDispatcherTrait;
 
   protected function configure() {
@@ -27,14 +25,15 @@ Examples:
   cv debug:event-dispatcher actionSchedule.getMappings
   cv debug:event-dispatcher /^actionSchedule/
 ');
-    $this->configureBootOptions();
+  }
+
+  protected function initialize(InputInterface $input, OutputInterface $output) {
+    define('CIVICRM_CONTAINER_CACHE', 'never');
+    $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
+    parent::initialize($input, $output);
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    define('CIVICRM_CONTAINER_CACHE', 'never');
-    $output->getErrorOutput()->writeln('<comment>The debug command ignores the container cache.</comment>');
-    $this->boot($input, $output);
-
     $container = \Civi::container();
 
     /*

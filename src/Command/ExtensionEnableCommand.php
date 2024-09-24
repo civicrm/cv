@@ -1,12 +1,16 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ExtensionTrait;
+use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ExtensionEnableCommand extends BaseExtensionCommand {
+class ExtensionEnableCommand extends CvCommand {
+
+  use ExtensionTrait;
 
   /**
    * @param string|null $name
@@ -37,19 +41,16 @@ Note:
   This subcommand does not output parseable data. For parseable output,
   consider using `cv api extension.install`.
 ');
-    $this->configureBootOptions();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     // Refresh extensions if (a) ---refresh enabled or (b) there's a cache-miss.
     $refresh = $input->getOption('refresh') ? 'yes' : 'auto';
-    // $refresh = $this->parseOptionalOption($input, array('--refresh', '-r'), 'auto', 'yes');
+    // $refresh = OptionalOption::parse(array('--refresh', '-r'), 'auto', 'yes');
     while (TRUE) {
       if ($refresh === 'yes') {
         $output->writeln("<info>Refreshing extension cache</info>");
-        $result = $this->callApiSuccess($input, $output, 'Extension', 'refresh', array(
+        $result = VerboseApi::callApi3Success('Extension', 'refresh', array(
           'local' => TRUE,
           'remote' => FALSE,
         ));
@@ -58,7 +59,7 @@ Note:
         }
       }
 
-      list ($foundKeys, $missingKeys) = $this->parseKeys($input, $output);
+      [$foundKeys, $missingKeys] = $this->parseKeys($input, $output);
       if ($refresh == 'auto' && !empty($missingKeys)) {
         $output->writeln("<info>Extension cache does not contain requested item(s)</info>");
         $refresh = 'yes';
@@ -87,7 +88,7 @@ Note:
       $output->writeln("<info>Enabling extension \"$key\"</info>");
     }
 
-    $result = $this->callApiSuccess($input, $output, 'Extension', 'install', array(
+    $result = VerboseApi::callApi3Success('Extension', 'install', array(
       'keys' => $foundKeys,
     ));
     return empty($result['is_error']) ? 0 : 1;

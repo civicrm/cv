@@ -80,6 +80,13 @@ class Cv {
   }
 
   /**
+   * @return \CvDeps\Symfony\Component\Console\Application|\Symfony\Component\Console\Application
+   */
+  public static function app() {
+    return static::ioStack()->current('app');
+  }
+
+  /**
    * @return \CvDeps\Symfony\Component\Console\Input\InputInterface|\Symfony\Component\Console\Input\InputInterface
    */
   public static function input() {

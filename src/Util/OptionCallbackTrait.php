@@ -33,6 +33,7 @@ trait OptionCallbackTrait {
    * @param string $name
    *   The name of the option to
    * @param callable $callback
+   *   Function(InputInterface $input, OutputInterface, $output, string $optionName)
    * @return $this
    */
   public function addOptionCallback($name, $callback) {
