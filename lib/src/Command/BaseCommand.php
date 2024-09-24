@@ -7,6 +7,14 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Cv's `BaseCommand` is a Symfony `Command` with support for bootstrapping CiviCRM/CMS.
+ *
+ * - From end-user POV, the command accepts options like --user, --level, --hostname.
+ * - From dev POV, the command allows you to implement `execute()` method without needing to
+ *   explicitly boot Civi.
+ * - From dev POV, you may fine-tune command by changing the $bootOptions / getBootOptions().
+ */
 class BaseCommand extends Command {
 
   use OptionCallbackTrait;
