@@ -8,6 +8,7 @@ Cv plugins are PHP files which register event listeners.
 // FILE: /etc/cv/plugin/hello-command.php
 use Civi\Cv\Cv;
 use CvDeps\Symfony\Component\Console\Input\InputInterface;
+use CvDeps\Symfony\Component\Console\Input\InputArgument;
 use CvDeps\Symfony\Component\Console\Output\OutputInterface;
 use CvDeps\Symfony\Component\Console\Command\Command;
 
@@ -16,15 +17,15 @@ if (empty($CV_PLUGIN['protocol']) || $CV_PLUGIN['protocol'] > 1) {
 }
 
 Cv::dispatcher()->addListener('cv.app.commands', function($e) {
-  $e['commands'][] = new class extends Command {
-    protected function configure() {
-      $this->setName('hello')->setDescription('Say a greeting');
-    }
-    protected function execute(InputInterface $input, OutputInterface $output): int {
-      $output->writeln('Hello there!');
+
+  $e['commands'][] = (new \Civi\Cv\Command\BaseCommand('hello'))
+    ->setDescription('Say a greeting')
+    ->addArgument('name', InputArgument::REQUIRED, 'Name of the person to greet')
+    ->setCode(function($input, $output) {
+      $output->writeln('Hello, ' . $input->getArgument('name'));
       return 0;
-    }
-  };
+    });
+
 });
 ```
 

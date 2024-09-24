@@ -372,7 +372,7 @@ trait BootTrait {
    * @return $this
    */
   public function setBootOptions(array $bootOptions) {
-    $this->bootOptions = $bootOptions;
+    $this->bootOptions = array_merge($this->bootOptions, $bootOptions);
     return $this;
   }
 
