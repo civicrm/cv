@@ -34,6 +34,7 @@ Key points:
 
 * You can create a global plugin by putting a PHP file in a suitable folder.
 * The important namespaces are `\Civi\Cv` (*classes and helpers from `cv`*) and `\CvDeps` (*third-party dependencies bundled with `cv`*).
+* `cv` is built with the [Symfony Console (5.x) library](https://symfony.com/doc/5.x/components/console.html).
 * If there is a major change in how plugins are loaded, you will get an error notice.
 * To develop functionality, we use helpers like `Cv::io()` and events like `cv.app.*`.
 * Specifically, to register a command, one uses `cv.app.command` and makes an instance of `CvCommand`.
@@ -109,12 +110,12 @@ The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
 
 ## Commands
 
-You can register new subcommands within `cv`. `cv` is built around [Symfony Console 5.x](https://symfony.com/doc/5.x/components/console.html), so commands must extend a suitable base-class, such as:
+You can register new subcommands within `cv`. `cv` includes the base-class from Symfony Console, and its adds another base-class. Compare:
 
-* `CvDeps\Symfony\Component\Console\Command\Command` is the original building-block from Symfony Console. This may be suitable for some basic commands. This is largely documented by upstream.
-* `Civi\Cv\Command\CvCommand` (v0.3.56+) is an extended version. It can automatically boot CiviCRM and CMS. It handles common options like `--user`, `--hostname`, and `--level`, and it respect environment-variables like `CIVICRM_BOOT`.
+* `CvDeps\Symfony\Component\Console\Command\Command` is the original building-block from Symfony Console. It can define and parse CLI arguments, but it does *not* bootstrap CiviCRM or CMS. It may be suitable for some basic commands. Documentation is provided by upstream. 
+* `Civi\Cv\Command\CvCommand` (v0.3.56+) is an extended version. It automatically boots CiviCRM and CMS. It handles common options like `--user`, `--hostname`, and `--level`, and it respect environment-variables like `CIVICRM_BOOT`.
 
-For this document, we focus on `CvCommand` because it's more appropriate for `cv` subcommands.
+For this document, we focus on `CvCommand`.
 
 Subcommands can be written in a few coding-styles, such as the *fluent-object* style or a *structured-class* style. Compare:
 
