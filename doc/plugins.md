@@ -2,16 +2,16 @@
 
 Cv plugins are PHP files which register event listeners.
 
-## Example: Add command
+## Quick Start
+
+Let's create a global plugin. Add the file `/etc/cv/plugin/hello-command.php` with this content:
 
 ```php
-// FILE: /etc/cv/plugin/hello-command.php
 use Civi\Cv\Cv;
 use Civi\Cv\Command\CvCommand;
 use CvDeps\Symfony\Component\Console\Input\InputInterface;
 use CvDeps\Symfony\Component\Console\Input\InputArgument;
 use CvDeps\Symfony\Component\Console\Output\OutputInterface;
-use CvDeps\Symfony\Component\Console\Command\Command;
 
 if (empty($CV_PLUGIN['protocol']) || $CV_PLUGIN['protocol'] > 1) {
   die(__FILE__ . " has only been tested with CV_PLUGIN API v1");
@@ -22,13 +22,23 @@ Cv::dispatcher()->addListener('cv.app.commands', function($e) {
   $e['commands'][] = (new CvCommand('hello'))
     ->setDescription('Say a greeting')
     ->addArgument('name', InputArgument::REQUIRED, 'Name of the person to greet')
-    ->setCode(function($input, $output) {
+    ->setCode(function(InputInterface $input, OutputInterface $output) {
       $output->writeln('Hello, ' . $input->getArgument('name'));
       return 0;
     });
 
 });
 ```
+
+Key points:
+
+* You can create a global plugin by putting a PHP file in a suitable folder.
+* The important namespaces are `\Civi\Cv` (*classes and helpers from `cv`*) and `\CvDeps` (*third-party dependencies bundled with `cv`*).
+* If there is a major change in how plugins are loaded, you will get an error notice.
+* To develop functionality, we use helpers like `Cv::io()` and events like `cv.app.*`.
+* Specifically, to register a command, one uses `cv.app.command` and makes an instance of `CvCommand`.
+
+Each of these topics is explored more in the subsequent sections.
 
 ## Plugin loading
 
@@ -61,6 +71,23 @@ Plugins execute within `cv`'s process, so they are affected by `cv`'s namespace-
 * Internal dependencies (eg Symfony Console) are bundled with `cv`. They are generally prefixed, though the
   concrete names vary. To maximize portability, access these classes with the logical alias `CvDeps\*` (eg `CvDeps\Symfony\Component\Console\*`).
 
+## `Cv` helpers
+
+The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
+
+* Input/Output
+    * __`Cv::io()`__: Get the Symfony "Style" interface for current subcommand. (*This provides high-level functions for interaction with the console user.*)
+    * __`Cv::input()`__: Get the Symfony "Input" interface for current subcommand. (*This is a mid-level helper for examining CLI parameters/arguments.*)
+    * __`Cv::output()`__: Get the Symfony "Output" interface for current subcommand. (*This is a mid-level helper for basic formatting of the output.*)
+    * (*During cv's initial bootstrap, there is no active subcommand. These may return stubs.*)
+* Event
+    * __`Cv::dispatcher()`__: Get a reference to the dispatcher service. Add listeners and/or fire events.
+    * __`Cv::filter(string $eventName, array $eventData)`__: Fire a basic event to modify `$eventData`.
+* Reflection 
+    * __`Cv::app()`__: Get a reference to the active/top-level `cv` command.
+    * __`Cv::plugins()`__: Get a reference to the plugin subsystem.
+    * __`Cv::ioStack()`__: Manage active instances of the input/output services.
+
 ## Events
 
 * `cv.app.boot`: Fires immediately when the application starts
@@ -80,18 +107,51 @@ Plugins execute within `cv`'s process, so they are affected by `cv`'s namespace-
 
 (Note: When subscribing to an event like `cv.app.site-alias`, you may alternatively subscribe to the wildcard `*.app.site-alias`. In the future, this should allow you hook into adjacent commands like civix and coworker.)
 
-## `Cv` helpers
+## Commands
 
-The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
+You can register new subcommands within `cv`. `cv` is built around [Symfony Console 5.x](https://symfony.com/doc/5.x/components/console.html), so commands must extend a suitable base-class, such as:
 
-* Event helpers
-    * __`Cv::dispatcher()`__: Get a reference to the dispatcher service. Add listeners and/or fire events.
-    * __`Cv::filter(string $eventName, array $eventData)`__: Fire a basic event to modify `$eventData`.
-* I/O helpers
-    * __`Cv::io()`__: Get the Symfony "Style" interface for current subcommand
-    * __`Cv::input()`__: Get the Symfony "Input" interface for current subcommand
-    * __`Cv::output()`__: Get the Symfony "Output" interface for current subcommand
-    * (*During cv's initial bootstrap, there is no active subcommand. These return stubs.*)
+* `CvDeps\Symfony\Component\Console\Command\Command` is the original building-block from Symfony Console. This may be suitable for some basic commands. This is largely documented by upstream.
+* `Civi\Cv\Command\CvCommand` (v0.3.56+) is an extended version. It can automatically boot CiviCRM and CMS. It handles common options like `--user`, `--hostname`, and `--level`, and it respect environment-variables like `CIVICRM_BOOT`.
+
+For this document, we focus on `CvCommand` because it's more appropriate for `cv` subcommands.
+
+Subcommands can be written in a few coding-styles, such as the *fluent-object* style or a *structured-class* style. Compare:
+
+```php
+## Fluent-object style of command
+$command = (new CvCommand('my-command'))
+  ->setDescription('Say a greeting')
+  ->addArgument('name', InputArgument::REQUIRED, 'Name of the person to greet')
+  ->setCode(function($input, $output) {
+    $output->writeln('Hello, ' . $input->getArgument('name'));
+    return 0;
+  });
+```
+
+```php
+## Structured-class style
+class MyCommand extends CvCommand {
+
+  public function configure() {
+    $this->setName('my-command');
+    $this->setDescription('Say a greeting');
+    $this->addArgument('name', InputArgument::REQUIRED, 'Name of the person to greet');
+  }
+
+  public functione execute(InputInterface $input, OutputInterface $output): int {
+    $output->writeln('Hello, ' . $input->getArgument('name'));
+    return 0;
+  }
+}
+
+$command = new MyCommand();
+```
+
+Both styles can be used in any kind of `cv` plugin, but you may find some affinities:
+
+* The fluent-object style is shorter, and it doesn't require class-loading or subfolders. If your aim is to deliver the plugin as one `*.php` file, then this style may fit better.
+* The structured-class style is more verbose and more organized (classes, namespaces, subfolders). If you implement several commands, this can keep things tidy. But it requires some glue (such as class-loading). If your aim is to bundle commands into CiviCRM extension, then this style may fit better.
 
 ## `$CV_PLUGIN` data
 
