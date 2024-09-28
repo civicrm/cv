@@ -84,7 +84,7 @@ The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
 * Event
     * __`Cv::dispatcher()`__: Get a reference to the dispatcher service. Add listeners and/or fire events.
     * __`Cv::filter(string $eventName, array $eventData)`__: Fire a basic event to modify `$eventData`.
-* Reflection 
+* Reflection
     * __`Cv::app()`__: Get a reference to the active/top-level `cv` command.
     * __`Cv::plugins()`__: Get a reference to the plugin subsystem.
     * __`Cv::ioStack()`__: Manage active instances of the input/output services.
@@ -104,7 +104,7 @@ The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
    * __Argument__: `$e['output']`: Reference to the `OutputInterface`
    * __Argument__: `$e['argv']`: Raw/original arguments passed to the current command
    * __Argument__: `$e['transport']`: Alternable callback (output). Fill in a value to specify how to forward the command to the referenced site.
-   * __Argument__: `$e['exec']`: Non-alterable callback (input). Use this if you need to immediately call the action within the current process. 
+   * __Argument__: `$e['exec']`: Non-alterable callback (input). Use this if you need to immediately call the action within the current process.
 
 (Note: When subscribing to an event like `cv.app.site-alias`, you may alternatively subscribe to the wildcard `*.app.site-alias`. In the future, this should allow you hook into adjacent commands like civix and coworker.)
 
@@ -112,7 +112,7 @@ The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
 
 You can register new subcommands within `cv`. `cv` includes the base-class from Symfony Console, and its adds another base-class. Compare:
 
-* `CvDeps\Symfony\Component\Console\Command\Command` is the original building-block from Symfony Console. It can define and parse CLI arguments, but it does *not* bootstrap CiviCRM or CMS. It may be suitable for some basic commands. Documentation is provided by upstream. 
+* `CvDeps\Symfony\Component\Console\Command\Command` is the original building-block from Symfony Console. It can define and parse CLI arguments, but it does *not* bootstrap CiviCRM or CMS. It may be suitable for some basic commands. Documentation is provided by upstream.
 * `Civi\Cv\Command\CvCommand` (v0.3.56+) is an extended version. It automatically boots CiviCRM and CMS. It handles common options like `--user`, `--hostname`, and `--level`, and it respect environment-variables like `CIVICRM_BOOT`.
 
 For this document, we focus on `CvCommand`.
