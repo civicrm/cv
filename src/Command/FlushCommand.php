@@ -24,12 +24,11 @@ Flush system caches
     // stale class-references that might be retained by the container cache.
     define('CIVICRM_CONTAINER_CACHE', 'never');
 
+    // Now we can let the parent proceed with bootstrap...
     parent::initialize($input, $output);
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $this->boot($input, $output);
-
     $params = array();
     if ($input->getOption('triggers')) {
       $params['triggers'] = TRUE;
