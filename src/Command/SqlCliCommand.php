@@ -41,6 +41,7 @@ The ENV expressions are prefixed to indicate their escaping rule:
     if ($input->getOption('dry-run') && $output->getVerbosity() <= OutputInterface::VERBOSITY_NORMAL) {
       $output->setVerbosity(OutputInterface::VERBOSITY_VERBOSE);
     }
+    parent::initialize($input, $output);
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
