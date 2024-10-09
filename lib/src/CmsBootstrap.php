@@ -163,6 +163,8 @@ class CmsBootstrap {
       $this->log->debug("Simulate web environment in CLI");
       $this->simulateWebEnv($this->options['httpHost'], $cms['path'] . '/index.php');
     }
+
+    $originalErrorReporting = error_reporting();
     $func = 'boot' . $cms['type'];
     if (!is_callable([$this, $func])) {
       throw new \Exception("Failed to locate boot function ($func)");
@@ -172,7 +174,7 @@ class CmsBootstrap {
       $cms['path'], $this->options['user'], $this->options['httpHost']);
 
     if (PHP_SAPI === "cli") {
-      error_reporting(1);
+      error_reporting($originalErrorReporting);
     }
 
     $this->log->debug("Finished");
