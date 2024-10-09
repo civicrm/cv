@@ -41,7 +41,14 @@ class ErrorHandler {
   }
 
   public static function onError($errorLevel, $message, $filename, $line) {
-    if ($errorLevel & error_reporting()) {
+    $errorReporting = error_reporting();
+    if (preg_match(';(/DB/|\\\DB\\\);', $filename) && static::isInCallstack('mysqli_real_connect', debug_backtrace())) {
+      // If a warning arises during the execution of `DB_mysqli::connect()` (esp during `@mysqli_real_connect()`),
+      // then the global error_reporting() is munged. Let's get our messages back...
+      $errorReporting |= (E_WARNING | E_USER_WARNING | E_NOTICE | E_USER_NOTICE | E_DEPRECATED | E_USER_DEPRECATED);
+    }
+
+    if ($errorLevel & $errorReporting) {
       $errorType = static::getErrorTypes()[$errorLevel] ?: "Unknown[$errorLevel]";
       fprintf(STDERR, "[%s] %s at %s:%d\n", $errorType, $message, $filename, $line);
       return TRUE;
@@ -89,6 +96,24 @@ class ErrorHandler {
       E_DEPRECATED => 'PHP Deprecation',
       E_USER_DEPRECATED => 'PHP User Deprecation',
     ];
+  }
+
+  /**
+   * Determine if a function is in the callstack.
+   *
+   * @param string $target
+   *   Ex: 'some_global_func' or 'SomeClass::someMethod'
+   * @param array $stack
+   * @return bool
+   */
+  protected static function isInCallstack(string $target, array $stack): bool {
+    foreach ($stack as $call) {
+      $sig = isset($call['class']) ? ($call['class'] . '::' . $call['function']) : $call['function'];
+      if ($target === $sig) {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
 }
