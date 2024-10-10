@@ -200,7 +200,15 @@ trait BootTrait {
       }
     }
 
-    if (is_callable([\CRM_Core_Config::singleton()->userSystem, 'setMySQLTimeZone'])) {
+    // setTimeZone is preferred to ensure PHP and MySQL timezones are in sync on 5.80+
+    // setMySQLTimeZone is retained for pre-existing behaviour on earlier versions
+    // @see https://github.com/civicrm/civicrm-core/pull/31225
+    if (is_callable([\CRM_Core_Config::singleton()->userSystem, 'setTimeZone'])) {
+      $logger->debug('Set active timezone in MySQL / PHP');
+
+      \CRM_Core_Config::singleton()->userSystem->setTimeZone();
+    }
+    elseif (is_callable([\CRM_Core_Config::singleton()->userSystem, 'setMySQLTimeZone'])) {
       $logger->debug('Set active MySQL timezone');
 
       \CRM_Core_Config::singleton()->userSystem->setMySQLTimeZone();
