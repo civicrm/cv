@@ -15,8 +15,11 @@ class BootCommand extends CvCommand {
   protected function execute(InputInterface $input, OutputInterface $output): int {
     switch ($input->getOption('level')) {
       case 'classloader':
-        $code = sprintf('require_once  %s . "/CRM/Core/ClassLoader.php";', var_export(rtrim($GLOBALS["civicrm_root"], '/'), 1))
-          . '\CRM_Core_ClassLoader::singleton()->register();';
+        $code = implode("\n", [
+          sprintf('$GLOBALS["civicrm_root"] = %s;', var_export(rtrim($GLOBALS["civicrm_root"], '/'), 1)),
+          'require_once $GLOBALS["civicrm_root"] . "/CRM/Core/ClassLoader.php";',
+          '\CRM_Core_ClassLoader::singleton()->register();',
+        ]);
         break;
 
       case 'settings':
