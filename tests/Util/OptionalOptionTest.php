@@ -55,7 +55,7 @@ class OptionalOptionTest extends \Civi\Cv\CivilTestCase {
    * @return array
    *   [0 => InputInterface, 1 => OutputInterface]
    */
-  protected function createInputOutput(array $argv = NULL): array {
+  protected function createInputOutput(?array $argv = NULL): array {
     $input = new ArgvInput($argv);
     $input->setInteractive(FALSE);
     $output = new NullOutput();

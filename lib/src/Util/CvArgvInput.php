@@ -12,7 +12,7 @@ class CvArgvInput extends ArgvInput {
 
   protected $originalArgv;
 
-  public function __construct(array $argv = NULL, InputDefinition $definition = NULL) {
+  public function __construct(?array $argv = NULL, ?InputDefinition $definition = NULL) {
     $argv = $argv ?? $_SERVER['argv'] ?? [];
     $this->originalArgv = $argv;
     parent::__construct($argv, $definition);
