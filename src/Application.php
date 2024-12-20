@@ -1,6 +1,8 @@
 <?php
 namespace Civi\Cv;
 
+use Symfony\Component\Console\Output\OutputInterface;
+
 class Application extends BaseApplication {
 
   const DEV_VERSION = '0.3.x';
@@ -95,6 +97,32 @@ class Application extends BaseApplication {
       $name = $this->deprecatedAliases[$name];
     }
     return parent::find($name);
+  }
+
+  public function doRenderThrowable(\Throwable $e, OutputInterface $output): void {
+    parent::doRenderThrowable($e, $output);
+
+    $indent = $output->isVerbose() ? ' ' : '  '; /* Because, yeah, sure. */
+
+    $ei = $e;
+    while (is_callable([$ei, 'getCause'])) {
+      // DB_ERROR doesn't have a getCause but does have a __call function which tricks is_callable.
+      if (!$ei instanceof \DB_Error) {
+        if ($ei->getCause() instanceof \PEAR_Error) {
+          $output->writeln(sprintf("<comment>Debug Info</comment>:"));
+          $parts = explode("\n", $ei->getCause()->getDebugInfo());
+          foreach ($parts as $part) {
+            $output->writeln($indent . $part, OutputInterface::OUTPUT_RAW);
+          }
+          $output->writeln('');
+        }
+        $ei = $ei->getCause();
+      }
+      // if we have reached a DB_Error assume that is the end of the road.
+      else {
+        $ei = NULL;
+      }
+    }
   }
 
 }
