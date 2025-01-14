@@ -540,7 +540,7 @@ class CmsBootstrap {
   protected function simulateWebEnv($host, $scriptFile) {
     $_SERVER['SCRIPT_FILENAME'] = $scriptFile;
     $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-    $_SERVER['SERVER_SOFTWARE'] = NULL;
+    $_SERVER['SERVER_SOFTWARE'] = '';
     $_SERVER['REQUEST_METHOD'] = 'GET';
     $_SERVER['SERVER_NAME'] = $host;
     $_SERVER['HTTP_HOST'] = $host;
