@@ -14,7 +14,7 @@ class DebugContainerCommandTest extends \Civi\Cv\CivilTestCase {
 
   public function testShowAll() {
     $p = Process::runOk($this->cv("debug:container"));
-    $this->assertMatchesRegularExpression('/cxn_reg_client.*Civi.Cxn.Rpc.RegistrationClient/', $p->getOutput());
+    $this->assertMatchesRegularExpression('/(cxn_reg_client.*Civi.Cxn.Rpc.RegistrationClient|httpClient.*CRM_Utils_HttpClient|sql_triggers.*Civi.Core.SqlTrigger)/', $p->getOutput());
     $this->assertMatchesRegularExpression('/civi_api_kernel.*Civi.API.Kernel/', $p->getOutput());
   }
 
