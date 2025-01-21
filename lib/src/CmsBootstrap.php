@@ -161,7 +161,10 @@ class CmsBootstrap {
 
     if (PHP_SAPI === "cli") {
       $this->log->debug("Simulate web environment in CLI");
-      $this->simulateWebEnv($this->options['httpHost'], $cms['path'] . '/index.php');
+      $this->simulateWebEnv($this->options['httpHost'],
+        $cms['path'] . '/index.php',
+        ($cms['type'] === 'Drupal') ? NULL : ''
+      );
     }
 
     $originalErrorReporting = error_reporting();
@@ -534,13 +537,14 @@ class CmsBootstrap {
   }
 
   /**
-   * @param $scriptFile
-   * @param $host
+   * @param string $host
+   * @param string $scriptFile
+   * @param string $serverSoftware
    */
-  protected function simulateWebEnv($host, $scriptFile) {
+  protected function simulateWebEnv($host, $scriptFile, $serverSoftware) {
     $_SERVER['SCRIPT_FILENAME'] = $scriptFile;
     $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-    $_SERVER['SERVER_SOFTWARE'] = NULL;
+    $_SERVER['SERVER_SOFTWARE'] = $serverSoftware;
     $_SERVER['REQUEST_METHOD'] = 'GET';
     $_SERVER['SERVER_NAME'] = $host;
     $_SERVER['HTTP_HOST'] = $host;

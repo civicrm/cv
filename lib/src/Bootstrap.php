@@ -196,7 +196,7 @@ class Bootstrap {
 
         $_SERVER['SCRIPT_FILENAME'] = $cmsBasePath . '/index.php';
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-        $_SERVER['SERVER_SOFTWARE'] = NULL;
+        $_SERVER['SERVER_SOFTWARE'] = ($cmsType === 'drupal') ? NULL : '';
         $_SERVER['REQUEST_METHOD'] = 'GET';
         if (!empty($options['httpHost'])) {
           // Hint for D7 multisite
