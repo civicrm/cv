@@ -214,7 +214,7 @@ class Bootstrap {
         throw new \Exception("Could not load the CiviCRM settings file: {$settings}");
       }
 
-      if (empty($_SERVER['HTTP_HOST']) && $cmsType === 'backdrop') {
+      if (empty($_SERVER['HTTP_HOST']) && in_array($cmsType, ['backdrop', 'wp'])) {
         // backdrop_settings_initialize() tries to configure cookie policy - and complains if HTTP_HOST is missing
         $webHostVars = $this->convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : 'http://localhost');
         foreach ($webHostVars as $key => $value) {
@@ -254,6 +254,9 @@ class Bootstrap {
       $result['HTTP_HOST'] = $parts['host'];
       $result['SERVER_PORT'] = $parts['scheme'] === 'http' ? 80 : 443;
     }
+    if ($parts['scheme'] === 'https') {
+      $result['HTTPS'] = 'on';
+    }
     return $result;
   }
 
@@ -276,7 +279,7 @@ class Bootstrap {
       'REQUEST_METHOD',
       'SCRIPT_NAME',
     );
-    if (CIVICRM_UF === 'Backdrop') {
+    if (in_array(CIVICRM_UF, ['Backdrop', 'WordPress'])) {
       $webHostVars = $this->convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : 'http://localhost');
       $srvVars = array_merge($srvVars, array_keys($webHostVars));
       // ^^ This might make sense for all UF's, but it would require more testing to QA.
