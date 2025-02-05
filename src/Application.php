@@ -104,23 +104,24 @@ class Application extends BaseApplication {
 
     $indent = $output->isVerbose() ? ' ' : '  '; /* Because, yeah, sure. */
 
+    $causes = [];
     $ei = $e;
-    while (is_callable([$ei, 'getCause'])) {
-      // DB_ERROR doesn't have a getCause but does have a __call function which tricks is_callable.
-      if (!$ei instanceof \DB_Error) {
-        if ($ei->getCause() instanceof \PEAR_Error) {
-          $output->writeln(sprintf("<comment>Debug Info</comment>:"));
-          $parts = explode("\n", $ei->getCause()->getDebugInfo());
-          foreach ($parts as $part) {
-            $output->writeln($indent . $part, OutputInterface::OUTPUT_RAW);
-          }
-          $output->writeln('');
-        }
-        $ei = $ei->getCause();
+    while ($ei !== NULL) {
+      if (method_exists($ei, 'getCause')) {
+        $causes[] = $ei->getCause();
       }
-      // if we have reached a DB_Error assume that is the end of the road.
-      else {
-        $ei = NULL;
+      $ei = $ei->getPrevious();
+    }
+
+    foreach ($causes as $cause) {
+      if ($cause instanceof \DB_Error && !empty($cause->getDebugInfo())) {
+        $output->writeln(sprintf("<comment>Debug Info</comment>:"));
+        $parts = explode("\n", $cause->getDebugInfo());
+        foreach ($parts as $part) {
+          $output->writeln($indent . $part, OutputInterface::OUTPUT_RAW);
+        }
+        $output->writeln('');
+        break;
       }
     }
   }
