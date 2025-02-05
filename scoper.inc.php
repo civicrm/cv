@@ -21,6 +21,7 @@ return [
   ],
   'exclude-classes' => [
     '/^(CRM_|HTML_|DB_|Log_)/',
+    '/^PEAR_(Error|Exception)/',
     'DB',
     'Log',
     'JFactory',
