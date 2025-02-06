@@ -71,6 +71,7 @@ class Application extends BaseApplication {
     $commands[] = new \Civi\Cv\Command\SettingRevertCommand();
     $commands[] = new \Civi\Cv\Command\SqlCliCommand();
     $commands[] = new \Civi\Cv\Command\ShowCommand();
+    $commands[] = new \Civi\Cv\Command\StatusCommand();
     // $commands[] = new \Civi\Cv\Command\UpgradeCommand();
     $commands[] = new \Civi\Cv\Command\UpgradeDbCommand();
     // $commands[] = new \Civi\Cv\Command\UpgradeDlCommand();
