@@ -103,7 +103,7 @@ The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
    * __Argument__: `$e['input']`: Reference to the `InputInterface`
    * __Argument__: `$e['output']`: Reference to the `OutputInterface`
    * __Argument__: `$e['argv']`: Raw/original arguments passed to the current command
-   * __Argument__: `$e['transport']`: Alternable callback (output). Fill in a value to specify how to forward the command to the referenced site.
+   * __Argument__: `$e['transport']`: Alterable callback (output). Fill in a value to specify how to forward the command to the referenced site.
    * __Argument__: `$e['exec']`: Non-alterable callback (input). Use this if you need to immediately call the action within the current process.
 
 (Note: When subscribing to an event like `cv.app.site-alias`, you may alternatively subscribe to the wildcard `*.app.site-alias`. In the future, this should allow you hook into adjacent commands like civix and coworker.)
