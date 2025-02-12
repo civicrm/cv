@@ -46,7 +46,7 @@ class StatusCommand extends CvCommand {
     $data['summary'] = $summaryCode;
     $data['civicrm'] = ($civiDbVer === $civiCodeVer) ? "$civiCodeVer" : "$civiCodeVer (DB $civiDbVer)";
     $data['cv'] = Application::version() . ($isPhar ? ' (phar)' : ' (src)');
-    $data['php'] = sprintf('%s (%s)', PHP_VERSION, PHP_SAPI);
+    $data['php'] = $this->longPhp();
     $data['mysql'] = $mysqlVersion;
     $data[$ufType] = $ufVer;
     $data['os'] = php_uname('s') . ' ' . php_uname('r') . ' ' . php_uname('m');
@@ -65,6 +65,36 @@ class StatusCommand extends CvCommand {
 
     $this->sendTable($input, $output, $rows);
     return 0;
+  }
+
+  private function longPhp(): string {
+    $parens = [PHP_SAPI => 1];
+
+    if (file_exists('/.dockerenv')) {
+      $parens['docker'] = 1;
+    }
+
+    $parens['other'] = 1;
+    foreach ([PHP_BINARY, realpath(PHP_BINARY)] as $binary) {
+      if (preg_match(';^/nix/;', $binary)) {
+        $parens['nix'] = 1;
+        unset($parens['other']);
+      }
+      if (preg_match(';/homebrew/;', $binary)) {
+        $parens['homebrew'] = 1;
+        unset($parens['other']);
+      }
+      if (preg_match(';MAMP;', $binary)) {
+        $parens['mamp'] = 1;
+        unset($parens['other']);
+      }
+      if (preg_match(';^/usr/bin/;', $binary)) {
+        $parens['usr-bin'] = 1;
+        unset($parens['other']);
+      }
+    }
+
+    return sprintf('%s (%s)', PHP_VERSION, implode(', ', array_keys($parens)));
   }
 
   private function shortPhp($version): string {
