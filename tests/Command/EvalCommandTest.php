@@ -123,4 +123,56 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $this->assertMatchesRegularExpression('/^eval says version is [0-9a-z\.]+\s*$/', $p->getOutput());
   }
 
+  /**
+   * @param string $level
+   * @dataProvider getLevels
+   */
+  public function testUrl_cliOptions($level) {
+    $checkServer = escapeshellarg('printf("HOST=%s HTTPS=%s PORT=%s\n", $_SERVER["HTTP_HOST"] ?? "", $_SERVER["HTTPS"] ?? "", $_SERVER["SERVER_PORT"]??"");');
+
+    $expect = [
+      // Current/recommended param is --url
+      "ev $checkServer --url='https://u.example-a.com:4321'" => "HOST=u.example-a.com:4321 HTTPS=on PORT=4321",
+      "ev $checkServer --url='http://u.example-b.com:4321'" => "HOST=u.example-b.com:4321 HTTPS= PORT=4321",
+      "ev $checkServer --url='http://u.example-c.com'" => "HOST=u.example-c.com HTTPS= PORT=80",
+      "ev $checkServer --url='https://u.example-d.com'" => "HOST=u.example-d.com HTTPS=on PORT=443",
+      "ev $checkServer --url='u.example-e.com/subdir'" => "HOST=u.example-e.com HTTPS= PORT=80",
+
+      // For backward compat, accept --hostname
+      "ev $checkServer --hostname='https://h.example-a.com:4321'" => "HOST=h.example-a.com:4321 HTTPS=on PORT=4321",
+      "ev $checkServer --hostname='h.example-b.com'" => "HOST=h.example-b.com HTTPS= PORT=80",
+
+      // For backward compat, accept --cms-base-url
+      "ev $checkServer --cms-base-url='https://c.example-a.com:4321'" => "HOST=c.example-a.com:4321 HTTPS=on PORT=4321",
+      "ev $checkServer --cms-base-url='c.example-b.com'" => "HOST=c.example-b.com HTTPS= PORT=80",
+    ];
+
+    foreach ($expect as $baseCommand => $expectOutput) {
+      $p1 = Process::runOk($this->cv("$baseCommand --level=$level"));
+      $this->assertStringContainsString($expectOutput, $p1->getOutput());
+    }
+  }
+
+  /**
+   * @param string $level
+   * @dataProvider getLevels
+   */
+  public function testUrl_envVar($level) {
+    $checkServer = escapeshellarg('printf("HOST=%s HTTPS=%s PORT=%s\n", $_SERVER["HTTP_HOST"] ?? "", $_SERVER["HTTPS"] ?? "", $_SERVER["SERVER_PORT"]??"");');
+
+    $expect = [
+      // string $envVarExpr => string $expectOutput
+      'HTTP_HOST=v.example-a.com:123' => "HOST=v.example-a.com:123 HTTPS= PORT=123",
+      'HTTP_HOST=v.example-b.com:1234&HTTPS=on' => "HOST=v.example-b.com:1234 HTTPS=on PORT=1234",
+      'HTTP_HOST=v.example-c.com' => "HOST=v.example-c.com HTTPS= PORT=80",
+      'HTTP_HOST=v.example-d.com&HTTPS=on' => "HOST=v.example-d.com HTTPS=on PORT=443",
+    ];
+
+    foreach ($expect as $envVarExpr => $expectOutput) {
+      parse_str($envVarExpr, $envVars);
+      $p1 = Process::runOk($this->cv("ev $checkServer --level=$level")->setEnv($envVars));
+      $this->assertStringContainsString($expectOutput, $p1->getOutput());
+    }
+  }
+
 }
