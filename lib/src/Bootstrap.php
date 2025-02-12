@@ -63,7 +63,8 @@ use Civi\Cv\Util\SimulateWeb;
  *   - env: string|NULL. The environment variable which may contain the path to
  *     civicrm.settings.php (or the token "Auto"). Set NULL to disable environment-checking.
  *     (Default: CIVICRM_SETTINGS)
- *   - httpHost: string|NULL. For multisite, the HTTP hostname.
+ *   - url: string|NULL. Specify the logical URL being used to process this request
+ *   - httpHost: string|NULL. For multisite, the HTTP hostname. (DEPRECATED; prefer "url")
  *   - log: \Psr\Log\LoggerInterface|\Civi\Cv\Log\InternalLogger (If given, send log messages here)
  *   - output: Symfony OutputInterface. (Fallback for handling logs - in absence of 'log')
  *   - prefetch: bool. Whether to load various caches.
@@ -113,7 +114,7 @@ class Bootstrap {
         'settingsFile' => NULL,
         'search' => TRUE,
         'cmsType' => NULL,
-        'httpHost' => array_key_exists('HTTP_HOST', $_SERVER) ? $_SERVER['HTTP_HOST'] : '',
+        'url' => SimulateWeb::detectEnvUrl(),
       ));
     }
     return self::$singleton;
@@ -124,7 +125,7 @@ class Bootstrap {
    *   See options in class doc.
    */
   public function __construct($options = array()) {
-    $this->options = $options;
+    $this->setOptions($options);
   }
 
   /**
@@ -135,6 +136,7 @@ class Bootstrap {
    * @throws \Exception
    */
   public function boot($options = array()) {
+    $options = $this->filterOptions($options);
     $this->log = Log\Logger::resolve($options, 'Bootstrap');
 
     $isBooting = TRUE;
@@ -195,10 +197,10 @@ class Bootstrap {
 
       if (PHP_SAPI === "cli") {
         $this->log->notice("Simulate web environment in CLI");
-        $effectiveUrl = !empty($options['httpHost']) ? SimulateWeb::prependDefaultScheme($options['httpHost']) : NULL;
-        SimulateWeb::apply($effectiveUrl,
+        SimulateWeb::apply($options['url'] ?? NULL,
           $cmsBasePath . '/index.php',
           ($cmsType === 'drupal') ? NULL : '');
+        // NOTE: If we don't get explicit URL (env-var or cli-arg), then we leave HTTP_HOST blank -- and try to guess later.
       }
 
       $this->log->debug("Load settings file \"" . $settings . "\"");
@@ -300,7 +302,18 @@ class Bootstrap {
    *   See options in class doc.
    */
   public function setOptions($options) {
-    $this->options = $options;
+    $this->options = $this->filterOptions($options);
+  }
+
+  private function filterOptions($options) {
+    if (isset($options['httpHost'])) {
+      $options['url'] = $options['url'] ?? $options['httpHost'];
+      unset($options['httpHost']);
+    }
+    if (isset($options['url'])) {
+      $options['url'] = SimulateWeb::prependDefaultScheme($options['url']);
+    }
+    return $options;
   }
 
   /**
@@ -406,10 +419,12 @@ class Bootstrap {
    * @return array
    */
   protected function findDrupalDirs($cmsRoot, $searchDir) {
+    $httpHost = empty($this->options['url']) ? '' : parse_url($this->options['url'], PHP_URL_HOST);
+
     // If there's no explicit host and we start the search from "web/sites/FOO/...", then infer subsite path.
     $sitesRoot = "$cmsRoot/sites";
     $sitesRootQt = preg_quote($sitesRoot, ';');
-    if (empty($this->options['httpHost']) && preg_match(";^($sitesRootQt/[^/]+);", $searchDir, $m)) {
+    if (empty($httpHost) && preg_match(";^($sitesRootQt/[^/]+);", $searchDir, $m)) {
       if (basename($m[1]) !== 'all') {
         return [$m[1]];
       }
@@ -420,7 +435,7 @@ class Bootstrap {
       include "$cmsRoot/sites/sites.php";
     }
     $dirs = array();
-    $server = explode('.', implode('.', array_reverse(explode(':', rtrim($this->options['httpHost'], '.')))));
+    $server = explode('.', implode('.', array_reverse(explode(':', rtrim($httpHost, '.')))));
     for ($j = count($server); $j > 0; $j--) {
       $s = implode('.', array_slice($server, -$j));
       if (isset($sites[$s]) && file_exists("$cmsRoot/sites/" . $sites[$s])) {
