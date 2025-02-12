@@ -1,6 +1,8 @@
 <?php
 namespace Civi\Cv;
 
+use Civi\Cv\Util\SimulateWeb;
+
 /**
  * Bootstrap the CiviCRM runtime.
  *
@@ -193,17 +195,10 @@ class Bootstrap {
 
       if (PHP_SAPI === "cli") {
         $this->log->notice("Simulate web environment in CLI");
-        $_SERVER['SCRIPT_FILENAME'] = $cmsBasePath . '/index.php';
-        $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-        $_SERVER['SERVER_SOFTWARE'] = ($cmsType === 'drupal') ? NULL : '';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-        if (!empty($options['httpHost'])) {
-          // Hint for D7 multisite
-          $_SERVER['HTTP_HOST'] = $options['httpHost'];
-        }
-        if (ord($_SERVER['SCRIPT_NAME']) != 47) {
-          $_SERVER['SCRIPT_NAME'] = '/' . $_SERVER['SCRIPT_NAME'];
-        }
+        $effectiveUrl = !empty($options['httpHost']) ? SimulateWeb::prependDefaultScheme($options['httpHost']) : NULL;
+        SimulateWeb::apply($effectiveUrl,
+          $cmsBasePath . '/index.php',
+          ($cmsType === 'drupal') ? NULL : '');
       }
 
       $this->log->debug("Load settings file \"" . $settings . "\"");
@@ -216,7 +211,7 @@ class Bootstrap {
 
       if (empty($_SERVER['HTTP_HOST']) && in_array($cmsType, ['backdrop', 'wp'])) {
         // backdrop_settings_initialize() tries to configure cookie policy - and complains if HTTP_HOST is missing
-        $webHostVars = $this->convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : 'http://localhost');
+        $webHostVars = SimulateWeb::convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : SimulateWeb::localhost());
         foreach ($webHostVars as $key => $value) {
           $_SERVER[$key] = $value;
         }
@@ -242,24 +237,6 @@ class Bootstrap {
     $isBooting = FALSE;
   }
 
-  private function convertUrlToCgiVars(string $url): array {
-    $parts = parse_url($url);
-    $result = [];
-    $result['SERVER_NAME'] = $parts['host'];
-    if (!empty($parts['port'])) {
-      $result['HTTP_HOST'] = $parts['host'] . ':' . $parts['port'];
-      $result['SERVER_PORT'] = $parts['port'];
-    }
-    else {
-      $result['HTTP_HOST'] = $parts['host'];
-      $result['SERVER_PORT'] = $parts['scheme'] === 'http' ? 80 : 443;
-    }
-    if ($parts['scheme'] === 'https') {
-      $result['HTTPS'] = 'on';
-    }
-    return $result;
-  }
-
   /**
    * Generate bootstrap logic.
    *
@@ -280,7 +257,7 @@ class Bootstrap {
       'SCRIPT_NAME',
     );
     if (in_array(CIVICRM_UF, ['Backdrop', 'WordPress'])) {
-      $webHostVars = $this->convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : 'http://localhost');
+      $webHostVars = SimulateWeb::convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : SimulateWeb::localhost());
       $srvVars = array_merge($srvVars, array_keys($webHostVars));
       // ^^ This might make sense for all UF's, but it would require more testing to QA.
     }

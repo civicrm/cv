@@ -1,6 +1,8 @@
 <?php
 namespace Civi\Cv;
 
+use Civi\Cv\Util\SimulateWeb;
+
 /**
  * Bootstrap the CMS runtime.
  *
@@ -162,7 +164,8 @@ class CmsBootstrap {
 
     if (PHP_SAPI === "cli") {
       $this->log->debug("Simulate web environment in CLI");
-      $this->simulateWebEnv($this->getEffectiveUrl(),
+      $effectiveUrl = SimulateWeb::prependDefaultScheme($this->options['url'] ?? (SimulateWeb::detectEnvHost() ?: 'localhost'));
+      SimulateWeb::apply($effectiveUrl,
         $cms['path'] . '/index.php',
         ($cms['type'] === 'Drupal') ? NULL : ''
       );
@@ -537,71 +540,6 @@ class CmsBootstrap {
     }
     else {
       return $this->options['search'];
-    }
-  }
-
-  /**
-   * Determine the effective site URL. We will use this to identify multisite systems,
-   * and it also inform URL construction.
-   *
-   * @return string
-   */
-  protected function getEffectiveUrl(): string {
-    // (1) Initialize $url with 'scheme://example.com' or 'example.com'.
-    if (isset($this->options['url'])) {
-      $url = $this->options['url'];
-    }
-    elseif (array_key_exists('HTTP_HOST', $_SERVER) && strpos($_SERVER['HTTP_HOST'], '/') === FALSE) {
-      $url = $_SERVER['HTTP_HOST'];
-      if (array_key_exists('HTTP_PORT', $_SERVER)) {
-        $url .= $_SERVER['HTTP_PORT'];
-      }
-    }
-    elseif (defined('CIVICRM_UF_BASEURL')) {
-      $url = CIVICRM_UF_BASEURL;
-    }
-    else {
-      $url = 'localhost';
-    }
-
-    // (2) Backfill the scheme.
-    if (strpos($url, '://') === 0) {
-      return $url;
-    }
-    elseif (($_SERVER['SERVER_PORT'] ?? NULL) === 443 || ($_SERVER['HTTPS'] ?? NULL) === 'on') {
-      return 'https://' . $url;
-    }
-    else {
-      return 'http://' . $url;
-    }
-  }
-
-  /**
-   * @param string $effectiveUrl
-   * @param string $scriptFile
-   * @param string $serverSoftware
-   */
-  protected function simulateWebEnv($effectiveUrl, $scriptFile, $serverSoftware) {
-    $_SERVER['SCRIPT_FILENAME'] = $scriptFile;
-    $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-    $_SERVER['SERVER_SOFTWARE'] = $serverSoftware;
-    $_SERVER['REQUEST_METHOD'] = 'GET';
-
-    $effectiveUrlParts = parse_url($effectiveUrl);
-    $_SERVER['SERVER_NAME'] = $effectiveUrlParts['host'];
-    $_SERVER['HTTP_HOST'] = $effectiveUrlParts['host'];
-    if ($effectiveUrlParts['scheme'] === 'https') {
-      $_SERVER['HTTPS'] = 'on';
-    }
-    if (!empty($effectiveUrlParts['port'])) {
-      $_SERVER['SERVER_PORT'] = $effectiveUrlParts['port'];
-    }
-    else {
-      $_SERVER['SERVER_PORT'] = ($effectiveUrlParts['host'] === 'https') ? '443' : '80';
-    }
-
-    if (ord($_SERVER['SCRIPT_NAME']) != 47) {
-      $_SERVER['SCRIPT_NAME'] = '/' . $_SERVER['SCRIPT_NAME'];
     }
   }
 
