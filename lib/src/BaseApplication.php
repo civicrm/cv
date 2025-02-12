@@ -145,12 +145,12 @@ class BaseApplication extends \Symfony\Component\Console\Application {
 
   protected static function filterDeprecatedOptions(array $argv): array {
     foreach ($argv as &$arg) {
-      if (preg_match('/^--(cms-base-url|hostname)$/', $arg, $m)) {
-        Cv::io()->note(sprintf("Option --%s renamed to --url", $m[1]));
+      if (preg_match('/^--(cms-base-url|hostname|uri)$/', $arg, $m)) {
+        Cv::io()->note(sprintf("Option --%s is a deprecated alias for --url (-l)", $m[1]));
         $arg = '--url';
       }
-      elseif (preg_match('/^--(cms-base-url|hostname)=(.*)/', $arg, $m)) {
-        Cv::io()->note(sprintf("Option --%s renamed to --url", $m[1]));
+      elseif (preg_match('/^--(cms-base-url|hostname|uri)=(.*)/', $arg, $m)) {
+        Cv::io()->note(sprintf("Option --%s is a deprecated alias for --url (-l)", $m[1]));
         $arg = '--url=' . $m[2];
       }
     }
