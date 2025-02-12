@@ -85,7 +85,7 @@ class CmsBootstrap {
       self::$singleton = new CmsBootstrap(array(
         'env' => 'CIVICRM_BOOT',
         'search' => TRUE,
-        'url' => NULL,
+        'url' => SimulateWeb::detectEnvUrl(),
         'user' => NULL,
       ));
     }
@@ -164,8 +164,7 @@ class CmsBootstrap {
 
     if (PHP_SAPI === "cli") {
       $this->log->debug("Simulate web environment in CLI");
-      $effectiveUrl = SimulateWeb::prependDefaultScheme($this->options['url'] ?? (SimulateWeb::detectEnvHost() ?: 'localhost'));
-      SimulateWeb::apply($effectiveUrl,
+      SimulateWeb::apply($this->options['url'] ?? SimulateWeb::localhost(),
         $cms['path'] . '/index.php',
         ($cms['type'] === 'Drupal') ? NULL : ''
       );
@@ -451,6 +450,10 @@ class CmsBootstrap {
       $options['url'] = $options['url'] ?? $options['httpHost'];
       unset($options['httpHost']);
     }
+    if (isset($options['url'])) {
+      $options['url'] = SimulateWeb::prependDefaultScheme($options['url']);
+    }
+
     $this->options = array_merge($this->options, $options);
     $this->log = Log\Logger::resolve($options, 'CmsBootstrap');
     return $this;
