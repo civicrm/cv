@@ -45,7 +45,7 @@ class StatusCommand extends CvCommand {
 
     $data = [];
     $data['summary'] = $summaryCode;
-    $data['civicrm'] = ($civiDbVer === $civiCodeVer) ? "$civiCodeVer" : "$civiCodeVer (DB $civiDbVer)";
+    $data['civicrm'] = $this->longCivi($civiCodeVer, $civiDbVer);
     $data['cv'] = Application::version() . ($isPhar ? ' (phar)' : ' (src)');
     $data['php'] = $this->longPhp();
     $data['mysql'] = $mysqlVersion;
@@ -66,6 +66,18 @@ class StatusCommand extends CvCommand {
 
     $this->sendTable($input, $output, $rows);
     return 0;
+  }
+
+  private function longCivi($civiCodeVer, $civiDbVer): string {
+    if ($civiDbVer === $civiCodeVer) {
+      return $civiCodeVer;
+    }
+    elseif (version_compare($civiDbVer, $civiCodeVer, '<')) {
+      return "$civiCodeVer (pending upgrade from $civiDbVer)";
+    }
+    else {
+      return "$civiCodeVer (futuristic data from $civiDbVer)";
+    }
   }
 
   private function longOs(): string {
