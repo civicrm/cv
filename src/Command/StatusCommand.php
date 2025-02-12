@@ -6,6 +6,7 @@ use Civi\Cv\Application;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Process;
 
 class StatusCommand extends CvCommand {
 
@@ -49,7 +50,7 @@ class StatusCommand extends CvCommand {
     $data['php'] = $this->longPhp();
     $data['mysql'] = $mysqlVersion;
     $data[$ufType] = $ufVer;
-    $data['os'] = php_uname('s') . ' ' . php_uname('r') . ' ' . php_uname('m');
+    $data['os'] = $this->longOs();
     // Would be nice to get lsb_release, but that requires more conditionality
     $data['smarty'] = $smartyVer;
     $data['path: cms.root'] = \Civi::paths()->getPath('[cms.root]/.');
@@ -65,6 +66,31 @@ class StatusCommand extends CvCommand {
 
     $this->sendTable($input, $output, $rows);
     return 0;
+  }
+
+  private function longOs(): string {
+    $parens = [];
+
+    $p = new Process(['lsb_release', '-sd']);
+    $p->run();
+    if ($p->isSuccessful() && $output = trim($p->getOutput())) {
+      $main = $output;
+      $parens[php_uname('s') . ' ' . php_uname('r')] = 1;
+    }
+    else {
+      $main = php_uname('s') . ' ' . php_uname('r');
+    }
+
+    if (file_exists('/.dockerenv')) {
+      $parens['docker'] = 1;
+    }
+    if (file_exists('/nix')) {
+      $parens['nix'] = 1;
+    }
+
+    $parens[php_uname('m')] = 1;
+
+    return sprintf('%s (%s)', $main, implode(', ', array_keys($parens)));
   }
 
   private function longPhp(): string {
