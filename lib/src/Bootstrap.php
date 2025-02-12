@@ -188,12 +188,11 @@ class Bootstrap {
       }
 
       $this->log->notice("Find CMS root for \"" . $this->getSearchDir() . "\"");
-      list ($cmsType, $cmsBasePath) = $this->findCmsRoot($this->getSearchDir());
+      [$cmsType, $cmsBasePath] = $this->findCmsRoot($this->getSearchDir());
       $this->log->notice("Found \"$cmsType\" in \"$cmsBasePath\"");
 
       if (PHP_SAPI === "cli") {
         $this->log->notice("Simulate web environment in CLI");
-
         $_SERVER['SCRIPT_FILENAME'] = $cmsBasePath . '/index.php';
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['SERVER_SOFTWARE'] = ($cmsType === 'drupal') ? NULL : '';
@@ -350,7 +349,7 @@ class Bootstrap {
       $settings = $options['settingsFile'];
     }
     elseif (!empty($options['search'])) {
-      list (, , $settings) = $this->findCivicrmSettingsPhp($this->getSearchDir());
+      [, , $settings] = $this->findCivicrmSettingsPhp($this->getSearchDir());
     }
 
     return $settings;
@@ -365,7 +364,7 @@ class Bootstrap {
    *   Array(string $cmsType, string $cmsRoot, string $settingsFile).
    */
   protected function findCivicrmSettingsPhp($searchDir) {
-    list ($cmsType, $cmsRoot) = $this->findCmsRoot($searchDir);
+    [$cmsType, $cmsRoot] = $this->findCmsRoot($searchDir);
     $settings = NULL;
     switch ($cmsType) {
       case 'backdrop':
