@@ -33,7 +33,7 @@ $ cv core:install
 $ wp plugin activate civicrm
 
 Example: Install on a basic Drupal 7 build.
-$ cv core:install --cms-base-url=http://example.com/
+$ cv core:install --url=https://example.com/
 $ drush -y en civicrm
 
 Example: Install on WordPress with a custom language and database.

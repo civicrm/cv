@@ -25,13 +25,13 @@ class CoreLifecycleTest extends \PHPUnit\Framework\TestCase {
     $cases[] = [
       'backdrop-empty',
       ['modules' => 'https://download.civicrm.org/latest/civicrm-RC-backdrop.tar.gz'],
-      'core:install -f --cms-base-url=http://localhost',
+      'core:install -f --url=http://localhost',
       '',
     ];
     $cases[] = [
       'drupal-empty',
       ['sites/all/modules' => 'https://download.civicrm.org/latest/civicrm-RC-drupal.tar.gz'],
-      'core:install -f --cms-base-url=http://localhost',
+      'core:install -f --url=http://localhost',
     // 'drush -y en civicrm', // No longer needed -- FlushDrupal plugin autoenables.
       '',
     ];

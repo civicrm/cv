@@ -228,14 +228,14 @@ Bootstrap
 > ___NOTE___: In absence of a configuration variable, the __Automatic__ mode will behave like `CIVICRM_SETTINGS="Auto"` (in v0.3.x).
   This is tentatively planned to change in v0.4.x, where it will behave like `CIVICRM_BOOT="Auto://."`
 
-Additionally, some deployments handle multiple sites ("multisite"/"multidomain"). You should target a specific site using `--hostname` or `HTTP_HOST`.
+Additionally, some deployments handle multiple sites ("multisite"/"multidomain"). You should target a specific site using `--url` or `HTTP_HOST`.
 
 Here are a few examples of putting these together:
 
 ```bash
-## Use --hostname for a domain
+## Use --url for a domain
 export CIVICRM_BOOT="WordPress:/$HOME/public_html/"
-cv --hostname='www.example.org' ext:list -L
+cv --url='https://www.example.org' ext:list -L
 ```
 
 ```bash
@@ -246,9 +246,9 @@ cv ext:list -L
 ```
 
 ```bash
-## Use --hostname for a subfolder
+## Use --url for a subfolder
 export CIVICRM_BOOT="WordPress:/$HOME/public_html/"
-cv --hostname='www.example.org/nyc' ext:list -L
+cv --url='www.example.org/nyc' ext:list -L
 ```
 
 Autocomplete
