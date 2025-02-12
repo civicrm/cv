@@ -175,4 +175,29 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     }
   }
 
+  /**
+   * If you call 'cv' without any specific URL, then it should tend to look like CIVICRM_UF_BASEURL.
+   */
+  public function testUrl_default() {
+    foreach (['settings', 'full'] as $level) {
+      $p1 = Process::runOk($this->cv("ev 'return CIVICRM_UF_BASEURL;'"));
+      $got = json_decode((string) $p1->getOutput());
+      $this->assertMatchesRegularExpression(';^https?://\w+;', $got);
+      $declaredUrl = parse_url($got);
+      $expectParts = [];
+      $expectParts[0] = 'HOST=' . $declaredUrl['host'];
+      if (!empty($declaredUrl['port'])) {
+        $expectParts[0] .= ':' . $declaredUrl['port'];
+      }
+      $expectParts[1] = 'HTTPS=' . (($declaredUrl['scheme'] ?? NULL) === 'https' ? 'on' : '');
+      $expectParts[2] = 'PORT=' . $declaredUrl['port'];
+      $expectOutput = implode(" ", $expectParts);
+
+      $checkServer = escapeshellarg('printf("HOST=%s HTTPS=%s PORT=%s\n", $_SERVER["HTTP_HOST"] ?? "", $_SERVER["HTTPS"] ?? "", $_SERVER["SERVER_PORT"]??"");');
+      $p2 = Process::runOk($this->cv("ev $checkServer --level=$level"));
+      $this->assertStringContainsString($expectOutput, $p2->getOutput());
+    }
+
+  }
+
 }

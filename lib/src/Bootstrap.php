@@ -211,8 +211,10 @@ class Bootstrap {
         throw new \Exception("Could not load the CiviCRM settings file: {$settings}");
       }
 
-      if (empty($_SERVER['HTTP_HOST']) && in_array($cmsType, ['backdrop', 'wp'])) {
-        // backdrop_settings_initialize() tries to configure cookie policy - and complains if HTTP_HOST is missing
+      if (empty($_SERVER['HTTP_HOST'])) {
+        // 1. backdrop_settings_initialize() tries to configure cookie policy - and complains if HTTP_HOST is missing
+        // 2. WP functions like plugin_url() and is_ssl() may choose HTTP even if the site supports SSL -- unless you have env setup
+        // 3. Generally, if there's no indication of what host/scheme to use, then best-guess is UF_BASEURL.
         $webHostVars = SimulateWeb::convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : SimulateWeb::localhost());
         foreach ($webHostVars as $key => $value) {
           $_SERVER[$key] = $value;
