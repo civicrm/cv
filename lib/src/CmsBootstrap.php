@@ -34,7 +34,8 @@ namespace Civi\Cv;
  *     Boolean TRUE means it should use a default (PWD).
  *     (Default: TRUE aka PWD)
  *   - user: string|NULL. The name of a CMS user to authenticate as.
- *   - httpHost: string|NULL. For multisite, the HTTP hostname.
+ *   - url: string|NULL. Specify the logical URL being used to process this request
+ *   - httpHost: string|NULL. Specify the logical URL being used to process this request (DEPRECATED; prefer "url")
  *   - log: \Psr\Log\LoggerInterface|\Civi\Cv\Log\InternalLogger (If given, send log messages here)
  *   - output: Symfony OutputInterface. (Fallback for handling logs - in absence of 'log')
  *
@@ -82,7 +83,7 @@ class CmsBootstrap {
       self::$singleton = new CmsBootstrap(array(
         'env' => 'CIVICRM_BOOT',
         'search' => TRUE,
-        'httpHost' => array_key_exists('HTTP_HOST', $_SERVER) ? $_SERVER['HTTP_HOST'] : 'localhost',
+        'url' => NULL,
         'user' => NULL,
       ));
     }
@@ -144,7 +145,7 @@ class CmsBootstrap {
       if (parse_url($cmsExpr, PHP_URL_QUERY)) {
         parse_str(parse_url($cmsExpr, PHP_URL_QUERY), $query);
         if (!empty($query['host'])) {
-          $this->options['httpHost'] = $query['host'];
+          $this->options['url'] = $query['host'];
         }
       }
     }
@@ -161,7 +162,7 @@ class CmsBootstrap {
 
     if (PHP_SAPI === "cli") {
       $this->log->debug("Simulate web environment in CLI");
-      $this->simulateWebEnv($this->options['httpHost'],
+      $this->simulateWebEnv($this->getEffectiveUrl(),
         $cms['path'] . '/index.php',
         ($cms['type'] === 'Drupal') ? NULL : ''
       );
@@ -173,8 +174,7 @@ class CmsBootstrap {
       throw new \Exception("Failed to locate boot function ($func)");
     }
 
-    call_user_func([$this, $func],
-      $cms['path'], $this->options['user'], $this->options['httpHost']);
+    call_user_func([$this, $func], $cms['path'], $this->options['user']);
 
     if (PHP_SAPI === "cli") {
       error_reporting($originalErrorReporting);
@@ -444,6 +444,10 @@ class CmsBootstrap {
    * @return CmsBootstrap
    */
   public function addOptions($options) {
+    if (isset($options['httpHost'])) {
+      $options['url'] = $options['url'] ?? $options['httpHost'];
+      unset($options['httpHost']);
+    }
     $this->options = array_merge($this->options, $options);
     $this->log = Log\Logger::resolve($options, 'CmsBootstrap');
     return $this;
@@ -537,17 +541,65 @@ class CmsBootstrap {
   }
 
   /**
-   * @param string $host
+   * Determine the effective site URL. We will use this to identify multisite systems,
+   * and it also inform URL construction.
+   *
+   * @return string
+   */
+  protected function getEffectiveUrl(): string {
+    // (1) Initialize $url with 'scheme://example.com' or 'example.com'.
+    if (isset($this->options['url'])) {
+      $url = $this->options['url'];
+    }
+    elseif (array_key_exists('HTTP_HOST', $_SERVER) && strpos($_SERVER['HTTP_HOST'], '/') === FALSE) {
+      $url = $_SERVER['HTTP_HOST'];
+      if (array_key_exists('HTTP_PORT', $_SERVER)) {
+        $url .= $_SERVER['HTTP_PORT'];
+      }
+    }
+    elseif (defined('CIVICRM_UF_BASEURL')) {
+      $url = CIVICRM_UF_BASEURL;
+    }
+    else {
+      $url = 'localhost';
+    }
+
+    // (2) Backfill the scheme.
+    if (strpos($url, '://') === 0) {
+      return $url;
+    }
+    elseif (($_SERVER['SERVER_PORT'] ?? NULL) === 443 || ($_SERVER['HTTPS'] ?? NULL) === 'on') {
+      return 'https://' . $url;
+    }
+    else {
+      return 'http://' . $url;
+    }
+  }
+
+  /**
+   * @param string $effectiveUrl
    * @param string $scriptFile
    * @param string $serverSoftware
    */
-  protected function simulateWebEnv($host, $scriptFile, $serverSoftware) {
+  protected function simulateWebEnv($effectiveUrl, $scriptFile, $serverSoftware) {
     $_SERVER['SCRIPT_FILENAME'] = $scriptFile;
     $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
     $_SERVER['SERVER_SOFTWARE'] = $serverSoftware;
     $_SERVER['REQUEST_METHOD'] = 'GET';
-    $_SERVER['SERVER_NAME'] = $host;
-    $_SERVER['HTTP_HOST'] = $host;
+
+    $effectiveUrlParts = parse_url($effectiveUrl);
+    $_SERVER['SERVER_NAME'] = $effectiveUrlParts['host'];
+    $_SERVER['HTTP_HOST'] = $effectiveUrlParts['host'];
+    if ($effectiveUrlParts['scheme'] === 'https') {
+      $_SERVER['HTTPS'] = 'on';
+    }
+    if (!empty($effectiveUrlParts['port'])) {
+      $_SERVER['SERVER_PORT'] = $effectiveUrlParts['port'];
+    }
+    else {
+      $_SERVER['SERVER_PORT'] = ($effectiveUrlParts['host'] === 'https') ? '443' : '80';
+    }
+
     if (ord($_SERVER['SCRIPT_NAME']) != 47) {
       $_SERVER['SCRIPT_NAME'] = '/' . $_SERVER['SCRIPT_NAME'];
     }
