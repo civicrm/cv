@@ -70,7 +70,9 @@ trait SetupCommandTrait {
       $possibleSrcPaths[] = implode(DIRECTORY_SEPARATOR, [$b->getBootedCmsPath(), 'web', 'core']);
       $possibleSrcPaths[] = dirname($b->getBootedCmsPath());
     }
-    $setupOptions['srcPath'] = ArrayUtil::pickFirst($possibleSrcPaths, 'file_exists');
+    $setupOptions['srcPath'] = ArrayUtil::pickFirst($possibleSrcPaths, function($f) {
+      return $f !== NULL && file_exists($f);
+    });
     if ($setupOptions['srcPath']) {
       $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-core', $setupOptions['srcPath']), $defaultOutputOptions);
     }
@@ -88,7 +90,9 @@ trait SetupCommandTrait {
       implode(DIRECTORY_SEPARATOR, [dirname($setupOptions['srcPath']), 'civicrm-setup']),
       implode(DIRECTORY_SEPARATOR, ['/usr', 'local', 'share', 'civicrm-setup']),
     ];
-    $setupOptions['setupPath'] = ArrayUtil::pickFirst($possibleSetupPaths, 'file_exists');
+    $setupOptions['setupPath'] = ArrayUtil::pickFirst($possibleSetupPaths, function($f) {
+      return $f !== NULL && file_exists($f);
+    });
     if ($setupOptions['setupPath']) {
       $output->writeln(sprintf('<info>Found code for <comment>%s</comment> in <comment>%s</comment></info>', 'civicrm-setup', $setupOptions['setupPath']), $defaultOutputOptions);
     }

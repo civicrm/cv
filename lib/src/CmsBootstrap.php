@@ -112,7 +112,7 @@ class CmsBootstrap {
     $code .= sprintf("require_once %s;\n", var_export(CV_AUTOLOAD, TRUE));
     $code .= sprintf("%s->addOptions(%s);\n", $instanceExpr, var_export($this->getOptions(), TRUE));
     foreach ($actions as $action) {
-      $code .= sprintf("%s->%s()->bootCivi();\n", $instanceExpr, $action);
+      $code .= sprintf("%s->%s();\n", $instanceExpr, $action);
     }
     return $code;
   }
