@@ -4,6 +4,7 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Application;
 use Civi\Cv\Util\StructuredOutputTrait;
+use Civi\Test\Invasive;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
@@ -53,11 +54,7 @@ class StatusCommand extends CvCommand {
     $data['os'] = $this->longOs();
     // Would be nice to get lsb_release, but that requires more conditionality
     $data['smarty'] = $smartyVer;
-    $data['path: cms.root'] = \Civi::paths()->getPath('[cms.root]/.');
-    $data['path: civicrm.root'] = \Civi::paths()->getPath('[civicrm.root]/.');
-    $data['path: civicrm.log'] = \Civi::paths()->getPath('[civicrm.log]/.');
-    $data['path: civicrm.l10n'] = \Civi::paths()->getPath('[civicrm.l10n]/.');
-    $data['path: extensionsDir'] = \CRM_Core_Config::singleton()->extensionsDir;
+    $data = array_merge($data, $this->findPathsUrls($output));
 
     $rows = [];
     foreach ($data as $name => $value) {
@@ -65,6 +62,11 @@ class StatusCommand extends CvCommand {
     }
 
     $this->sendTable($input, $output, $rows);
+    if ($input->getOption('out') === 'table' && !$output->isVerbose()) {
+      $error = method_exists($output, 'getErrorOutput') ? $output->getErrorOutput() : $output;
+      $error->writeln('<comment>TIP: To see even more information, enable the verbose flag (-v).</comment>');
+    }
+
     return 0;
   }
 
@@ -175,6 +177,55 @@ class StatusCommand extends CvCommand {
       default:
         return $ufName;
     }
+  }
+
+  /**
+   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   * @return array
+   */
+  protected function findPathsUrls(OutputInterface $output): array {
+    $error = method_exists($output, 'getErrorOutput') ? $output->getErrorOutput() : $output;
+    $pathList = $urlList = [];
+    $paths = \Civi::paths();
+
+    // These are paths that a sysadmin is likely to need to consult while debugging common problems.
+    $pathVariables = ['cms.root', 'civicrm.root', 'civicrm.log', 'civicrm.l10n'];
+    $urlVariables = [];
+    // In default (non-verbose) mode, we don't automatically print most URLs because
+    // most URL-detection is HTTP-dependent. Interpreting that data takes more effort/attention.
+
+    if ($output->isVerbose()) {
+      $allVariables = property_exists($paths, 'variableFactory') ? Invasive::get([$paths, 'variableFactory']) : NULL;
+      if (empty($allVariables)) {
+        $error->writeln('<error>Failed to inspect Civi::paths()->variableFactory</error>');
+      }
+      else {
+        $pathVariables = $urlVariables = array_keys($allVariables);
+      }
+    }
+
+    foreach ($urlVariables as $variable) {
+      try {
+        $urlList['url: [' . $variable . ']'] = $paths->getUrl('[' . $variable . ']/.');
+      }
+      catch (\Throwable $e) {
+      }
+    }
+    foreach ($pathVariables as $variable) {
+      try {
+        $pathList['path: [' . $variable . ']'] = $paths->getPath('[' . $variable . ']/.');
+      }
+      catch (\Throwable $e) {
+      }
+    }
+
+    // Oddballs
+    $urlList['url: CIVICRM_UF_BASEURL'] = \CRM_Utils_Constant::value('CIVICRM_UF_BASEURL');
+    $pathList['path: extensionsDir'] = \CRM_Core_Config::singleton()->extensionsDir;
+
+    asort($pathList);
+    asort($urlList);
+    return array_merge($pathList, $urlList);
   }
 
 }
