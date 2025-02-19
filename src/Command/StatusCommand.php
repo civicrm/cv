@@ -93,14 +93,18 @@ class StatusCommand extends CvCommand {
       $main = php_uname('s') . ' ' . php_uname('r');
     }
 
+    $parens[php_uname('m')] = 1;
+
     if (file_exists('/.dockerenv')) {
       $parens['docker'] = 1;
+    }
+    if (file_exists('/opt/homebrew')) {
+      // Newer deployments use /opt/homebrew. Dunno how to check older deployments in /usr/local.
+      $parens['homebrew'] = 1;
     }
     if (file_exists('/nix')) {
       $parens['nix'] = 1;
     }
-
-    $parens[php_uname('m')] = 1;
 
     return sprintf('%s (%s)', $main, implode(', ', array_keys($parens)));
   }
@@ -119,6 +123,7 @@ class StatusCommand extends CvCommand {
         unset($parens['other']);
       }
       if (preg_match(';/homebrew/;', $binary)) {
+        // Newer deployments use /opt/homebrew. Dunno how to check older deployments in /usr/local.
         $parens['homebrew'] = 1;
         unset($parens['other']);
       }
