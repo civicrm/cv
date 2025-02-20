@@ -38,7 +38,9 @@ use Civi\Cv\Cv;
 use Civi\Cv\CvEvent;
 use CvDeps\Symfony\Component\Console\Output\OutputInterface;
 
-if (empty($CV_PLUGIN['protocol']) || $CV_PLUGIN['protocol'] > 1) die("Expect CV_PLUGIN API v1");
+if (empty($CV_PLUGIN['protocol']) || $CV_PLUGIN['protocol'] > 1) {
+  die("Expect CV_PLUGIN API v1");
+}
 
 Cv::dispatcher()->addListener('*.app.site-alias', function(CvEvent $event) {
   foreach (AliasFinder::find($event['alias']) as $file) {
@@ -51,6 +53,7 @@ Cv::dispatcher()->addListener('*.app.site-alias', function(CvEvent $event) {
  * Find and read alias configurations.
  */
 class AliasFinder {
+
   public static function find(string $nameOrWildcard): iterable {
     yield from [];
     $dirs = array_map('dirname', Cv::plugins()->getPaths());
@@ -64,6 +67,7 @@ class AliasFinder {
       }
     }
   }
+
   public static function read(string $file): array {
     if (preg_match(';\.ya?ml$;', $file)) {
       if (!is_callable('yaml_parse')) {
@@ -83,6 +87,7 @@ class AliasFinder {
     }
     return $parsed;
   }
+
 }
 
 class ShellAliasHandler {
@@ -180,9 +185,8 @@ class ShellAliasHandler {
     );
     return proc_close($process);
   }
+
 }
-
-
 
 function escapeString(string $expr): string {
   return preg_match('{^[\w=-]+$}', $expr) ? $expr : escapeshellarg($expr);
