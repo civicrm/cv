@@ -49,6 +49,20 @@ Cv::dispatcher()->addListener('*.app.site-alias', function(CvEvent $event) {
   }
 });
 
+Cv::dispatcher()->addListener('*.app.site-alias.list', function(CvEvent $event) {
+  foreach (AliasFinder::find('*') as $file) {
+    $name = preg_replace('/\.(json|yaml)/', '', basename($file));
+    $event['aliases'][] = [
+      'name' => $name,
+      'type' => 'basic',
+      'config' => $file,
+      'getter' => function () use ($file) {
+        return AliasFinder::read($file);
+      },
+    ];
+  }
+});
+
 /**
  * Find and read alias configurations.
  */
@@ -56,16 +70,23 @@ class AliasFinder {
 
   public static function find(string $nameOrWildcard): iterable {
     yield from [];
-    $dirs = array_map('dirname', Cv::plugins()->getPaths());
-    foreach ($dirs as $dir) {
+    foreach (static::getFolders() as $dir) {
       foreach (['yaml', 'json'] as $type) {
-        $pat = "$dir/alias/$nameOrWildcard.$type";
+        $pat = "$dir/$nameOrWildcard.$type";
         $files = (array) glob($pat);
         foreach ($files as $file) {
           yield $file;
         }
       }
     }
+  }
+
+  public static function getFolders(): array {
+    $dirs = [];
+    foreach (Cv::plugins()->getPaths() as $pluginDir) {
+      $dirs[] = dirname($pluginDir) . '/alias';
+    }
+    return $dirs;
   }
 
   public static function read(string $file): array {
