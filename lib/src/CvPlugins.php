@@ -38,7 +38,7 @@ class CvPlugins {
     $this->plugins = [];
     foreach ($this->paths as $path) {
       if (file_exists($path) && is_dir($path)) {
-        foreach ((array) glob("$path/*.php") as $file) {
+        foreach ($this->findFiles($path, '/\.php$/') as $file) {
           $pluginName = preg_replace(';(\d+-)?(.*)(@\w+)?\.php;', '\\2', basename($file));
           if ($pluginName === basename($file)) {
             throw new \RuntimeException("Malformed plugin name: $file");
@@ -89,6 +89,14 @@ class CvPlugins {
    */
   public function getPlugins(): array {
     return $this->plugins;
+  }
+
+  private function findFiles(string $path, string $regex): array {
+    // NOTE: scandir() works better than glob() in PHAR context.
+    $files = preg_grep($regex, scandir($path));
+    return array_map(function ($f) use ($path) {
+      return "$path/$f";
+    }, $files);
   }
 
 }
