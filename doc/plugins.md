@@ -113,7 +113,7 @@ The `\Civi\Cv\Cv` facade provides some helpers for implementing functionality:
 You can register new subcommands within `cv`. `cv` includes the base-class from Symfony Console, and its adds another base-class. Compare:
 
 * `CvDeps\Symfony\Component\Console\Command\Command` is the original building-block from Symfony Console. It can define and parse CLI arguments, but it does *not* bootstrap CiviCRM or CMS. It may be suitable for some basic commands. Documentation is provided by upstream.
-* `Civi\Cv\Command\CvCommand` (v0.3.56+) is an extended version. It automatically boots CiviCRM and CMS. It handles common options like `--user`, `--hostname`, and `--level`, and it respect environment-variables like `CIVICRM_BOOT`.
+* `Civi\Cv\Command\CvCommand` (v0.3.56+) is an extended version. It automatically boots CiviCRM and CMS. It handles common options like `--user`, `--url`, and `--level`, and it respect environment-variables like `CIVICRM_BOOT`.
 
 For this document, we focus on `CvCommand`.
 

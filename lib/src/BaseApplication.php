@@ -28,6 +28,7 @@ class BaseApplication extends \Symfony\Component\Console\Application {
       Cv::ioStack()->replace('app', $application);
       $application->configure();
       $argv = AliasFilter::filter($argv);
+      $argv = static::filterDeprecatedOptions($argv);
       $result = $application->run(new CvArgvInput($argv), Cv::ioStack()->current('output'));
     }
     finally {
@@ -140,6 +141,20 @@ class BaseApplication extends \Symfony\Component\Console\Application {
     ShellVerbosityIsEvil::doWithoutEvil(function() use ($input, $output) {
       parent::configureIO($input, $output);
     });
+  }
+
+  protected static function filterDeprecatedOptions(array $argv): array {
+    foreach ($argv as &$arg) {
+      if (preg_match('/^--(cms-base-url|hostname|uri)$/', $arg, $m)) {
+        Cv::io()->note(sprintf("Option --%s is a deprecated alias for --url (-l)", $m[1]));
+        $arg = '--url';
+      }
+      elseif (preg_match('/^--(cms-base-url|hostname|uri)=(.*)/', $arg, $m)) {
+        Cv::io()->note(sprintf("Option --%s is a deprecated alias for --url (-l)", $m[1]));
+        $arg = '--url=' . $m[2];
+      }
+    }
+    return $argv;
   }
 
 }

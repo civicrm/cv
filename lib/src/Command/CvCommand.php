@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * `CvCommand` is a Symfony `Command` with support for bootstrapping CiviCRM/CMS.
  *
- * - From end-user POV, the command accepts options like --user, --level, --hostname.
+ * - From end-user POV, the command accepts options like --user, --level, --url.
  * - From dev POV, the command allows you to implement `execute()` method without needing to
  *   explicitly boot Civi.
  * - From dev POV, you may fine-tune command by changing the $bootOptions / getBootOptions().

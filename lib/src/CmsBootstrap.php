@@ -1,6 +1,8 @@
 <?php
 namespace Civi\Cv;
 
+use Civi\Cv\Util\SimulateWeb;
+
 /**
  * Bootstrap the CMS runtime.
  *
@@ -34,7 +36,8 @@ namespace Civi\Cv;
  *     Boolean TRUE means it should use a default (PWD).
  *     (Default: TRUE aka PWD)
  *   - user: string|NULL. The name of a CMS user to authenticate as.
- *   - httpHost: string|NULL. For multisite, the HTTP hostname.
+ *   - url: string|NULL. Specify the logical URL being used to process this request
+ *   - httpHost: string|NULL. Specify the logical URL being used to process this request (DEPRECATED; prefer "url")
  *   - log: \Psr\Log\LoggerInterface|\Civi\Cv\Log\InternalLogger (If given, send log messages here)
  *   - output: Symfony OutputInterface. (Fallback for handling logs - in absence of 'log')
  *
@@ -82,7 +85,7 @@ class CmsBootstrap {
       self::$singleton = new CmsBootstrap(array(
         'env' => 'CIVICRM_BOOT',
         'search' => TRUE,
-        'httpHost' => array_key_exists('HTTP_HOST', $_SERVER) ? $_SERVER['HTTP_HOST'] : 'localhost',
+        'url' => SimulateWeb::detectEnvUrl(),
         'user' => NULL,
       ));
     }
@@ -144,7 +147,7 @@ class CmsBootstrap {
       if (parse_url($cmsExpr, PHP_URL_QUERY)) {
         parse_str(parse_url($cmsExpr, PHP_URL_QUERY), $query);
         if (!empty($query['host'])) {
-          $this->options['httpHost'] = $query['host'];
+          $this->options['url'] = $query['host'];
         }
       }
     }
@@ -161,7 +164,7 @@ class CmsBootstrap {
 
     if (PHP_SAPI === "cli") {
       $this->log->debug("Simulate web environment in CLI");
-      $this->simulateWebEnv($this->options['httpHost'],
+      SimulateWeb::apply($this->options['url'] ?? SimulateWeb::localhost(),
         $cms['path'] . '/index.php',
         ($cms['type'] === 'Drupal') ? NULL : ''
       );
@@ -173,8 +176,7 @@ class CmsBootstrap {
       throw new \Exception("Failed to locate boot function ($func)");
     }
 
-    call_user_func([$this, $func],
-      $cms['path'], $this->options['user'], $this->options['httpHost']);
+    call_user_func([$this, $func], $cms['path'], $this->options['user']);
 
     if (PHP_SAPI === "cli") {
       error_reporting($originalErrorReporting);
@@ -444,6 +446,14 @@ class CmsBootstrap {
    * @return CmsBootstrap
    */
   public function addOptions($options) {
+    if (isset($options['httpHost'])) {
+      $options['url'] = $options['url'] ?? $options['httpHost'];
+      unset($options['httpHost']);
+    }
+    if (isset($options['url'])) {
+      $options['url'] = SimulateWeb::prependDefaultScheme($options['url']);
+    }
+
     $this->options = array_merge($this->options, $options);
     $this->log = Log\Logger::resolve($options, 'CmsBootstrap');
     return $this;
@@ -533,23 +543,6 @@ class CmsBootstrap {
     }
     else {
       return $this->options['search'];
-    }
-  }
-
-  /**
-   * @param string $host
-   * @param string $scriptFile
-   * @param string $serverSoftware
-   */
-  protected function simulateWebEnv($host, $scriptFile, $serverSoftware) {
-    $_SERVER['SCRIPT_FILENAME'] = $scriptFile;
-    $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-    $_SERVER['SERVER_SOFTWARE'] = $serverSoftware;
-    $_SERVER['REQUEST_METHOD'] = 'GET';
-    $_SERVER['SERVER_NAME'] = $host;
-    $_SERVER['HTTP_HOST'] = $host;
-    if (ord($_SERVER['SCRIPT_NAME']) != 47) {
-      $_SERVER['SCRIPT_NAME'] = '/' . $_SERVER['SCRIPT_NAME'];
     }
   }
 

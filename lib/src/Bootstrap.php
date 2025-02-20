@@ -1,6 +1,8 @@
 <?php
 namespace Civi\Cv;
 
+use Civi\Cv\Util\SimulateWeb;
+
 /**
  * Bootstrap the CiviCRM runtime.
  *
@@ -61,7 +63,8 @@ namespace Civi\Cv;
  *   - env: string|NULL. The environment variable which may contain the path to
  *     civicrm.settings.php (or the token "Auto"). Set NULL to disable environment-checking.
  *     (Default: CIVICRM_SETTINGS)
- *   - httpHost: string|NULL. For multisite, the HTTP hostname.
+ *   - url: string|NULL. Specify the logical URL being used to process this request
+ *   - httpHost: string|NULL. For multisite, the HTTP hostname. (DEPRECATED; prefer "url")
  *   - log: \Psr\Log\LoggerInterface|\Civi\Cv\Log\InternalLogger (If given, send log messages here)
  *   - output: Symfony OutputInterface. (Fallback for handling logs - in absence of 'log')
  *   - prefetch: bool. Whether to load various caches.
@@ -111,7 +114,7 @@ class Bootstrap {
         'settingsFile' => NULL,
         'search' => TRUE,
         'cmsType' => NULL,
-        'httpHost' => array_key_exists('HTTP_HOST', $_SERVER) ? $_SERVER['HTTP_HOST'] : '',
+        'url' => SimulateWeb::detectEnvUrl(),
       ));
     }
     return self::$singleton;
@@ -122,7 +125,7 @@ class Bootstrap {
    *   See options in class doc.
    */
   public function __construct($options = array()) {
-    $this->options = $options;
+    $this->setOptions($options);
   }
 
   /**
@@ -133,6 +136,7 @@ class Bootstrap {
    * @throws \Exception
    */
   public function boot($options = array()) {
+    $options = $this->filterOptions($options);
     $this->log = Log\Logger::resolve($options, 'Bootstrap');
 
     $isBooting = TRUE;
@@ -193,17 +197,10 @@ class Bootstrap {
 
       if (PHP_SAPI === "cli") {
         $this->log->notice("Simulate web environment in CLI");
-        $_SERVER['SCRIPT_FILENAME'] = $cmsBasePath . '/index.php';
-        $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
-        $_SERVER['SERVER_SOFTWARE'] = ($cmsType === 'drupal') ? NULL : '';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-        if (!empty($options['httpHost'])) {
-          // Hint for D7 multisite
-          $_SERVER['HTTP_HOST'] = $options['httpHost'];
-        }
-        if (ord($_SERVER['SCRIPT_NAME']) != 47) {
-          $_SERVER['SCRIPT_NAME'] = '/' . $_SERVER['SCRIPT_NAME'];
-        }
+        SimulateWeb::apply($options['url'] ?? NULL,
+          $cmsBasePath . '/index.php',
+          ($cmsType === 'drupal') ? NULL : '');
+        // NOTE: If we don't get explicit URL (env-var or cli-arg), then we leave HTTP_HOST blank -- and try to guess later.
       }
 
       $this->log->debug("Load settings file \"" . $settings . "\"");
@@ -214,9 +211,11 @@ class Bootstrap {
         throw new \Exception("Could not load the CiviCRM settings file: {$settings}");
       }
 
-      if (empty($_SERVER['HTTP_HOST']) && $cmsType === 'backdrop') {
-        // backdrop_settings_initialize() tries to configure cookie policy - and complains if HTTP_HOST is missing
-        $webHostVars = $this->convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : 'http://localhost');
+      if (empty($_SERVER['HTTP_HOST'])) {
+        // 1. backdrop_settings_initialize() tries to configure cookie policy - and complains if HTTP_HOST is missing
+        // 2. WP functions like plugin_url() and is_ssl() may choose HTTP even if the site supports SSL -- unless you have env setup
+        // 3. Generally, if there's no indication of what host/scheme to use, then best-guess is UF_BASEURL.
+        $webHostVars = SimulateWeb::convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : SimulateWeb::localhost());
         foreach ($webHostVars as $key => $value) {
           $_SERVER[$key] = $value;
         }
@@ -242,21 +241,6 @@ class Bootstrap {
     $isBooting = FALSE;
   }
 
-  private function convertUrlToCgiVars(string $url): array {
-    $parts = parse_url($url);
-    $result = [];
-    $result['SERVER_NAME'] = $parts['host'];
-    if (!empty($parts['port'])) {
-      $result['HTTP_HOST'] = $parts['host'] . ':' . $parts['port'];
-      $result['SERVER_PORT'] = $parts['port'];
-    }
-    else {
-      $result['HTTP_HOST'] = $parts['host'];
-      $result['SERVER_PORT'] = $parts['scheme'] === 'http' ? 80 : 443;
-    }
-    return $result;
-  }
-
   /**
    * Generate bootstrap logic.
    *
@@ -276,8 +260,8 @@ class Bootstrap {
       'REQUEST_METHOD',
       'SCRIPT_NAME',
     );
-    if (CIVICRM_UF === 'Backdrop') {
-      $webHostVars = $this->convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : 'http://localhost');
+    if (in_array(CIVICRM_UF, ['Backdrop', 'WordPress'])) {
+      $webHostVars = SimulateWeb::convertUrlToCgiVars(defined('CIVICRM_UF_BASEURL') ? CIVICRM_UF_BASEURL : SimulateWeb::localhost());
       $srvVars = array_merge($srvVars, array_keys($webHostVars));
       // ^^ This might make sense for all UF's, but it would require more testing to QA.
     }
@@ -320,7 +304,18 @@ class Bootstrap {
    *   See options in class doc.
    */
   public function setOptions($options) {
-    $this->options = $options;
+    $this->options = $this->filterOptions($options);
+  }
+
+  private function filterOptions($options) {
+    if (isset($options['httpHost'])) {
+      $options['url'] = $options['url'] ?? $options['httpHost'];
+      unset($options['httpHost']);
+    }
+    if (isset($options['url'])) {
+      $options['url'] = SimulateWeb::prependDefaultScheme($options['url']);
+    }
+    return $options;
   }
 
   /**
@@ -426,10 +421,12 @@ class Bootstrap {
    * @return array
    */
   protected function findDrupalDirs($cmsRoot, $searchDir) {
+    $httpHost = empty($this->options['url']) ? '' : parse_url($this->options['url'], PHP_URL_HOST);
+
     // If there's no explicit host and we start the search from "web/sites/FOO/...", then infer subsite path.
     $sitesRoot = "$cmsRoot/sites";
     $sitesRootQt = preg_quote($sitesRoot, ';');
-    if (empty($this->options['httpHost']) && preg_match(";^($sitesRootQt/[^/]+);", $searchDir, $m)) {
+    if (empty($httpHost) && preg_match(";^($sitesRootQt/[^/]+);", $searchDir, $m)) {
       if (basename($m[1]) !== 'all') {
         return [$m[1]];
       }
@@ -440,7 +437,7 @@ class Bootstrap {
       include "$cmsRoot/sites/sites.php";
     }
     $dirs = array();
-    $server = explode('.', implode('.', array_reverse(explode(':', rtrim($this->options['httpHost'], '.')))));
+    $server = explode('.', implode('.', array_reverse(explode(':', rtrim($httpHost, '.')))));
     for ($j = count($server); $j > 0; $j--) {
       $s = implode('.', array_slice($server, -$j));
       if (isset($sites[$s]) && file_exists("$cmsRoot/sites/" . $sites[$s])) {

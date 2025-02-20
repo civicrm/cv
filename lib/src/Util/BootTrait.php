@@ -45,7 +45,7 @@ trait BootTrait {
     // However, we also have extension-based commands. The system will boot before we have a chance to discover them.
     // By putting these options at the application level, we ensure they will be defined+used.
     $definition->addOption(new InputOption('level', NULL, InputOption::VALUE_REQUIRED, 'Bootstrap level (none,classloader,settings,full,cms-only,cms-full)', $defaultLevel));
-    $definition->addOption(new InputOption('hostname', NULL, InputOption::VALUE_REQUIRED, 'Hostname (for a multisite system)'));
+    $definition->addOption(new InputOption('url', 'l', InputOption::VALUE_REQUIRED, 'URL or hostname of the current site (for a multisite system)'));
     $definition->addOption(new InputOption('test', 't', InputOption::VALUE_NONE, 'Bootstrap the test database (CIVICRM_UF=UnitTests)'));
     $definition->addOption(new InputOption('user', 'U', InputOption::VALUE_REQUIRED, 'CMS user'));
   }
@@ -267,8 +267,8 @@ trait BootTrait {
     if ($input->getOption('user')) {
       $boot_params['user'] = $input->getOption('user');
     }
-    if ($input->getOption('hostname')) {
-      $boot_params['httpHost'] = $input->getOption('hostname');
+    if ($input->getOption('url')) {
+      $boot_params['url'] = $input->getOption('url');
     }
 
     return \Civi\Cv\CmsBootstrap::singleton()->addOptions($boot_params);
@@ -345,8 +345,8 @@ trait BootTrait {
     if ($output->isDebug()) {
       $boot_params['output'] = $output;
     }
-    if ($input->getOption('hostname')) {
-      $boot_params['httpHost'] = $input->getOption('hostname');
+    if ($input->getOption('url')) {
+      $boot_params['url'] = $input->getOption('url');
     }
     return $boot_params;
   }
