@@ -3,6 +3,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Application;
+use Civi\Cv\Cv;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Civi\Test\Invasive;
 use Symfony\Component\Console\Input\InputInterface;
@@ -48,6 +49,9 @@ class StatusCommand extends CvCommand {
     $data['summary'] = $summaryCode;
     $data['civicrm'] = $this->longCivi($civiCodeVer, $civiDbVer);
     $data['cv'] = Application::version() . ($isPhar ? ' (phar)' : ' (src)');
+    if ($plugins = Cv::plugins()->getPlugins()) {
+      $data['cv plugins'] = sprintf("%dx (%s)", count($plugins), implode(', ', array_keys($plugins)));
+    }
     $data['php'] = $this->longPhp();
     $data['mysql'] = $mysqlVersion;
     $data[$ufType] = $ufVer;
@@ -222,6 +226,13 @@ class StatusCommand extends CvCommand {
     // Oddballs
     $urlList['url: CIVICRM_UF_BASEURL'] = \CRM_Utils_Constant::value('CIVICRM_UF_BASEURL');
     $pathList['path: extensionsDir'] = \CRM_Core_Config::singleton()->extensionsDir;
+    if ($output->isVerbose() && $pluginPaths = Cv::plugins()->getPaths()) {
+      $parts = [];
+      foreach ($pluginPaths as $key => $pluginPath) {
+        $parts[] = "[$key] $pluginPath";
+      }
+      $pathList['path: CV_PLUGIN_PATH'] = implode("\n", $parts);
+    }
 
     asort($pathList);
     asort($urlList);

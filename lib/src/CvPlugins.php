@@ -33,7 +33,7 @@ class CvPlugins {
     }
 
     // Always load internal plugins
-    $this->paths[] = dirname(__DIR__) . '/plugin';
+    $this->paths['builtin'] = dirname(__DIR__) . '/plugin';
 
     $this->plugins = [];
     foreach ($this->paths as $path) {
