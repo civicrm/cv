@@ -30,6 +30,9 @@ class CvPlugins {
       if (getenv('HOME')) {
         array_unshift($this->paths, getenv('HOME') . '/.cv/plugin');
       }
+      elseif (getenv('USERPROFILE')) {
+        array_unshift($this->paths, getenv('USERPROFILE') . '/.cv/plugin');
+      }
     }
 
     // Always load internal plugins

@@ -86,6 +86,9 @@ class AliasFinder {
     if (getenv('HOME')) {
       array_unshift($dirs, getenv('HOME') . '/.cv/alias');
     }
+    elseif (getenv('USERPROFILE')) {
+      array_unshift($dirs, getenv('USERPROFILE') . '/.cv/alias');
+    }
     return $dirs;
   }
 
