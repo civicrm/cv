@@ -13,6 +13,7 @@ use Civi\Cv\Command\CvCommand;
 use Civi\Cv\Cv;
 use Civi\Cv\Util\StructuredOutputTrait;
 use CvDeps\Symfony\Component\Console\Input\InputArgument;
+use CvDeps\Symfony\Component\Console\Output\OutputInterface;
 
 if (empty($CV_PLUGIN['protocol']) || $CV_PLUGIN['protocol'] > 1) {
   die("Expect CV_PLUGIN API v1");
@@ -66,6 +67,7 @@ class AliasAddCommand extends CvCommand {
     if (!class_exists(AliasFinder::class)) {
       throw new \Exception("Cannot add new aliases without the \"basic-alias\" plugin.");
     }
+    Cv::io()->title('Site Aliases: Add new');
 
     $answers['name'] = $this->askName();
     $answers['path'] = $this->askPath();
@@ -76,12 +78,22 @@ class AliasAddCommand extends CvCommand {
     }
     $answers['user'] = $this->askUser($answers['name']);
 
-    $this->writeInfo($this->askAliasFile($answers['name'] . '.json'), $this->createInfo($answers));
+    Cv::io()->section('Generate configuration');
+    $configJson = $this->createInfo($answers);
+    Cv::io()->writeln("<info>This is the configuration for your alias:</info>\n");
+    Cv::io()->writeln($configJson, OutputInterface::OUTPUT_PLAIN);
+
+    $this->writeInfo($this->askAliasFile($answers['name'] . '.json'), $configJson);
+
+    Cv::io()->success([
+      "Successfully added alias \"@{$answers['name']}\".",
+      "You may now run commands like \"cv @{$answers['name']} status\" ",
+    ]);
     return 0;
   }
 
-  protected function writeInfo(string $outputFile, array $info): void {
-    $infoJson = json_encode($info, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . "\n";
+  protected function writeInfo(string $outputFile, string $infoJson): void {
+    Cv::io()->section('Write ' . $outputFile);
 
     $parent = dirname($outputFile);
     if (!is_dir($parent)) {
@@ -90,7 +102,7 @@ class AliasAddCommand extends CvCommand {
     file_put_contents($outputFile, $infoJson);
   }
 
-  protected function createInfo(array $answers) {
+  protected function createInfo(array $answers): string {
     extract($answers);
 
     $info = [];
@@ -117,11 +129,12 @@ class AliasAddCommand extends CvCommand {
     if (!empty($answers['user'])) {
       $info['options']['user'] = $answers['user'];
     }
-    return $info;
+
+    return json_encode($info, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . "\n";
   }
 
   protected function askAliasFile(string $entry): string {
-    Cv::io()->section('Save alias info');
+    Cv::io()->section('Identify alias storage');
 
     $collections['all'] = AliasFinder::getFolders();
     $collections['extant'] = array_filter($collections['all'], function($d) {
@@ -142,15 +155,15 @@ class AliasAddCommand extends CvCommand {
       $options = array_values($collections[$type]);
       foreach ($options as $option) {
         if (file_exists("$option/$entry")) {
-          Cv::io()->info("Found existing alias entry: $option/$entry");
-          if (!Cv::io()->confirm('Overwrite existing file?')) {
+          Cv::io()->info("Found existing file: $option/$entry");
+          if (!Cv::io()->confirm('Overwrite file?')) {
             throw new \Exception("Aborted. File already exists.");
           }
           return "$option/$entry";
         }
       }
       if (count($options) === 1) {
-        Cv::io()->note("Found existing alias folder ({$options[0]})");
+        Cv::io()->info("Found existing alias folder ({$options[0]})");
         return $options[0] . "/$entry";
       }
       if (count($options) > 1) {
@@ -172,7 +185,6 @@ class AliasAddCommand extends CvCommand {
       return $name;
     };
 
-    Cv::io()->title('Site Aliases: Add new');
     if ($name = Cv::input()->getArgument('name')) {
       $name = $validateName($name);
       Cv::io()->writeln("<info>Alias-name</info>: $name");
@@ -180,9 +192,9 @@ class AliasAddCommand extends CvCommand {
     else {
       Cv::io()->section('Configure alias-name');
       Cv::io()->info([
-        'The alias is a short nickname to identify your CiviCRM instance. It allows you to construct shorter commands.',
-        'For example, if you choose the alias "wombatcrm", then you can construct commands like:',
-        '$ cv @wombatcrm status',
+        'The alias is a brief nickname to identify your CiviCRM instance. It allows you to construct shorter commands.',
+        'For example, if you choose the alias "wombat", then you can construct commands like:',
+        '$ cv @wombat status',
       ]);
       $name = Cv::io()->ask('Alias-name (required)', NULL, $validateName);
     }
@@ -212,16 +224,16 @@ class AliasAddCommand extends CvCommand {
   }
 
   protected function askBootstrap(string $path): string {
-    Cv::io()->section('Configure bootstrap mode');
+    Cv::io()->section('Configure application type');
     Cv::io()->info([
-      "CiviCRM may run as a standalone application or as an add-on with another application (such as Drupal or WordPress).",
+      "CiviCRM may run as a standalone application or as an add-on (alongside Drupal, WordPress, or similar).",
       "cv needs to determine which kind of application lives in $path.",
-      "This can often be done automatically. However, some systems work better with manual options. For example, if you have created symlinks, or if you have rearranged the folders in WordPress, then use manual.",
+      "This can often be done automatically. However, some systems work better with manual options. For example, if you have created symlinks, or if you have reorganized the default folders, then use manual.",
     ]);
-    $choice = Cv::io()->choice('Bootstrap mode', [
-      'auto' => 'Identify the system automatically (using file-layout)',
-      'manual' => 'Manually specify the system type.',
-      'settings' => 'Identify the system by reading "civicrm.settings.php" (legacy)',
+    $choice = Cv::io()->choice('Application type', [
+      'auto' => 'Identify the application automatically (using file-layout)',
+      'manual' => 'Manually specify the application.',
+      'settings' => 'Identify the application by reading "civicrm.settings.php" (legacy)',
       // The 'auto' and 'manual' options are more representative of HTTP lifecycle, and they can preserve current CWD.
       // However, 'settings' is closer to the actual default behavior.
     ], 'auto');
@@ -230,7 +242,7 @@ class AliasAddCommand extends CvCommand {
       return $choice;
     }
     else {
-      return Cv::io()->choice('Application type', [
+      return Cv::io()->choice('Application type (manual)', [
         'standalone' => 'CiviCRM-Standalone',
         'backdrop' => 'Backdrop with CiviCRM',
         'drupal' => 'Drupal (8/9/10/11) with CiviCRM',
@@ -244,10 +256,11 @@ class AliasAddCommand extends CvCommand {
   protected function askMultisite(string $path): bool {
     Cv::io()->section('Configure multi-site options?');
     Cv::io()->info([
-      'In single-site installations, CiviCRM has one codebase, one database, and one URL.',
-      'In multi-site installations, the codebase may be re-used with multiple databases and/or multiple URLs. This may require extra options.',
+      // 'In single-site installations, CiviCRM has one codebase, one database, and one URL.',
+      'In multi-site installations, the codebase is shared by multiple URLs and/or multiple databases.',
+      'If your system uses multi-site, then we should configure additional options.',
     ]);
-    return Cv::io()->confirm("Does <comment>$path</comment> require multi-site options?", FALSE);
+    return Cv::io()->confirm("Enable multi-site options?", FALSE);
   }
 
   protected function askSettings(string $path): string {
@@ -316,13 +329,13 @@ class AliasAddCommand extends CvCommand {
   }
 
   protected function askUser(string $name): ?string {
-    Cv::io()->section('Configure default user (OPTIONAL)');
+    Cv::io()->section('Configure default username (optional)');
     Cv::io()->info([
-      "In the CiviCRM CLI, -most- commands execute as the system (with super-privileges).",
-      "However, -some- CLI commands may involve a CiviCRM user.",
-      "To handle these commands automatically, specify the default user for \"@{$name}\".",
+      "Most cv subcommands execute with super-privileges, but some require a user.",
+      "If you have an existing CiviCRM user-account, you may use it by default.",
     ]);
-    return trim(Cv::io()->ask('Default user (optional)'));
+    $user = Cv::io()->ask('Default username (optional)');
+    return $user ? trim($user) : $user;
   }
 
 }
