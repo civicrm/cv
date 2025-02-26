@@ -82,9 +82,9 @@ class AliasFinder {
   }
 
   public static function getFolders(): array {
-    $dirs = [];
-    foreach (Cv::plugins()->getPaths() as $pluginDir) {
-      $dirs[] = dirname($pluginDir) . '/alias';
+    $dirs = ['/etc/cv/alias', '/usr/local/share/cv/alias', '/usr/share/cv/alias'];
+    if (getenv('HOME')) {
+      array_unshift($dirs, getenv('HOME') . '/.cv/alias');
     }
     return $dirs;
   }
