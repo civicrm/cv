@@ -58,7 +58,7 @@ class AliasAddCommand extends CvCommand {
     $this
       ->setName('alias:add')
       ->addArgument('name', InputArgument::OPTIONAL, 'Alias name')
-      ->addArgument('path', InputArgument::OPTIONAL, 'Local path to the instance (web-root)')
+      ->addArgument('local-path', InputArgument::OPTIONAL, 'Local path to the instance (web-root)')
       ->setDescription('Interactively create a new @alias')
       ->setBootOptions(['auto' => FALSE]);
   }
@@ -70,7 +70,14 @@ class AliasAddCommand extends CvCommand {
     Cv::io()->title('Site Aliases: Add new');
 
     $answers['name'] = $this->askName();
-    $answers['path'] = $this->askPath();
+    if (empty($input->getArgument('local-path'))) {
+      $answers['remote_command'] = $this->askRemoteCommand();
+      if ($answers['remote_command']) {
+        $answers['cv_command'] = $this->askCvCommand();
+        // NOTE: We don't need cv_command locally -- because clearly the user is already able to run 'cv alias:add'.
+      }
+    }
+    $answers['path'] = $this->askPath(empty($answers['remote_command']));
     $answers['mode'] = $this->askBootstrap($answers['path']);
     $answers['settings'] = ($answers['mode'] === 'settings') ? $this->askSettings($answers['path']) : NULL;
     if ($answers['mode'] !== 'settings' && $this->askMultisite($answers['path'])) {
@@ -86,7 +93,7 @@ class AliasAddCommand extends CvCommand {
     $this->writeInfo($this->askAliasFile($answers['name'] . '.json'), $configJson);
 
     Cv::io()->success([
-      "Successfully added alias \"@{$answers['name']}\".",
+      "Created alias \"@{$answers['name']}\".",
       "You may now run commands like \"cv @{$answers['name']} status\" ",
     ]);
     return 0;
@@ -106,6 +113,15 @@ class AliasAddCommand extends CvCommand {
     extract($answers);
 
     $info = [];
+
+    if (!empty($answers['remote_command'])) {
+      $info['remote_command'] = $answers['remote_command'];
+      $info['options']['cwd'] = $answers['path'];
+    }
+    if (!empty($answers['cv_command'])) {
+      $info['cv_command'] = $answers['cv_command'];
+    }
+
     $modeMap = [
       'auto' => 'Auto://',
       'standalone' => 'Standalone://',
@@ -163,7 +179,7 @@ class AliasAddCommand extends CvCommand {
         }
       }
       if (count($options) === 1) {
-        Cv::io()->info("Found existing alias folder ({$options[0]})");
+        Cv::io()->info("Alias folder is {$options[0]}");
         return $options[0] . "/$entry";
       }
       if (count($options) > 1) {
@@ -175,10 +191,10 @@ class AliasAddCommand extends CvCommand {
 
   protected function askName(): string {
     $validateName = function ($name): ?string {
-      $name = trim($name);
       if (empty($name)) {
         throw new \Exception("The alias name is required");
       }
+      $name = trim($name);
       if (!preg_match('/^[a-zA-Z0-9\-]+$/', $name)) {
         throw new \Exception("Malformed alias ($name). Use only alphanumerics and dashes.");
       }
@@ -193,25 +209,24 @@ class AliasAddCommand extends CvCommand {
       Cv::io()->section('Configure alias-name');
       Cv::io()->info([
         'The alias is a brief nickname to identify your CiviCRM instance. It allows you to construct shorter commands.',
-        'For example, if you choose the alias "wombat", then you can construct commands like:',
-        '$ cv @wombat status',
+        "Example: Run a command with alias \"wombat\"\n$ cv @wombat status",
       ]);
       $name = Cv::io()->ask('Alias-name (required)', NULL, $validateName);
     }
     return $name;
   }
 
-  protected function askPath(): string {
-    $validatePath = function ($path): ?string {
+  protected function askPath(bool $isLocal): string {
+    $validatePath = function ($path) use ($isLocal): ?string {
       $path = trim($path);
       $path = rtrim($path, '/' . DIRECTORY_SEPARATOR);
-      if (!is_dir($path)) {
+      if ($isLocal && !is_dir($path)) {
         throw new \Exception("The path ($path) is not valid.");
       }
       return $path;
     };
 
-    if ($path = Cv::input()->getArgument('path')) {
+    if ($path = Cv::input()->getArgument('local-path')) {
       $path = $validatePath($path);
       Cv::io()->writeln("<info>Root-path</info>: $path");
     }
@@ -223,15 +238,59 @@ class AliasAddCommand extends CvCommand {
     return $path;
   }
 
+  protected function askRemoteCommand(): ?string {
+    $validateCommand = function ($command): ?string {
+      if (is_string($command)) {
+        $command = trim($command);
+        // The examples use '$ ' prefix, which may easily be misinterpreted by reader as literal.
+        if (substr($command, 0, 2) === '$ ') {
+          $command = substr($command, 2);
+        }
+      }
+      if (empty($command)) {
+        throw new \Exception("The command is required for remote access.");
+      }
+      return $command;
+    };
+
+    Cv::io()->section('Configure local/remote access');
+    Cv::io()->info([
+      'cv can access an instance of CiviCRM on the local host -- or on a remote (SSH) server.',
+    ]);
+    $isRemote = Cv::io()->choice('Where is CiviCRM running?', [
+      'local' => 'Local CiviCRM site',
+      'remote' => 'Remote CiviCRM site (SSH)',
+    ], 'local');
+    if ($isRemote === 'local') {
+      return NULL;
+    }
+    Cv::io()->info([
+      'Please describe a command to connect to the remote server. Here are a few examples.',
+      "Connect via SSH to server.example.com:\n$ ssh server.example.com",
+      "Connect via SSH to server.example.com as user www-data:\n$ ssh www-data@server.example.com",
+      "Connect via SSH to server.example.com on port 2222:\n$ ssh -p 2222 server.example.com",
+    ]);
+    return Cv::io()->ask('Remote access command (required)', NULL, $validateCommand);
+  }
+
+  protected function askCvCommand(): ?string {
+    // Cv::io()->section('Configure remote cv command? (optional)');
+    Cv::io()->info([
+      'The remote server must have its own copy of cv. If this has been installed in a standard PATH (such as /usr/local/bin), then no extra work is required.',
+      'If the remote copy of cv lives in a custom location (as /var/www/mysite/vendor/bin), then specify it.',
+    ]);
+    return Cv::io()->ask('Remote cv command (optional)');
+  }
+
   protected function askBootstrap(string $path): string {
     Cv::io()->section('Configure application type');
     Cv::io()->info([
       "CiviCRM may run as a standalone application or as an add-on (alongside Drupal, WordPress, or similar).",
-      "cv needs to determine which kind of application lives in $path.",
-      "This can often be done automatically. However, some systems work better with manual options. For example, if you have created symlinks, or if you have reorganized the default folders, then use manual.",
+      "cv can usually identify the application automatically by examining the file-layout.",
+      "However, if you have customized the file-layout (symlinks or path-overrides), then it may need extra hints.",
     ]);
     $choice = Cv::io()->choice('Application type', [
-      'auto' => 'Identify the application automatically (using file-layout)',
+      'auto' => 'Identify the application automatically (examine file-layout)',
       'manual' => 'Manually specify the application.',
       'settings' => 'Identify the application by reading "civicrm.settings.php" (legacy)',
       // The 'auto' and 'manual' options are more representative of HTTP lifecycle, and they can preserve current CWD.
@@ -254,7 +313,7 @@ class AliasAddCommand extends CvCommand {
   }
 
   protected function askMultisite(string $path): bool {
-    Cv::io()->section('Configure multi-site options?');
+    Cv::io()->section('Configure multi-site options');
     Cv::io()->info([
       // 'In single-site installations, CiviCRM has one codebase, one database, and one URL.',
       'In multi-site installations, the codebase is shared by multiple URLs and/or multiple databases.',
@@ -329,7 +388,7 @@ class AliasAddCommand extends CvCommand {
   }
 
   protected function askUser(string $name): ?string {
-    Cv::io()->section('Configure default username (optional)');
+    Cv::io()->section('Configure default username');
     Cv::io()->info([
       "Most cv subcommands execute with super-privileges, but some require a user.",
       "If you have an existing CiviCRM user-account, you may use it by default.",
