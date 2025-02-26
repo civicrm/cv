@@ -11,6 +11,7 @@ use Civi\Cv\BasicAliasPlugin\AliasFinder;
 
 use Civi\Cv\Command\CvCommand;
 use Civi\Cv\Cv;
+use Civi\Cv\Util\Filesystem;
 use Civi\Cv\Util\StructuredOutputTrait;
 use CvDeps\Symfony\Component\Console\Input\InputArgument;
 use CvDeps\Symfony\Component\Console\Output\OutputInterface;
@@ -157,14 +158,7 @@ class AliasAddCommand extends CvCommand {
       return is_dir($d) && is_writable($d);
     });
     $collections['viable'] = array_values(array_filter($collections['all'], function($d) {
-      $iter = $d;
-      while (dirname($iter) && dirname($iter) !== $iter) {
-        if (is_dir($iter) && is_writable($iter)) {
-          return TRUE;
-        }
-        $iter = dirname($iter);
-      }
-      return FALSE;
+      return Filesystem::isCreatable($d);
     }));
 
     foreach (['extant', 'viable'] as $type) {
