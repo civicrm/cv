@@ -67,8 +67,7 @@ class StatusCommand extends CvCommand {
 
     $this->sendTable($input, $output, $rows);
     if ($input->getOption('out') === 'table' && !$output->isVerbose()) {
-      $error = method_exists($output, 'getErrorOutput') ? $output->getErrorOutput() : $output;
-      $error->writeln('<comment>TIP: To see even more information, enable the verbose flag (-v).</comment>');
+      Cv::errorOutput()->writeln('<comment>TIP: To see even more information, enable the verbose flag (-v).</comment>');
     }
 
     return 0;
@@ -188,7 +187,6 @@ class StatusCommand extends CvCommand {
    * @return array
    */
   protected function findPathsUrls(OutputInterface $output): array {
-    $error = method_exists($output, 'getErrorOutput') ? $output->getErrorOutput() : $output;
     $pathList = $urlList = [];
     $paths = \Civi::paths();
 
@@ -201,7 +199,7 @@ class StatusCommand extends CvCommand {
     if ($output->isVerbose()) {
       $allVariables = property_exists($paths, 'variableFactory') ? Invasive::get([$paths, 'variableFactory']) : NULL;
       if (empty($allVariables)) {
-        $error->writeln('<error>Failed to inspect Civi::paths()->variableFactory</error>');
+        Cv::errorOutput()->writeln('<error>Failed to inspect Civi::paths()->variableFactory</error>');
       }
       else {
         $pathVariables = $urlVariables = array_keys($allVariables);

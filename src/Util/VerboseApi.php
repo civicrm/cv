@@ -33,7 +33,7 @@ class VerboseApi {
         'result' => $result,
       );
       if (!empty($result['is_error'])) {
-        $output->getErrorOutput()->writeln("<error>Error: API Call Failed</error>: "
+        \Civi\Cv\Cv::errorOutput()->writeln("<error>Error: API Call Failed</error>: "
           . Encoder::encode($data, 'pretty'));
       }
       else {
