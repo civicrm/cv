@@ -94,10 +94,22 @@ class Cv {
   }
 
   /**
+   * Get a reference to STDOUT (with support for highlighting) for current action.
+   * )
    * @return \CvDeps\Symfony\Component\Console\Output\OutputInterface|\Symfony\Component\Console\Output\OutputInterface
    */
   public static function output() {
     return static::ioStack()->current('output');
+  }
+
+  /**
+   * Get a reference to STDERR (with support for highlighting) for current action .
+   *
+   * @return \CvDeps\Symfony\Component\Console\Output\OutputInterface|\Symfony\Component\Console\Output\OutputInterface
+   */
+  public static function errorOutput() {
+    $out = static::output();
+    return method_exists($out, 'getErrorOutput') ? $out->getErrorOutput() : $out;
   }
 
   /**

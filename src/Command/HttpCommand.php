@@ -2,6 +2,7 @@
 
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Cv;
 use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Civi\Cv\Util\UrlCommandTrait;
@@ -81,9 +82,8 @@ NOTE: If you use `--login` and do not have `authx`, then it prompts about
    */
   protected function sendRequest(OutputInterface $output, string $method, string $url, array $headers = [], ?string $body = NULL): int {
     $method = strtoupper($method);
-    $errorOutput = is_callable([$output, 'getErrorOutput']) ? $output->getErrorOutput() : $output;
-    $verbose = function(string $text) use ($errorOutput) {
-      $errorOutput->writeln($text, OutputInterface::OUTPUT_RAW | OutputInterface::VERBOSITY_VERBOSE);
+    $verbose = function(string $text) {
+      Cv::errorOutput()->writeln($text, OutputInterface::OUTPUT_RAW | OutputInterface::VERBOSITY_VERBOSE);
     };
 
     $verbose("> $method $url");
