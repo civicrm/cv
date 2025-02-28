@@ -182,7 +182,7 @@ trait StructuredOutputTrait {
                 return '';
               }
               elseif (is_array($value)) {
-                return json_encode($value);
+                return json_encode($value, JSON_UNESCAPED_SLASHES);
               }
               elseif (is_object($value)) {
                 return '(' . get_class($value) . ')';

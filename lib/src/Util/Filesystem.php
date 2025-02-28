@@ -10,6 +10,32 @@ class Filesystem {
   }
 
   /**
+   * Determine whether the given $path can be created.
+   *
+   * It does not matter if the parent exists already (if the parent is creatable).
+   *
+   * It only matters if we have sufficient write access to some ancestor.
+   *
+   * @param string $path
+   *   The file that you would like to create.
+   * @return bool
+   */
+  public static function isCreatable(string $path): bool {
+    if (file_exists($path)) {
+      return is_writable($path);
+    }
+
+    $iter = $path;
+    while (!empty($iter) && dirname($iter) !== $iter) {
+      if (file_exists($iter)) {
+        return is_dir($iter) && is_writable($iter);
+      }
+      $iter = dirname($iter);
+    }
+    return FALSE;
+  }
+
+  /**
    * @return false|string
    */
   public function pwd() {
