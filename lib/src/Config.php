@@ -45,6 +45,9 @@ class Config {
     if (getenv('CV_CONFIG')) {
       return getenv('CV_CONFIG');
     }
+    elseif (getenv('XDG_STATE_HOME')) {
+      return getenv('XDG_STATE_HOME') . '/.cv.json';
+    }
     elseif (getenv('HOME')) {
       return getenv('HOME') . '/.cv.json';
     }
