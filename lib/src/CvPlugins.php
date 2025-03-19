@@ -27,8 +27,8 @@ class CvPlugins {
     }
     else {
       $this->paths = ['/etc/cv/plugin', '/usr/local/share/cv/plugin', '/usr/share/cv/plugin'];
-      if (getenv('XDG_STATE_HOME')) {
-        array_unshift($this->paths, getenv('XDG_STATE_HOME') . '/.cv/plugin');
+      if (getenv('XDG_CONFIG_HOME')) {
+        array_unshift($this->paths, getenv('XDG_CONFIG_HOME') . '/.cv/plugin');
       }
       elseif (getenv('HOME')) {
         array_unshift($this->paths, getenv('HOME') . '/.cv/plugin');
