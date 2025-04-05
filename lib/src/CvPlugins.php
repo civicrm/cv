@@ -27,14 +27,14 @@ class CvPlugins {
     }
     else {
       $this->paths = ['/etc/cv/plugin', '/usr/local/share/cv/plugin', '/usr/share/cv/plugin'];
-      if (getenv('XDG_CONFIG_HOME')) {
-        array_unshift($this->paths, getenv('XDG_CONFIG_HOME') . '/.cv/plugin');
-      }
-      elseif (getenv('HOME')) {
+      if (getenv('HOME')) {
         array_unshift($this->paths, getenv('HOME') . '/.cv/plugin');
       }
       elseif (getenv('USERPROFILE')) {
         array_unshift($this->paths, getenv('USERPROFILE') . '/.cv/plugin');
+      }
+      if (getenv('XDG_CONFIG_HOME')) {
+        array_unshift($this->paths, getenv('XDG_CONFIG_HOME') . '/cv/plugin');
       }
     }
 
