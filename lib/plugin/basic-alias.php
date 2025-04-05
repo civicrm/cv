@@ -89,6 +89,9 @@ class AliasFinder {
     elseif (getenv('USERPROFILE')) {
       array_unshift($dirs, getenv('USERPROFILE') . '/.cv/alias');
     }
+    if (getenv('XDG_CONFIG_HOME')) {
+      array_unshift($dirs, getenv('XDG_CONFIG_HOME') . '/cv/alias');
+    }
     return $dirs;
   }
 
