@@ -113,9 +113,12 @@ Examples:
    *   upgrades use the same file.
    */
   protected function getUpgradeFile() {
-    $home = getenv('HOME') ? getenv('HOME') : getenv('USERPROFILE');
+    $home = getenv('XDG_STATE_HOME');
     if (empty($home) || !file_exists($home)) {
-      throw new \RuntimeException("Failed to locate HOME or USERPROFILE");
+      $home = getenv('HOME') ? getenv('HOME') : getenv('USERPROFILE');
+      if (empty($home) || !file_exists($home)) {
+        throw new \RuntimeException("Failed to locate HOME or USERPROFILE");
+      }
     }
 
     $dir = implode(DIRECTORY_SEPARATOR, [$home, '.cv', 'upgrade']);

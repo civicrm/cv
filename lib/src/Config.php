@@ -43,14 +43,33 @@ class Config {
    */
   public static function getFileName() {
     if (getenv('CV_CONFIG')) {
+      // The user has specifically told us where to go.
       return getenv('CV_CONFIG');
     }
-    elseif (getenv('HOME')) {
-      return getenv('HOME') . '/.cv.json';
+
+    // We have to figure out where to go. There are a couple plausible locations...
+    $candidates = [];
+    if (getenv('XDG_CONFIG_HOME')) {
+      $candidates[] = getenv('XDG_CONFIG_HOME') . '/.cv.json';
     }
-    else {
-      throw new \RuntimeException("Failed to determine file path for 'cv.json'.");
+    if (getenv('HOME')) {
+      $candidates[] = getenv('HOME') . '/.cv.json';
     }
+
+    // Prefer the first extant config file...
+    foreach ($candidates as $candidate) {
+      if (file_exists($candidate)) {
+        return $candidate;
+      }
+    }
+
+    // Or if there is no extant file, then use the first plausible suggestion...
+    if (isset($candidates[0])) {
+      return $candidates[0];
+    }
+
+    throw new \RuntimeException("Failed to determine file path for 'cv.json'.");
+
   }
 
 }

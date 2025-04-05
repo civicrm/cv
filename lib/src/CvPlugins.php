@@ -33,6 +33,9 @@ class CvPlugins {
       elseif (getenv('USERPROFILE')) {
         array_unshift($this->paths, getenv('USERPROFILE') . '/.cv/plugin');
       }
+      if (getenv('XDG_CONFIG_HOME')) {
+        array_unshift($this->paths, getenv('XDG_CONFIG_HOME') . '/cv/plugin');
+      }
     }
 
     // Always load internal plugins
