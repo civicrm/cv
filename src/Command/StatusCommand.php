@@ -110,6 +110,15 @@ class StatusCommand extends CvCommand {
     if (file_exists('/nix')) {
       $parens['nix'] = 1;
     }
+    if (file_exists('/opt/plesk')) {
+      $parens['plesk'] = 1;
+    }
+    if (file_exists('/var/cpanel') || file_exists('/usr/local/cpanel')) {
+      $parens['cpanel'] = 1;
+    }
+    if (file_exists('/etc/webmin')) {
+      $parens['webmin'] = 1;
+    }
 
     return sprintf('%s (%s)', $main, implode(', ', array_keys($parens)));
   }
