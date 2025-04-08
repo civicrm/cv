@@ -163,11 +163,15 @@ class StatusCommand extends CvCommand {
   }
 
   private function shortDbms($version): string {
-    if (str_contains($version, 'Maria')) {
-      // FIXME: ex: 10.5 ==> r105
+    if (preg_match('/([0-9]+)\.([0-9]+).*.*MariaDB/', $version, $matches)) {
+      // Ex: 10.6.2-MariaDB => r106
+      return 'r' . $matches[1] . $matches[2];
+    }
+    elseif (str_contains($version, 'Maria')) {
       return 'r???';
     }
     else {
+      // Ex: 8.0.5 => m80
       return 'm' . preg_replace('/([0-9]+)\.([0-9]+).*$/', '$1$2', $version);
     }
   }
