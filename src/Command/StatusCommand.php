@@ -149,6 +149,10 @@ class StatusCommand extends CvCommand {
         $parens['usr-bin'] = 1;
         unset($parens['other']);
       }
+      if (preg_match(';^/opt/plesk/;', $binary)) {
+        $parens['plesk'] = 1;
+        unset($parens['other']);
+      }
     }
 
     return sprintf('%s (%s)', PHP_VERSION, implode(', ', array_keys($parens)));
