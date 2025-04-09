@@ -93,7 +93,7 @@ class ConsoleQueueRunner {
         }
         catch (\Exception $e) {
           // WISHLIST: For interactive mode, perhaps allow retry/skip?
-          $io->writeln(sprintf("<error>Error executing task \"%s\"</error>", $task->title));
+          $io->writeln(sprintf("<error>Error executing task: %s</error>", $task->title));
           throw $e;
         }
       }
