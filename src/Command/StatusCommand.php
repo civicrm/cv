@@ -110,6 +110,15 @@ class StatusCommand extends CvCommand {
     if (file_exists('/nix')) {
       $parens['nix'] = 1;
     }
+    if (file_exists('/opt/plesk')) {
+      $parens['plesk'] = 1;
+    }
+    if (file_exists('/var/cpanel') || file_exists('/usr/local/cpanel')) {
+      $parens['cpanel'] = 1;
+    }
+    if (file_exists('/etc/webmin')) {
+      $parens['webmin'] = 1;
+    }
 
     return sprintf('%s (%s)', $main, implode(', ', array_keys($parens)));
   }
@@ -140,6 +149,10 @@ class StatusCommand extends CvCommand {
         $parens['usr-bin'] = 1;
         unset($parens['other']);
       }
+      if (preg_match(';^/opt/plesk/;', $binary)) {
+        $parens['plesk'] = 1;
+        unset($parens['other']);
+      }
     }
 
     return sprintf('%s (%s)', PHP_VERSION, implode(', ', array_keys($parens)));
@@ -150,11 +163,15 @@ class StatusCommand extends CvCommand {
   }
 
   private function shortDbms($version): string {
-    if (str_contains($version, 'Maria')) {
-      // FIXME: ex: 10.5 ==> r105
+    if (preg_match('/([0-9]+)\.([0-9]+).*.*MariaDB/', $version, $matches)) {
+      // Ex: 10.6.2-MariaDB => r106
+      return 'r' . $matches[1] . $matches[2];
+    }
+    elseif (str_contains($version, 'Maria')) {
       return 'r???';
     }
     else {
+      // Ex: 8.0.5 => m80
       return 'm' . preg_replace('/([0-9]+)\.([0-9]+).*$/', '$1$2', $version);
     }
   }
