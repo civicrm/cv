@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Util;
 
+use Civi\Cv\Exception\QueueTaskException;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -88,10 +89,10 @@ class ConsoleQueueRunner {
         try {
           $isOK = $task->run($taskCtx);
           if (!$isOK) {
-            throw new \Exception('Task returned false');
+            throw new QueueTaskException('Task returned false');
           }
         }
-        catch (\Exception $e) {
+        catch (\Throwable $e) {
           // WISHLIST: For interactive mode, perhaps allow retry/skip?
           $io->writeln(sprintf("<error>Error executing task: %s</error>", $task->title));
           throw $e;
