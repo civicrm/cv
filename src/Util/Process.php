@@ -17,7 +17,7 @@ class Process {
     $newArgs = array();
     $newArgs[] = array_shift($args);
     foreach ($args as $arg) {
-      $newArgs[] = preg_match(';^[a-zA-Z0-9\.\/]+$;', $arg) ? $arg : escapeshellarg($arg);
+      $newArgs[] = static::lazyEscape($arg);
     }
     return call_user_func_array('sprintf', $newArgs);
   }
@@ -123,6 +123,24 @@ class Process {
       'Output' => $process->getOutput(),
       'Error Output' => $process->getErrorOutput(),
     ));
+  }
+
+  /**
+   * Escape a value for use as a shell argument.
+   *
+   * This is basically the same as `escapeshellarg()`, but quotation marks can be skipped for
+   * some simple strings.
+   *
+   * @param string $value
+   * @return string
+   */
+  public static function lazyEscape(string $value): string {
+    if (preg_match('/^[a-zA-Z0-9_\.\-\/=]*$/', $value)) {
+      return $value;
+    }
+    else {
+      return escapeshellarg($value);
+    }
   }
 
 }
