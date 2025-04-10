@@ -3,6 +3,7 @@ namespace Civi\Cv\Command;
 
 use Civi\Cv\Cv;
 use Civi\Cv\Exception\QueueTaskException;
+use Civi\Cv\ExtensionPolyfill\PfQueueDownloader;
 use Civi\Cv\Util\ConsoleSubprocessQueueRunner;
 use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\Filesystem;
@@ -212,12 +213,14 @@ Note:
     $reloadQueueSpec = array_merge($queueSpec, ['reset' => FALSE]);
     $queue = \CRM_Queue_Service::singleton()->create($newQueueSpec);
 
-    if (class_exists('CRM_Extension_QueueTasks')) {
+    if (class_exists('CRM_Extension_QueueDownloader') && class_exists('CRM_Extension_QueueTasks')) {
+      // Note: 6.1.0 has QueueDownloader but an insufficient signature. Presence of QueueTasks correlates with revised signature (6.1.1-ish).
       $downloader = new \CRM_Extension_QueueDownloader(TRUE, $queue);
       $runner = new ConsoleSubprocessQueueRunner(Cv::io(), $reloadQueueSpec, Cv::input()->getOption('dry-run'), Cv::input()->getOption('step'));
     }
     else {
-      throw new \Exception("TODO: Implement polyfill for CRM_Extension_QueueDownloader");
+      $downloader = new PfQueueDownloader(TRUE, $queue);
+      $runner = new ConsoleSubprocessQueueRunner(Cv::io(), $reloadQueueSpec, Cv::input()->getOption('dry-run'), Cv::input()->getOption('step'));
     }
 
     $batch = NULL;
