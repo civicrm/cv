@@ -66,6 +66,7 @@ class SiteConfigReader {
       $config = Config::read();
       $this->cache['home'] = isset($config['sites'][$this->settingsFile])
         ? $config['sites'][$this->settingsFile] : array();
+      $this->cache['home']['CONFIG_FILE'] = Config::getFileName();
     }
     return $this->cache['home'];
   }
