@@ -1,6 +1,10 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Cv;
+use Civi\Cv\Exception\QueueTaskException;
+use Civi\Cv\ExtensionPolyfill\PfQueueDownloader;
+use Civi\Cv\Util\ConsoleSubprocessQueueRunner;
 use Civi\Cv\Util\ExtensionTrait;
 use Civi\Cv\Util\Filesystem;
 use Civi\Cv\Util\HeadlessDownloader;
@@ -33,6 +37,8 @@ class ExtensionDownloadCommand extends CvCommand {
       ->addOption('force', 'f', InputOption::VALUE_NONE, 'If an extension already exists, download it anyway.')
       ->addOption('to', NULL, InputOption::VALUE_OPTIONAL, 'Download to a specific directory (absolute path).')
       ->addOption('keep', 'k', InputOption::VALUE_NONE, 'If an extension already exists, keep it.')
+      ->addOption('dry-run', NULL, InputOption::VALUE_NONE, 'Preview the list of tasks')
+      ->addOption('step', NULL, InputOption::VALUE_NONE, 'Run the tasks in steps, pausing before each step')
       ->addArgument('key-or-name', InputArgument::IS_ARRAY, 'One or more extensions to enable. Identify the extension by full key ("org.example.foobar") or short name ("foobar"). Optionally append a URL.')
       ->setHelp('Download and enable an extension
 
@@ -67,6 +73,9 @@ Note:
     if ($input->hasOption('bare') && $input->getOption('bare')) {
       $input->setOption('level', 'none');
       $input->setOption('no-install', TRUE);
+      if (empty($input->getOption('to'))) {
+        throw new \LogicException("If --bare is specified, then --to must also be specified.");
+      }
     }
     if ($extRepoUrl = $this->parseRepoUrl($input)) {
       global $civicrm_setting;
@@ -76,6 +85,12 @@ Note:
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
+    if ($input->getOption('step')) {
+      if ($output->getVerbosity() < OutputInterface::VERBOSITY_VERY_VERBOSE) {
+        $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
+      }
+    }
+
     $fs = new Filesystem();
 
     if ($input->getOption('to') && !$fs->isAbsolutePath($input->getOption('to'))) {
@@ -100,7 +115,7 @@ Note:
         }
       }
 
-      [$downloads, $errors] = $this->parseDownloads($input);
+      [$requestedDownloads, $errors] = $this->parseDownloads($input);
       if ($refresh == 'auto' && !empty($errors)) {
         $output->writeln("<info>Extension cache does not contain requested item(s)</info>");
         $refresh = 'yes';
@@ -115,59 +130,167 @@ Note:
         $output->getErrorOutput()->writeln("<error>$error</error>");
       }
       $output->getErrorOutput()->writeln("<comment>Tip: To customize the feed, review options in \"cv {$input->getFirstArgument()} --help\"");
-      $output->getErrorOutput()->writeln("<comment>Tip: To browse available downloads, run \"cv ext:list -R\"</comment>");
+      $output->getErrorOutput()->writeln("<comment>Tip: To browse available requestedDownloads, run \"cv ext:list -R\"</comment>");
       return 1;
     }
 
-    if ($input->getOption('to') && count($downloads) > 1) {
+    if ($input->getOption('to') && count($requestedDownloads) > 1) {
       throw new \RuntimeException("When specifying --to, you can only download one extension at a time.");
     }
+    elseif (empty($requestedDownloads)) {
+      Cv::output()->writeln('Nothing to do.');
+      return 0;
+    }
+    elseif ($input->getOption('bare')) {
+      return $this->executeWithBare($requestedDownloads);
+    }
+    else {
+      return $this->executeWithQueue($requestedDownloads);
+    }
+  }
 
-    foreach ($downloads as $key => $url) {
-      $action = $this->pickAction($input, $output, $key);
+  /**
+   * In a bare download, we don't have access to a copy of CiviCRM. This is useful
+   * if you want to grab a specific extension from a feed (before Civi is installed).
+   *
+   * Ex: cv dl -b "@https://civicrm.org/extdir/ver=$DM_VERSION/$SOME_EXT.xml" --to="$SOME_FOLDER"
+   *
+   * @param array $requestedDownloads
+   * @return int
+   */
+  protected function executeWithBare(array $requestedDownloads): int {
+    foreach ($requestedDownloads as $key => $url) {
+      $action = $this->pickAction(Cv::input(), Cv::output(), $key);
       switch ($action) {
         case 'download':
-          if ($to = $input->getOption('to')) {
-            $output->writeln("<info>Downloading extension \"$key\" ($url) to \"$to\"</info>");
+          if ($to = Cv::input()->getOption('to')) {
+            Cv::output()->writeln("<info>Downloading extension \"$key\" ($url) to \"$to\"</info>");
             $dl = new HeadlessDownloader();
-            $dl->run($url, $key, $input->getOption('to'), TRUE);
+            $dl->run($url, $key, Cv::input()->getOption('to'), TRUE);
           }
           else {
-            $output->writeln("<info>Downloading extension \"$key\" ($url)</info>");
-            $this->assertBooted();
-            $result = VerboseApi::callApi3Success('Extension', 'download', array(
-              'key' => $key,
-              'url' => $url,
-              'install' => !$input->getOption('no-install'),
-            ));
+            throw new \LogicException("Missing option --to");
           }
-          break;
-
-        case 'install':
-          $output->writeln("<info>Found extension \"$key\". Enabling.</info>");
-          $result = VerboseApi::callApi3Success('Extension', 'enable', array(
-            'key' => $key,
-          ));
           break;
 
         case 'abort':
-          $output->writeln("<error>Aborted</error>");
+          Cv::output()->writeln("<error>Aborted</error>");
           return 1;
 
+        case 'install':
         case 'skip':
-          $output->writeln("<comment>Skipped extension \"$key\".</comment>");
+          Cv::output()->writeln("<comment>Skipped extension \"$key\".</comment>");
           break;
 
         default:
           throw new \RuntimeException("Unrecognized action: $action");
       }
-
-      if (!empty($result['is_error'])) {
-        return 1;
-      }
     }
 
     return 0;
+  }
+
+  /**
+   * Perform a normal download. This may involve several steps, such as fetching a ZIP,
+   * extracting it, putting it inplace (replacing an old ext), flushing caches,
+   * running upgrades, etc.
+   *
+   * This runs in a queue, and each queue item is launched as a separate subprocess.
+   *
+   * @param array $requestedDownloads
+   * @return int
+   */
+  protected function executeWithQueue(array $requestedDownloads): int {
+    $this->assertBooted();
+
+    if (Cv::input()->getOption('to')) {
+      // FIXME
+      throw new \RuntimeException('Queued downloader does not currently support --to');
+    }
+
+    $queueSpec = $this->createQueueSpec();
+    $newQueueSpec = array_merge($queueSpec, ['reset' => TRUE]);
+    $reloadQueueSpec = array_merge($queueSpec, ['reset' => FALSE]);
+    $queue = \CRM_Queue_Service::singleton()->create($newQueueSpec);
+
+    if (class_exists('CRM_Extension_QueueDownloader') && class_exists('CRM_Extension_QueueTasks')) {
+      // Note: 6.1.0 has QueueDownloader but an insufficient signature. Presence of QueueTasks correlates with revised signature (6.1.1-ish).
+      $downloader = new \CRM_Extension_QueueDownloader(TRUE, $queue);
+      $runner = new ConsoleSubprocessQueueRunner(Cv::io(), $reloadQueueSpec, Cv::input()->getOption('dry-run'), Cv::input()->getOption('step'));
+    }
+    else {
+      $downloader = new PfQueueDownloader(TRUE, $queue);
+      $runner = new ConsoleSubprocessQueueRunner(Cv::io(), $reloadQueueSpec, Cv::input()->getOption('dry-run'), Cv::input()->getOption('step'));
+    }
+
+    $batch = NULL;
+    $updateBatch = function(?string $method, array $data) use (&$batch, $downloader) {
+      if ($batch === NULL) {
+        $batch = ['method' => $method, 'data' => $data];
+      }
+      elseif ($batch['method'] === $method) {
+        $batch['data'] = array_merge($batch['data'], $data);
+      }
+      else {
+        if ($batch['method'] === 'addDownloads') {
+          $downloader->addDownloads($batch['data'], !Cv::input()->getOption('no-install'));
+        }
+        elseif ($batch['method'] === 'addEnable') {
+          $downloader->addEnable($batch['data']);
+        }
+        else {
+          throw new \LogicException("Unrecognized method: $method");
+        }
+        $batch = ['method' => $method, 'data' => $data];
+      }
+    };
+
+    foreach ($requestedDownloads as $key => $url) {
+      $action = $this->pickAction(Cv::input(), Cv::output(), $key);
+      switch ($action) {
+        case 'download':
+          $updateBatch('addDownloads', [$key => $url]);
+          break;
+
+        case 'install':
+          $updateBatch('addEnable', [$key]);
+          break;
+
+        case 'abort':
+          Cv::output()->writeln("<error>Aborted</error>");
+          return 1;
+
+        case 'skip':
+          Cv::output()->writeln("<comment>Skipped extension \"$key\".</comment>");
+          break;
+
+        default:
+          throw new \RuntimeException("Unrecognized action: $action");
+      }
+    }
+
+    $updateBatch(NULL, []);
+    $downloader->fillQueue();
+    try {
+      $runner->runAll();
+      return 0;
+    }
+    catch (QueueTaskException $e) {
+      // The earlier handlers will output details.
+      return 1;
+    }
+  }
+
+  protected function createQueueSpec(): array {
+    return [
+      'name' => 'cli-ext-dl',
+      'type' => 'Sql',
+      'runner' => 'task',
+      'is_autorun' => FALSE,
+      'retry_limit' => 0,
+      'error' => 'abort',
+      'is_persistent' => FALSE,
+    ];
   }
 
   /**
@@ -318,7 +441,7 @@ Note:
       return 'download';
     }
     elseif ($input->getOption('keep')) {
-      return $input->getOptions('no-install') ? 'skip' : 'install';
+      return $input->getOption('no-install') ? 'skip' : 'install';
     }
     elseif ($input->getOption('force')) {
       return 'download';
@@ -339,7 +462,7 @@ Note:
           return 'download';
 
         case 'k':
-          return $input->getOptions('no-install') ? 'skip' : 'install';
+          return $input->getOption('no-install') ? 'skip' : 'install';
 
         case 'a':
         default:

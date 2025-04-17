@@ -2,6 +2,8 @@
 
 namespace Civi\Cv\Util;
 
+use Symfony\Component\Process\PhpExecutableFinder;
+
 class Cv {
 
   /**
@@ -70,9 +72,14 @@ class Cv {
    *   If the command terminates abnormally.
    */
   public static function passthru($cmd) {
-    $cmd = 'cv ' . $cmd;
+    $output = \Civi\Cv\Cv::output();
+    $fullCmd = static::getCvCommand() . ' ' . $cmd;
+    if ($output->isDebug()) {
+      $output->writeln("<info>Run subcommand</info> (<comment>$fullCmd</comment>)");
+      $output->writeln('');
+    }
     $process = proc_open(
-      $cmd,
+      $fullCmd,
       array(
         // 0 => array('pipe', 'r'),
         0 => STDIN,
@@ -82,6 +89,56 @@ class Cv {
       $pipes
     );
     return proc_close($process);
+  }
+
+  public static function getCvCommand(): string {
+    $executableFinder = new PhpExecutableFinder();
+    $php = $executableFinder->find(FALSE);
+    if (!$php) {
+      throw new \RuntimeException("Unable to find the PHP executable");
+    }
+    $parts = $executableFinder->findArguments();
+    if (preg_match(';^phar://(.*)/bin/cv$;', CV_BIN, $matches)) {
+      $parts[] = $matches[1];
+    }
+    else {
+      $parts[] = CV_BIN;
+    }
+    $parts = array_merge($parts, static::getPassthruOptions());
+    return $php . ' ' . implode(' ', array_map([Process::class, 'lazyEscape'], $parts));
+  }
+
+  protected static function getPassthruOptions(): array {
+    $input = \Civi\Cv\Cv::input();
+    $output = \Civi\Cv\Cv::output();
+    $parts = [];
+    foreach (['level', 'url', 'user'] as $option) {
+      if ($input->getOption($option)) {
+        $parts[] = '--' . $option . '=' . $input->getOption($option);
+      }
+    }
+    foreach (['test'] as $option) {
+      if ($input->getOption($option)) {
+        $parts[] = '--' . $option;
+      }
+    }
+    if ($output->isDebug()) {
+      $parts[] = '-vvv';
+    }
+    elseif ($output->isVeryVerbose()) {
+      $parts[] = '-vv';
+    }
+    elseif ($output->isVerbose()) {
+      $parts[] = '-v';
+    }
+    if ($output->isQuiet()) {
+      $parts[] = '--quiet';
+    }
+    $parts[] = $output->isDecorated() ? '--ansi' : '--no-ansi';
+    if (!$input->isInteractive()) {
+      $parts[] = '--no-interaction';
+    }
+    return $parts;
   }
 
 }
