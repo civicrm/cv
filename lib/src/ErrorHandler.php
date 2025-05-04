@@ -72,23 +72,27 @@ class ErrorHandler {
   }
 
   protected static function getErrorTypes(): array {
-    return [
-      E_ERROR => 'PHP Error',
-      E_WARNING => 'PHP Warning',
-      E_PARSE => 'PHP Parse Error',
-      E_NOTICE => 'PHP Notice',
-      E_CORE_ERROR => 'PHP Core Error',
-      E_CORE_WARNING => 'PHP Core Warning',
-      E_COMPILE_ERROR => 'PHP Compile Error',
-      E_COMPILE_WARNING => 'PHP Compile Warning',
-      E_USER_ERROR => 'PHP User Error',
-      E_USER_WARNING => 'PHP User Warning',
-      E_USER_NOTICE => 'PHP User Notice',
-      E_STRICT => 'PHP Strict Warning',
-      E_RECOVERABLE_ERROR => 'PHP Recoverable Fatal Error',
-      E_DEPRECATED => 'PHP Deprecation',
-      E_USER_DEPRECATED => 'PHP User Deprecation',
-    ];
+    return array_merge(
+      [
+        E_ERROR => 'PHP Error',
+        E_WARNING => 'PHP Warning',
+        E_PARSE => 'PHP Parse Error',
+        E_NOTICE => 'PHP Notice',
+        E_CORE_ERROR => 'PHP Core Error',
+        E_CORE_WARNING => 'PHP Core Warning',
+        E_COMPILE_ERROR => 'PHP Compile Error',
+        E_COMPILE_WARNING => 'PHP Compile Warning',
+        E_USER_ERROR => 'PHP User Error',
+        E_USER_WARNING => 'PHP User Warning',
+        E_USER_NOTICE => 'PHP User Notice',
+        E_RECOVERABLE_ERROR => 'PHP Recoverable Fatal Error',
+        E_DEPRECATED => 'PHP Deprecation',
+        E_USER_DEPRECATED => 'PHP User Deprecation',
+      ],
+      version_compare(phpversion(), '8.4', '<') ? [constant('E_STRICT') => 'PHP Strict Warning'] : []
+      // https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
+      // In theory, once cv shifts to 8.x only, we can simplify this.
+    );
   }
 
 }
