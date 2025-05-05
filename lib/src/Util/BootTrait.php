@@ -330,7 +330,9 @@ trait BootTrait {
     $this->bootLogger($output)->debug('Attempting to set verbose error reporting');
 
     // standard php debug chat settings
-    error_reporting(E_ALL | E_STRICT);
+    error_reporting(E_ALL | (version_compare(phpversion(), '8.4', '<') ? E_STRICT : 0));
+    // https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
+    // In theory, once cv shifts to 8.x only, we can simplify this.
     ini_set('display_errors', 'stderr');
     ini_set('display_startup_errors', TRUE);
   }
