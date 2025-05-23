@@ -18,6 +18,7 @@ return [
 
     // Joomla bootstrap
     'TYPO3\\PharStreamWrapper',
+    'Joomla\\',
   ],
   'exclude-classes' => [
     '/^(CRM_|HTML_|DB_|Log_)/',
@@ -27,6 +28,7 @@ return [
     'JFactory',
     'Civi',
     'Drupal',
+    'Joomla',
   ],
   'exclude-functions' => [
     '/^civicrm_/',
