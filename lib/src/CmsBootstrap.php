@@ -410,10 +410,12 @@ class CmsBootstrap {
       ->alias(\Joomla\Session\SessionInterface::class, 'session.cli');
     $app = $container->get(\Joomla\CMS\Application\ConsoleApplication::class);
     \Joomla\CMS\Factory::$application = $app;
-    $userFactory = \Joomla\CMS\Factory::getContainer()->get(\Joomla\CMS\User\UserFactoryInterface::class);
-    $user = $userFactory->loadUserByUserName($cmsUser);
-    if (empty($user->id)) {
-      throw new \Exception(sprintf("Fail to find Joomla user (%s)", $cmsUser));
+    if ($cmsUser) {
+      $userFactory = \Joomla\CMS\Factory::getContainer()->get(\Joomla\CMS\User\UserFactoryInterface::class);
+      $user = $userFactory->loadUserByUserName($cmsUser);
+      if (empty($user->id)) {
+        throw new \Exception(sprintf("Fail to find Joomla user (%s)", $cmsUser));
+      }
     }
     return $this;
   }
@@ -605,7 +607,7 @@ class CmsBootstrap {
         break;
 
       case 'Joomla':
-        $user = \JFactory::getUser();
+        $user = (!class_exists('JFactory') ? \Joomla\CMS\Factory::getUser() : \JFactory::getUser());
         \CRM_Core_BAO_UFMatch::synchronize($user, TRUE, CIVICRM_UF, 'Individual');
         break;
 
