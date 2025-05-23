@@ -225,7 +225,24 @@ class CmsBootstrap {
       \Civi\Cv\Bootstrap::singleton()->boot();
       $this->loginStandaloneUser();
     }
-    // else if Joomla weirdness, do that
+    elseif ($this->bootedCms['type'] === 'Joomla') {
+      if (!defined('CIVICRM_SETTINGS_PATH')) {
+        define('CIVICRM_SETTINGS_PATH', JPATH_BASE . '/components/com_civicrm/civicrm.settings.php');
+      }
+      require_once CIVICRM_SETTINGS_PATH;
+      require_once 'CRM/Core/Config.php';
+      $config = \CRM_Core_Config::singleton();
+      \CRM_Utils_Hook::config($config, ['uf' => TRUE]);
+      $app = \Joomla\CMS\Factory::getApplication();
+      $joomlaConfig = $app->getConfig();
+      $timezone = $joomlaConfig->get('offset');
+      if ($timezone && is_callable([$config->userSystem, 'setTimeZone'])) {
+        $config->userSystem->setTimeZone($timezone);
+      }
+      elseif ($timezone) {
+        date_default_timezone_set($timezone);
+      }
+    }
     else {
       throw new \Exception("This system does not appear to have CiviCRM");
     }
@@ -377,7 +394,29 @@ class CmsBootstrap {
     return $this;
   }
 
-  // TODO public function bootJoomla($cmsRootPath, $cmsUser) { }
+  public function bootJoomla($cmsRootPath, $cmsUser) {
+    $cmsRootPath = rtrim($cmsRootPath, '/');
+    $cmsUser = $cmsUser;
+    define('_JEXEC', 1);
+    define('DS', DIRECTORY_SEPARATOR);
+    define('JPATH_BASE', $cmsRootPath . DS . 'administrator');
+    require_once JPATH_BASE . '/includes/defines.php';
+    require_once JPATH_BASE . '/includes/framework.php';
+    $container = \Joomla\CMS\Factory::getContainer();
+    $container->alias('session', 'session.cli')
+      ->alias('JSession', 'session.cli')
+      ->alias(\Joomla\CMS\Session\Session::class, 'session.cli')
+      ->alias(\Joomla\Session\Session::class, 'session.cli')
+      ->alias(\Joomla\Session\SessionInterface::class, 'session.cli');
+    $app = $container->get(\Joomla\CMS\Application\ConsoleApplication::class);
+    \Joomla\CMS\Factory::$application = $app;
+    $userFactory = \Joomla\CMS\Factory::getContainer()->get(\Joomla\CMS\User\UserFactoryInterface::class);
+    $user = $userFactory->loadUserByUserName($cmsUser);
+    if (empty($user->id)) {
+      throw new \Exception(sprintf("Fail to find Joomla user (%s)", $cmsUser));
+    }
+    return $this;
+  }
 
   /**
    * @param string $cmsRootPath
@@ -476,6 +515,7 @@ class CmsBootstrap {
       ),
       'Joomla' => array(
         'administrator/components/com_users/users.php',
+        'libraries/src/Factory.php',
       ),
       'Drupal' => array(
         'modules/system/system.module',
@@ -565,7 +605,8 @@ class CmsBootstrap {
         break;
 
       case 'Joomla':
-        \CRM_Core_BAO_UFMatch::synchronize(\JFactory::getUser(), TRUE, CIVICRM_UF, 'Individual');
+        $user = \JFactory::getUser();
+        \CRM_Core_BAO_UFMatch::synchronize($user, TRUE, CIVICRM_UF, 'Individual');
         break;
 
       case 'WordPress':
