@@ -14,7 +14,6 @@ trait ExtensionTrait {
     $this
       ->addOption('dev', NULL, InputOption::VALUE_NONE, 'Include developmental extensions. (Equivalent to "--filter-status=* --filter-ready=*")')
       ->addOption('filter-ver', NULL, InputOption::VALUE_REQUIRED, 'Filter remote extensions by Civi compatibility (Ex: "4.7.15","4.6.20")', '{ver}')
-      ->addOption('filter-uf', NULL, InputOption::VALUE_REQUIRED, 'Filter remote extensions by CMS compatibility (Ex: "Drupal", "WordPress")', '{uf}')
       ->addOption('filter-status', NULL, InputOption::VALUE_REQUIRED, 'Filter remote extensions by stability flag (Ex: "stable", "*")', 'stable')
       ->addOption('filter-ready', NULL, InputOption::VALUE_REQUIRED, 'Filter remote extensions based on reviewers\' approval (Ex: "ready", "*")', 'ready');
   }
@@ -31,7 +30,7 @@ trait ExtensionTrait {
       $input->setOption('filter-ready', '*');
     }
     $parts = array();
-    foreach (array('ver', 'uf', 'status', 'ready') as $key) {
+    foreach (array('ver', 'status', 'ready') as $key) {
       $value = $input->getOption("filter-" . $key);
       if ($value === '*') {
         $value = '';
