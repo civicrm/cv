@@ -14,19 +14,15 @@ class BaseExtensionCommandTest extends \Civi\Cv\CivilTestCase {
     $cases = array();
     $cases[] = array(
       array('examplecmd'),
-      'https://civicrm.org/extdir/ver={ver}|uf={uf}|status=stable|ready=ready',
-    );
-    $cases[] = array(
-      array('examplecmd', '--filter-uf=Drupal8'),
-      'https://civicrm.org/extdir/ver={ver}|uf=Drupal8|status=stable|ready=ready',
+      'https://civicrm.org/extdir/ver={ver}|status=stable|ready=ready',
     );
     $cases[] = array(
       array('examplecmd', '--dev'),
-      'https://civicrm.org/extdir/ver={ver}|uf={uf}|status=|ready=',
+      'https://civicrm.org/extdir/ver={ver}|status=|ready=',
     );
     $cases[] = array(
       array('examplecmd', '--filter-status=*'),
-      'https://civicrm.org/extdir/ver={ver}|uf={uf}|status=|ready=ready',
+      'https://civicrm.org/extdir/ver={ver}|status=|ready=ready',
     );
     return $cases;
   }
