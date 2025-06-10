@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Core\SettingsBag;
 use Civi\Cv\Util\SettingTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
@@ -69,6 +70,7 @@ class SettingGetCommand extends CvCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
+    $hasExplicit = method_exists(SettingsBag::class, 'hasExplicit') /* v6.4 */ ? 'hasExplicit' : 'hasExplict';
     $filter = $this->createSettingFilter($input->getArgument('name'));
 
     $result = [];
@@ -88,7 +90,7 @@ class SettingGetCommand extends CvCommand {
           'default' => $decode($settingBag->getDefault($settingKey)),
           'explicit' => $decode($settingBag->getExplicit($settingKey)),
           'mandatory' => $decode($settingBag->getMandatory($settingKey)),
-          'layer' => $settingBag->getMandatory($settingKey) !== NULL ? 'mandatory' : ($settingBag->hasExplict($settingKey) ? 'explicit' : 'default'),
+          'layer' => $settingBag->getMandatory($settingKey) !== NULL ? 'mandatory' : ($settingBag->$hasExplicit($settingKey) ? 'explicit' : 'default'),
         ];
         $result[] = $row;
       }
