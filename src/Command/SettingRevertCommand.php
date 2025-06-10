@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Core\SettingsBag;
 use Civi\Cv\Util\SettingTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
@@ -60,6 +61,7 @@ class SettingRevertCommand extends CvCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
+    $hasExplicit = method_exists(SettingsBag::class, 'hasExplicit') /* v6.4 */ ? 'hasExplicit' : 'hasExplict';
     $errorOutput = is_callable([$output, 'getErrorOutput']) ? $output->getErrorOutput() : $output;
 
     $filter = $this->createSettingFilter($input->getArgument('name'));
@@ -74,7 +76,7 @@ class SettingRevertCommand extends CvCommand {
           continue;
         }
 
-        if (!$settingBag->hasExplict($settingKey)) {
+        if (!$settingBag->$hasExplicit($settingKey)) {
           $errorOutput->writeln("<comment>Skip \"$settingKey\" (no value found)</comment>");
         }
         elseif ($input->getOption('dry-run')) {
@@ -93,7 +95,7 @@ class SettingRevertCommand extends CvCommand {
           'default' => $decode($settingBag->getDefault($settingKey)),
           'explicit' => $decode($settingBag->getExplicit($settingKey)),
           'mandatory' => $decode($settingBag->getMandatory($settingKey)),
-          'layer' => $settingBag->getMandatory($settingKey) !== NULL ? 'mandatory' : ($settingBag->hasExplict($settingKey) ? 'explicit' : 'default'),
+          'layer' => $settingBag->getMandatory($settingKey) !== NULL ? 'mandatory' : ($settingBag->$hasExplicit($settingKey) ? 'explicit' : 'default'),
         ];
         $result[] = $row;
       }
