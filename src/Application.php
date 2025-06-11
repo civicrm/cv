@@ -54,6 +54,7 @@ class Application extends BaseApplication {
     $commands[] = new \Civi\Cv\Command\AngularModuleListCommand();
     $commands[] = new \Civi\Cv\Command\AngularHtmlListCommand();
     $commands[] = new \Civi\Cv\Command\AngularHtmlShowCommand();
+    $commands[] = new \Civi\Cv\Command\CronCommand();
     $commands[] = new \Civi\Cv\Command\DebugContainerCommand();
     $commands[] = new \Civi\Cv\Command\DebugDispatcherCommand();
     $commands[] = new \Civi\Cv\Command\ExtensionDownloadCommand();
