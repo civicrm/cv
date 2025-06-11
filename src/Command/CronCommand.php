@@ -20,8 +20,16 @@ class CronCommand extends CvCommand {
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
     if (empty($input->getOption('user'))) {
-      \CRM_Core_Config::singleton()->userPermissionTemp = new \CRM_Core_Permission_Temp();
-      \CRM_Core_Config::singleton()->userPermissionTemp->grant('all CiviCRM permissions and ACLs');
+
+      // Grant access to all permissions for the current process.
+      // Ex: `Job.process_mailing` needs permission to lookup recipients.
+      \CRM_Core_Config::singleton()->userPermissionTemp = new class extends \CRM_Core_Permission_Temp {
+
+        public function check($perm) {
+          return TRUE;
+        }
+
+      };
 
       $cid = \CRM_Core_DAO::singleValueQuery('SELECT contact_id FROM civicrm_domain ORDER BY id LIMIT 1');
       authx_login(['principal' => ['contactId' => $cid]]);
