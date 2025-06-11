@@ -1,7 +1,11 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Log\MultiLogger;
+use Civi\Cv\Log\SymfonyConsoleLogger;
+use Civi\Cv\Util\PsrLogger;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class CronCommand extends CvCommand {
@@ -15,7 +19,8 @@ class CronCommand extends CvCommand {
     $this
       ->setName('core:cron')
       ->setAliases(['cron'])
-      ->setDescription('Run the CiviCRM cron on the default domain (defaults to using the default domain organisation contact, or you can use a --user=USER)');
+      ->setDescription('Run the CiviCRM cron on the default domain (defaults to using the default domain organisation contact, or you can use a --user=USER)')
+      ->addOption('force', 'f', InputOption::VALUE_NONE, 'Ignore pending maintenance tasks. Force cron to run regardless of status.');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -35,8 +40,41 @@ class CronCommand extends CvCommand {
       authx_login(['principal' => ['contactId' => $cid]]);
     }
 
-    $result = civicrm_api3('Job', 'execute', []);
-    return empty($result['is_error']) ? 0 : 1;
+    if (!$input->getOption('force') && $cronBlock = $this->getCronBlock()) {
+      $output->writeln("<error>Cron skipped!</error> $cronBlock");
+      return 0;
+    }
+
+    // Logging integration requires ~6.5 (or later).
+    $jobManager = class_exists('CRM_Core_JobLogger')
+      ? new \CRM_Core_JobManager($this->createLogger($output))
+      : new \CRM_Core_JobManager();
+    $jobManager->execute(FALSE);
+
+    return 0;
+  }
+
+  protected function getCronBlock(): ?string {
+    $domainVersion = \CRM_Core_BAO_Domain::getDomain()->version;
+    $codeVersion = \CRM_Utils_System::version();
+    if (version_compare($domainVersion, $codeVersion, '<')) {
+      return "Database needs upgrade from $domainVersion to $codeVersion.";
+    }
+
+    if (method_exists('CRM_Utils_System', ' isMaintenanceMode()')) {
+      if (\CRM_Utils_System::isMaintenanceMode()) {
+        return 'System is in maintenance mode';
+      }
+    }
+
+    return NULL;
+  }
+
+  protected function createLogger(OutputInterface $output) {
+    return new PsrLogger(new MultiLogger('cron', [
+      new SymfonyConsoleLogger('cron', $output),
+      new \CRM_Core_JobLogger(),
+    ]));
   }
 
 }
