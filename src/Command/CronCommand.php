@@ -20,8 +20,26 @@ class CronCommand extends CvCommand {
     $this
       ->setName('core:cron')
       ->setAliases(['cron'])
-      ->setDescription('Run the CiviCRM cron on the default domain (defaults to using the default domain organisation contact, or you can use a --user=USER)')
-      ->addOption('force', 'f', InputOption::VALUE_NONE, 'Ignore pending maintenance tasks. Force cron to run regardless of status.');
+      ->setDescription('Execute scheduled and recurring jobs')
+      ->addOption('force', 'f', InputOption::VALUE_NONE, 'Ignore pending maintenance tasks. Force cron to run regardless of status.')
+      ->setHelp('
+<info>cv cron</info> command is designed for use as a <comment>cron job</comment>. It executes scheduled and recurring tasks, including all enabled jobs from <info>civicrm_job</info> table.
+
+<comment>Identity and Permissions:</comment>
+
+For purposes of logging and permissions, any cron invocation must be linked to a <info>Contact</info> record.
+
+By default, <info>cv cron</info> executes as the <comment>default domain contact</comment> with super-user permissions. You may override this with <info>--user=USER</info>.
+
+<comment>Console Output</comment>
+
+Traditional cron systems send an alert if a cronjob displays output. Therefore, the default output for <info>cv cron</info> is fairly quiet. The exact behavior may be tuned:
+
+* (CiviCRM v6.5+) By default, only display errors.
+* (CiviCRM v6.5+) Use <info>-q</info> (<info>--quiet</info>) to suppress all output (including errors).
+* (CiviCRM v6.5+) Use <info>-vv</info> to enable very verbose output (for monitoring, debugging).
+* (CiviCRM, before v6.5) Strictly quiet, with no options to adjust output.
+');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
