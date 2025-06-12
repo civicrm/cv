@@ -402,6 +402,7 @@ class CmsBootstrap {
     define('JPATH_BASE', $cmsRootPath . DS . 'administrator');
     require_once JPATH_BASE . '/includes/defines.php';
     require_once JPATH_BASE . '/includes/framework.php';
+    require_once JPATH_LIBRARIES . '/vendor/symfony/deprecation-contracts/function.php';
     $container = \Joomla\CMS\Factory::getContainer();
     $container->alias('session', 'session.cli')
       ->alias('JSession', 'session.cli')
@@ -409,6 +410,7 @@ class CmsBootstrap {
       ->alias(\Joomla\Session\Session::class, 'session.cli')
       ->alias(\Joomla\Session\SessionInterface::class, 'session.cli');
     $app = $container->get(\Joomla\CMS\Application\ConsoleApplication::class);
+    $app->createExtensionNamespaceMap();
     \Joomla\CMS\Factory::$application = $app;
     if ($cmsUser) {
       $userFactory = \Joomla\CMS\Factory::getContainer()->get(\Joomla\CMS\User\UserFactoryInterface::class);
