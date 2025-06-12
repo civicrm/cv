@@ -418,6 +418,7 @@ class CmsBootstrap {
       if (empty($user->id)) {
         throw new \Exception(sprintf("Fail to find Joomla user (%s)", $cmsUser));
       }
+      \Joomla\CMS\Factory::getApplication()->loadIdentity($user);
     }
     return $this;
   }
@@ -609,7 +610,7 @@ class CmsBootstrap {
         break;
 
       case 'Joomla':
-        $user = (!class_exists('JFactory') ? \Joomla\CMS\Factory::getUser() : \JFactory::getUser());
+        $user = (!class_exists('JFactory') ? \Joomla\CMS\Factory::getApplication()->getIdentity() : \JFactory::getUser());
         \CRM_Core_BAO_UFMatch::synchronize($user, TRUE, CIVICRM_UF, 'Individual');
         break;
 
