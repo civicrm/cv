@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Log\InternalLogger;
 use Civi\Cv\Log\MultiLogger;
 use Civi\Cv\Log\SymfonyConsoleLogger;
 use Civi\Cv\Util\PsrLogger;
@@ -47,11 +48,12 @@ class CronCommand extends CvCommand {
 
     // Logging integration requires ~6.5 (or later).
     $jobManager = class_exists('CRM_Core_JobLogger')
-      ? new \CRM_Core_JobManager($this->createLogger($output))
+      ? new \CRM_Core_JobManager(new PsrLogger($loggers = $this->createLogger($output)))
       : new \CRM_Core_JobManager();
     $jobManager->execute(FALSE);
 
-    return 0;
+    $hasError = isset($loggers) ? $loggers->getLogger('summary')->hasError : FALSE;
+    return ($hasError && !$output->isQuiet()) ? 1 : 0;
   }
 
   protected function getCronBlock(): ?string {
@@ -70,11 +72,29 @@ class CronCommand extends CvCommand {
     return NULL;
   }
 
-  protected function createLogger(OutputInterface $output) {
-    return new PsrLogger(new MultiLogger('cron', [
-      new SymfonyConsoleLogger('cron', $output),
-      new \CRM_Core_JobLogger(),
-    ]));
+  protected function createLogger(OutputInterface $output): MultiLogger {
+    $topic = 'cron';
+
+    $summary = new class ($topic) extends InternalLogger {
+
+      /**
+       * @var bool
+       */
+      public $hasError = FALSE;
+
+      public function log($level, $message, array $context = array()) {
+        if (in_array($level, ['error', 'critical', 'alert', 'emergency'])) {
+          $this->hasError = TRUE;
+        }
+      }
+
+    };
+
+    return new MultiLogger($topic, [
+      'console' => new SymfonyConsoleLogger($topic, $output),
+      'db' => new \CRM_Core_JobLogger(),
+      'summary' => $summary,
+    ]);
   }
 
 }
