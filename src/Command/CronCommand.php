@@ -55,7 +55,13 @@ Traditional cron systems send an alert if a cronjob displays output. Therefore, 
 
       };
 
-      $cid = \CRM_Core_DAO::singleValueQuery('SELECT contact_id FROM civicrm_domain ORDER BY id LIMIT 1');
+      $cid = NULL;
+      if ($domain = \CRM_Core_BAO_Domain::getDomain()) {
+        $cid = $domain->contact_id;
+      }
+      if (!$cid) {
+        $cid = \CRM_Core_DAO::singleValueQuery('SELECT contact_id FROM civicrm_domain ORDER BY id LIMIT 1');
+      }
       authx_login(['principal' => ['contactId' => $cid]]);
     }
 
