@@ -39,7 +39,13 @@ return [
   'exclude-files' => [
     'vendor/symfony/polyfill-php80/Resources/stubs/Stringable.php'
   ],
-
+  'exclude-constants' => [
+    'JPATH_BASE',
+    'JPATH_LIBRARIES',
+    'CIVICRM_SETTINGS_PATH',
+    'DS',
+    '_JEXEC',
+  ],
   // Do not generate wrappers/aliases for `civicrm_api()` etc or various CMS-booting functions.
   'expose-global-functions' => FALSE,
 ];
