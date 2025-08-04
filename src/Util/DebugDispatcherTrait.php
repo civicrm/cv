@@ -47,29 +47,35 @@ trait DebugDispatcherTrait {
     $fmt = class_exists('\Civi\Core\Event\EventPrinter')
       ? ['\Civi\Core\Event\EventPrinter', 'formatName'] : NULL;
 
+    $getPriority = function ($eventName, $listener) use ($dispatcher) {
+      return is_callable([$dispatcher, 'getListenerPriority'])
+        ? $dispatcher->getListenerPriority($eventName, $listener)
+        : NULL;
+    };
+
     foreach ($eventNames as $event) {
       $rows = array();
       $i = 0;
       foreach ($dispatcher->getListeners($event) as $listener) {
         $handled = FALSE;
         if ($fmt != NULL) {
-          $rows[] = array('#' . ++$i, $fmt($listener));
+          $rows[] = array('#' . ++$i, $fmt($listener), $getPriority($event, $listener));
           $handled = TRUE;
         }
         elseif (is_array($listener)) {
           list ($a, $b) = $listener;
           if (is_object($a)) {
-            $rows[] = array('#' . ++$i, get_class($a) . "->$b()");
+            $rows[] = array('#' . ++$i, get_class($a) . "->$b()", $getPriority($event, $listener));
             $handled = TRUE;
           }
           elseif (is_string($a)) {
-            $rows[] = array('#' . ++$i, "$a::$b()");
+            $rows[] = array('#' . ++$i, "$a::$b()", $getPriority($event, $listener));
             $handled = TRUE;
           }
         }
         elseif (is_string($listener)) {
           $handled = TRUE;
-          $rows[] = array('#' . ++$i, $listener . '()');
+          $rows[] = array('#' . ++$i, $listener . '()', $getPriority($event, $listener));
         }
         elseif ($listener instanceof \Civi\Core\Event\ServiceListener) {
           $handled = TRUE;
@@ -81,6 +87,7 @@ trait DebugDispatcherTrait {
             $rows[] = array(
               '#' . ++$i,
               'closure(' . $f->getFileName() . '@' . $f->getStartLine() . ')',
+              $getPriority($event, $listener),
             );
             $handled = TRUE;
           }
@@ -94,7 +101,7 @@ trait DebugDispatcherTrait {
       }
       $output->writeln("<info>[Event]</info> $event");
       $table = new Table($output);
-      $table->setHeaders(array('Order', 'Callable'));
+      $table->setHeaders(array('Order', 'Callable', 'Priority'));
       $table->addRows($rows);
       $table->render();
       $output->writeln("");
