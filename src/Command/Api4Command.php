@@ -146,12 +146,19 @@ NOTE: To change the default output format, set CV_OUTPUT.
 
     $out = $input->getOption('out');
     if (!in_array($out, Encoder::getFormats()) && in_array($out, Encoder::getTabularFormats())) {
-      if (!empty($params['select'])) {
-        $columns = $params['select'];
-      }
-      else {
-        $columns = count($result) ? array_keys($result->first()) : [''];
-      }
+
+      // Figure out the result-columns.
+      //
+      // (1) This implementation assumes that API's are fairly good about consistently returning -exactly-
+      // the list of selected columns. If some API's return non-selected columns (or if they return
+      // different columns for different rows), then it could screw up the table. But when I checked some
+      // oddballs (eg LEFT JOIN; eg Afform.get), it seemed to work.
+      //
+      // (2) $params['select'] does not necessarily identify the result-columns.
+      // For example, querying ['select'=>['COUNT(*)']] gives a munged result-column ['COUNT:' => 204].
+
+      $columns = count($result) ? array_keys($result->first()) : [''];
+
       $this->sendTable($input, $output, (array) $result, $columns);
     }
     else {
