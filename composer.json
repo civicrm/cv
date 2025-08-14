@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "php": ">=7.3.0",
+        "php": ">=7.4.0",
         "ext-json": "*",
         "cweagans/composer-patches": "~1.0",
         "lesser-evil/shell-verbosity-is-evil": "~1.0",
@@ -32,7 +32,7 @@
     ],
     "config": {
         "platform": {
-            "php": "7.3.0"
+            "php": "7.4.0"
         },
         "bin-dir": "bin",
         "allow-plugins": {
@@ -44,9 +44,6 @@
         "patches": {
             "stecman/symfony-console-completion": {
                 "Fix warnings on PHP 8.4": "patches/scc-CompletionHandler.diff"
-            },
-            "psy/psysh": {
-                "Fix warnings on PHP 8.4": "patches/psysh-0.11-php84.diff"
             }
         }
     }
