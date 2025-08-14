@@ -10,8 +10,8 @@ if (PHP_SAPI !== 'cli') {
   printf("TIP: In a typical shell environment, the \"php\" command should execute php-cli - not php-cgi or similar.\n");
   exit(1);
 }
-if (version_compare(PHP_VERSION, '7.3', '<')) {
-  echo "cv requires PHP 7.3+\n";
+if (version_compare(PHP_VERSION, '7.4', '<')) {
+  echo "cv requires PHP 7.4+\n";
   exit(2);
 }
 $found = 0;

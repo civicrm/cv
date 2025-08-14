@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "php": ">=7.3.0",
+        "php": ">=7.4.0",
         "ext-json": "*",
         "cweagans/composer-patches": "~1.0",
         "lesser-evil/shell-verbosity-is-evil": "~1.0",
@@ -32,7 +32,7 @@
     ],
     "config": {
         "platform": {
-            "php": "7.3.0"
+            "php": "7.4.0"
         },
         "bin-dir": "bin",
         "allow-plugins": {
