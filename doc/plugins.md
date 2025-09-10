@@ -121,32 +121,39 @@ Subcommands can be written in a few coding-styles, such as the *fluent-object* s
 
 ```php
 ## Fluent-object style of command
-$command = (new CvCommand('my-command'))
+$command = (new CvCommand('hello-command'))
   ->setDescription('Say a greeting')
   ->addArgument('name', InputArgument::REQUIRED, 'Name of the person to greet')
   ->setCode(function($input, $output) {
     $output->writeln('Hello, ' . $input->getArgument('name'));
     return 0;
-  });
+});
+
+Cv::dispatcher()->addListener('cv.app.commands', function($e) use ($command) {
+  $e['commands'][] = $command;
+});
 ```
 
 ```php
 ## Structured-class style
-class MyCommand extends CvCommand {
+class HelloCommand extends CvCommand {
 
   public function configure() {
-    $this->setName('my-command');
+    $this->setName('hello');
     $this->setDescription('Say a greeting');
     $this->addArgument('name', InputArgument::REQUIRED, 'Name of the person to greet');
   }
 
-  public functione execute(InputInterface $input, OutputInterface $output): int {
+  public function execute(InputInterface $input, OutputInterface $output): int {
     $output->writeln('Hello, ' . $input->getArgument('name'));
     return 0;
   }
 }
 
-$command = new MyCommand();
+Cv::dispatcher()->addListener('cv.app.commands', function($e) {
+  $e['commands'][] = new HelloCommand();
+});
+
 ```
 
 Both styles can be used in any kind of `cv` plugin, but you may find some affinities:
