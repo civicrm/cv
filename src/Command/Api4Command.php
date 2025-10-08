@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Api4\Generic\Result;
 use Civi\Cv\Encoder;
 use Civi\Cv\Util\Api4ArgParser;
 use Civi\Cv\Util\StructuredOutputTrait;
@@ -37,6 +38,13 @@ class Api4Command extends CvCommand {
       ->setDescription('Call APIv4')
       ->addOption('in', NULL, InputOption::VALUE_REQUIRED, 'Input format (args,json)', 'args')
       ->configureOutputOptions(['tabular' => TRUE, 'shortcuts' => ['table', 'list', 'json']])
+      ->addOption('enable-meta', 'M', InputOption::VALUE_NONE, 'Enable return of meta properties like "count" and "countFetched".')
+      ->addOption('select-meta', 'm', InputOption::VALUE_REQUIRED, 'Return specific meta properties (comma-separated list or *). Implies --enable-meta', '')
+      ->addOptionCallback('select-meta', function (InputInterface $input, OutputInterface $output, InputOption $option) {
+        if (!empty($input->getOption('select-meta'))) {
+          $input->setOption('enable-meta', TRUE);
+        }
+      })
       ->addOption('dry-run', 'N', InputOption::VALUE_NONE, 'Preview the API call. Do not execute.')
       ->addArgument('Entity.action', InputArgument::REQUIRED)
       ->addArgument('key=value', InputArgument::IS_ARRAY)
@@ -118,6 +126,12 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
 {$C}Example: Change do_not_phone for everyone named Adam{$_C}
     cv api4 Contact.update +w 'display_name like %Adam%' +v do_not_phone=1
 
+{$C}Example: Get ten contacts (along with all request metadata){$_C}
+   cv api4 Contact.get +s id,display_name +l 25@200 -M
+
+{$C}Example: Get ten contacts (but only return specific request metadata){$_C}
+   cv api4 Contact.get +s id,display_name +l 25@200 -m values,count
+
 NOTE: To change the default output format, set CV_OUTPUT.
 ");
   }
@@ -142,10 +156,15 @@ NOTE: To change the default output format, set CV_OUTPUT.
     if ($input->getOption('dry-run')) {
       return 0;
     }
-    $result = \civicrm_api4($entity, $action, $params);
+    $result = $this->toArray([$entity, $action, $params], \civicrm_api4($entity, $action, $params), $input);
 
     $out = $input->getOption('out');
     if (!in_array($out, Encoder::getFormats()) && in_array($out, Encoder::getTabularFormats())) {
+      if ($input->getOption('enable-meta')) {
+        // When showing a table of meta-props, focus on the meta-props. Nested "values" aren't really sensible in this context.
+        $result['values'] = '...';
+        $result = [$result];
+      }
 
       // Figure out the result-columns.
       //
@@ -157,15 +176,40 @@ NOTE: To change the default output format, set CV_OUTPUT.
       // (2) $params['select'] does not necessarily identify the result-columns.
       // For example, querying ['select'=>['COUNT(*)']] gives a munged result-column ['COUNT:' => 204].
 
-      $columns = count($result) ? array_keys($result->first()) : [''];
+      $columns = count($result) ? array_keys(reset($result)) : [''];
 
-      $this->sendTable($input, $output, (array) $result, $columns);
+      $this->sendTable($input, $output, $result, $columns);
     }
     else {
       $this->sendResult($input, $output, $result);
     }
 
     return empty($result['is_error']) ? 0 : 1;
+  }
+
+  protected function toArray(array $apiRequest, Result $result, InputInterface $input): array {
+    if (!$input->getOption('enable-meta')) {
+      return (array) $result;
+    }
+
+    $metaString = $input->getOption('select-meta') ? $input->getOption('select-meta') : '*';
+    $metaString = str_replace('*', 'entity,action,version,values,count,countFetched', $metaString);
+
+    $metaArray = explode(',', ltrim($metaString, '='));
+    $meta = [];
+    $props = [
+      'values' => fn() => (array) $result,
+      'entity' => fn() => $apiRequest[0],
+      'action' => fn() => $apiRequest[1],
+      'version' => fn() => 4,
+      'count' => fn() => $result->count(),
+      'countFetched' => fn() => $result->countFetched(),
+      'countMatched' => fn() => $result->countMatched(),
+    ];
+    foreach ($metaArray as $metaKey) {
+      $meta[$metaKey] = isset($props[$metaKey]) ? call_user_func($props[$metaKey]) : NULL;
+    }
+    return $meta;
   }
 
   /**
