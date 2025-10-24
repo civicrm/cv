@@ -31,11 +31,6 @@ Flush system caches
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $params = array();
-    if ($input->getOption('triggers')) {
-      $params['triggers'] = TRUE;
-    }
-
     $output->writeln("<info>Flushing system caches</info>");
 
     // the modern way (from core 6.1 on)
@@ -60,10 +55,15 @@ Flush system caches
       \Civi::rebuild($default_params)->execute();
       return 0;
     }
-
-    // the old way
-    $result = VerboseApi::callApi3Success('System', 'flush', $params);
-    return empty($result['is_error']) ? 0 : 1;
+    else {
+      // the old way
+      $params = array();
+      if ($input->getOption('triggers')) {
+        $params['triggers'] = TRUE;
+      }
+      $result = VerboseApi::callApi3Success('System', 'flush', $params);
+      return empty($result['is_error']) ? 0 : 1;
+    }
   }
 
 }
