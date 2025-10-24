@@ -14,10 +14,19 @@ class SettingLifecycleTest extends \Civi\Cv\CivilTestCase {
   }
 
   public function testScalar() {
+    $civiVersion = json_decode($this->cvOk('ev \'return \CRM_Utils_System::version();\''), TRUE);
+
     $vset = $this->cvOk('vset dummy_scalar_1=100 dummy_scalar_2="More text" dummy_blank= dummy_zero=0');
     $this->assertTableHasRow(['domain', 'dummy_scalar_1', 100, 'explicit'], $vset);
     $this->assertTableHasRow(['domain', 'dummy_scalar_2', '"More text"', 'explicit'], $vset);
-    $this->assertTableHasRow(['domain', 'dummy_blank', '""', 'explicit'], $vset);
+    // Before 6.9, there was a sync-bug between SQL and Civi::settings(). The 6.9+ behavior is more
+    // representative of how the commands actually work.
+    if (version_compare($civiVersion, "6.9.alpha1", ">=")) {
+      $this->assertTableHasRow(['domain', 'dummy_blank', 'null', 'default'], $vset);
+    }
+    else {
+      $this->assertTableHasRow(['domain', 'dummy_blank', '""', 'explicit'], $vset);
+    }
     $this->assertTableHasRow(['domain', 'dummy_zero', 0, 'explicit'], $vset);
 
     $vget = $this->cvOk('vget dummy_scalar_1 dummy_scalar_2');
