@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\ArrayUtil;
 use Civi\Cv\Util\VerboseApi;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -49,6 +50,12 @@ Flush system caches
         foreach ($excludes as $exclude) {
           $default_params[$exclude] = FALSE;
         }
+      }
+      if ($output->isVerbose()) {
+        \Civi\Cv\Cv::io()->table(
+          ['target', 'enabled'],
+          ArrayUtil::mapKV($default_params, fn($k, $v) => [$k, $v ? 'yes' : 'no'])
+        );
       }
       \Civi::rebuild($default_params)->execute();
       return 0;
