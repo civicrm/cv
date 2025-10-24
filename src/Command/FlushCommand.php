@@ -13,6 +13,7 @@ class FlushCommand extends CvCommand {
       ->setName('flush')
       ->setAliases(array())
       ->addOption('triggers', 'T', InputOption::VALUE_NONE, 'Rebuild triggers')
+      ->addOption('exclude', 'E', InputOption::VALUE_OPTIONAL, 'Exclude specific components (comma-separated), e.g. --exclude=entities,userjobs (only available in CiviCRM 6.1 or newer)')
       ->setDescription('Flush system caches')
       ->setHelp('
 Flush system caches
@@ -35,6 +36,25 @@ Flush system caches
     }
 
     $output->writeln("<info>Flushing system caches</info>");
+
+    // the modern way (from core 6.1 on)
+    if (is_callable(['Civi', 'rebuild'])) {
+      $default_params = ['*' => TRUE, 'triggers' => FALSE, 'sessions' => FALSE];
+      if ($input->getOption('triggers')) {
+        $default_params['triggers'] = TRUE;
+      }
+      if ($input->getOption('exclude')) {
+        $exclude_param = $input->getOption('exclude');
+        $excludes = explode(',', $exclude_param);
+        foreach ($excludes as $exclude) {
+          $default_params[$exclude] = FALSE;
+        }
+      }
+      \Civi::rebuild($default_params)->execute();
+      return 0;
+    }
+
+    // the old way
     $result = VerboseApi::callApi3Success('System', 'flush', $params);
     return empty($result['is_error']) ? 0 : 1;
   }
