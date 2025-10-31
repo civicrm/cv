@@ -144,6 +144,18 @@ The ENV expressions are prefixed to indicate their escaping rule:
       case 'cms':
         $dsn = \CRM_Core_Config::singleton()->userFrameworkDSN;
         break;
+
+      case 'rw':
+      case 'master':
+        global $civirpow;
+        $dsn = $civirpow['masters'][0];
+        break;
+
+      case 'ro':
+      case 'slave':
+        global $civirpow;
+        $dsn = $civirpow['masters'][0];
+        break;
     }
 
     if (empty($dsn)) {
