@@ -9,6 +9,7 @@ Requirements
 * PHP v7.3+.
 * A local CiviCRM installation.
 * Systems with special file-layouts may need to [configure bootstrap](#bootstrap).
+* MySQL or MariaDB CLI for `cv sql`.
 
 Download
 ========
