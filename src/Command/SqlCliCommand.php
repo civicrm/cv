@@ -49,6 +49,10 @@ The ENV expressions are prefixed to indicate their escaping rule:
     $datasource->loadFromCiviDSN($this->pickDsn($input->getOption('target')));
 
     $mysql = Process::findCommand('mysql');
+    if (!$mysql) {
+      $output->getErrorOutput()->writeln("<info>[SqlCommand]</info> <comment>ERROR: The mysql command is not available.</comment>");
+      return 1;
+    }
     if (Process::isShellScript($mysql) && !static::supportsDefaultsFile($mysql)) {
       $output->getErrorOutput()->writeln("<info>[SqlCommand]</info> <comment>WARNING: The mysql command appears to be a wrapper script. In some environments, this may interfere with credential passing.</comment>");
     }
