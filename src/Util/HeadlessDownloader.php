@@ -118,8 +118,13 @@ class HeadlessDownloader {
       \Civi\Cv\Application::version()
     ));
     curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     fclose($fp);
+
+    if ($httpCode >= 400) {
+      throw new \Exception("Download failed: HTTP $httpCode");
+    }
   }
 
 }
