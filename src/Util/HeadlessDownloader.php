@@ -113,6 +113,10 @@ class HeadlessDownloader {
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_FILE, $fp);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+    curl_setopt($ch, CURLOPT_USERAGENT, sprintf("curl/%s cv-headless/%s",
+      phpversion("curl"),
+      \Civi\Cv\Application::version()
+    ));
     curl_exec($ch);
     curl_close($ch);
     fclose($fp);
