@@ -104,7 +104,7 @@ class HeadlessDownloader {
       return $extractedZipPath;
     }
     else {
-      throw new \Exception('Unable to extract the extension.');
+      throw new \Exception("Unable to extract the extension ($zipFile).");
     }
   }
 
