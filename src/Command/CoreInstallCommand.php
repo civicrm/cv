@@ -111,7 +111,7 @@ $ cv core:install -m extras.opt-in.versionCheck=1
 
     $helper = $this->getHelper('question');
     $question = new ChoiceQuestion(
-      "The $title already exists. What you like to do?",
+      "The $title already exists. What would you like to do?",
       array(
         'a' => "Abort. (Default.) (Equivalent to -A.)",
         'k' => "Keep existing $title. (WARNING: This may fail if the existing version is out-of-date.) (Equivalent to -K.)",

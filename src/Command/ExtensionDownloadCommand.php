@@ -449,7 +449,7 @@ Note:
     else {
       $helper = $this->getHelper('question');
       $question = new ChoiceQuestion(
-        "The extension \"$key\" already exists. What you like to do?",
+        "The extension \"$key\" already exists. What would you like to do?",
         array(
           'k' => 'Keep existing extension. (Default) (Equivalent to option "-k")',
           'd' => 'Download anyway. (Equivalent to option "-f")',
