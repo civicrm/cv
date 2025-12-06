@@ -104,7 +104,7 @@ class HeadlessDownloader {
       return $extractedZipPath;
     }
     else {
-      throw new \Exception('Unable to extract the extension.');
+      throw new \Exception("Unable to extract the extension ($zipFile).");
     }
   }
 
@@ -113,9 +113,18 @@ class HeadlessDownloader {
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_FILE, $fp);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
+    curl_setopt($ch, CURLOPT_USERAGENT, sprintf("curl/%s cv-headless/%s",
+      phpversion("curl"),
+      \Civi\Cv\Application::version()
+    ));
     curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     fclose($fp);
+
+    if ($httpCode >= 400) {
+      throw new \Exception("Download failed: HTTP $httpCode");
+    }
   }
 
 }
