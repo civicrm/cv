@@ -65,6 +65,7 @@ class Application extends BaseApplication {
     $commands[] = new \Civi\Cv\Command\ExtensionUpgradeDbCommand();
     $commands[] = new \Civi\Cv\Command\FillCommand();
     $commands[] = new \Civi\Cv\Command\FlushCommand();
+    $commands[] = new \Civi\Cv\Command\PasswordResetCommand();
     $commands[] = new \Civi\Cv\Command\PathCommand();
     $commands[] = new \Civi\Cv\Command\PipeCommand();
     $commands[] = new \Civi\Cv\Command\SettingSetCommand();
