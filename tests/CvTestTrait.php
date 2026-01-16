@@ -66,4 +66,11 @@ trait CvTestTrait {
     return $GLOBALS['CV_CIVICRM_ROOT'];
   }
 
+  protected function getUfType(): string {
+    if (!isset($GLOBALS['CV_CIVICRM_UF'])) {
+      $GLOBALS['CV_CIVICRM_UF'] = $this->cvJsonOk('ev "return CIVICRM_UF;"');
+    }
+    return $GLOBALS['CV_CIVICRM_UF'];
+  }
+
 }

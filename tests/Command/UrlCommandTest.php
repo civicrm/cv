@@ -52,14 +52,17 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
   }
 
   public function testExtPaths() {
+    // In most deployments, static file URLs are pretty much guaranteed to include "/civicrm/". But in standalone, it's "/core/".
+    $prefix = $this->getUfType() === 'Standalone' ? 'https?://.*/core' : 'https?://.*/civicrm';
+
     $plain = rtrim($this->cvJsonOk("url -x civicrm"), "\n");
-    $this->assertMatchesRegularExpression(';https?://.*/civicrm($|/core$);', $plain);
+    $this->assertMatchesRegularExpression(';' . $prefix . '($|/core$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -x civicrm/"), "\n");
-    $this->assertMatchesRegularExpression(';https?://.*/civicrm(/$|/core/$);', $plain);
+    $this->assertMatchesRegularExpression(';' . $prefix . '(/$|/core/$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -x civicrm/packages"), "\n");
-    $this->assertMatchesRegularExpression(';https?://.*/civicrm(/|/core/)packages$;', $plain);
+    $this->assertMatchesRegularExpression(';' . $prefix . '(/|/core/)packages$;', $plain);
   }
 
   public function testDynamicExprPaths() {
@@ -68,17 +71,19 @@ class UrlCommandTest extends \Civi\Cv\CivilTestCase {
       $this->markTestSkipped('"cv path -d" requires v4.7+');
     }
 
+    $prefix = $this->getUfType() === 'Standalone' ? 'https?://.*/core' : 'https?://.*/civicrm';
+
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.root]'"), "\n");
-    $this->assertMatchesRegularExpression(';https?://.*/civicrm($|/\w+$);', $plain);
+    $this->assertMatchesRegularExpression(';' . $prefix . '($|/\w+$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.root]/'"), "\n");
-    $this->assertMatchesRegularExpression(';https?://.*/civicrm(/$|/\w+/$);', $plain);
+    $this->assertMatchesRegularExpression(';' . $prefix . '(/$|/\w+/$);', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.root]/packages'"), "\n");
-    $this->assertMatchesRegularExpression(';https?://.*/civicrm(/|/core/)packages$;', $plain);
+    $this->assertMatchesRegularExpression(';' . $prefix . '(/|/core/)packages$;', $plain);
 
     $plain = rtrim($this->cvJsonOk("url -d '[civicrm.packages]'"), "\n");
-    $this->assertMatchesRegularExpression(';https?://.*/civicrm/packages$;', $plain);
+    $this->assertMatchesRegularExpression(';' . $prefix . '/packages$;', $plain);
   }
 
   public function testConfigPaths() {
