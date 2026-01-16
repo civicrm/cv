@@ -75,7 +75,7 @@ Examples:
         file_put_contents($rawFile, isset($rawPartials[$file]) ? $coder->recode($rawPartials[$file]) : '');
         file_put_contents($liveFile, isset($livePartials[$file]) ? $coder->recode($livePartials[$file]) : '');
         $cmd = sprintf("diff -u %s %s", escapeshellarg($rawFile), escapeshellarg($liveFile));
-        $content = `$cmd`;
+        $content = shell_exec($cmd);
         if (empty($content)) {
           $content = 'No differences found';
         }
