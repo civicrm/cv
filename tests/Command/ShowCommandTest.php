@@ -15,7 +15,9 @@ class ShowCommandTest extends \Civi\Cv\CivilTestCase {
     $p->run();
     $data = json_decode($p->getOutput(), 1);
     $this->assertMatchesRegularExpression('/^([0-9\.\-]|alpha|beta|dev|master|x)+$/', $data['CIVI_VERSION']);
-    $this->assertMatchesRegularExpression('/^([0-9\.\-]|alpha|beta|dev|master|x)+$/', $data['CMS_VERSION']);
+    if ($data['CIVI_UF'] !== 'Standalone') {
+      $this->assertMatchesRegularExpression('/^([0-9\.\-]|alpha|beta|dev|master|x)+$/', $data['CMS_VERSION']);
+    }
     $this->assertTrue(is_dir($data['CMS_ROOT']));
     $this->assertTrue(is_dir($data['CIVI_CORE']));
   }
