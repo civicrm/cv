@@ -18,7 +18,7 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
 
   public function setUp(): void {
     parent::setup();
-    $this->tmpDir = $this->getExampleDir() . '/vendor/cvtest';
+    $this->tmpDir = $this->getCivicrmRoot() . '/ext/cvtest';
 
     if (self::$first) {
       self::$first = FALSE;
@@ -26,10 +26,8 @@ class ExtensionLifecycleTest extends \Civi\Cv\CivilTestCase {
     }
 
     $this->removeDir($this->tmpDir);
-    foreach (array('/vendor', '/vendor/cvtest') as $part) {
-      if (!is_dir($this->getExampleDir() . $part)) {
-        mkdir($this->getExampleDir() . $part);
-      }
+    if (!is_dir($this->tmpDir)) {
+      mkdir($this->tmpDir, 0777, TRUE);
     }
   }
 

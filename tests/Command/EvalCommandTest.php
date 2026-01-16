@@ -74,7 +74,7 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
   }
 
   public function testBoot() {
-    $checkBoot = escapeshellarg('echo (function_exists("drupal_add_js") || function_exists("wp_redirect") || class_exists("JFactory") || class_exists("Drupal")) ? "found" : "not-found";');
+    $checkBoot = escapeshellarg('echo (function_exists("drupal_add_js") || function_exists("wp_redirect") || class_exists("JFactory") || class_exists("Drupal") || class_exists("Civi\Standalone\WebEntrypoint")) ? "found" : "not-found";');
 
     $p1 = Process::runOk($this->cv("ev $checkBoot"));
     $this->assertMatchesRegularExpression('/^found$/', $p1->getOutput());
@@ -105,7 +105,7 @@ class EvalCommandTest extends \Civi\Cv\CivilTestCase {
     $checkUf = escapeshellarg('return CIVICRM_UF;');
 
     $p1 = Process::runOk($this->cv("ev $checkUf"));
-    $this->assertMatchesRegularExpression('/(Drupal|Joomla|WordPress|Backdrop)/i', $p1->getOutput());
+    $this->assertMatchesRegularExpression('/(Drupal|Joomla|Standalone|WordPress|Backdrop)/i', $p1->getOutput());
 
     $p1 = Process::runOk($this->cv("ev -t $checkUf"));
     $this->assertMatchesRegularExpression('/UnitTests/i', $p1->getOutput());
