@@ -21,7 +21,7 @@ class SimulateWeb {
       }
     }
 
-    if (ord($_SERVER['SCRIPT_NAME']) != 47) {
+    if (ord($_SERVER['SCRIPT_NAME'][0]) != 47) {
       $_SERVER['SCRIPT_NAME'] = '/' . $_SERVER['SCRIPT_NAME'];
     }
   }
