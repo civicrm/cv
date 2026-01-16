@@ -41,7 +41,7 @@ $c['cvlibWorkDir'] = fn($buildDir) => $buildDir . '/cv-lib';
 $c['gpg'] = function(Credentials $cred): \Crypt_GPG {
   // It's easier to sign multiple files if we use Crypt_GPG wrapper API.
   #!require pear/crypt_gpg: ~1.6.4
-  $gpg = new \Crypt_GPG(['binary' => trim(`which gpg`)]);
+  $gpg = new \Crypt_GPG(['binary' => trim(shell_exec('which gpg'))]);
   $gpg->addSignKey($cred->get('GPG_KEY'), $cred->get('GPG_PASSPHRASE'));
   return $gpg;
 };
