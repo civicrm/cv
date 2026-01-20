@@ -302,8 +302,13 @@ class CmsBootstrap {
     }
 
     if ($cmsUser) {
+      $theUser = \user_load_by_name($cmsUser);
+      if (!$theUser || $theUser->name !== $cmsUser) {
+        throw new \RuntimeException("Failed to find Backdrop user ($cmsUser)");
+      }
+
       global $user;
-      $user = \user_load(array('name' => $cmsUser));
+      $user = $theUser;
     }
 
     return $this;
