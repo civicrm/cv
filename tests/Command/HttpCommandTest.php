@@ -22,8 +22,15 @@ class HttpCommandTest extends \Civi\Cv\CivilTestCase {
     $this->cvOk('en authx');
   }
 
-  public function testAuthorizedGet() {
-    $body = $this->cvOk("http {$this->login} civicrm/authx/id");
+  public static function getBootLevels(): array {
+    return [['full'], ['cms-full']];
+  }
+
+  /**
+   * @dataProvider getBootLevels
+   */
+  public function testAuthorizedGet(string $bootLevel) {
+    $body = $this->cvOk("http {$this->login} civicrm/authx/id --level=" . escapeshellarg($bootLevel));
     $data = json_decode($body, TRUE);
     $this->assertTrue(is_numeric($data['contact_id']), "civicrm/authx/id should return current contact. Received: $body");
 

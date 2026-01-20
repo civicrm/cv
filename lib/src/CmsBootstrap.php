@@ -278,18 +278,12 @@ class CmsBootstrap {
    */
   protected function loginStandaloneUser() {
     if (!empty($this->deferredUserToLogin)) {
-      global $loggedInUserId;
-      if (class_exists(\Civi\Api4\User::class)) {
-        $userID = \Civi\Api4\User::get(FALSE)
-          ->addWhere('username', '=', $this->deferredUserToLogin)
-          ->addWhere('is_active', '=', 1)
-          ->execute()->single();
-        \CRM_Core_Session::singleton()->set('ufId', $userID);
-        $loggedInUserId = $userID['contact_id'];
-      }
-      if (empty($loggedInUserId)) {
-        throw new \RuntimeException("Unable to login as '$this->deferredUserToLogin'");
-      }
+      // Note: Standalone always has "authx".
+      authx_login([
+        'flow' => 'cv_cli',
+        'useSession' => FALSE,
+        'principal' => ['user' => $this->deferredUserToLogin],
+      ]);
     }
   }
 
@@ -308,8 +302,13 @@ class CmsBootstrap {
     }
 
     if ($cmsUser) {
+      $theUser = \user_load_by_name($cmsUser);
+      if (!$theUser || $theUser->name !== $cmsUser) {
+        throw new \RuntimeException("Failed to find Backdrop user ($cmsUser)");
+      }
+
       global $user;
-      $user = \user_load(array('name' => $cmsUser));
+      $user = $theUser;
     }
 
     return $this;
@@ -616,6 +615,13 @@ class CmsBootstrap {
 
       case 'WordPress':
         \CRM_Core_BAO_UFMatch::synchronize($GLOBALS['current_user'], TRUE, CIVICRM_UF, 'Individual');
+        break;
+
+      case 'Standalone':
+        // Recall: We're looking at the edge-case where a "User" is defined without corresponding "Contact".
+        // On Standalone, the *UI* is slightly more effective blocking this edge-case. (But you can still get it via API...)
+        // In any case, UFMatch::synchronize() doesn't seem to do anything on Standalone. (Maybe b/c special uf-match
+        // dual-purpose schema?) But for now, there's no point complaining about "Unrecognized UF".
         break;
 
       default:

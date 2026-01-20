@@ -29,6 +29,7 @@ assertNotMatch('src/Command/ApiCommand.php', ';Cvphar.civicrm_api;');
 assertMatch('lib/src/CmsBootstrap.php', ';JFactory::;');
 assertMatch('lib/src/CmsBootstrap.php', ';Drupal::;');
 assertMatch('lib/src/CmsBootstrap.php', ';drupal_bootstrap;');
+assertMatch('lib/src/CmsBootstrap.php', ';user_load_by_name;');
 assertMatch('lib/src/CmsBootstrap.php', ';user_load;');
 assertMatch('lib/src/CmsBootstrap.php', ';wp_set_current_user;');
 foreach (['lib/src/Bootstrap.php', 'lib/src/CmsBootstrap.php'] as $file) {
