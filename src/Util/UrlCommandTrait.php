@@ -91,7 +91,12 @@ trait UrlCommandTrait {
 
       $cid = \CRM_Core_Session::getLoggedInContactID();
       if (!$cid) {
-        throw new \RuntimeException('The "--login" option requires specifying an active user/contact ("--user=X").');
+        if (empty($input->getOption('user'))) {
+          throw new \RuntimeException('The "--login" option requires specifying an active user/contact ("--user=X").');
+        }
+        else {
+          throw new \RuntimeException('The "--login" option requires an active user/contact, but they could not be detected in this environment.');
+        }
       }
       $token = \Civi::service('crypto.jwt')->encode([
         'exp' => time() + $this->defaultJwtTimeout,
