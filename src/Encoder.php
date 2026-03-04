@@ -1,6 +1,8 @@
 <?php
 namespace Civi\Cv;
 
+use Civi\Cv\Util\Json;
+
 class Encoder {
 
   /**
@@ -64,14 +66,14 @@ class Encoder {
         return var_export(static::preferArray($data), 1);
 
       case 'json-pretty':
-        $jsonOptions = (defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0)
-          |
-          (defined('JSON_UNESCAPED_SLASHES') ? JSON_UNESCAPED_SLASHES : 0);
-        return json_encode($data, $jsonOptions);
+        return Json::encode($data, 'pretty');
+
+      case 'json-flat':
+        return Json::encode($data, 'flat');
 
       case 'json':
       case 'json-strict':
-        return json_encode($data);
+        return Json::encode($data, 'raw');
 
       case 'serialize':
         return serialize($data);
