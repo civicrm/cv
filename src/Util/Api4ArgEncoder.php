@@ -74,7 +74,7 @@ class Api4ArgEncoder {
       }
     }
     if (!empty($oddballs)) {
-      $parts[] = json_encode($oddballs);
+      $parts[] = Json::encode($oddballs, 'raw');
     }
     return $parts;
   }

@@ -109,7 +109,7 @@ class ConsoleQueueRunner {
 
   protected static function formatTaskCallback(\CRM_Queue_Task $task) {
     $cb = implode('::', (array) $task->callback);
-    $args = json_encode($task->arguments, JSON_UNESCAPED_SLASHES);
+    $args = Json::encode($task->arguments, 'flat', NULL) ?? '(unprintable)';
     return sprintf("%s(%s)", $cb, substr($args, 1, -1));
   }
 
