@@ -55,7 +55,7 @@ Examples:
     $rows = array();
 
     foreach ($ang->getModules() as $name => $module) {
-      $partials = $ang->getPartials($name);
+      $partials = $ang->getRawPartials($name);
       foreach ($partials as $file => $html) {
         $rows[] = array(
           'file' => preg_replace(';^~/;', '', $file),
