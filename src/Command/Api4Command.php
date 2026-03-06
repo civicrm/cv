@@ -4,6 +4,7 @@ namespace Civi\Cv\Command;
 use Civi\Api4\Generic\Result;
 use Civi\Cv\Encoder;
 use Civi\Cv\Util\Api4ArgParser;
+use Civi\Cv\Util\Json;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -146,12 +147,12 @@ NOTE: To change the default output format, set CV_OUTPUT.
       throw new \RuntimeException("Please enable APIv4 before running APIv4 commands.");
     }
 
-    list($entity, $action) = explode('.', $input->getArgument('Entity.action'));
+    [$entity, $action] = explode('.', $input->getArgument('Entity.action'));
     $params = $this->parseParams($input);
     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE || $input->getOption('dry-run')) {
       $output->writeln("{$I}Entity{$_I}: {$C}$entity{$_C}");
       $output->writeln("{$I}Action{$_I}: {$C}$action{$_C}");
-      $output->writeln("{$I}Params{$_I}: " . json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+      $output->writeln("{$I}Params{$_I}: " . Json::encode($params, 'pretty'));
     }
     if ($input->getOption('dry-run')) {
       return 0;

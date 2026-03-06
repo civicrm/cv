@@ -2,6 +2,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Core\SettingsBag;
+use Civi\Cv\Util\Json;
 use Civi\Cv\Util\SettingTrait;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
@@ -99,7 +100,7 @@ If you'd like to inspect the behavior more carefully, try using {$I}--dry-run{$_
 
       $params = $this->parseSettingParams($input, $settingBag, $meta);
       if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-        $output->writeln("{$I}Params{$_I}: " . json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $output->writeln("{$I}Params{$_I}: " . Json::encode($params, 'pretty'));
       }
 
       foreach ($params as $settingKey => $settingValue) {
