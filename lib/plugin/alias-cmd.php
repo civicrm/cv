@@ -147,7 +147,7 @@ class AliasAddCommand extends CvCommand {
       $info['options']['user'] = $answers['user'];
     }
 
-    return json_encode($info, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . "\n";
+    return json_encode($info, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . "\n";
   }
 
   protected function askAliasFile(string $entry): string {

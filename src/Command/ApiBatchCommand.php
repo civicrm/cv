@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Util\Json;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -82,7 +83,7 @@ Protocol:
     }
 
     if ($output->isVerbose()) {
-      fwrite(STDERR, sprintf("Set API defaults: %s\n", json_encode($this->defaults, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
+      fwrite(STDERR, sprintf("Set API defaults: %s\n", Json::encode($this->defaults, 'pretty')));
     }
 
     $lineNum = 0;
@@ -107,15 +108,16 @@ Protocol:
             $result[$k] = array('is_error' => 1, 'error_message' => "JSON data is structured incorrectly (line $lineNum)");
             continue;
           }
-          list ($entity, $action, $params) = $api;
+          [$entity, $action, $params] = $api;
           $params = \CRM_Utils_Array::crmArrayMerge($params, $this->defaults);
           if ($output->isVerbose()) {
-            fwrite(STDERR, sprintf("Execute API calls: %s\n", json_encode([$entity, $action, $params], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)));
+            fwrite(STDERR, sprintf("Execute API calls: %s\n", Json::encode([$entity, $action, $params], 'pretty')));
           }
           $result[$k] = \civicrm_api($entity, $action, $params);
         }
       }
-      echo json_encode($result);
+      echo Json::encode($result, 'flat', NULL)
+        ?? Json::encode(['is_error' => 1, 'error_message' => ['API executed, but results cannot be returned']], 'flat');
       echo "\n";
 
       if (ob_get_level() > 0) {

@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv;
 
+use Civi\Cv\Util\Json;
 use Civi\Cv\Util\SimulateWeb;
 
 /**
@@ -170,7 +171,7 @@ class Bootstrap {
     if (!defined('CIVICRM_SETTINGS_PATH')) {
 
       $this->options = $options = array_merge($this->options, $options);
-      $this->log->debug("Options: " . json_encode($options, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+      $this->log->debug("Options: " . Json::encode($options, 'pretty'));
 
       $this->log->debug("Find settings file");
       $settings = $this->getCivicrmSettingsPhp($options);

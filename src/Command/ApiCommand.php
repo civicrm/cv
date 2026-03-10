@@ -2,6 +2,7 @@
 namespace Civi\Cv\Command;
 
 use Civi\Cv\Encoder;
+use Civi\Cv\Util\Json;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -53,7 +54,7 @@ TIP: To display a full backtrace of any errors, pass "-vv" (very verbose).
     $I = '<info>';
     $_I = '</info>';
 
-    list($entity, $action) = explode('.', $input->getArgument('Entity.action'));
+    [$entity, $action] = explode('.', $input->getArgument('Entity.action'));
     $params = $this->parseParams($input);
 
     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE && !array_key_exists('debug', $params)) {
@@ -63,7 +64,7 @@ TIP: To display a full backtrace of any errors, pass "-vv" (very verbose).
     if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
       $output->writeln("{$I}Entity{$_I}: {$C}$entity{$_C}");
       $output->writeln("{$I}Action{$_I}: {$C}$action{$_C}");
-      $output->writeln("{$I}Params{$_I}: " . json_encode($params, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+      $output->writeln("{$I}Params{$_I}: " . Json::encode($params, 'pretty'));
     }
 
     $result = \civicrm_api($entity, $action, $params);
