@@ -190,7 +190,18 @@ trait BootTrait {
     if ($input->getOption('user')) {
       $logger->debug('Set system user');
 
-      if (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
+      if (is_callable('authx_login')) {
+        authx_login([
+          'flow' => 'script',
+          'useSession' => FALSE,
+          'principal' => ['user' => $input->getOption('user')],
+        ]);
+        if (!$this->ensureUserContact($output)) {
+          throw new \Exception("Failed to determine contactID for user=" . $input->getOption('user'));
+        }
+      }
+      elseif (is_callable(array(\CRM_Core_Config::singleton()->userSystem, 'loadUser'))) {
+        $output->getErrorOutput()->writeln("<error>System does not support authx. Falling back to legacy implementation of loadUser().</error>");
         if (!\CRM_Core_Config::singleton()->userSystem->loadUser($input->getOption('user')) || !$this->ensureUserContact($output)) {
           throw new \Exception("Failed to determine contactID for user=" . $input->getOption('user'));
         }

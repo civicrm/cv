@@ -31,6 +31,7 @@ return [
     'Joomla',
   ],
   'exclude-functions' => [
+    '/^authx_/',
     '/^civicrm_/',
     '/^wp_.*/',
     '/^(drupal|backdrop|user|module)_/',
