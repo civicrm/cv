@@ -88,6 +88,7 @@ class Application extends BaseApplication {
       $commands[] = new \Civi\Cv\Command\ScriptCommand();
       $commands[] = new \Civi\Cv\Command\CoreCheckReqCommand();
       $commands[] = new \Civi\Cv\Command\CoreInstallCommand();
+      $commands[] = new \Civi\Cv\Command\CoreDownloadCommand();
       $commands[] = new \Civi\Cv\Command\CoreUninstallCommand();
       $commands[] = new \Civi\Cv\Command\QueueNextCommand();
       $commands[] = new \Stecman\Component\Symfony\Console\BashCompletion\CompletionCommand();
