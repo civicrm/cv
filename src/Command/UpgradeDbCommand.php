@@ -275,6 +275,11 @@ Examples:
     $input = $this->input;
     $output = $this->output;
 
+    if (!\CRM_Extension_Upgrades::hasPending()) {
+      $output->writeln("<info>No pending extension upgrades.</info>", $this->niceVerbosity);
+      return 0;
+    }
+
     if ($isFirstTry) {
       $output->writeln("<info>Preparing extension upgrade...</info>", $this->niceVerbosity);
       \CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
