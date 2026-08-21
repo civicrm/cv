@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Cv\Command;
 
+use Civi\Cv\Cv;
 use Civi\Cv\Util\StructuredOutputTrait;
 use Civi\Cv\Util\ConsoleQueueRunner;
 use Symfony\Component\Console\Input\InputInterface;
@@ -179,11 +180,11 @@ Examples:
     if (is_callable([$upgrade, 'getUpgradeBlockers'])) {
       $htmlErrors = $upgrade->getUpgradeBlockers($dbVer, $codeVer);
       if ($htmlErrors) {
-        \Civi\Cv\Cv::io()->error("Upgrade is currently blocked!");
+        Cv::io()->error("Upgrade is currently blocked!");
         foreach ($htmlErrors as $error) {
-          \Civi\Cv\Cv::io()->write('<error>Blocker:</error> ');
-          \Civi\Cv\Cv::io()->writeln(html_entity_decode(strip_tags($error)), OutputInterface::OUTPUT_RAW);
-          \Civi\Cv\Cv::io()->writeln('');
+          Cv::io()->write('<error>Blocker:</error> ');
+          Cv::io()->writeln(html_entity_decode(strip_tags($error)), OutputInterface::OUTPUT_RAW);
+          Cv::io()->writeln('');
         }
         return 2;
       }
@@ -201,7 +202,7 @@ Examples:
       $upgrade->setPreUpgradeMessage($preUpgradeMessage, $dbVer, $codeVer);
       if ($preUpgradeMessage) {
         $output->writeln(\CRM_Utils_String::htmlToText($preUpgradeMessage), $this->niceVerbosity);
-        if (!\Civi\Cv\Cv::io()->confirm('Continue?')) {
+        if (!Cv::io()->confirm('Continue?')) {
           $output->writeln("<error>Abort</error>");
           return 2;
         }
@@ -239,7 +240,7 @@ Examples:
     }
 
     $output->writeln("<info>Executing upgrade...</info>", $this->niceVerbosity);
-    $runner = new ConsoleQueueRunner(\Civi\Cv\Cv::io(), $queue, $input->getOption('dry-run'), $input->getOption('step'));
+    $runner = new ConsoleQueueRunner(Cv::io(), $queue, $input->getOption('dry-run'), $input->getOption('step'));
     $runner->runAll();
 
     $output->writeln("<info>Finishing upgrade...</info>", $this->niceVerbosity);
@@ -317,7 +318,7 @@ Examples:
       }
     }
 
-    $runner = new ConsoleQueueRunner(\Civi\Cv\Cv::io(), $queue, $input->getOption('dry-run'), $input->getOption('step'));
+    $runner = new ConsoleQueueRunner(Cv::io(), $queue, $input->getOption('dry-run'), $input->getOption('step'));
     $runner->runAll();
     return 0;
   }
