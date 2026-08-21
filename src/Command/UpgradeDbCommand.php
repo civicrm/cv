@@ -86,21 +86,27 @@ Examples:
       throw new \Exception("Cannot resume upgrade: The log file ($postUpgradeMessageFile) is missing. Consider a regular upgrade (without --retry or --skip).");
     }
 
-    $result = 0;
     $mode = $input->getOption('mode');
     if ($mode === 'auto') {
       $mode = (version_compare($dbVer, $codeVer, '<') ? 'full' : 'ext');
     }
 
     if ($mode === 'full') {
-      $result += $this->runCoreUpgrade($isFirstTry, $dbVer, $postUpgradeMessageFile, $codeVer);
-      $this->sendMessages($postUpgradeMessageFile, $codeVer);
+      $result = $this->runCoreUpgrade($isFirstTry, $dbVer, $postUpgradeMessageFile, $codeVer);
+      if ($result !== 2) {
+        $this->sendMessages($postUpgradeMessageFile, $codeVer);
+      }
     }
     elseif ($mode === 'ext') {
-      $result += $this->runExtensionUpgrade($isFirstTry);
+      $result = $this->runExtensionUpgrade($isFirstTry);
+    }
+    else {
+      $result = 0;
     }
 
-    $output->writeln("<info>Have a nice day.</info>");
+    if ($result === 0) {
+      $output->writeln("<info>Have a nice day.</info>");
+    }
     return $result;
   }
 
@@ -159,7 +165,7 @@ Examples:
    * @return int|null
    * @throws \CRM_Core_Exception
    */
-  protected function runCoreUpgrade(bool $isFirstTry, string $dbVer, string $postUpgradeMessageFile, string $codeVer): ?int {
+  protected function runCoreUpgrade(bool $isFirstTry, string $dbVer, string $postUpgradeMessageFile, string $codeVer): int {
     $input = $this->input;
     $output = $this->output;
 
@@ -169,8 +175,24 @@ Examples:
 
     $upgrade = new \CRM_Upgrade_Form();
 
-    if ($error = $upgrade->checkUpgradeableVersion($dbVer, $codeVer)) {
-      throw new \Exception($error);
+    // Check for blockers. (For v6.10+, use getUpgradeBlockers(). Older versions require `checkUpgradeableVersion()`.)
+    if (is_callable([$upgrade, 'getUpgradeBlockers'])) {
+      $htmlErrors = $upgrade->getUpgradeBlockers($dbVer, $codeVer);
+      if ($htmlErrors) {
+        \Civi\Cv\Cv::io()->error("Upgrade is currently blocked!");
+        foreach ($htmlErrors as $error) {
+          \Civi\Cv\Cv::io()->write('<error>Blocker:</error> ');
+          \Civi\Cv\Cv::io()->writeln(html_entity_decode(strip_tags($error)), OutputInterface::OUTPUT_RAW);
+          \Civi\Cv\Cv::io()->writeln('');
+        }
+        return 2;
+      }
+    }
+    else {
+      if ($error = $upgrade->checkUpgradeableVersion($dbVer, $codeVer)) {
+        // Weird output format -- only one error; with HTML entities but no HTML tags
+        throw new \Exception(html_entity_decode(strip_tags($error)));
+      }
     }
 
     if ($isFirstTry) {
@@ -181,7 +203,7 @@ Examples:
         $output->writeln(\CRM_Utils_String::htmlToText($preUpgradeMessage), $this->niceVerbosity);
         if (!\Civi\Cv\Cv::io()->confirm('Continue?')) {
           $output->writeln("<error>Abort</error>");
-          return 1;
+          return 2;
         }
       }
       else {
