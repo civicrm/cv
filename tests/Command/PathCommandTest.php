@@ -83,12 +83,17 @@ class PathCommandTest extends \Civi\Cv\CivilTestCase {
       'customFileUploadDir',
       'customPHPPathDir',
       'customTemplateDir',
-      'templateCompileDir/en_US',
     );
     foreach ($optionalSettingNames as $settingName) {
       $plain = rtrim($this->cvOk("path -c $settingName"), "\n");
       $this->assertTrue((file_exists($plain) && is_dir($plain)) || empty($plain), "Check $settingName");
     }
+
+    // We want an example of a subpath ("fooSetting/subPath/file".
+    // This example file is pretty common, but it changed around 6.17<=>6.18. So check by glob.
+    $plain = rtrim($this->cvOk("path -c templateCompileDir/en_US*"), "\n");
+    $files = (array) glob("$plain");
+    $this->assertTrue(!empty($files), "Check templateCompileDir/en_US");
   }
 
   public function testExtDot() {
