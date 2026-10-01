@@ -209,6 +209,7 @@ class ArrayUtil {
    *
    * @param string[]|null $columns
    *   List of requested columns. May include wildcard '*'.
+   *   NULL and * both mean "infer columns based on all available data".
    * @param array $records
    *   List of records
    * @return array
@@ -218,7 +219,7 @@ class ArrayUtil {
     if (is_array($columns) && in_array('*', $columns)) {
       $columns = NULL;
     }
-    return $columns ?: ArrayUtil::findColumns($records);
+    return $columns ?: (ArrayUtil::findColumns($records) ?? []);
   }
 
   public static function sortColumns(array $records, ?array $columns): array {
