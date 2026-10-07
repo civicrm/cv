@@ -65,7 +65,7 @@ class SimulateWeb {
     if (array_key_exists('HTTP_HOST', $_SERVER) && strpos($_SERVER['HTTP_HOST'], '//') === FALSE) {
       $url = $_SERVER['HTTP_HOST'];
       if (array_key_exists('HTTP_PORT', $_SERVER)) {
-        $url .= $_SERVER['HTTP_PORT'];
+        $url .= ':' . $_SERVER['HTTP_PORT'];
       }
       return $url;
     }
@@ -73,7 +73,7 @@ class SimulateWeb {
   }
 
   public static function detectEnvScheme(): ?string {
-    return (($_SERVER['SERVER_PORT'] ?? NULL) === 443 || ($_SERVER['HTTPS'] ?? NULL) === 'on') ? 'https' : 'http';
+    return ((int) ($_SERVER['SERVER_PORT'] ?? 0) === 443 || ($_SERVER['HTTPS'] ?? NULL) === 'on') ? 'https' : 'http';
   }
 
   public static function prependDefaultScheme(?string $url): string {
