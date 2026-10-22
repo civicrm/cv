@@ -63,7 +63,7 @@ class CvDispatcher {
       return implode('::', $callback);
     }
     else {
-      return spl_object_hash($callback);
+      return (string) spl_object_id($callback);
     }
   }
 
