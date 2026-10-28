@@ -210,7 +210,7 @@ Bootstrap
 
     ```bash
     export CIVICRM_BOOT="Drupal://var/www/public"
-    export CIVICRM_BOOT="Drupal8://admin@/var/www/public"
+    export CIVICRM_BOOT="Drupal8://admin@var/www/public"
     export CIVICRM_BOOT="WordPress:/$HOME/sites/my-wp-site/web/"
     export CIVICRM_BOOT="Auto://."
     ```
