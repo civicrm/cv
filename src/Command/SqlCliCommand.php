@@ -48,7 +48,7 @@ The ENV expressions are prefixed to indicate their escaping rule:
     $datasource = new Datasource();
     $datasource->loadFromCiviDSN($this->pickDsn($input->getOption('target')));
 
-    $mysql = Process::findCommand('mysql');
+    $mysql = Process::findCommand('mysql') ?: Process::findCommand('mariadb');
     if (!$mysql) {
       $output->getErrorOutput()->writeln("<info>[SqlCommand]</info> <comment>ERROR: The mysql command is not available.</comment>");
       return 1;
