@@ -73,8 +73,14 @@ Examples:
     $this->niceVerbosity = $input->getOption('out') === 'pretty' ? OutputInterface::VERBOSITY_NORMAL : OutputInterface::VERBOSITY_VERBOSE;
     $isFirstTry = !$input->getOption('retry') && !$input->getOption('skip');
 
-    $codeVer = \CRM_Utils_System::version();
-    $dbVer = \CRM_Core_BAO_Domain::version();
+    if (is_callable(['\CRM_Upgrade_Versions', 'getUpgradeVersions'])) {
+      [$dbVer, $codeVer] = \CRM_Upgrade_Versions::getUpgradeVersions();
+    }
+    else {
+      $codeVer = \CRM_Utils_System::version();
+      $dbVer = \CRM_Core_BAO_Domain::version();
+    }
+
     $postUpgradeMessageFile = $this->getUpgradeFile();
     $output->writeln(sprintf("<info>Found CiviCRM database version <comment>%s</comment>.</info>", $dbVer), $this->niceVerbosity);
     $output->writeln(sprintf("<info>Found CiviCRM code version <comment>%s</comment>.</info>", $codeVer), $this->niceVerbosity);
