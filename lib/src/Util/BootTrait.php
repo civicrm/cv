@@ -84,6 +84,12 @@ trait BootTrait {
     $logger = $this->bootLogger($output);
     $logger->debug('Start');
 
+    $GLOBALS['civicrm_url_defaults'] = $GLOBALS['civicrm_url_defaults'] ?? [];
+    array_unshift($GLOBALS['civicrm_url_defaults'], [
+      'format' => 'absolute',
+      'scheme' => 'default',
+    ]);
+
     $this->setupErrorHandling($output);
 
     if ($input->hasOption('test') && $input->getOption('test')) {
